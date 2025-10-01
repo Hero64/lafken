@@ -2,6 +2,7 @@ import type { EnvironmentValue, ServicesValues } from '@alicanto/common';
 import type { ResolverType } from '@alicanto/resolver';
 
 import type { ModuleResource } from '../module/module.types';
+import type { AppStack } from './app';
 
 export interface LambdaGlobalProps {
   /**
@@ -130,7 +131,10 @@ export interface CreateAppProps {
    *
    * Defines the set of modules to be created within the application.
    */
-  modules: (() => ModuleResource[])[];
+  modules: ((
+    scope: AppStack,
+    resources: Record<string, ResolverType>
+  ) => Promise<ModuleResource>)[];
   /**
    * Resource resolvers.
    *

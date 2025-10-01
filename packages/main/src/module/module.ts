@@ -1,15 +1,17 @@
 import { getResourceMetadata } from '@alicanto/common';
+import type { ResolverType } from '@alicanto/resolver';
 
 import type { AppStack } from '../app/app';
 import { StackConfig } from '../config/config';
-import type { CreateModuleProps, ModuleResource } from './module.types';
+import type { CreateModuleProps } from './module.types';
 
 export class StackModule {
   public config: StackConfig;
   constructor(
     public readonly app: AppStack,
     public readonly name: string,
-    protected props: CreateModuleProps
+    private resolvers: Record<string, ResolverType>,
+    private props: CreateModuleProps
   ) {
     this.config = new StackConfig(
       app,
@@ -21,19 +23,28 @@ export class StackModule {
     );
   }
 
-  getModuleResources(): ModuleResource[] {
+  async generateResources() {
     const { resources } = this.props;
 
-    return resources.map((resource) => ({
-      module: this,
-      Resource: resource,
-      metadata: getResourceMetadata(resource),
-    }));
+    for (const resource of resources) {
+      const metadata = getResourceMetadata(resource);
+      const resolver = this.resolvers[metadata.type];
+
+      if (!resolver) {
+        throw new Error(`There is no resolver for the resource ${metadata.type}`);
+      }
+
+      await resolver.create(this, resource);
+    }
   }
 }
 
-export const createModule = (props: CreateModuleProps) => (scope: AppStack) => {
-  const module = new StackModule(scope, props.name, props);
+export const createModule =
+  (props: CreateModuleProps) =>
+  async (scope: AppStack, resources: Record<string, ResolverType>) => {
+    const module = new StackModule(scope, props.name, resources, props);
 
-  return module.getModuleResources();
-};
+    await module.generateResources();
+
+    return module;
+  };

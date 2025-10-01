@@ -1,22 +1,9 @@
-import {
-  type ResolverPriority,
-  type ResolverType,
-  removeExportedFiles,
-} from '@alicanto/resolver';
+import { type ResolverType, removeExportedFiles } from '@alicanto/resolver';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { App, TerraformStack } from 'cdktf';
 
 import { StackConfig } from '../config/config';
-import type { ModuleResource } from '../module/module.types';
 import type { CreateAppProps } from './app.types';
-
-const mapResolverPriority: Record<ResolverPriority, number> = {
-  very_high: 5,
-  high: 4,
-  medium: 3,
-  low: 2,
-  very_low: 1,
-};
 
 export class AppStack extends TerraformStack {
   public config: StackConfig;
@@ -35,6 +22,7 @@ export class AppStack extends TerraformStack {
 
     await this.triggerHook(resolvers, 'beforeCreate');
     await this.resolveModuleResources();
+    // TODO: posterior al create de recursos verificar dependencias no resueltas
     await this.triggerHook(resolvers, 'afterCreate');
   }
 
@@ -58,30 +46,8 @@ export class AppStack extends TerraformStack {
       },
       {} as Record<string, ResolverType>
     );
-    const resources: ModuleResource[] = [];
 
-    for (const module of modules) {
-      const moduleResources = module();
-      resources.push(...moduleResources);
-    }
-
-    const sortedResources = resources.sort((a, b) => {
-      const priorityA = mapResolverPriority[resolversByType[a.metadata.type].priority];
-      const priorityB = mapResolverPriority[resolversByType[b.metadata.type].priority];
-
-      if (!priorityA || !priorityB) {
-        throw new Error(`resolver type not found`);
-      }
-
-      return priorityB - priorityA;
-    });
-
-    for (const resource of sortedResources) {
-      await resolversByType[resource.metadata.type].create(
-        resource.module,
-        resource.Resource
-      );
-    }
+    await Promise.all(modules.map((module) => module(this, resolversByType)));
   }
 }
 
