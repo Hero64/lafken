@@ -1,11 +1,31 @@
 import type { Construct } from 'constructs';
 
-const resourceManager: Record<string, Construct> = {};
+import type { DependentResource } from './resource.types';
 
-export const createResource = <T extends new (...args: any[]) => Construct>(
-  StackResource: T,
-  ...props: ConstructorParameters<T>
-) => {
-  const resource = new StackResource(...props);
-  resourceManager[props[1]] = resource;
-};
+class AlicantoResource {
+  private globals: Record<string, Construct> = {};
+  private dependent: DependentResource[];
+
+  create = <T extends new (...args: any[]) => Construct>(
+    ExtendResource: T,
+    ...props: ConstructorParameters<T>
+  ) => {
+    const self = this;
+    class Resource extends ExtendResource {
+      isGlobal() {
+        // TODO: ver la forma de exportar valores
+        self.globals[props[0]] = this;
+      }
+
+      isDependent(resolveDependency: () => void) {
+        self.dependent.push({
+          resolveDependency,
+          resource: this,
+        });
+      }
+    }
+    return new Resource(...props);
+  };
+}
+
+export const alicantoResource = new AlicantoResource();
