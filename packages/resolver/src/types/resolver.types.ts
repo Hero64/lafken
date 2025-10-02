@@ -20,11 +20,8 @@ export interface AppModule {
   config?: StackConfigProps;
 }
 
-export type ResolverPriority = 'very_high' | 'high' | 'medium' | 'low' | 'very_low';
-
 export interface ResolverType {
   type: string;
-  priority: ResolverPriority;
   beforeCreate?: (scope: AppStack) => Promise<void>;
   create: (module: Required<AppModule>, resource: ClassResource) => Promise<void>;
   afterCreate?: (scope: AppStack) => Promise<void>;

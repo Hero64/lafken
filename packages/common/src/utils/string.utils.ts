@@ -12,3 +12,7 @@ export const kebabCase = (str: string) => {
     .replace(/[\s_]+/g, '-')
     .toLowerCase();
 };
+
+export const cleanString = (str: string) => {
+  return str.replace(/[^a-zA-Z0-9]/g, '');
+};

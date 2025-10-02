@@ -1,6 +1,6 @@
 {
   "name": "@alicanto/resolver",
-  "version": "0.1.2",
+  "version": "0.0.1",
   "private": false,
   "license": "MIT",
   "main": "lib/index.js",

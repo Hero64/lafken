@@ -1,20 +1,22 @@
 import type { Construct } from 'constructs';
-
 import type { DependentResource } from './resource.types';
 
 class AlicantoResource {
   private globals: Record<string, Construct> = {};
-  private dependent: DependentResource[];
+  private dependent: DependentResource[] = [];
 
   create = <T extends new (...args: any[]) => Construct>(
     ExtendResource: T,
     ...props: ConstructorParameters<T>
-  ) => {
+  ): InstanceType<T> & {
+    isGlobal(): void;
+    isDependent(resolveDependency: () => void): void;
+  } => {
     const self = this;
+
     class Resource extends ExtendResource {
       isGlobal() {
-        // TODO: ver la forma de exportar valores
-        self.globals[props[0]] = this;
+        self.globals[props[0] as string] = this;
       }
 
       isDependent(resolveDependency: () => void) {
@@ -24,7 +26,11 @@ class AlicantoResource {
         });
       }
     }
-    return new Resource(...props);
+
+    return new Resource(...props) as InstanceType<T> & {
+      isGlobal(): void;
+      isDependent(resolveDependency: () => void): void;
+    };
   };
 }
 
