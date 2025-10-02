@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.2.4
         version: 2.2.4
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -70,9 +73,6 @@ importers:
       '@types/jest':
         specifier: 29.5.2
         version: 29.5.2
-      '@types/node':
-        specifier: 24.6.0
-        version: 24.6.0
       jest:
         specifier: 29.5.0
         version: 29.5.0(@types/node@24.6.0)(ts-node@10.9.1(@types/node@24.6.0)(typescript@5.9.2))
@@ -107,9 +107,6 @@ importers:
       '@types/jest':
         specifier: 29.5.2
         version: 29.5.2
-      '@types/node':
-        specifier: 24.6.0
-        version: 24.6.0
       jest:
         specifier: 29.5.0
         version: 29.5.0(@types/node@24.6.0)(ts-node@10.9.1(@types/node@24.6.0)(typescript@5.9.2))
@@ -147,9 +144,6 @@ importers:
       '@types/jest':
         specifier: 29.5.2
         version: 29.5.2
-      '@types/node':
-        specifier: 24.6.0
-        version: 24.6.0
       jest:
         specifier: 29.5.0
         version: 29.5.0(@types/node@24.6.0)(ts-node@10.9.1(@types/node@24.6.0)(typescript@5.9.2))
