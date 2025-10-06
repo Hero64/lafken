@@ -1,20 +1,30 @@
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktf';
+import type { Construct } from 'constructs';
 import { build } from 'esbuild';
-
-import type { AppStack } from '../../../types';
 import { createSha1 } from '../../../utils';
+import { AlicantoBuildPlugin } from '../build-plugin/build-plugin';
 import type { LambdaHandlerProps } from '../lambda.types';
+import type { AssetMetadata, AssetProps } from './asset.types';
 
 class LambdaAssets {
-  private lambdaAssets: Record<string, TerraformAsset> = {};
+  private lambdaAssets: Record<string, AssetProps> = {};
 
-  async buildHandler(scope: AppStack, props: LambdaHandlerProps) {
-    const prebuildPath = join(props.pathName, `${props.filename}.js`);
+  public initializeMetadata(pathName: string, filename: string, metadata: AssetMetadata) {
+    const prebuildPath = this.getPrebuildPath(pathName, filename);
+    this.lambdaAssets[prebuildPath] = {
+      metadata,
+    };
+  }
 
-    if (this.lambdaAssets[prebuildPath]) {
-      return this.lambdaAssets[prebuildPath];
+  public async buildHandler(scope: Construct, props: LambdaHandlerProps) {
+    const prebuildPath = this.getPrebuildPath(props.pathName, props.filename);
+
+    const lambdaAsset = this.lambdaAssets[prebuildPath];
+
+    if (lambdaAsset.asset) {
+      return lambdaAsset.asset;
     }
 
     const outputPath = this.createOutputPath();
@@ -22,10 +32,16 @@ class LambdaAssets {
     await build({
       entryPoints: [prebuildPath],
       outfile: outputPath,
-      splitting: true,
       legalComments: 'none',
       minify: props.lambda?.minify ?? true,
       external: ['@aws-sdk', 'aws-lambda'],
+      plugins: [
+        AlicantoBuildPlugin({
+          filename: props.filename,
+          removeAttributes: ['lambda'],
+          export: lambdaAsset.metadata,
+        }),
+      ],
     });
 
     const asset = new TerraformAsset(scope, `${props.filename}-asset`, {
@@ -33,9 +49,13 @@ class LambdaAssets {
       type: AssetType.ARCHIVE,
     });
 
-    this.lambdaAssets[prebuildPath] = asset;
+    this.lambdaAssets[prebuildPath].asset = asset;
 
     return asset;
+  }
+
+  private getPrebuildPath(pathName: string, filename: string) {
+    return join(pathName, `${filename}.js`);
   }
 
   private createOutputPath() {
@@ -43,4 +63,4 @@ class LambdaAssets {
   }
 }
 
-export const assets = new LambdaAssets();
+export const lambdaAssets = new LambdaAssets();

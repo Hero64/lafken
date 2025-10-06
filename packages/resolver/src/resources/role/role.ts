@@ -1,7 +1,7 @@
 import type { ServicesName, ServicesValues } from '@alicanto/common';
 import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import type { AppStack } from '../../types';
+import type { Construct } from 'constructs';
 import type { RoleProps } from './role.types';
 
 const defaultPermissions: Record<ServicesName, string[]> = {
@@ -96,12 +96,12 @@ export const mapServicesName: Partial<Record<ServicesName, string>> = {
 
 export class Role extends IamRole {
   constructor(
-    private scope: AppStack,
+    scope: Construct,
     id: string,
     private props: RoleProps
   ) {
     super(scope, id, {
-      name: props.name || id,
+      name: props.name,
       assumeRolePolicy: JSON.stringify({
         Version: '2012-10-17',
         Statement: [
@@ -120,7 +120,7 @@ export class Role extends IamRole {
 
   private createPolicy() {
     const policyName = `${this.name}-policy`;
-    new IamRolePolicy(this.scope, policyName, {
+    new IamRolePolicy(this, policyName, {
       name: `${this.name}-policy`,
       role: this.name,
       policy: JSON.stringify(this.createPolicyStatement(this.props.services)),

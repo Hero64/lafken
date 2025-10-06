@@ -3,14 +3,14 @@ import type {
   ApiAuthorizerNames,
   ApiRestNames,
   AuthNames,
+  BucketNames,
   DynamoDbNames,
   EventBusNames,
   QueueScopedNames,
-  BucketNames,
   StateMachineScopedNames,
 } from './override-resources.types';
 
-type EvnFunctionProps = {
+interface EvnFunctionProps {
   getResourceValue: GetResourceValue<
     | DynamoDbNames
     | AuthNames
@@ -22,10 +22,8 @@ type EvnFunctionProps = {
     | StateMachineScopedNames
     | QueueScopedNames
   >;
-};
+}
 
-type EvnFunction = (props: EvnFunctionProps) => string;
+type EvnFunction = (props: EvnFunctionProps) => Record<string, string>;
 
-export type EnvironmentValue =
-  | string
-  | Record<string, string | number | boolean | EvnFunction>;
+export type EnvironmentValue = Record<string, string> | EvnFunction;

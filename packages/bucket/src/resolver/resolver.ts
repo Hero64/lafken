@@ -1,24 +1,22 @@
 import type { ClassResource } from '@alicanto/common';
-import type { AppStack, ResolverType } from '@alicanto/resolver';
-
-import { BucketParser } from './parser/parser';
-import type { BucketGlobalConfig } from './resolver.types';
+import type { AppModule, ResolverType } from '@alicanto/resolver';
+import { Bucket } from './bucket/bucket';
+import type { BucketGlobalConfig } from './bucket/bucket.types';
 
 export class BucketResolver implements ResolverType {
   public type = 'BUCKET';
 
-  private config: BucketGlobalConfig;
   constructor(
     private buckets: ClassResource[],
-    config: BucketGlobalConfig = {}
-  ) {
-    this.config = config;
-  }
+    private config: BucketGlobalConfig = {}
+  ) {}
 
-  public async beforeCreate(scope: AppStack) {
+  public async beforeCreate(scope: AppModule) {
     for (const bucket of this.buckets) {
-      const bucketParser = new BucketParser(scope, bucket, this.config);
-      bucketParser.generate();
+      new Bucket(scope, {
+        ...this.config,
+        classResource: bucket,
+      });
     }
   }
 

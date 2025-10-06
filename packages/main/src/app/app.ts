@@ -1,19 +1,22 @@
-import { type ResolverType, removeExportedFiles } from '@alicanto/resolver';
+import { ContextName, type ResolverType } from '@alicanto/resolver';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { App, TerraformStack } from 'cdktf';
 
-import { StackConfig } from '../config/config';
+import { AppContext } from '../context/context';
 import type { CreateAppProps } from './app.types';
 
 export class AppStack extends TerraformStack {
-  public config: StackConfig;
   constructor(
     scope: App,
-    public readonly name: string,
+    public id: string,
     private props: CreateAppProps
   ) {
-    super(scope, name);
-    this.config = new StackConfig(this, props);
+    super(scope, id);
+
+    new AppContext(this, {
+      contextName: ContextName.APP,
+      globalConfig: props.globalConfig,
+    });
     new AwsProvider(scope, 'AWS');
   }
 
@@ -22,8 +25,8 @@ export class AppStack extends TerraformStack {
 
     await this.triggerHook(resolvers, 'beforeCreate');
     await this.resolveModuleResources();
-    // TODO: posterior al create de recursos verificar dependencias no resueltas
     await this.triggerHook(resolvers, 'afterCreate');
+    // TODO: crear un aspect que resuelva
   }
 
   private async triggerHook(
@@ -52,16 +55,12 @@ export class AppStack extends TerraformStack {
 }
 
 export const createApp = async (props: CreateAppProps) => {
-  try {
-    const app = new App();
-    const appStack = new AppStack(app, props.name, props);
-    await appStack.init();
+  const app = new App();
+  const appStack = new AppStack(app, props.name, props);
+  await appStack.init();
 
-    return {
-      app,
-      appStack,
-    };
-  } finally {
-    await removeExportedFiles();
-  }
+  return {
+    app,
+    appStack,
+  };
 };

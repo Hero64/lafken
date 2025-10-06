@@ -1,5 +1,5 @@
 import type { ClassResource, ResourceMetadata } from '@alicanto/common';
-
+import type { ResolverType } from '@alicanto/resolver';
 import type { GlobalConfig } from '../app/app.types';
 import type { StackModule } from './module';
 
@@ -27,6 +27,10 @@ export interface CreateModuleProps {
    * which are managed at the application level.
    */
   globalConfig?: Omit<GlobalConfig, 'env'>;
+}
+
+export interface ModuleProps extends CreateModuleProps {
+  resolvers: Record<string, ResolverType>;
 }
 
 export interface ModuleResource {

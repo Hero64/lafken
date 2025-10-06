@@ -6,6 +6,7 @@ class AlicantoResource {
   private dependent: DependentResource[] = [];
 
   create = <T extends new (...args: any[]) => Construct>(
+    module: string,
     ExtendResource: T,
     ...props: ConstructorParameters<T>
   ): InstanceType<T> & {
@@ -16,7 +17,8 @@ class AlicantoResource {
 
     class Resource extends ExtendResource {
       isGlobal() {
-        self.globals[props[0] as string] = this;
+        const id = props[0] as string;
+        self.globals[`${module}-${id}`] = this;
       }
 
       isDependent(resolveDependency: () => void) {
@@ -32,6 +34,10 @@ class AlicantoResource {
       isDependent(resolveDependency: () => void): void;
     };
   };
+
+  getResource<T = unknown>(id: string): any {
+    return this.globals[id] as T;
+  }
 }
 
 export const alicantoResource = new AlicantoResource();

@@ -1,6 +1,6 @@
+import type { EnvironmentValue } from '../../types';
 import type { ServicesValues } from '../../types/services.types';
 import type { FieldInformation } from '../field';
-import type { EnvironmentValue } from '../../types';
 
 export interface LambdaProps {
   /**
@@ -82,7 +82,7 @@ export interface LambdaProps {
    *   }
    * ]
    */
-  env?: EnvironmentValue[];
+  env?: EnvironmentValue;
   /**
    * Lambda tags.
    *

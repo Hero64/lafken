@@ -1,21 +1,20 @@
-import type { ClassResource } from '@really-less/common';
+import type { ClassResource } from '@alicanto/common';
 import {
   CopyObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-  ListObjectsV2Command,
-  PutObjectCommand,
-  type DeleteObjectCommandInput,
-  type GetObjectCommandInput,
   type CopyObjectCommandInput,
+  DeleteObjectCommand,
+  type DeleteObjectCommandInput,
+  GetObjectCommand,
+  type GetObjectCommandInput,
+  ListObjectsV2Command,
   type ListObjectsV2CommandInput,
   type ListObjectsV2CommandOutput,
+  PutObjectCommand,
   type PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
-
-import { getBucketInformation } from './repository.utils';
 import { client, getClientWithXRay } from '../client/client';
 import type { InputWithoutBucket } from './repository.types';
+import { getBucketInformation } from './repository.utils';
 
 export const createRepository = <E extends ClassResource>(bucket: E) => {
   const { name, tracing } = getBucketInformation(bucket);
@@ -62,7 +61,7 @@ export const createRepository = <E extends ClassResource>(bucket: E) => {
     },
     async listObjects(props: InputWithoutBucket<ListObjectsV2CommandInput>) {
       let allContents: ListObjectsV2CommandOutput['Contents'] = [];
-      let nextToken: string | undefined = undefined;
+      let nextToken: string | undefined;
 
       do {
         const command: ListObjectsV2Command = new ListObjectsV2Command({

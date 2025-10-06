@@ -5,4 +5,5 @@ export interface LambdaHandlerProps extends LambdaMetadata {
   filename: string;
   suffix?: string;
   excludeFiles?: string[];
+  principal?: string;
 }

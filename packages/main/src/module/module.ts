@@ -1,26 +1,22 @@
 import { getResourceMetadata } from '@alicanto/common';
-import type { ResolverType } from '@alicanto/resolver';
+import { ContextName, type ResolverType } from '@alicanto/resolver';
+import { Construct } from 'constructs';
 
 import type { AppStack } from '../app/app';
-import { StackConfig } from '../config/config';
-import type { CreateModuleProps } from './module.types';
+import { AppContext } from '../context/context';
+import type { CreateModuleProps, ModuleProps } from './module.types';
 
-export class StackModule {
-  public config: StackConfig;
+export class StackModule extends Construct {
   constructor(
-    public readonly app: AppStack,
-    public readonly name: string,
-    private resolvers: Record<string, ResolverType>,
-    private props: CreateModuleProps
+    scope: AppStack,
+    public id: string,
+    private props: ModuleProps
   ) {
-    this.config = new StackConfig(
-      app,
-      {
-        name,
-        globalConfig: props.globalConfig,
-      },
-      false
-    );
+    super(scope, id);
+    new AppContext(this, {
+      contextName: ContextName.APP,
+      globalConfig: props.globalConfig,
+    });
   }
 
   async generateResources() {
@@ -28,7 +24,7 @@ export class StackModule {
 
     for (const resource of resources) {
       const metadata = getResourceMetadata(resource);
-      const resolver = this.resolvers[metadata.type];
+      const resolver = this.props.resolvers[metadata.type];
 
       if (!resolver) {
         throw new Error(`There is no resolver for the resource ${metadata.type}`);
@@ -41,8 +37,11 @@ export class StackModule {
 
 export const createModule =
   (props: CreateModuleProps) =>
-  async (scope: AppStack, resources: Record<string, ResolverType>) => {
-    const module = new StackModule(scope, props.name, resources, props);
+  async (scope: AppStack, resolvers: Record<string, ResolverType>) => {
+    const module = new StackModule(scope, props.name, {
+      ...props,
+      resolvers,
+    });
 
     await module.generateResources();
 

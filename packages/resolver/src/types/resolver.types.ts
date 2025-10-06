@@ -1,5 +1,7 @@
-import type { ClassResource } from '@alicanto/common';
+import type { ClassResource, LambdaProps } from '@alicanto/common';
 import type { TerraformStack } from 'cdktf';
+import type { Construct } from 'constructs';
+
 import type { Role } from '../resources';
 
 export interface StackConfigProps {
@@ -9,20 +11,34 @@ export interface StackConfigProps {
   tags: Record<string, string>;
 }
 
+export type AlicantoResourceType<T extends new (...args: any[]) => Construct> =
+  InstanceType<T> & {
+    isGlobal(): void;
+    isDependent(resolveDependency: () => void): void;
+  };
+
 export interface AppStack extends TerraformStack {
-  name: string;
-  config: StackConfigProps;
+  id: string;
 }
 
-export interface AppModule {
-  name: string;
-  app: AppStack;
-  config?: StackConfigProps;
+export interface AppModule extends Construct {
+  id: string;
+}
+
+export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags' | 'env'> {
+  env?: Record<string, string>;
+}
+
+export interface GlobalContext extends Omit<LambdaGlobalConfig, 'services'> {}
+
+export enum ContextName {
+  APP = 'app',
+  MODULE = 'module',
 }
 
 export interface ResolverType {
   type: string;
   beforeCreate?: (scope: AppStack) => Promise<void>;
-  create: (module: Required<AppModule>, resource: ClassResource) => Promise<void>;
+  create: (module: AppModule, resource: ClassResource) => Promise<void>;
   afterCreate?: (scope: AppStack) => Promise<void>;
 }

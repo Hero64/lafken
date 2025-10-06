@@ -1,23 +1,17 @@
-import { type ClassResource, cleanString } from '@alicanto/common';
-import { type AppStack, alicantoResource } from '@alicanto/resolver';
+import { cleanString } from '@alicanto/common';
+import { alicantoResource } from '@alicanto/resolver';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAccelerateConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-accelerate-configuration';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
 import { S3BucketNotification } from '@cdktf/provider-aws/lib/s3-bucket-notification';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-
+import { Construct } from 'constructs';
 import { getBucketInformation } from '../../service';
-import type { BucketGlobalConfig } from '../resolver.types';
+import type { BucketProps } from './bucket.types';
 
-export class BucketParser {
-  constructor(
-    private scope: AppStack,
-    private bucket: ClassResource,
-    private config: BucketGlobalConfig
-  ) {}
-
-  public generate() {
+export class Bucket extends Construct {
+  constructor(scope: Construct, props: BucketProps) {
     const {
       name,
       prefix,
@@ -27,34 +21,34 @@ export class BucketParser {
       transferAcceleration,
       versioned,
       lifeCycleRules,
-    } = getBucketInformation(this.bucket);
+    } = getBucketInformation(props.classResource);
 
-    const bucketId = `bucket_${name}`;
+    super(scope, `${name}-bucket`);
 
-    const bucket = alicantoResource.create(S3Bucket, this.scope, bucketId, {
+    const bucket = alicantoResource.create('bucket', S3Bucket, this, name, {
       bucket: name,
       bucketPrefix: prefix,
-      forceDestroy,
+      forceDestroy: forceDestroy ?? props.forceDestroy,
     });
 
     bucket.isGlobal();
 
-    if (eventBridgeEnabled ?? this.config.eventBridgeEnabled) {
-      new S3BucketNotification(this.scope, `${bucketId}_notification`, {
+    if (eventBridgeEnabled ?? props.eventBridgeEnabled) {
+      new S3BucketNotification(this, `${name}-notification`, {
         bucket: bucket.id,
         eventbridge: true,
       });
     }
 
-    if (acl || this.config.acl) {
-      new S3BucketAcl(this.scope, `${bucketId}-acl`, {
+    if (acl || props.acl) {
+      new S3BucketAcl(this, `${name}-acl`, {
         bucket: bucket.id,
-        acl: acl || this.config.acl,
+        acl: acl || props.acl,
       });
     }
 
-    if (versioned ?? this.config.versioned) {
-      new S3BucketVersioningA(this.scope, `${bucketId}-versioned`, {
+    if (versioned ?? props.versioned) {
+      new S3BucketVersioningA(this, `${name}-versioned`, {
         bucket: bucket.id,
         versioningConfiguration: {
           status: 'Enabled',
@@ -62,22 +56,22 @@ export class BucketParser {
       });
     }
 
-    if (transferAcceleration ?? this.config.transferAcceleration) {
-      new S3BucketAccelerateConfiguration(this.scope, `${bucketId}-versioned`, {
+    if (transferAcceleration ?? props.transferAcceleration) {
+      new S3BucketAccelerateConfiguration(this, `${name}-versioned`, {
         bucket: bucket.id,
         status: 'Enabled',
       });
     }
 
-    const lifeCycle = lifeCycleRules || this.config.lifeCycleRules || {};
+    const lifeCycle = lifeCycleRules || props.lifeCycleRules || {};
 
     if (Object.keys(lifeCycle).length > 0) {
-      new S3BucketLifecycleConfiguration(this.scope, `${bucketId}-lifecycle`, {
+      new S3BucketLifecycleConfiguration(this, `${name}-lifecycle`, {
         bucket: bucket.id,
         rule: Object.keys(lifeCycle).map((key) => {
           const rule = lifeCycle[key];
           return {
-            id: `${bucketId}-lc-rule-${cleanString(key)}`,
+            id: `${name}-lc-rule-${cleanString(key)}`,
             status: 'Enabled',
             filter: [
               {
