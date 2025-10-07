@@ -27,13 +27,15 @@ class LambdaAssets {
       return lambdaAsset.asset;
     }
 
-    const outputPath = this.createOutputPath();
+    const outputPath = this.createOutputPath(prebuildPath);
 
     await build({
       entryPoints: [prebuildPath],
       outfile: outputPath,
       legalComments: 'none',
       minify: props.lambda?.minify ?? true,
+      bundle: true,
+      platform: 'node',
       external: ['@aws-sdk', 'aws-lambda'],
       plugins: [
         AlicantoBuildPlugin({
@@ -46,7 +48,7 @@ class LambdaAssets {
 
     const asset = new TerraformAsset(scope, `${props.filename}-asset`, {
       path: outputPath,
-      type: AssetType.ARCHIVE,
+      type: AssetType.FILE,
     });
 
     this.lambdaAssets[prebuildPath].asset = asset;
@@ -58,8 +60,8 @@ class LambdaAssets {
     return join(pathName, `${filename}.js`);
   }
 
-  private createOutputPath() {
-    return join(cwd(), '.out', createSha1(), 'index.js');
+  private createOutputPath(path: string) {
+    return join(cwd(), '.out', createSha1(path), 'index.js');
   }
 }
 

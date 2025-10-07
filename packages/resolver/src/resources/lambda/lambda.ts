@@ -121,9 +121,6 @@ export class LambdaHandler extends Construct {
       ...(this.appContext.env || {}),
       ...(this.moduleContext?.env || {}),
     };
-    if (!this.props.lambda?.env) {
-      return {};
-    }
     const env = new Environment(
       this,
       'lambda-env',
@@ -131,12 +128,7 @@ export class LambdaHandler extends Construct {
       globalEnv
     );
 
-    if (!env) {
-      return false;
-    }
-    return {
-      ...this.props.lambda?.env,
-    };
+    return env.getValues();
   }
 
   private getRoleArn(name: string) {

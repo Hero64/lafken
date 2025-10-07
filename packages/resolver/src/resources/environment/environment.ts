@@ -61,7 +61,7 @@ export class Environment extends Construct {
       values[key] = this.resolveEnvParameter(values[key]);
     }
 
-    return {};
+    return values;
   }
 
   private resolveEnvParameter = (value: string) => {
