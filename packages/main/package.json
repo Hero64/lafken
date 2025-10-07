@@ -19,6 +19,7 @@
     "@cdktf/provider-random": "12.0.0",
     "cdktf": "0.21.0",
     "constructs": "10.4.2",
+    "pretty-error": "4.0.0",
     "reflect-metadata": "0.1.13"
   },
   "devDependencies": {

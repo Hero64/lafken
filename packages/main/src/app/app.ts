@@ -7,11 +7,13 @@ import {
 } from '@alicanto/resolver';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { App, Aspects, TerraformStack } from 'cdktf';
+import PrettyError from 'pretty-error';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';
 import type { CreateAppProps } from './app.types';
 
 enableBuildEnvVariable();
+new PrettyError().start();
 
 export class AppStack extends TerraformStack {
   constructor(
