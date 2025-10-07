@@ -1,0 +1,26 @@
+{
+  "name": "@alicanto/example",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "build-app": "tsc",
+    "clean": "rm -rf cdk.out dist",
+    "deploy": "build-app  && cdk deploy",
+    "destroy": "build-app && cdk destroy",
+    "preview": "build-app && cdk deploy --no-execute-changeset",
+    "synth": "pnpm build-app && cdktf synth"
+  },
+  "dependencies": {
+    "@alicanto/api": "workspace:*",
+    "@alicanto/bucket": "workspace:*",
+    "@alicanto/common": "workspace:*",
+    "@alicanto/main": "workspace:*",
+    "cdktf": "0.21.0",
+    "dayjs": "1.11.8"
+  },
+  "devDependencies": {
+    "cdktf-cli": "0.21.0"
+  }
+}

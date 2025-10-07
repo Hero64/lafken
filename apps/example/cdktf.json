@@ -1,0 +1,5 @@
+{
+  "app": "node dist/index.js",
+  "projectId": "5eed1914-e48c-4c14-af95-098dbb8baf95",
+  "language": "typescript"
+}

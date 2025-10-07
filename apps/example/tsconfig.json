@@ -1,0 +1,17 @@
+{
+  "extends": "../../configs/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["node"],
+    "paths": {
+      //"@alicanto/dynamodb/*": ["../../packages/dynamo/lib/*"],
+      "@alicanto/api/*": ["../../packages/api/lib/*"],
+      // "@alicanto/event/*": ["../../packages/event/lib/*"],
+      // "@alicanto/state-machine/*": ["../../packages/state-machine/lib/*"],
+      "@alicanto/bucket/*": ["../../packages/bucket/lib/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
