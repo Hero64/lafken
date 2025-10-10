@@ -65,6 +65,12 @@ export class ByeResponse {
 }
 
 @Payload()
+export class Data {
+  @Field()
+  name: string;
+}
+
+@Payload()
 export class NewGreetingEvent extends BaseEvent {
   @Param({
     source: 'body',
@@ -75,6 +81,24 @@ export class NewGreetingEvent extends BaseEvent {
     source: 'body',
   })
   lastName: string;
+
+  @Param({
+    source: 'body',
+    type: Data,
+  })
+  data: Data;
+
+  @Param({
+    source: 'body',
+    type: [Data],
+  })
+  listData: Data[];
+
+  @Param({
+    source: 'query',
+    type: [Number],
+  })
+  numbers: number[];
 }
 
 @Payload()
@@ -110,7 +134,9 @@ export class DynamoPutEvent extends BaseEvent {
 export class DynamoUpdateEvent extends DynamoPutEvent {
   @Param({
     source: 'body',
-    required: false,
+    validation: {
+      required: false,
+    },
   })
   date?: string;
 }
