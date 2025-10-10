@@ -10,6 +10,86 @@ interface ExtendProps {
 }
 
 export type ApiKeySource = 'header' | 'authorizer';
+
+/**
+ * HTTP methods allowed for CORS requests
+ */
+export type CorsHttpMethod =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
+  | 'HEAD'
+  | 'OPTIONS';
+
+/**
+ * CORS configuration options for API Gateway
+ */
+export interface CorsOptions {
+  /**
+   * Specifies the origins that are allowed to make requests to the API.
+   * Can be:
+   * - `true`: Allow all origins (*)
+   * - `false`: Disable CORS
+   * - `string`: Single origin (e.g., 'https://example.com')
+   * - `string[]`: Multiple specific origins
+   * - `RegExp`: Pattern to match origins
+   *
+   * @default false
+   */
+  allowOrigins?: boolean | string | string[] | RegExp;
+
+  /**
+   * Specifies the HTTP methods that are allowed when accessing the resource.
+   *
+   * @default ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']
+   */
+  allowMethods?: CorsHttpMethod[];
+
+  /**
+   * Specifies the headers that are allowed in the actual request.
+   * Can be:
+   * - `true`: Allow all headers (*)
+   * - `string[]`: Specific headers to allow
+   *
+   * @default true
+   */
+  allowHeaders?: boolean | string[];
+
+  /**
+   * Specifies the headers that are exposed to the client.
+   * These are the headers that the client can access from the response.
+   *
+   * @default []
+   */
+  exposeHeaders?: string[];
+
+  /**
+   * Indicates whether the request can include credentials (cookies, authorization headers, etc.).
+   * When set to true, the Access-Control-Allow-Credentials header is set to true.
+   *
+   * @default false
+   */
+  allowCredentials?: boolean;
+
+  /**
+   * Specifies how long (in seconds) the browser can cache the preflight response.
+   * This reduces the number of preflight requests for subsequent requests.
+   *
+   * @default 86400 (24 hours)
+   */
+  maxAge?: number;
+
+  /**
+   * Indicates whether to add CORS headers to error responses.
+   * This is useful for handling CORS in error scenarios.
+   *
+   * @default true
+   */
+  addToErrorResponses?: boolean;
+}
+
 type MediaTypes =
   | 'image/png'
   | 'image/jpeg'
@@ -72,8 +152,22 @@ export interface RestApiProps {
    * Defines the Cross-Origin Resource Sharing (CORS) configuration for the API Gateway.
    * CORS allows or restricts resources on a web server to be requested from another domain
    * outside the one from which the resource originated.
+   *
+   * When enabled, this will automatically configure the necessary CORS headers and OPTIONS
+   * method responses for all endpoints in the API.
+   *
+   * @example
+   * ```typescript
+   * cors: {
+   *   allowOrigins: ['https://example.com', 'https://app.example.com'],
+   *   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+   *   allowHeaders: ['Content-Type', 'Authorization'],
+   *   allowCredentials: true,
+   *   maxAge: 3600
+   * }
+   * ```
    */
-  // cors?: CorsOptions;
+  cors?: CorsOptions;
   /**
    * Defines whether the default `execute-api` endpoint of API Gateway should be disabled.
    * By default, every API Gateway has an automatically generated endpoint of the form:

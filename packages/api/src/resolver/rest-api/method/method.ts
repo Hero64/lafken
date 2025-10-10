@@ -1,5 +1,8 @@
 import type { AppModule } from '@alicanto/resolver';
+import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
+import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
+import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
 import { Construct } from 'constructs';
 import { IntegrationHelper } from './helpers/integration/integration';
 import { ParamHelper } from './helpers/param/param';
@@ -60,23 +63,21 @@ export class ApiMethod extends Construct {
       modelId = model.id;
     }
 
-    const method = new ApiGatewayMethod(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-method`,
-      {
-        ...authorizationProps,
-        resourceId,
-        restApiId: restApi.api.id,
-        httpMethod: handler.method.toLowerCase(),
-        requestParameters: requestHelper.getRequestParameters(),
-        requestValidatorId: validatorId,
-        requestModels: modelId
-          ? {
-              'application/json': modelId,
-            }
-          : undefined,
-      }
-    );
+    const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
+
+    const method = new ApiGatewayMethod(restApi, `${methodName}-method`, {
+      ...authorizationProps,
+      resourceId,
+      restApiId: restApi.api.id,
+      httpMethod: handler.method.toLowerCase(),
+      requestParameters: requestHelper.getRequestParameters(),
+      requestValidatorId: validatorId,
+      requestModels: modelId
+        ? {
+            'application/json': modelId,
+          }
+        : undefined,
+    });
     await this.integrateMethod({
       ...this.props,
       fullPath,
@@ -87,6 +88,128 @@ export class ApiMethod extends Construct {
       integrationHelper,
       apiGatewayMethod: method,
     });
+
+    this.corsMethod(methodName, resourceId);
+  }
+
+  private corsMethod(methodName: string, resourceId: string) {
+    if (!this.props.cors) {
+      return;
+    }
+
+    const { cors, restApi } = this.props;
+    const corsHeaders = this.buildCorsHeaders(cors);
+
+    const optionsMethod = new ApiGatewayMethod(restApi, `${methodName}-options-method`, {
+      resourceId,
+      restApiId: restApi.api.id,
+      httpMethod: 'OPTIONS',
+      authorization: 'NONE',
+    });
+
+    new ApiGatewayIntegration(restApi, `${methodName}-options-integration`, {
+      httpMethod: optionsMethod.httpMethod,
+      resourceId: optionsMethod.resourceId,
+      restApiId: restApi.api.id,
+      type: 'MOCK',
+      requestTemplates: {
+        'application/json': '{"statusCode": 200}',
+      },
+    });
+
+    new ApiGatewayMethodResponse(restApi, `${methodName}-options-method-response`, {
+      httpMethod: optionsMethod.httpMethod,
+      resourceId: optionsMethod.resourceId,
+      restApiId: restApi.api.id,
+      statusCode: '200',
+      responseParameters: this.buildCorsMethodResponseParameters(corsHeaders),
+    });
+
+    new ApiGatewayIntegrationResponse(
+      restApi,
+      `${methodName}-options-integration-response`,
+      {
+        httpMethod: optionsMethod.httpMethod,
+        resourceId: optionsMethod.resourceId,
+        restApiId: restApi.api.id,
+        statusCode: '200',
+        responseParameters: corsHeaders,
+        responseTemplates: {
+          'application/json': '',
+        },
+      }
+    );
+  }
+
+  private buildCorsHeaders(cors: NonNullable<typeof this.props.cors>) {
+    const headers: Record<string, string> = {};
+
+    if (cors.allowOrigins !== undefined) {
+      if (typeof cors.allowOrigins === 'boolean') {
+        headers['method.response.header.Access-Control-Allow-Origin'] = cors.allowOrigins
+          ? "'*'"
+          : "'null'";
+      } else if (typeof cors.allowOrigins === 'string') {
+        headers['method.response.header.Access-Control-Allow-Origin'] =
+          `'${cors.allowOrigins}'`;
+      } else if (Array.isArray(cors.allowOrigins)) {
+        headers['method.response.header.Access-Control-Allow-Origin'] =
+          `'${cors.allowOrigins[0] || '*'}'`;
+      } else if (cors.allowOrigins instanceof RegExp) {
+        headers['method.response.header.Access-Control-Allow-Origin'] = "'*'";
+      }
+    } else {
+      headers['method.response.header.Access-Control-Allow-Origin'] = "'*'";
+    }
+
+    const allowedMethods = cors.allowMethods || [
+      'GET',
+      'HEAD',
+      'PUT',
+      'PATCH',
+      'POST',
+      'DELETE',
+    ];
+    headers['method.response.header.Access-Control-Allow-Methods'] =
+      `'${allowedMethods.join(',')}'`;
+
+    if (cors.allowHeaders !== undefined) {
+      if (typeof cors.allowHeaders === 'boolean') {
+        headers['method.response.header.Access-Control-Allow-Headers'] = cors.allowHeaders
+          ? "'*'"
+          : "''";
+      } else {
+        headers['method.response.header.Access-Control-Allow-Headers'] =
+          `'${cors.allowHeaders.join(',')}'`;
+      }
+    } else {
+      headers['method.response.header.Access-Control-Allow-Headers'] =
+        "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'";
+    }
+
+    if (cors.exposeHeaders && cors.exposeHeaders.length > 0) {
+      headers['method.response.header.Access-Control-Expose-Headers'] =
+        `'${cors.exposeHeaders.join(',')}'`;
+    }
+
+    if (cors.allowCredentials) {
+      headers['method.response.header.Access-Control-Allow-Credentials'] = "'true'";
+    }
+
+    const maxAge = cors.maxAge ?? 86400;
+    headers['method.response.header.Access-Control-Max-Age'] = `'${maxAge}'`;
+
+    return headers;
+  }
+
+  private buildCorsMethodResponseParameters(corsHeaders: Record<string, string>) {
+    const methodParameters: Record<string, boolean> = {};
+
+    for (const headerKey of Object.keys(corsHeaders)) {
+      methodParameters[headerKey] = false;
+    }
+
+    return methodParameters;
   }
 
   private async integrateMethod(props: IntegrationProps) {

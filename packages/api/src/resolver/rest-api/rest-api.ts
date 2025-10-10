@@ -46,6 +46,7 @@ export class RestApi extends Construct {
       `${props.resourceMetadata.name}-${props.handler.name}`,
       {
         ...props,
+        cors: this.props.cors,
         restApi: this,
       }
     );

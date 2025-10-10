@@ -1,5 +1,4 @@
 import { RequestHelper } from './request';
-import type { ParamHelper } from '../param/param';
 
 describe('RequestHelper', () => {
   let requestHelper: RequestHelper;
@@ -7,9 +6,9 @@ describe('RequestHelper', () => {
 
   beforeEach(() => {
     mockParamHelper = {
-      paramsBySource: {}
+      paramsBySource: {},
     };
-    
+
     requestHelper = new RequestHelper(mockParamHelper);
   });
 
@@ -29,22 +28,22 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: { required: true }
+            validation: { required: true },
           },
           {
             type: 'String',
             name: 'sort',
             destinationName: 'sort',
-            validation: { required: false }
-          }
-        ]
+            validation: { required: false },
+          },
+        ],
       };
 
       const result = requestHelper.getRequestParameters();
 
       expect(result).toEqual({
         'method.request.querystring.filter': true,
-        'method.request.querystring.sort': false
+        'method.request.querystring.sort': false,
       });
     });
 
@@ -55,22 +54,22 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: { required: true }
+            validation: { required: true },
           },
           {
             type: 'String',
             name: 'userId',
             destinationName: 'userId',
-            validation: {}
-          }
-        ]
+            validation: {},
+          },
+        ],
       };
 
       const result = requestHelper.getRequestParameters();
 
       expect(result).toEqual({
         'method.request.path.id': true,
-        'method.request.path.userId': true
+        'method.request.path.userId': true,
       });
     });
 
@@ -81,22 +80,22 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'authorization',
             destinationName: 'authorization',
-            validation: { required: true }
+            validation: { required: true },
           },
           {
             type: 'String',
             name: 'content-type',
             destinationName: 'contentType',
-            validation: { required: false }
-          }
-        ]
+            validation: { required: false },
+          },
+        ],
       };
 
       const result = requestHelper.getRequestParameters();
 
       expect(result).toEqual({
         'method.request.header.authorization': true,
-        'method.request.header.content-type': false
+        'method.request.header.content-type': false,
       });
     });
 
@@ -107,25 +106,25 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: { required: true }
-          }
+            validation: { required: true },
+          },
         ],
         path: [
           {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: { required: true }
-          }
+            validation: { required: true },
+          },
         ],
         header: [
           {
             type: 'String',
             name: 'authorization',
             destinationName: 'authorization',
-            validation: { required: false }
-          }
-        ]
+            validation: { required: false },
+          },
+        ],
       };
 
       const result = requestHelper.getRequestParameters();
@@ -133,7 +132,7 @@ describe('RequestHelper', () => {
       expect(result).toEqual({
         'method.request.querystring.filter': true,
         'method.request.path.id': true,
-        'method.request.header.authorization': false
+        'method.request.header.authorization': false,
       });
     });
 
@@ -144,15 +143,15 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'param',
             destinationName: 'param',
-            validation: {}
-          }
-        ]
+            validation: {},
+          },
+        ],
       };
 
       const result = requestHelper.getRequestParameters();
 
       expect(result).toEqual({
-        'method.request.querystring.param': true
+        'method.request.querystring.param': true,
       });
     });
 
@@ -160,7 +159,7 @@ describe('RequestHelper', () => {
       mockParamHelper.paramsBySource = {
         query: [],
         path: [],
-        header: []
+        header: [],
       };
 
       const result = requestHelper.getRequestParameters();
@@ -197,7 +196,7 @@ describe('RequestHelper', () => {
 
       expect(result).toEqual({
         validateRequestParameters: false,
-        validateRequestBody: false
+        validateRequestBody: false,
       });
     });
 
@@ -208,9 +207,9 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {}
-          }
-        ]
+            validation: {},
+          },
+        ],
       };
 
       const result = requestHelper.getValidatorProperties();
@@ -226,9 +225,9 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: {}
-          }
-        ]
+            validation: {},
+          },
+        ],
       };
 
       const result = requestHelper.getValidatorProperties();
@@ -244,15 +243,15 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: true }
+            validation: { required: true },
           },
           {
             type: 'String',
             name: 'description',
             destinationName: 'description',
-            validation: { required: false }
-          }
-        ]
+            validation: { required: false },
+          },
+        ],
       };
 
       const result = requestHelper.getValidatorProperties();
@@ -268,15 +267,15 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: false }
+            validation: { required: false },
           },
           {
             type: 'String',
             name: 'description',
             destinationName: 'description',
-            validation: {}
-          }
-        ]
+            validation: {},
+          },
+        ],
       };
 
       const result = requestHelper.getValidatorProperties();
@@ -292,17 +291,17 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {}
-          }
+            validation: {},
+          },
         ],
         body: [
           {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: true }
-          }
-        ]
+            validation: { required: true },
+          },
+        ],
       };
 
       const result = requestHelper.getValidatorProperties();
@@ -318,10 +317,10 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {}
-          }
+            validation: {},
+          },
         ],
-        body: undefined
+        body: undefined,
       };
 
       const result = requestHelper.getValidatorProperties();
