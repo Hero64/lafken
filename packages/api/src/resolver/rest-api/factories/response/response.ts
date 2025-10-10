@@ -20,6 +20,7 @@ export class ResponseFactory {
         resourceId: method.resourceId,
         restApiId: this.scope.api.id,
         statusCode: response.statusCode,
+        responseParameters: response.methodParameters,
         responseModels: response.field
           ? {
               'application/json': this.scope.modelFactory.getModel(
@@ -38,6 +39,7 @@ export class ResponseFactory {
           resourceId: method.resourceId,
           restApiId: this.scope.api.id,
           statusCode: response.statusCode,
+          responseParameters: response.integrationParameters,
           selectionPattern: response.selectionPattern,
           responseTemplates: response.template
             ? {

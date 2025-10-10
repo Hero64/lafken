@@ -106,9 +106,9 @@ export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
   lambda?: LambdaProps;
 }
 
-export type S3IntegrationActions = 'Download' | 'Upload' | 'Delete';
+export type BucketIntegrationActions = 'Download' | 'Upload' | 'Delete';
 
-export interface S3DownloadIntegrationServiceProps extends ApiLambdaBaseProps {
+export interface BucketDownloadIntegrationServiceProps extends ApiLambdaBaseProps {
   /**
    * Method integration type.
    *
@@ -116,7 +116,7 @@ export interface S3DownloadIntegrationServiceProps extends ApiLambdaBaseProps {
    * integration to respond. If this property is not set, the method
    * will use the Lambda function directly as its backend.
    */
-  integration: 's3';
+  integration: 'bucket';
   /**
    * S3 integration action.
    *
@@ -126,10 +126,10 @@ export interface S3DownloadIntegrationServiceProps extends ApiLambdaBaseProps {
    * - `'Upload'` – uploads an object to the S3 bucket.
    * - `'Delete'` – deletes an object from the S3 bucket.
    */
-  action: Extract<S3IntegrationActions, 'Download'>;
+  action: Extract<BucketIntegrationActions, 'Download'>;
 }
 
-export interface S3UploadDeleteIntegrationServiceProps
+export interface BucketUploadDeleteIntegrationServiceProps
   extends Omit<ApiLambdaBaseProps, 'response'> {
   /**
    * Method integration type.
@@ -138,7 +138,7 @@ export interface S3UploadDeleteIntegrationServiceProps
    * integration to respond. If this property is not set, the method
    * will use the Lambda function directly as its backend.
    */
-  integration: 's3';
+  integration: 'bucket';
   /**
    * S3 integration action.
    *
@@ -148,12 +148,12 @@ export interface S3UploadDeleteIntegrationServiceProps
    * - `'Upload'` – uploads an object to the S3 bucket.
    * - `'Delete'` – deletes an object from the S3 bucket.
    */
-  action: Exclude<S3IntegrationActions, 'Download'>;
+  action: Exclude<BucketIntegrationActions, 'Download'>;
 }
 
-export type S3IntegrationServiceProps =
-  | S3DownloadIntegrationServiceProps
-  | S3UploadDeleteIntegrationServiceProps;
+export type BucketIntegrationServiceProps =
+  | BucketDownloadIntegrationServiceProps
+  | BucketUploadDeleteIntegrationServiceProps;
 
 export type StateMachineIntegrationActions = 'Start' | 'Stop' | 'Status';
 
@@ -253,7 +253,7 @@ export interface QueueIntegrationServiceProps
 
 export type ApiLambdaProps =
   | ApiLambdaIntegrationProps
-  | S3IntegrationServiceProps
+  | BucketIntegrationServiceProps
   | StateMachineIntegrationServiceProps
   | DynamoDbIntegrationServiceProps
   | QueueIntegrationServiceProps;

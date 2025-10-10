@@ -39,6 +39,11 @@ export class ParamHelper {
       return this._pathParams;
     }
 
+    if (this.params === undefined) {
+      this._pathParams = {};
+      return this._pathParams;
+    }
+
     this._pathParams = this.flattenedField(this.params);
 
     return this._pathParams;

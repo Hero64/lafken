@@ -13,12 +13,12 @@ export interface IntegrationOptionBase<T = string> {
   getCurrentDate: () => string;
 }
 
-export interface S3IntegrationResponse {
+export interface BucketIntegrationResponse {
   bucket: string;
   object: string;
 }
 
-export type S3IntegrationOption = IntegrationOptionBase<BucketNames>;
+export type BucketIntegrationOption = IntegrationOptionBase<BucketNames>;
 
 export interface StateMachineStartIntegrationResponse<T = any> {
   stateMachineArn: string;

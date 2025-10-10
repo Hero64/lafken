@@ -11,6 +11,7 @@ import {
   defaultDataResponseTemplate,
   defaultResponses,
   getSuccessStatusCode,
+  responseMessages,
 } from './response.utils';
 
 const typesWithObjects = new Set<FieldTypes>(['Object', 'Array']);
@@ -83,5 +84,13 @@ export class ResponseHelper {
     }
 
     this._handlerResponse = responses;
+  }
+
+  getPatternResponse(statusCode: '400' | '500'): ResponseHandler {
+    return {
+      selectionPattern: `${statusCode[0]}\\d{2}`,
+      statusCode,
+      template: `{"error": "${responseMessages[statusCode]}"}`,
+    };
   }
 }

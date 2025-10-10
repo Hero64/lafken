@@ -1,12 +1,15 @@
 import type { AppModule } from '@alicanto/resolver';
 import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
 import { Construct } from 'constructs';
+import { IntegrationHelper } from './helpers/integration/integration';
 import { ParamHelper } from './helpers/param/param';
+import { ProxyHelper } from './helpers/proxy/proxy';
 import { RequestHelper } from './helpers/request/request';
 import { ResponseHelper } from './helpers/response/response';
 import { TemplateHelper } from './helpers/template/template';
-import type { IntegrationProps } from './integrations/integration.types';
+import type { Integration, IntegrationProps } from './integrations/integration.types';
 import { LambdaIntegration } from './integrations/lambda/lambda';
+import { BucketIntegration } from './integrations/s3/bucket';
 import type { ApiMethodProps } from './method.types';
 
 export class ApiMethod extends Construct {
@@ -25,6 +28,8 @@ export class ApiMethod extends Construct {
     const requestHelper = new RequestHelper(paramHelper);
     const responseHelper = new ResponseHelper(handler);
     const templateHelper = new TemplateHelper();
+    const proxyHelper = new ProxyHelper();
+    const integrationHelper = new IntegrationHelper();
 
     const fullPath = this.cleanPath(`${resourceMetadata.path}/${handler.path}`) || '/';
     const resourceId = restApi.resourceFactory.getResource(fullPath);
@@ -76,17 +81,29 @@ export class ApiMethod extends Construct {
       ...this.props,
       fullPath,
       paramHelper,
+      proxyHelper,
       responseHelper,
       templateHelper,
+      integrationHelper,
       apiGatewayMethod: method,
     });
   }
 
   private async integrateMethod(props: IntegrationProps) {
-    if (!props.handler.integration) {
-      const integration = new LambdaIntegration(this, props);
-      await integration.create();
+    const { handler } = props;
+    let integration: Integration | undefined;
+
+    switch (handler.integration) {
+      case 'bucket': {
+        integration = new BucketIntegration(props);
+        break;
+      }
+      default: {
+        integration = new LambdaIntegration(this, props);
+      }
     }
+
+    await integration.create();
     return false;
   }
 

@@ -5,4 +5,6 @@ export interface ResponseHandler
   extends Pick<ApiGatewayIntegrationResponseConfig, 'statusCode' | 'selectionPattern'> {
   field?: ResponseFieldMetadata;
   template?: string;
+  methodParameters?: Record<string, boolean>;
+  integrationParameters?: Record<string, string>;
 }
