@@ -1,4 +1,5 @@
 export enum ResourceReflectKeys {
+  // TODO: esto en minusculas
   RESOURCE = 'resource',
 }
 

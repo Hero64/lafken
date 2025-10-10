@@ -113,7 +113,7 @@ export class LambdaHandler extends Construct {
   }
 
   private getHandlerName() {
-    return `${this.id}-${this.props.suffix ? `-${this.props.suffix}` : ''}`.toLowerCase();
+    return `${this.id}-${this.moduleContext?.contextCreator || this.appContext.contextCreator}${this.props.suffix ? `-${this.props.suffix}` : ''}`.toLowerCase();
   }
 
   private getCurrentEnvironment() {

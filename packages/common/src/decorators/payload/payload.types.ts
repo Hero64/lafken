@@ -11,3 +11,9 @@ export interface PayloadProps {
 export interface PayloadMetadata extends Required<PayloadProps> {
   id: string;
 }
+
+export interface CreatePayloadDecoratorProps<P extends PayloadProps, M> {
+  enableInLambdaInvocation?: boolean;
+  createUniqueId?: boolean;
+  getMetadata?: (props?: P) => Omit<M, keyof PayloadMetadata>;
+}

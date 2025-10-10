@@ -7,8 +7,14 @@ import type {
   ResourceMetadata,
   ResourceProps,
 } from '@alicanto/common';
-
-import type { FieldParams } from '../field';
+import type { ResponseMetadata } from '../event';
+import type {
+  ApiArrayField,
+  ApiBooleanField,
+  ApiNumberField,
+  ApiObjectField,
+  ApiStringField,
+} from '../field';
 
 export interface MethodAuthorizer {
   /**
@@ -281,6 +287,22 @@ export interface ApiProps extends ResourceProps {
 
 export interface ApiResourceMetadata extends Required<ApiProps>, ResourceMetadata {}
 
+export type ResponseFieldMetadata =
+  | ApiStringField
+  | ApiNumberField
+  | ApiBooleanField
+  | ResponseApiObjectField
+  | ResponseApiArrayField;
+
+export interface ResponseApiObjectField
+  extends Omit<ApiObjectField, 'properties' | 'payload'> {
+  properties: ResponseFieldMetadata[];
+  payload: ResponseMetadata;
+}
+export interface ResponseApiArrayField extends Omit<ApiArrayField, 'items'> {
+  items: ResponseFieldMetadata;
+}
+
 export interface ApiLambdaMetadata extends LambdaMetadata {
   path: string;
   method: Method;
@@ -288,7 +310,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   integration?: ApiLambdaProps['integration'];
   action?: string;
   lambda?: LambdaProps;
-  response?: FieldParams;
+  response?: ResponseFieldMetadata;
   auth?: MethodAuthorizer | false;
 }
 

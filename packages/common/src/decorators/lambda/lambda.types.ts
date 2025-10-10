@@ -1,6 +1,5 @@
 import type { EnvironmentValue } from '../../types';
 import type { ServicesValues } from '../../types/services.types';
-import type { FieldInformation } from '../field';
 
 export interface LambdaProps {
   /**
@@ -109,21 +108,18 @@ export interface LambdaMetadata {
 }
 
 export enum LambdaReflectKeys {
-  HANDLERS = 'lambda:handlers',
-  ARGUMENTS = 'lambda:arguments',
-  EVENT_PARAM = 'lambda:event_params',
-  ADDITIONAL_EVENT_INFORMATION = 'lambda:additional_event_information',
+  handlers = 'lambda:handlers',
+  arguments = 'lambda:arguments',
+  event_param = 'lambda:event_params',
 }
 
 export enum LambdaArgumentTypes {
-  EVENT = 'EVENT',
-  CALLBACK = 'CALLBACK',
-  CONTEXT = 'CONTEXT',
+  event = 'event',
+  callback = 'callback',
+  context = 'context',
 }
 
 export type CallbackParam = (error: boolean | null, response?: any) => void;
-
-export type GetEventFields<T> = (FieldClass: T) => FieldInformation;
 
 export type LambdaArguments = Record<string, LambdaArgumentTypes[]>;
 export type LambdaArgumentsType = Record<

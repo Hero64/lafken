@@ -1,6 +1,6 @@
 import type { PayloadMetadata, PayloadProps } from '@alicanto/common';
 
-import type { FieldParams } from '../field';
+import type { ApiFieldMetadata } from '../field';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
 
 export interface ResponseProps extends PayloadProps {
@@ -45,5 +45,5 @@ export interface ResponseProps extends PayloadProps {
 export interface ResponseMetadata
   extends PayloadMetadata,
     Omit<ResponseProps, 'name' | 'responses'> {
-  responses?: Partial<Record<HTTP_STATUS_CODE_NUMBER, FieldParams | true>>;
+  responses?: Partial<Record<string, ApiFieldMetadata | true>>;
 }

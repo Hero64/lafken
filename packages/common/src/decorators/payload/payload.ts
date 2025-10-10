@@ -1,40 +1,46 @@
 import { isBuildEnvironment } from '../../utils';
-import type { PayloadMetadata, PayloadProps } from './payload.types';
+import { FieldProperties } from '../field';
+import type {
+  CreatePayloadDecoratorProps,
+  PayloadMetadata,
+  PayloadProps,
+} from './payload.types';
 
-const modelPayloads: Record<string, number> = {};
+const payloadIds: Record<string, number> = {};
 
 export const createPayloadDecorator =
-  <T extends PayloadProps, M extends PayloadMetadata>(
-    setMetadata: (props: T, metadata: PayloadMetadata) => M,
-    payloadKey: string,
-    incrementId?: boolean,
-    enableInLambdaInvocation = false
-  ) =>
+  <T extends PayloadProps, M>({
+    getMetadata,
+    createUniqueId = false,
+    enableInLambdaInvocation = false,
+  }: CreatePayloadDecoratorProps<T, M>) =>
   (props?: T) =>
   (target: Function) => {
-    if (isBuildEnvironment() || enableInLambdaInvocation) {
-      const { name = target.name } = props || {};
-      let id = name;
-      if (incrementId) {
-        modelPayloads[name] ??= 0;
-        if (modelPayloads[name] > 0) {
-          id = `${name}_${modelPayloads[name]}`;
-        }
-        modelPayloads[name]++;
-      }
-
-      const metadata = setMetadata(props as T, {
-        id,
-        name,
-      });
-
-      Reflect.defineMetadata(
-        payloadKey,
-        {
-          ...(props || {}),
-          ...metadata,
-        },
-        target
-      );
+    if (!isBuildEnvironment() && !enableInLambdaInvocation) {
+      return;
     }
+
+    const { name = target.name } = props || {};
+    let id = name;
+    if (createUniqueId) {
+      payloadIds[name] ??= 0;
+      if (payloadIds[name] > 0) {
+        id = `${name}_${payloadIds[name]}`;
+      }
+      payloadIds[name]++;
+    }
+
+    let payloadMetadata: PayloadMetadata = {
+      id,
+      name,
+    };
+
+    if (getMetadata) {
+      payloadMetadata = {
+        ...payloadMetadata,
+        ...getMetadata(props),
+      };
+    }
+
+    Reflect.defineMetadata(FieldProperties.payload, payloadMetadata, target);
   };

@@ -1,49 +1,45 @@
 import {
   createEventDecorator,
   createPayloadDecorator,
-  getClassData,
-  getMetadataOfType,
+  getEventFields,
 } from '@alicanto/common';
 
-import { ApiReflectKeys } from '../api';
+import type { ApiFieldMetadata } from '../field';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
 import type { ResponseMetadata, ResponseProps } from './event.types';
 
-export const Response = createPayloadDecorator<ResponseProps, ResponseMetadata>(
-  (props, metadata) => {
-    const metadataProps: ResponseMetadata = {
-      ...metadata,
-      defaultCode: props?.defaultCode,
-    };
+export const Response = createPayloadDecorator<ResponseProps, ResponseMetadata>({
+  createUniqueId: true,
+  getMetadata: (props) => {
+    if (!props?.responses) {
+      return {
+        defaultCode: props?.defaultCode,
+      };
+    }
 
-    if (props?.responses) {
-      metadataProps.responses = {};
-      for (const code in props.responses) {
-        const statusCode = code as unknown as HTTP_STATUS_CODE_NUMBER;
-        metadataProps.responses[statusCode] = true;
+    const responses: Partial<Record<string, ApiFieldMetadata | true>> = {};
 
-        if (props.responses[statusCode] !== true) {
-          metadataProps.responses[statusCode] = getMetadataOfType(
-            ApiReflectKeys.FIELD,
-            ApiReflectKeys.PAYLOAD,
-            props.responses[statusCode]
-          );
-        }
+    for (const responseCode in props?.responses) {
+      const code = responseCode as unknown as HTTP_STATUS_CODE_NUMBER;
+      responses[code] = true;
+
+      if (props.responses[code] !== true) {
+        responses[code] = getEventFields(
+          props.responses[code],
+          'response'
+        ) as ApiFieldMetadata;
       }
     }
 
-    return metadataProps;
+    return {
+      responses,
+      defaultCode: props?.defaultCode,
+    };
   },
-  ApiReflectKeys.PAYLOAD,
-  true
-);
+});
 
-export const Payload = createPayloadDecorator(
-  (_props, metadata) => metadata,
-  ApiReflectKeys.PAYLOAD,
-  true
-);
+export const Payload = createPayloadDecorator({
+  createUniqueId: true,
+});
 
-export const Event = createEventDecorator((ParamClass) =>
-  getClassData(ParamClass, ApiReflectKeys.FIELD, ApiReflectKeys.PAYLOAD)
-);
+export const Event = (target: Function) => createEventDecorator()(target);

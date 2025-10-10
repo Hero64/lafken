@@ -10,3 +10,7 @@ export const createSha1 = (value: string) => {
 
   return shasum.digest('hex');
 };
+
+export const uuid = () => {
+  return crypto.randomUUID();
+};

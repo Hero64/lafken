@@ -1,4 +1,4 @@
-import type { ParamMetadata } from '../../../../../main';
+import type { ApiFieldMetadata } from '../../../../../main';
 import type { ParamHelper } from '../param/param';
 
 export class RequestHelper {
@@ -33,18 +33,20 @@ export class RequestHelper {
     return {
       validateRequestParameters:
         paramsBySource.query !== undefined || paramsBySource.path !== undefined,
-      validateRequestBody: !!paramsBySource.body?.some((param) => param.required),
+      validateRequestBody: !!paramsBySource.body?.some(
+        (param) => param.validation?.required
+      ),
     };
   }
 
   private mapUrlParameters(
     type: 'querystring' | 'path' | 'header',
-    params: ParamMetadata[] = []
+    params: ApiFieldMetadata[] = []
   ) {
     return Object.fromEntries(
       params.map((param) => [
         this.generateMethodRequestType(type, param.name),
-        param.required,
+        param.validation?.required || true,
       ])
     );
   }

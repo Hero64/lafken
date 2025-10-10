@@ -8,7 +8,9 @@ import { ApiGatewayStage } from '@cdktf/provider-aws/lib/api-gateway-stage';
 import { Construct } from 'constructs';
 import type { RestApiProps } from '../resolver.types';
 import { AuthorizerFactory } from './factories/authorizer/authorizer';
+import { ModelFactory } from './factories/model/model';
 import { ResourceFactory } from './factories/resource/resource';
+import { ResponseFactory } from './factories/response/response';
 import { ValidatorFactory } from './factories/validator/validator';
 import { ApiMethod } from './method/method';
 import type { ApiMethodProps } from './method/method.types';
@@ -20,6 +22,8 @@ export class RestApi extends Construct {
   public resourceFactory: ResourceFactory;
   public validatorFactory: ValidatorFactory;
   public authorizerFactory: AuthorizerFactory;
+  public modelFactory: ModelFactory;
+  public responseFactory: ResponseFactory;
 
   constructor(
     private scope: AppStack,
@@ -32,6 +36,8 @@ export class RestApi extends Construct {
     this.resourceFactory = new ResourceFactory(this);
     this.validatorFactory = new ValidatorFactory(this);
     this.authorizerFactory = new AuthorizerFactory(this, props.auth?.authorizers || []);
+    this.modelFactory = new ModelFactory(this);
+    this.responseFactory = new ResponseFactory(this);
   }
 
   public async addMethod(module: AppModule, props: Omit<ApiMethodProps, 'restApi'>) {

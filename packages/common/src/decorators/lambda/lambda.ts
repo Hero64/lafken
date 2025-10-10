@@ -1,19 +1,19 @@
 import 'reflect-metadata';
 import { isBuildEnvironment } from '../../utils';
+import { type AllowedTypes, getEventFields } from '../field';
 import {
-  LambdaArgumentTypes,
-  LambdaReflectKeys,
   type CallbackParam,
   type CreateLambdaDecoratorProps,
-  type GetEventFields,
   type LambdaArguments,
   type LambdaArgumentsType,
+  LambdaArgumentTypes,
+  LambdaReflectKeys,
 } from './lambda.types';
 
 const argumentsByType: LambdaArgumentsType = {
-  [LambdaArgumentTypes.EVENT]: ({ event }) => event,
-  [LambdaArgumentTypes.CALLBACK]: ({ callback }) => callback,
-  [LambdaArgumentTypes.CONTEXT]: ({ context }) => context,
+  [LambdaArgumentTypes.event]: ({ event }) => event,
+  [LambdaArgumentTypes.callback]: ({ callback }) => callback,
+  [LambdaArgumentTypes.context]: ({ context }) => context,
 };
 
 export const reflectArgumentMethod = (
@@ -22,10 +22,10 @@ export const reflectArgumentMethod = (
   type: LambdaArgumentTypes
 ) => {
   const properties: LambdaArguments =
-    Reflect.getMetadata(LambdaReflectKeys.ARGUMENTS, target) || {};
+    Reflect.getMetadata(LambdaReflectKeys.arguments, target) || {};
 
   properties[methodName] = [type, ...(properties[methodName] || [])];
-  Reflect.defineMetadata(LambdaReflectKeys.ARGUMENTS, properties, target);
+  Reflect.defineMetadata(LambdaReflectKeys.arguments, properties, target);
 };
 
 export const createLambdaDecorator =
@@ -38,17 +38,17 @@ export const createLambdaDecorator =
   (target: any, methodName: string, descriptor: PropertyDescriptor) => {
     if (isBuildEnvironment()) {
       const handlersMetadata: M[] =
-        Reflect.getMetadata(LambdaReflectKeys.HANDLERS, target) || [];
+        Reflect.getMetadata(LambdaReflectKeys.handlers, target) || [];
 
       Reflect.defineMetadata(
-        LambdaReflectKeys.HANDLERS,
+        LambdaReflectKeys.handlers,
         [...handlersMetadata, getLambdaMetadata(props || ({} as T), methodName)],
         target
       );
     }
 
     const lambdaArguments: LambdaArguments = Reflect.getMetadata(
-      LambdaReflectKeys.ARGUMENTS,
+      LambdaReflectKeys.arguments,
       target
     );
 
@@ -91,32 +91,23 @@ const reflectEventMetadata = (
 };
 
 export const createEventDecorator =
-  <E extends { new (...args: any[]): {} }>(getEventFields?: GetEventFields<E>) =>
-  (FieldClass: E) =>
+  () =>
+  (eventField: AllowedTypes) =>
   (target: any, methodName: string, _number: number) => {
-    reflectArgumentMethod(target, methodName, LambdaArgumentTypes.EVENT);
+    reflectArgumentMethod(target, methodName, LambdaArgumentTypes.event);
 
-    if (!isBuildEnvironment() || !getEventFields) {
+    if (!isBuildEnvironment() || !eventField) {
       return;
     }
-    const { fields, additionalInformation } = getEventFields(FieldClass);
 
-    reflectEventMetadata(target, methodName, LambdaReflectKeys.EVENT_PARAM, fields);
-
-    if (additionalInformation) {
-      reflectEventMetadata(
-        target,
-        methodName,
-        LambdaReflectKeys.ADDITIONAL_EVENT_INFORMATION,
-        additionalInformation
-      );
-    }
+    const field = getEventFields(eventField);
+    reflectEventMetadata(target, methodName, LambdaReflectKeys.event_param, field);
   };
 
 export const Callback = () => (target: any, methodName: string, _number: number) => {
-  reflectArgumentMethod(target, methodName, LambdaArgumentTypes.CALLBACK);
+  reflectArgumentMethod(target, methodName, LambdaArgumentTypes.callback);
 };
 
 export const Context = () => (target: any, methodName: string, _number: number) => {
-  reflectArgumentMethod(target, methodName, LambdaArgumentTypes.CONTEXT);
+  reflectArgumentMethod(target, methodName, LambdaArgumentTypes.context);
 };

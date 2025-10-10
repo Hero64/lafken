@@ -15,7 +15,7 @@ export const getResourceMetadata = <T = ResourceMetadata>(
 export const getResourceHandlerMetadata = <T = LambdaMetadata>(
   classResource: ClassResource
 ): T[] => {
-  return Reflect.getMetadata(LambdaReflectKeys.HANDLERS, classResource.prototype) || [];
+  return Reflect.getMetadata(LambdaReflectKeys.handlers, classResource.prototype) || [];
 };
 
 export const getMetadataByKey = <T>(classResource: ClassResource, key: string): T => {

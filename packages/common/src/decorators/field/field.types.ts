@@ -1,13 +1,5 @@
 import type { PayloadMetadata } from '../payload';
 
-export type FieldTypes =
-  | 'String'
-  | 'Number'
-  | 'Boolean'
-  | 'Array'
-  | 'Object'
-  | (string & {});
-
 export type BasicTypes = StringConstructor | NumberConstructor | BooleanConstructor;
 
 export type AllowedTypes =
@@ -42,19 +34,51 @@ export interface FieldProps {
    */
   type?: AllowedTypes;
 }
-
-export interface FieldWithClassInformation<M = any> {
-  fieldType: FieldTypes;
-  params?: FieldInformation<M[]>;
-  subFieldType?: FieldTypes;
-}
-
-export interface FieldMetadata<M = any> extends FieldWithClassInformation<M> {
+export interface BaseFieldMetadata {
   name: string;
-  destinationField: string;
+  destinationName: string;
+}
+export interface StringField extends BaseFieldMetadata {
+  type: 'String';
+}
+export interface NumberField extends BaseFieldMetadata {
+  type: 'Number';
+}
+export interface BooleanField extends BaseFieldMetadata {
+  type: 'Boolean';
+}
+export interface ObjectField extends BaseFieldMetadata {
+  type: 'Object';
+  properties: FieldMetadata[];
+  payload: PayloadMetadata;
+}
+export interface ArrayField extends BaseFieldMetadata {
+  type: 'Array';
+  items: FieldMetadata;
 }
 
-export interface FieldInformation<T = any, A = PayloadMetadata> {
-  fields: T;
-  additionalInformation?: A;
+export type FieldMetadata =
+  | StringField
+  | NumberField
+  | BooleanField
+  | ObjectField
+  | ArrayField;
+
+export type FieldTypes = FieldMetadata['type'];
+export type PrimitiveTypes = Extract<FieldTypes, 'String' | 'Number' | 'Boolean'>;
+
+export enum FieldProperties {
+  field = 'alicanto:field',
+  payload = 'alicanto:payload',
+}
+
+export interface CreateFieldDecoratorProps<P extends FieldProps, M> {
+  enableInLambdaInvocation?: boolean;
+  getMetadata: (props?: P) => Omit<M, keyof FieldMetadata>;
+}
+
+export interface GetFieldMetadataProps {
+  type: string;
+  destinationName: string;
+  fieldProps?: FieldProps;
 }

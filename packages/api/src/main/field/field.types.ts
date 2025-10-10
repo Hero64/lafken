@@ -1,40 +1,90 @@
 import type {
   AllowedTypesWithoutFunction,
+  ArrayField,
   BasicTypes,
-  FieldMetadata,
+  BooleanField,
   FieldProps,
-  FieldWithClassInformation,
+  NumberField,
+  ObjectField,
+  StringField,
 } from '@alicanto/common';
 
-export interface ApiFieldProps extends FieldProps {
-  /**
-   * Required attribute.
-   *
-   * Specifies whether this attribute is mandatory in the payload.
-   * If set to `true`, the request must include this attribute;
-   */
+interface ApiFieldValidatorBase {
   required?: boolean;
 }
 
-export interface ApiFieldMetadata extends FieldMetadata {
-  required: boolean;
+interface ApiFieldValidatorString extends ApiFieldValidatorBase {
+  minLength?: number;
+  maxLength?: number;
+  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary';
+  pattern?: string;
+  enum?: string[];
 }
 
-export interface FieldParams extends FieldWithClassInformation<ParamMetadata> {
-  source?: Source;
-  directValue?: string;
-  required?: boolean;
+interface ApiFieldValidatorNumber extends ApiFieldValidatorBase {
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: boolean;
+  multipleOf?: number;
 }
 
-export interface ParamPropsBase extends FieldProps {
-  /**
-   * specify field is required
-   * @default true
-   */
-  required?: boolean;
+export interface ApiStringField extends StringField {
+  validation: ApiFieldValidatorString;
 }
 
-export interface BodyParamProps extends ParamPropsBase {
+export interface ApiStringParam extends ApiStringField {
+  source: Source;
+}
+export interface ApiNumberField extends NumberField {
+  validation: ApiFieldValidatorNumber;
+}
+
+export interface ApiNumberParam extends ApiNumberField {
+  source: Source;
+  validation: ApiFieldValidatorNumber;
+}
+export interface ApiBooleanField extends BooleanField {
+  validation: ApiFieldValidatorBase;
+}
+export interface ApiBooleanParam extends ApiBooleanField {
+  source: Source;
+}
+export interface ApiObjectField extends Omit<ObjectField, 'properties'> {
+  validation: ApiFieldValidatorBase;
+  properties: ApiFieldMetadata[];
+}
+export interface ApiObjectParam extends Omit<ApiObjectField, 'properties'> {
+  source: Source;
+  properties: ApiParamMetadata[];
+}
+export interface ApiArrayField extends Omit<ArrayField, 'items'> {
+  validation: ApiFieldValidatorBase;
+  items: ApiFieldMetadata;
+}
+export interface ApiArrayParam extends Omit<ApiArrayField, 'items'> {
+  source: Source;
+  items: ApiParamMetadata;
+}
+
+export type ApiFieldMetadata =
+  | ApiStringField
+  | ApiNumberField
+  | ApiBooleanField
+  | ApiObjectField
+  | ApiArrayField;
+
+export type ApiParamMetadata =
+  | ApiStringParam
+  | ApiNumberParam
+  | ApiBooleanParam
+  | ApiObjectParam
+  | ApiArrayParam;
+
+export interface ApiFieldBaseProps extends FieldProps {
+  validation?: ApiFieldValidatorString | ApiFieldValidatorNumber | ApiFieldValidatorBase;
+}
+
+export interface BodyParamProps extends ApiFieldBaseProps {
   /**
    * Source of the field value.
    *
@@ -44,7 +94,7 @@ export interface BodyParamProps extends ParamPropsBase {
   source: 'body';
 }
 
-export interface PathParamProps extends Omit<ParamPropsBase, 'type'> {
+export interface PathParamProps extends Omit<ApiFieldBaseProps, 'type' | 'validation'> {
   /**
    * Source of the field value.
    *
@@ -63,9 +113,11 @@ export interface PathParamProps extends Omit<ParamPropsBase, 'type'> {
    * This ensures correct parsing, validation, and serialization of the field's value.
    */
   type?: BasicTypes;
+  validation?: ApiFieldValidatorBase;
 }
 
-export interface QueryHeaderParamProps extends Omit<ParamPropsBase, 'type'> {
+export interface QueryHeaderParamProps
+  extends Omit<ApiFieldBaseProps, 'type' | 'validation'> {
   /**
    * Source of the field value.
    *
@@ -84,9 +136,12 @@ export interface QueryHeaderParamProps extends Omit<ParamPropsBase, 'type'> {
    * This ensures correct parsing, validation, and serialization of the field's value.
    */
   type?: AllowedTypesWithoutFunction;
+
+  validation?: ApiFieldValidatorBase;
 }
 
-export interface ContextParamProps extends Omit<ParamPropsBase, 'type'> {
+export interface ContextParamProps
+  extends Omit<ApiFieldBaseProps, 'type' | 'validation'> {
   /**
    * Source of the field value.
    *
@@ -114,18 +169,13 @@ export interface ContextParamProps extends Omit<ParamPropsBase, 'type'> {
     | 'protocol'
     | 'requestId'
     | 'resourcePath';
+  validation?: never;
 }
 
-export type Source = Exclude<ParamProps['source'], undefined>;
-
-export type ParamProps =
+export type ApiFieldProps =
   | PathParamProps
   | BodyParamProps
   | QueryHeaderParamProps
   | ContextParamProps;
 
-export interface ParamMetadata
-  extends Omit<FieldMetadata, 'type' | 'source' | 'required'>,
-    Omit<Required<ParamProps>, 'type'> {
-  directValue?: string;
-}
+export type Source = Exclude<ApiFieldProps['source'], undefined>;

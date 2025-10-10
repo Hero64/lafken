@@ -12,15 +12,27 @@ export class LambdaIntegration extends Construct implements Integration {
   }
 
   async create() {
-    const { handler, resourceMetadata, restApi, apiGatewayMethod } = this.props;
+    const {
+      handler,
+      resourceMetadata,
+      restApi,
+      apiGatewayMethod,
+      responseHelper,
+      paramHelper,
+      templateHelper,
+    } = this.props;
 
-    const lambdaHandler = new LambdaHandler(this, handler.name, {
-      ...handler,
-      filename: resourceMetadata.filename,
-      pathName: resourceMetadata.foldername,
-      suffix: 'api',
-      principal: 'apigateway.amazonaws.com',
-    });
+    const lambdaHandler = new LambdaHandler(
+      this,
+      `${handler.name}-${resourceMetadata.name}`,
+      {
+        ...handler,
+        filename: resourceMetadata.filename,
+        pathName: resourceMetadata.foldername,
+        principal: 'apigateway.amazonaws.com',
+        suffix: 'api',
+      }
+    );
 
     const lambda = await lambdaHandler.generate();
 
@@ -34,26 +46,20 @@ export class LambdaIntegration extends Construct implements Integration {
         type: 'AWS_PROXY',
         uri: lambda.invokeArn,
         integrationHttpMethod: 'POST',
+        requestTemplates: paramHelper.params
+          ? {
+              'application/json': templateHelper.generateTemplate({
+                field: paramHelper.params,
+              }),
+            }
+          : undefined,
       }
+    );
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      responseHelper.handlerResponse,
+      `${resourceMetadata.name}-${handler.name}`
     );
   }
 }
-/**
-
-example;
-  greeting - module;
-    greeting-api
-      lambda-integration
-        get
-        nuevo
-    resolve-module
-    bye-api
-      lambda
-
-
-  greeting-api;
-    resource
-
-
-
- */

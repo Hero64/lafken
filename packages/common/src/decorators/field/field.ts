@@ -1,115 +1,153 @@
 import 'reflect-metadata';
+import type { ClassResource } from '../../types';
+import { getMetadataByKey, getMetadataPrototypeByKey } from '../../utils';
 import { isBuildEnvironment } from '../../utils/build-env.utils';
-import type {
-  AllowedTypes,
-  FieldInformation,
-  FieldMetadata,
-  FieldProps,
-  FieldTypes,
-  FieldWithClassInformation,
+import type { PayloadMetadata } from '../payload';
+import {
+  type AllowedTypes,
+  type BaseFieldMetadata,
+  type CreateFieldDecoratorProps,
+  type FieldMetadata,
+  FieldProperties,
+  type FieldProps,
+  type GetFieldMetadataProps,
+  type PrimitiveTypes,
 } from './field.types';
 
-export const FieldKey = 'field:metadata';
+const primitiveTypeValues = new Set<PrimitiveTypes>(['Boolean', 'Number', 'String']);
 
-export const getPrimitiveType = (type: AllowedTypes): FieldTypes | undefined => {
+export const getPrimitiveType = (type: AllowedTypes): PrimitiveTypes | undefined => {
   if (type === String) return 'String';
   if (type === Number) return 'Number';
   if (type === Boolean) return 'Boolean';
 };
 
-export const getClassData = (
-  ParamClass: Function,
-  fieldKey: string,
-  payloadKey: string
-) => ({
-  fields: Reflect.getMetadata(fieldKey, ParamClass.prototype) as any[],
-  additionalInformation: Reflect.getMetadata(payloadKey, ParamClass),
-});
+export const getEventFields = (
+  target?: AllowedTypes,
+  name: string = 'event'
+): BaseFieldMetadata | undefined => {
+  if (!target) {
+    return undefined;
+  }
 
-export const getMetadataOfType = (
-  fieldKey: string,
-  payloadKey: string,
-  type?: AllowedTypes,
-  defaultFieldType: FieldTypes = 'Object'
-): FieldWithClassInformation => {
-  let params: FieldInformation | undefined;
-  let fieldType: FieldTypes = defaultFieldType;
-  let subFieldType: FieldTypes | undefined;
+  return getFieldMetadata({
+    destinationName: name,
+    type: `${name}_type`,
+    fieldProps: {
+      type: target,
+    },
+  });
+};
 
-  if (type !== undefined) {
-    const primitiveType = getPrimitiveType(type);
+const getObjectMetadata = (
+  metadata: Pick<BaseFieldMetadata, 'destinationName' | 'name'>,
+  payloadClass: ClassResource
+): FieldMetadata => {
+  const payloadMetadata = getMetadataByKey<PayloadMetadata>(
+    payloadClass,
+    FieldProperties.payload
+  );
 
-    if (primitiveType) {
-      fieldType = primitiveType;
-    } else if (typeof type === 'function') {
-      params = getClassData(type, fieldKey, payloadKey);
-      fieldType = 'Object';
-    } else if (Array.isArray(type)) {
-      fieldType = 'Array';
-      const arrayType = type[0];
-      const arrayPrimitiveType = getPrimitiveType(arrayType);
-
-      if (arrayPrimitiveType) {
-        subFieldType = arrayPrimitiveType;
-      } else if (typeof arrayType === 'function') {
-        subFieldType = 'Object';
-        params = getClassData(arrayType, fieldKey, payloadKey);
-      }
-    }
+  if (!payloadMetadata) {
+    throw new Error('Field should be decorated by @Payload decorator');
   }
 
   return {
-    params,
-    fieldType,
-    subFieldType,
+    ...metadata,
+    type: 'Object',
+    properties: getMetadataPrototypeByKey<FieldMetadata[]>(
+      payloadClass,
+      FieldProperties.field
+    ),
+    payload: payloadMetadata,
   };
 };
 
-export const generateFieldMetadata = <T extends FieldProps>(
-  props: T,
-  fieldKey: string,
-  payloadKey: string,
-  propertyKey: string,
-  paramFieldType: FieldTypes
-): FieldMetadata => {
-  const { name, type } = props;
-  const { params, fieldType, subFieldType } = getMetadataOfType(
-    fieldKey,
-    payloadKey,
-    type,
-    paramFieldType
-  );
+const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
+  const { fieldProps, destinationName, type } = props;
 
-  return {
-    params,
-    fieldType,
-    subFieldType,
-    name: name ?? propertyKey,
-    destinationField: propertyKey,
+  const metadata: Pick<BaseFieldMetadata, 'destinationName' | 'name'> = {
+    destinationName,
+    name: fieldProps?.name || destinationName,
   };
+
+  const primitiveType = getPrimitiveType(type);
+
+  if (
+    primitiveTypeValues.has(type as PrimitiveTypes) ||
+    primitiveTypeValues.has(primitiveType as PrimitiveTypes)
+  ) {
+    return {
+      type: primitiveType || (type as PrimitiveTypes),
+      ...metadata,
+    };
+  }
+
+  if (fieldProps?.type !== undefined) {
+    if (typeof fieldProps.type === 'function') {
+      return getObjectMetadata(metadata, fieldProps.type as ClassResource);
+    }
+
+    if (Array.isArray(fieldProps.type)) {
+      const arrayPrimitiveType = getPrimitiveType(fieldProps.type[0]);
+      let items!: FieldMetadata;
+
+      if (arrayPrimitiveType) {
+        items = {
+          type: arrayPrimitiveType,
+          name: arrayPrimitiveType,
+          destinationName: arrayPrimitiveType,
+        };
+      } else {
+        if (typeof fieldProps.type[0] === 'function') {
+          items = getObjectMetadata(
+            {
+              name: 'Object',
+              destinationName: 'Object',
+            },
+            fieldProps.type[0] as ClassResource
+          );
+        }
+      }
+
+      return {
+        ...metadata,
+        type: 'Array',
+        items,
+      };
+    }
+  }
+
+  throw new Error(`unidentified type ${type} in ${destinationName} field`);
 };
 
 export const createFieldDecorator =
-  <T extends FieldProps, M extends FieldMetadata>(
-    getMetadata: (props: T, field: M) => M,
-    fieldKey: string,
-    payloadKey: string,
-    enableInLambdaInvocation = false
-  ) =>
+  <T extends FieldProps, M>({
+    getMetadata,
+    enableInLambdaInvocation,
+  }: CreateFieldDecoratorProps<T, M>) =>
   (props?: T) =>
-  (target: any, propertyKey: string) => {
-    if (isBuildEnvironment() || enableInLambdaInvocation) {
-      const prevMetadata: M[] = Reflect.getMetadata(fieldKey, target) || [];
-      const designType = Reflect.getMetadata('design:type', target, propertyKey).name;
-      const field = generateFieldMetadata(
-        props || ({} as T),
-        fieldKey,
-        payloadKey,
-        propertyKey,
-        designType
-      );
-
-      const newMetadata = [...prevMetadata, getMetadata(props || ({} as T), field as M)];
-      Reflect.defineMetadata(fieldKey, newMetadata, target);
+  (target: any, destinationName: string) => {
+    if (!isBuildEnvironment() && !enableInLambdaInvocation) {
+      return;
     }
+
+    const fields =
+      getMetadataByKey<M & BaseFieldMetadata[]>(target, FieldProperties.field) || [];
+
+    const propertyType = Reflect.getMetadata('design:type', target, destinationName).name;
+    const parentMetadata = getMetadata(props);
+
+    const metadata = [
+      ...fields,
+      {
+        ...parentMetadata,
+        ...getFieldMetadata({
+          destinationName,
+          type: propertyType,
+          fieldProps: props,
+        }),
+      },
+    ];
+    Reflect.defineMetadata(FieldProperties.field, metadata, target);
   };

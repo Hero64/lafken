@@ -3,18 +3,17 @@ import {
   Context,
   createLambdaDecorator,
   createResourceDecorator,
-  getMetadataOfType,
+  getEventFields,
 } from '@alicanto/common';
 
-import type { FieldParams } from '../field';
 import {
   type ApiLambdaBaseProps,
   type ApiLambdaIntegrationProps,
   type ApiLambdaMetadata,
   type ApiLambdaProps,
   type ApiProps,
-  ApiReflectKeys,
   Method,
+  type ResponseFieldMetadata,
 } from './api.types';
 
 export const RESOURCE_TYPE = 'REST_API';
@@ -23,7 +22,6 @@ const createMethodDecorator = (method: Method) =>
   createLambdaDecorator<ApiLambdaProps, ApiLambdaMetadata>({
     getLambdaMetadata: (params, methodName) => {
       const { path = '/' } = params;
-      let responseFieldParams: FieldParams | undefined;
       let action: string | undefined;
 
       if (params.integration) {
@@ -32,15 +30,9 @@ const createMethodDecorator = (method: Method) =>
 
       const responseHandler = params as ApiLambdaBaseProps;
 
-      if (responseHandler.response) {
-        responseFieldParams = responseHandler.response
-          ? getMetadataOfType(
-              ApiReflectKeys.FIELD,
-              ApiReflectKeys.PAYLOAD,
-              responseHandler.response
-            )
-          : undefined;
-      }
+      const responseParams = getEventFields(
+        responseHandler.response
+      ) as ResponseFieldMetadata;
 
       return {
         lambda: (params as ApiLambdaIntegrationProps).lambda,
@@ -49,7 +41,7 @@ const createMethodDecorator = (method: Method) =>
         action,
         name: methodName,
         auth: params.auth,
-        response: responseFieldParams,
+        response: responseParams,
         description: params.description,
         integration: params.integration,
       } as ApiLambdaMetadata;
