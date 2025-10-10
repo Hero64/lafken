@@ -1,5 +1,8 @@
 {
-  "*.{ts, md}": [
-    "yarn biome format --write ."
+  "*.{ts,tsx,js,jsx,json,md}": [
+    "pnpm biome format --write"
+  ],
+  "*.{ts,tsx,js,jsx}": [
+    "pnpm biome lint --write"
   ]
 }
