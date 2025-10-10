@@ -46,7 +46,7 @@ export class RequestHelper {
     return Object.fromEntries(
       params.map((param) => [
         this.generateMethodRequestType(type, param.name),
-        param.validation?.required || true,
+        param.validation?.required ?? true,
       ])
     );
   }

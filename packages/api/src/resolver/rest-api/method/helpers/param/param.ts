@@ -50,10 +50,12 @@ export class ParamHelper {
     }
 
     this._paramsBySource = {};
-    for (const property of this.params.properties) {
-      const { source = 'query' } = property;
-      this._paramsBySource[source] ??= [];
-      this._paramsBySource[source].push(property);
+    if (this.params?.properties) {
+      for (const property of this.params.properties) {
+        const { source = 'query' } = property;
+        this._paramsBySource[source] ??= [];
+        this._paramsBySource[source].push(property);
+      }
     }
 
     return this._paramsBySource;
