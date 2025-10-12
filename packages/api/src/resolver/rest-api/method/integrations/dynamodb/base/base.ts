@@ -2,7 +2,6 @@ import type { FieldTypes } from '@alicanto/common';
 import { alicantoResource } from '@alicanto/resolver';
 import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
 import { Method } from '../../../../../../main';
-import { IntegrationOptionResolver } from '../../../helpers/option-resolver/option-resolver';
 import type { ResponseHandler } from '../../../helpers/response/response.types';
 import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
 import type { InitializedClass, Integration } from '../../integration.types';
@@ -30,7 +29,8 @@ export class DynamoBaseIntegration<T> implements Integration {
       createTemplate,
     } = this.props;
 
-    const { integrationResponse, optionResolver } = await this.callIntegrationMethod<T>();
+    const { integrationResponse, resolveResource } =
+      await this.callIntegrationMethod<T>();
 
     const integration = alicantoResource.create(
       'integration',
@@ -47,19 +47,19 @@ export class DynamoBaseIntegration<T> implements Integration {
         credentials: roleArn,
         passthroughBehavior: 'WHEN_NO_TEMPLATES',
         requestTemplates: {
-          'application/json': optionResolver.hasUnresolved()
+          'application/json': resolveResource.hasUnresolved()
             ? ''
             : createTemplate(integrationResponse),
         },
       }
     );
 
-    if (optionResolver.hasUnresolved()) {
+    if (resolveResource.hasUnresolved()) {
       integration.isDependent(async () => {
-        const { integrationResponse, optionResolver } =
+        const { integrationResponse, resolveResource } =
           await this.callIntegrationMethod<T>();
 
-        if (optionResolver.hasUnresolved()) {
+        if (resolveResource.hasUnresolved()) {
           throw new Error(`unresolved dependencies in ${handler.name} integration`);
         }
 
@@ -78,18 +78,18 @@ export class DynamoBaseIntegration<T> implements Integration {
   }
 
   protected async callIntegrationMethod<R>() {
-    const { classResource, handler, proxyHelper } = this.props;
+    const { classResource, handler, proxyHelper, integrationHelper } = this.props;
 
     const resource: InitializedClass<R> = new classResource();
-    const optionResolver = new IntegrationOptionResolver();
+    const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
     const integrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
-      optionResolver
+      options
     );
 
     return {
       integrationResponse,
-      optionResolver,
+      resolveResource,
     };
   }
 

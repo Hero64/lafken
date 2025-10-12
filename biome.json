@@ -29,7 +29,8 @@
       "suspicious": {
         "noExplicitAny": "off",
         "noShadowRestrictedNames": "off",
-        "noEmptyInterface": "off"
+        "noEmptyInterface": "off",
+        "noExportsInTest": "off"
       },
       "complexity": {
         "noBannedTypes": "off",

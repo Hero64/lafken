@@ -2,10 +2,10 @@ import type {
   ApiAuthorizerNames,
   ApiRestNames,
   AuthNames,
+  BucketNames,
   DynamoDbNames,
   EventBusNames,
   QueueScopedNames,
-  BucketNames,
   StateMachineScopedNames,
 } from './override-resources.types';
 

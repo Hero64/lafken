@@ -1,4 +1,3 @@
-import { ResolveResources } from '@alicanto/resolver';
 import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
 import type { BucketIntegrationResponse, Method, Source } from '../../../../../../main';
 import type { ServiceRoleName } from '../../../helpers/integration/integration.types';
@@ -27,6 +26,7 @@ export class BucketBaseIntegration implements Integration {
       httpMethod,
       paramHelper,
       responseHelper,
+      integrationHelper,
     } = this.props;
 
     if ((paramHelper.paramsBySource.body || []).length > 0) {
@@ -34,9 +34,11 @@ export class BucketBaseIntegration implements Integration {
     }
 
     const resource: InitializedClass<BucketIntegrationResponse> = new classResource();
+
+    const { options } = integrationHelper.generateIntegrationOptions();
     const integrationResponse: BucketIntegrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
-      new ResolveResources()
+      options
     );
 
     new ApiGatewayIntegration(
@@ -53,7 +55,7 @@ export class BucketBaseIntegration implements Integration {
         requestParameters: this.createRequestParameters(integrationResponse),
       }
     );
-    let responses = [...responseHelper.handlerResponse];
+    const responses = [...responseHelper.handlerResponse];
 
     responses[0].methodParameters = {
       'method.response.header.Content-Type': true,
@@ -63,13 +65,8 @@ export class BucketBaseIntegration implements Integration {
       'method.response.header.Content-Type': 'integration.response.header.Content-Type',
     };
 
-    if (responses.length === 1) {
-      responses = [
-        ...responses,
-        responseHelper.getPatternResponse('400'),
-        responseHelper.getPatternResponse('500'),
-      ];
-    }
+    responses[1] = responseHelper.getPatternResponse('400');
+    responses[2] = responseHelper.getPatternResponse('500');
 
     restApi.responseFactory.createResponses(
       apiGatewayMethod,

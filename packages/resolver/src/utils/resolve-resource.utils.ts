@@ -13,7 +13,7 @@ export class ResolveResources<T = string> {
 
     const [scope, id, property] = resourceValues;
 
-    const resource = alicantoResource.getResource(`${scope}_${id}`);
+    const resource = alicantoResource.getResource(`${scope}-${id}`);
 
     if (!resource) {
       this.unresolved.push(`${scope}_${id}`);

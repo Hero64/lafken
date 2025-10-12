@@ -5,7 +5,6 @@ import {
   Method,
   type QueueSendMessageIntegrationResponse,
 } from '../../../../../../main';
-import { IntegrationOptionResolver } from '../../../helpers/option-resolver/option-resolver';
 import type {
   InitializedClass,
   Integration,
@@ -26,12 +25,12 @@ export class SendMessageIntegration implements Integration {
       integrationHelper,
     } = this.props;
 
-    const optionResolver = new IntegrationOptionResolver();
+    const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
       new classResource();
     const integrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
-      optionResolver
+      options
     );
 
     const integration = alicantoResource.create(
@@ -45,24 +44,24 @@ export class SendMessageIntegration implements Integration {
         restApiId: restApi.api.id,
         type: 'AWS',
         integrationHttpMethod: Method.POST,
-        uri: optionResolver.hasUnresolved() ? '' : this.getUri(integrationResponse),
+        uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
         credentials: integrationHelper.createRole('sqs.write', restApi).arn,
         passthroughBehavior: 'WHEN_NO_TEMPLATES',
         requestTemplates: {
-          'application/json': optionResolver.hasUnresolved()
+          'application/json': resolveResource.hasUnresolved()
             ? ''
             : this.createTemplate(integrationResponse),
         },
       }
     );
 
-    if (optionResolver.hasUnresolved()) {
+    if (resolveResource.hasUnresolved()) {
       integration.isDependent(async () => {
         const integrationResponse = await resource[handler.name](
           proxyHelper.createEvent(),
-          optionResolver
+          resolveResource
         );
-        if (optionResolver.hasUnresolved()) {
+        if (resolveResource.hasUnresolved()) {
           throw new Error(`unresolved dependencies in ${handler.name} integration`);
         }
 

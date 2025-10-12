@@ -5,9 +5,9 @@ import type {
   SQSPermissions,
   StateMachinePermissions,
 } from '@alicanto/common';
-import { alicantoResource, Role } from '@alicanto/resolver';
+import { alicantoResource, ResolveResources, Role } from '@alicanto/resolver';
 import type { Construct } from 'constructs';
-import type { ServiceRoleName } from './integration.types';
+import type { IntegrationOption, ServiceRoleName } from './integration.types';
 
 export class IntegrationHelper {
   public createRole(name: ServiceRoleName, scope: Construct) {
@@ -31,6 +31,22 @@ export class IntegrationHelper {
 
     serviceRole.isGlobal();
     return serviceRole;
+  }
+
+  public generateIntegrationOptions(): IntegrationOption {
+    const resolveResource = new ResolveResources();
+
+    return {
+      options: {
+        getResourceValue(value, type) {
+          return resolveResource.getResourceValue(`${value}::${type}`);
+        },
+        getCurrentDate() {
+          return '$context.requestTimeEpoch';
+        },
+      },
+      resolveResource,
+    };
   }
 
   private getPermissionByRoleName(roleName: ServiceRoleName) {
