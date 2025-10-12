@@ -13,7 +13,6 @@ export interface Integration {
 }
 
 export interface IntegrationProps {
-  fullPath: string;
   restApi: RestApi;
   handler: ApiLambdaMetadata;
   paramHelper: ParamHelper;

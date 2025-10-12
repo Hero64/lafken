@@ -9,6 +9,7 @@ import { ProxyHelper } from './helpers/proxy/proxy';
 import { RequestHelper } from './helpers/request/request';
 import { ResponseHelper } from './helpers/response/response';
 import { TemplateHelper } from './helpers/template/template';
+import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
 import type { Integration, IntegrationProps } from './integrations/integration.types';
 import { LambdaIntegration } from './integrations/lambda/lambda';
 import { QueueIntegration } from './integrations/queue/queue';
@@ -81,7 +82,6 @@ export class ApiMethod extends Construct {
     });
     await this.integrateMethod({
       ...this.props,
-      fullPath,
       paramHelper,
       proxyHelper,
       responseHelper,
@@ -228,6 +228,10 @@ export class ApiMethod extends Construct {
       }
       case 'queue': {
         integration = new QueueIntegration(props);
+        break;
+      }
+      case 'dynamodb': {
+        integration = new DynamoDbIntegration(props);
         break;
       }
       default: {
