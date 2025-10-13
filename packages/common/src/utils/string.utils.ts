@@ -16,3 +16,11 @@ export const kebabCase = (str: string) => {
 export const cleanString = (str: string) => {
   return str.replace(/[^a-zA-Z0-9]/g, '');
 };
+
+export const cleanTemplateString = (str: string) => {
+  return str
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(' ');
+};

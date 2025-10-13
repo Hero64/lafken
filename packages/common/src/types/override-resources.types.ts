@@ -34,10 +34,9 @@ export type DynamoDbScopedNames = StackResourceName<DynamoDBAvailable, 'dynamo'>
 export type StateMachineNames =
   | ResourceIdentifiers<ModulesAvailable, 'StateMachine'>
   | (string & {});
-export type StateMachineScopedNames = ScopedResourceNames<
-  ModulesAvailable,
-  'StateMachine'
->;
+export type StateMachineScopedNames =
+  | ScopedResourceNames<ModulesAvailable, 'StateMachine'>
+  | (string & {});
 
 export type QueueNames = ResourceIdentifiers<QueueAvailable, 'Queue'> | (string & {});
 export type QueueScopedNames = ScopedResourceNames<QueueAvailable, 'queue'>;
