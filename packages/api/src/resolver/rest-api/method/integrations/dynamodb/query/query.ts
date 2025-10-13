@@ -117,7 +117,11 @@ export class QueryIntegration
       ...(resolver.field || {}),
       type: resolver.type,
       name: resolver.path,
-      directTemplateValue: resolver.field ? undefined : resolver.value,
+      directTemplateValue: resolver.field
+        ? undefined
+        : resolver.type === 'String'
+          ? `"${resolver.value}"`
+          : resolver.value,
     });
 
     let template = `${union} ${resolver.key} = ${keyValue}`;

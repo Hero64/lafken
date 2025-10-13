@@ -8,7 +8,7 @@ import type {
   StateMachineScopedNames,
 } from '@alicanto/common';
 
-export interface IntegrationOptionBase<T = string, V = string> {
+export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'> {
   getResourceValue: GetResourceValue<T, V>;
   getCurrentDate: () => string;
 }
@@ -18,10 +18,7 @@ export interface BucketIntegrationResponse {
   object: string;
 }
 
-export type BucketIntegrationOption = IntegrationOptionBase<
-  BucketNames,
-  'id' | 'arn' | 'bucketDomainName' | 'bucketRegion'
->;
+export type BucketIntegrationOption = IntegrationOptionBase<BucketNames>;
 
 export interface StateMachineStartIntegrationResponse<T = any> {
   stateMachineArn: string;
@@ -36,10 +33,8 @@ export interface StateMachineStatusIntegrationResponse {
 export interface StateMachineStopIntegrationResponse
   extends StateMachineStatusIntegrationResponse {}
 
-export type StateMachineIntegrationOption = IntegrationOptionBase<
-  StateMachineScopedNames,
-  'id' | 'arn'
->;
+export type StateMachineIntegrationOption =
+  IntegrationOptionBase<StateMachineScopedNames>;
 
 export type DynamoIntegrationOption = IntegrationOptionBase<DynamoDbScopedNames>;
 
