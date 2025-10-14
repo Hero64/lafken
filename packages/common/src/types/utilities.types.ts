@@ -10,6 +10,10 @@ export type OnlyNumberString<T> = {
   [key in keyof T as T[key] extends string | number ? key : never]: T[key];
 };
 
+export type OnlyNumber<T> = {
+  [key in keyof T as T[key] extends number ? key : never]: T[key];
+};
+
 export type Join<K, P> = K extends string
   ? P extends string
     ? `${K}::${P}`

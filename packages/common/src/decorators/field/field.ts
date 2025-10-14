@@ -14,7 +14,11 @@ import {
   type PrimitiveTypes,
 } from './field.types';
 
-const primitiveTypeValues = new Set<PrimitiveTypes>(['Boolean', 'Number', 'String']);
+export const primitiveTypeValues = new Set<PrimitiveTypes>([
+  'Boolean',
+  'Number',
+  'String',
+]);
 
 export const getPrimitiveType = (type: AllowedTypes): PrimitiveTypes | undefined => {
   if (type === String) return 'String';

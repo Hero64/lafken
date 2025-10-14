@@ -1,0 +1,177 @@
+import 'reflect-metadata';
+import type {
+  DeepPartial,
+  DynamoDbNames,
+  FieldTypes,
+  OnlyNumber,
+  OnlyNumberString,
+} from '@alicanto/common';
+
+export enum ModelMetadataKeys {
+  MODEL = 'dynamo:model',
+  PARTITION_KEY = 'dynamo:partition_key',
+  SORT_KEY = 'dynamo:sort_key',
+  FIELDS = 'dynamo:fields',
+}
+
+export interface DynamoIndex<T extends Function> {
+  name: string;
+  partitionKey: keyof OnlyNumberString<T['prototype']>;
+  sortKey?: keyof OnlyNumberString<T['prototype']>;
+}
+
+export type StreamTypes = 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY';
+
+export interface ImageFilter<T> {
+  keys: ModelPartition<T>;
+  attributes: DeepPartial<T>;
+}
+
+export interface FilterCriteria<T> {
+  /**
+   * Event types to include in the stream.
+   *
+   * Specify one or more of the following:
+   * - `'INSERT'` – Record when a new item is added.
+   * - `'MODIFY'` – Record when an existing item is modified.
+   * - `'REMOVE'` – Record when an item is deleted.
+   */
+  eventName?: ('INSERT' | 'MODIFY' | 'REMOVE')[];
+  /**
+   * Filter by specific partition keys.
+   *
+   * Only records with the specified partition key values will be included.
+   */
+  keys?: ModelPartition<T>;
+  /**
+   * Filter based on the new image of the item.
+   *
+   * Allows applying conditions to the attributes of the new item image
+   * after an INSERT or MODIFY event.
+   */
+  newImage?: ImageFilter<T>;
+  /**
+   * Filter based on the old image of the item.
+   *
+   * Allows applying conditions to the attributes of the old item image
+   * before a MODIFY or REMOVE event.
+   */
+  oldImage?: ImageFilter<T>;
+}
+
+export interface DynamoStream<T> {
+  /**
+   * Enable DynamoDB Stream.
+   *
+   * Specifies whether the DynamoDB Stream is active for the table.
+   * When enabled, changes to items in the table (insert, modify, remove)
+   * will be captured and can be consumed by EventBridge or Lambda functions.
+   */
+  enabled?: boolean;
+  /**
+   * Stream type.
+   *
+   * Specifies which information is captured in the DynamoDB Stream
+   * when items in the table are modified.
+   *
+   * Available options:
+   * - `'NEW_IMAGE'` – Only the new item image is recorded.
+   * - `'OLD_IMAGE'` – Only the old item image is recorded.
+   * - `'NEW_AND_OLD_IMAGES'` – Both new and old images are recorded.
+   * - `'KEYS_ONLY'` – Only the key attributes are recorded.
+   *
+   * @default  "NEW_AND_OLD_IMAGES"
+   */
+  type?: StreamTypes;
+  /**
+   * Batch size for stream events.
+   *
+   * Specifies the maximum number of records that will be sent
+   * in a single batch to the event consumer.
+   * Adjusting this value can help control memory usage and processing throughput.
+   */
+  batchSize?: number;
+  /**
+   * Maximum batching window in seconds.
+   *
+   * Specifies the maximum amount of time to gather records before
+   * sending a batch to the event consumer.
+   * This allows for combining multiple changes into a single batch,
+   * potentially reducing the number of invocations.
+   *
+   * @default 1
+   */
+  maximumBatchingWindowInSeconds?: number;
+  /**
+   * Stream filters.
+   *
+   * Specifies filter criteria to selectively process only certain records
+   * from the DynamoDB Stream. This allows you to ignore events that do
+   * not match the defined conditions, reducing unnecessary processing.
+   */
+  filters?: FilterCriteria<T>;
+}
+
+export interface DynamoModelProps<T extends Function> {
+  /**
+   * Table name.
+   *
+   * Defines the logical name of the DynamoDB table.
+   * If not specified, the name of the decorated class will be used.
+   */
+  name?: DynamoDbNames;
+  /**
+   * Table indexes.
+   *
+   * Defines the secondary indexes to apply on the DynamoDB table.
+   * These indexes can be used to optimize query patterns or support
+   * additional access patterns.
+   */
+  indexes?: DynamoIndex<T>[];
+  /**
+   * Enable X-Ray tracing.
+   *
+   * When enabled, AWS X-Ray tracing is activated for all operations
+   * on this DynamoDB table. This allows you to trace and analyze
+   * requests, helping with debugging and performance monitoring.
+   */
+  tracing?: boolean;
+  /**
+   * Enable DynamoDB Streams via EventBridge.
+   *
+   * When enabled, the table will send stream events for item changes
+   * (insert, modify, remove) through EventBridge. This allows other
+   * services to react to changes in the table in near real-time.
+   *
+   * - `detailType` is always set to `'db:stream'`.
+   * - `source` is set to `dynamodb.<model_name>`, where `<model_name>` is
+   *   the name of the decorated class.
+   */
+  stream?: DynamoStream<T['prototype']>;
+  // TODO: completar esto
+  ttl?: keyof OnlyNumber<T['prototype']>;
+}
+
+export interface FieldProps {
+  type?:
+    | StringConstructor
+    | NumberConstructor
+    | BooleanConstructor
+    | [Function]
+    | Function;
+}
+
+export interface FieldMetadata {
+  name: string;
+  type: FieldTypes;
+}
+
+export type FieldsMetadata = Record<string, FieldMetadata>;
+
+type Partition = { __special: unknown };
+
+export type PrimaryPartition<T = never> = T | (T & Partition);
+
+export type ModelPartition<T> = {
+  [K in keyof T as [Extract<T[K], Partition>] extends [never] ? never : K]: T[K];
+};
