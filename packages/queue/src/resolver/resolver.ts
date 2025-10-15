@@ -22,6 +22,7 @@ export class QueueResolver implements ResolverType {
     for (const handler of handlers) {
       const queue = new Queue(module, `${metadata.name}-${handler.name}`, {
         resourceMetadata: metadata,
+        classResource: resource,
         handler,
       });
 

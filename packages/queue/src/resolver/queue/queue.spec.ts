@@ -1,8 +1,10 @@
 import 'cdktf/lib/testing/adapters/jest';
+import { enableBuildEnvVariable } from '@alicanto/common';
 import { LambdaHandler } from '@alicanto/resolver';
 import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
 import { TerraformStack, Testing } from 'cdktf';
+import { Event, Fifo, Param, Payload, Queue, Standard } from '../../main';
 import { Queue as QueueResolver } from './queue';
 
 Testing.setupJest();
@@ -31,8 +33,45 @@ const setupQueueApp = () => {
 };
 
 describe('Queue', () => {
+  enableBuildEnvVariable();
+  @Payload()
+  class ParamError {
+    @Param({
+      source: 'attribute',
+    })
+    attr: boolean;
+  }
+
+  @Payload()
+  class BodyError {
+    @Param({
+      source: 'body',
+    })
+    body: string;
+
+    @Param({
+      source: 'body',
+    })
+    body2: string;
+  }
+  @Queue()
+  class TestQueue {
+    @Fifo()
+    fifo() {}
+
+    @Standard()
+    standard() {}
+
+    @Fifo()
+    paramTypeError(@Event(ParamError) _e: ParamError) {}
+
+    @Fifo()
+    bodyError(@Event(BodyError) _e: BodyError) {}
+  }
+
   it('should create a fifo queue integration without file creation', async () => {
     const { stack } = setupQueueApp();
+
     const queue = new QueueResolver(stack, 'fifo', {
       handler: {
         name: 'fifo',
@@ -45,6 +84,7 @@ describe('Queue', () => {
         originalName: 'queue',
         type: 'QUEUE',
       },
+      classResource: TestQueue,
     });
 
     await queue.create();
@@ -88,6 +128,7 @@ describe('Queue', () => {
         originalName: 'queue',
         type: 'QUEUE',
       },
+      classResource: TestQueue,
     });
 
     await queue.create();
@@ -115,5 +156,45 @@ describe('Queue', () => {
       event_source_arn: '${aws_sqs_queue.standard_standard-queue_C8EAAF87.arn}',
       function_name: 'test-function',
     });
+  });
+
+  it('should throw error with invalid attribute event param', () => {
+    const { stack } = setupQueueApp();
+    expect(() => {
+      new QueueResolver(stack, 'standard', {
+        handler: {
+          name: 'paramTypeError',
+          isFifo: false,
+        },
+        resourceMetadata: {
+          filename: 'test.js',
+          foldername: __dirname,
+          name: 'queue',
+          originalName: 'queue',
+          type: 'QUEUE',
+        },
+        classResource: TestQueue,
+      });
+    }).toThrow();
+  });
+
+  it('should throw error with invalid body event', () => {
+    const { stack } = setupQueueApp();
+    expect(() => {
+      new QueueResolver(stack, 'standard', {
+        handler: {
+          name: 'bodyError',
+          isFifo: false,
+        },
+        resourceMetadata: {
+          filename: 'test.js',
+          foldername: __dirname,
+          name: 'queue',
+          originalName: 'queue',
+          type: 'QUEUE',
+        },
+        classResource: TestQueue,
+      });
+    }).toThrow();
   });
 });
