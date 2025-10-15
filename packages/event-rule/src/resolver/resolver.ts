@@ -1,0 +1,77 @@
+import {
+  type ClassResource,
+  getResourceHandlerMetadata,
+  getResourceMetadata,
+  type ResourceMetadata,
+} from '@alicanto/common';
+import {
+  type AppModule,
+  type AppStack,
+  lambdaAssets,
+  type ResolverType,
+} from '@alicanto/resolver';
+import { CloudwatchEventBus } from '@cdktf/provider-aws/lib/cloudwatch-event-bus';
+import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
+import { type EventLambdaMetadata, RESOURCE_TYPE } from '../main';
+import { Cron } from './cron/cron';
+import type { EventRuleResolverProps } from './resolver.types';
+import { Rule } from './rule/rule';
+
+export class EventRuleResolver implements ResolverType {
+  public type = RESOURCE_TYPE;
+  private eventBuses: Record<string, CloudwatchEventBus> = {};
+
+  constructor(private props: EventRuleResolverProps[] = []) {}
+
+  public async beforeCreate(scope: AppStack) {
+    const defaultBus = new DataAwsCloudwatchEventBus(scope, 'DefaultBus', {
+      name: 'default',
+    });
+
+    this.eventBuses.default = defaultBus as unknown as CloudwatchEventBus;
+
+    for (const eventBusProps of this.props) {
+      if (eventBusProps.busName === 'default') {
+        throw new Error('Event bus default already exist');
+      }
+
+      this.eventBuses[eventBusProps.busName] = new CloudwatchEventBus(
+        scope,
+        `${eventBusProps.busName}-bus`,
+        {
+          name: eventBusProps.busName,
+        }
+      );
+    }
+  }
+
+  public async create(module: AppModule, resource: ClassResource) {
+    const metadata: ResourceMetadata = getResourceMetadata(resource);
+    const handlers = getResourceHandlerMetadata<EventLambdaMetadata>(resource);
+    lambdaAssets.initializeMetadata(metadata.foldername, metadata.filename, {
+      className: metadata.originalName,
+      methods: handlers.map((handler) => handler.name),
+    });
+
+    for (const handler of handlers) {
+      const id = `${metadata.name}-${handler.name}`;
+      if (handler.eventType === 'rule') {
+        const bus = this.eventBuses[handler.bus || 'default'];
+        const rule = new Rule(module, id, {
+          bus,
+          handler,
+          resourceMetadata: metadata,
+        });
+
+        await rule.create();
+      } else if (handler.eventType === 'cron') {
+        const cron = new Cron(module, id, {
+          handler,
+          resourceMetadata: metadata,
+        });
+
+        await cron.create();
+      }
+    }
+  }
+}
