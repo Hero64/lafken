@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'cdktf/lib/testing/adapters/jest';
 import { enableBuildEnvVariable } from '@alicanto/common';
 import { DynamodbTable } from '@cdktf/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktf/provider-aws/lib/pipes-pipe';

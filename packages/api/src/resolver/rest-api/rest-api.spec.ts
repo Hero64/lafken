@@ -1,3 +1,4 @@
+import 'cdktf/lib/testing/adapters/jest';
 import { enableBuildEnvVariable } from '@alicanto/common';
 import { alicantoResource } from '@alicanto/resolver';
 import { ApiGatewayDeployment } from '@cdktf/provider-aws/lib/api-gateway-deployment';
