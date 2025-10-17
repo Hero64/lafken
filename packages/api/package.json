@@ -26,16 +26,15 @@
   "dependencies": {
     "@alicanto/common": "workspace:*",
     "@alicanto/resolver": "workspace:*",
-    "@cdktf/provider-aws": "21.11.1",
+    "@cdktf/provider-aws": "21.14.0",
     "cdktf": "0.21.0",
     "constructs": "10.4.2",
-    "reflect-metadata": "0.1.13"
+    "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.152",
+    "@types/aws-lambda": "8.10.156",
     "@types/jest": "30.0.0",
-    "jest": "30.0.5",
-    "ts-jest": "29.4.1",
-    "ts-node": "10.9.2"
+    "jest": "30.2.0",
+    "ts-jest": "29.4.5"
   }
 }
