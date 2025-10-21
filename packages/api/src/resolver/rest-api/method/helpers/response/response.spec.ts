@@ -1,5 +1,5 @@
-import { ResponseHelper } from './response';
 import { Method } from '../../../../../main';
+import { ResponseHelper } from './response';
 import { defaultResponses, getSuccessStatusCode } from './response.utils';
 
 describe('ResponseHelper', () => {
@@ -7,7 +7,7 @@ describe('ResponseHelper', () => {
     it('should return default responses when no response is defined', () => {
       const handler = {
         method: Method.GET,
-        response: undefined
+        response: undefined,
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -23,7 +23,7 @@ describe('ResponseHelper', () => {
     it('should return cached response on subsequent calls', () => {
       const handler = {
         method: Method.GET,
-        response: undefined
+        response: undefined,
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -39,8 +39,8 @@ describe('ResponseHelper', () => {
         response: {
           type: 'String',
           name: 'message',
-          destinationName: 'message'
-        }
+          destinationName: 'message',
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -58,9 +58,9 @@ describe('ResponseHelper', () => {
           items: {
             type: 'String',
             name: 'item',
-            destinationName: 'item'
-          }
-        }
+            destinationName: 'item',
+          },
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -76,10 +76,10 @@ describe('ResponseHelper', () => {
         response: {
           type: 'Object',
           payload: {
-            defaultCode: 201
+            defaultCode: 201,
           },
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -101,29 +101,29 @@ describe('ResponseHelper', () => {
               '400': {
                 type: 'String',
                 name: 'error',
-                destinationName: 'error'
+                destinationName: 'error',
               },
-              '500': true
-            }
+              '500': true,
+            },
           },
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
       const result = responseHelper.handlerResponse;
 
       expect(result).toHaveLength(3);
-      
+
       // Default response
       expect(result[0].statusCode).toBe('201');
       expect(result[0].field).toEqual(handler.response);
-      
+
       // Custom 400 response
       expect(result[1].statusCode).toBe('400');
       expect(result[1].field).toEqual(handler.response.payload.responses['400']);
       expect(result[1].template).toBeDefined();
-      
+
       // Custom 500 response (true means no field)
       expect(result[2].statusCode).toBe('500');
       expect(result[2].field).toBeUndefined();
@@ -143,13 +143,13 @@ describe('ResponseHelper', () => {
                 '404': {
                   type: 'String',
                   name: 'notFound',
-                  destinationName: 'message'
-                }
-              }
+                  destinationName: 'message',
+                },
+              },
             },
-            properties: []
-          }
-        }
+            properties: [],
+          },
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -167,8 +167,8 @@ describe('ResponseHelper', () => {
         response: {
           type: 'Object',
           payload: {},
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const postHandler = {
@@ -176,8 +176,8 @@ describe('ResponseHelper', () => {
         response: {
           type: 'Object',
           payload: {},
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const getHelper = new ResponseHelper(getHandler);
@@ -193,10 +193,10 @@ describe('ResponseHelper', () => {
         response: {
           type: 'Object',
           payload: {
-            defaultCode: 204
+            defaultCode: 204,
           },
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);
@@ -213,8 +213,8 @@ describe('ResponseHelper', () => {
         response: {
           type: 'Object',
           payload: {},
-          properties: []
-        }
+          properties: [],
+        },
       } as any;
 
       const responseHelper = new ResponseHelper(handler);

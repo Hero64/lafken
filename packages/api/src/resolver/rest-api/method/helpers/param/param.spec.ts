@@ -5,11 +5,13 @@ import { getMetadataPrototypeByKey, LambdaReflectKeys } from '@alicanto/common';
 jest.mock('@alicanto/common', () => ({
   getMetadataPrototypeByKey: jest.fn(),
   LambdaReflectKeys: {
-    event_param: 'event_param'
-  }
+    event_param: 'event_param',
+  },
 }));
 
-const mockGetMetadataPrototypeByKey = getMetadataPrototypeByKey as jest.MockedFunction<typeof getMetadataPrototypeByKey>;
+const mockGetMetadataPrototypeByKey = getMetadataPrototypeByKey as jest.MockedFunction<
+  typeof getMetadataPrototypeByKey
+>;
 
 describe('ParamHelper', () => {
   let paramHelper: ParamHelper;
@@ -44,14 +46,14 @@ describe('ParamHelper', () => {
               name: 'id',
               destinationName: 'id',
               source: 'path',
-              validation: {}
-            }
-          ]
+              validation: {},
+            },
+          ],
         },
         otherMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -65,8 +67,8 @@ describe('ParamHelper', () => {
       const mockParams = {
         testMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -82,8 +84,8 @@ describe('ParamHelper', () => {
       const mockParams = {
         otherMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -105,17 +107,17 @@ describe('ParamHelper', () => {
               name: 'id',
               destinationName: 'id',
               source: 'path',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'name',
               destinationName: 'name',
               source: 'body',
-              validation: {}
-            }
-          ]
-        }
+              validation: {},
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -146,12 +148,12 @@ describe('ParamHelper', () => {
                   name: 'name',
                   destinationName: 'name',
                   source: 'body',
-                  validation: {}
-                }
-              ]
-            }
-          ]
-        }
+                  validation: {},
+                },
+              ],
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -179,11 +181,11 @@ describe('ParamHelper', () => {
                 name: 'tag',
                 destinationName: 'tag',
                 source: 'body',
-                validation: {}
-              }
-            }
-          ]
-        }
+                validation: {},
+              },
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -199,8 +201,8 @@ describe('ParamHelper', () => {
       const mockParams = {
         testMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -223,31 +225,31 @@ describe('ParamHelper', () => {
               name: 'id',
               destinationName: 'id',
               source: 'path',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'filter',
               destinationName: 'filter',
               source: 'query',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'name',
               destinationName: 'name',
               source: 'body',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'authorization',
               destinationName: 'authorization',
               source: 'header',
-              validation: {}
-            }
-          ]
-        }
+              validation: {},
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -260,15 +262,15 @@ describe('ParamHelper', () => {
       expect(result.path).toBeDefined();
       expect(result.path).toHaveLength(1);
       expect(result.path![0]).toEqual(mockParams.testMethod.properties[0]);
-      
+
       expect(result.query).toBeDefined();
       expect(result.query).toHaveLength(1);
       expect(result.query![0]).toEqual(mockParams.testMethod.properties[1]);
-      
+
       expect(result.body).toBeDefined();
       expect(result.body).toHaveLength(1);
       expect(result.body![0]).toEqual(mockParams.testMethod.properties[2]);
-      
+
       expect(result.header).toBeDefined();
       expect(result.header).toHaveLength(1);
       expect(result.header![0]).toEqual(mockParams.testMethod.properties[3]);
@@ -283,16 +285,16 @@ describe('ParamHelper', () => {
               type: 'String',
               name: 'param1',
               destinationName: 'param1',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'param2',
               destinationName: 'param2',
-              validation: {}
-            }
-          ]
-        }
+              validation: {},
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -313,24 +315,24 @@ describe('ParamHelper', () => {
               name: 'param1',
               destinationName: 'param1',
               source: 'query',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'param2',
               destinationName: 'param2',
               source: 'query',
-              validation: {}
+              validation: {},
             },
             {
               type: 'String',
               name: 'param3',
               destinationName: 'param3',
               source: 'body',
-              validation: {}
-            }
-          ]
-        }
+              validation: {},
+            },
+          ],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -345,8 +347,8 @@ describe('ParamHelper', () => {
       const mockParams = {
         testMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
@@ -361,8 +363,8 @@ describe('ParamHelper', () => {
       const mockParams = {
         testMethod: {
           type: 'Object',
-          properties: []
-        }
+          properties: [],
+        },
       };
 
       mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);

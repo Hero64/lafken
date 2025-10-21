@@ -15,10 +15,13 @@ describe('TemplateHelper', () => {
           name: 'username',
           destinationName: 'username',
           source: 'body' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'username' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'username',
+        } as any);
 
         expect(result).toBe("$input.json('$.username')");
       });
@@ -29,10 +32,13 @@ describe('TemplateHelper', () => {
           name: 'id',
           destinationName: 'id',
           source: 'path' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'id' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'id',
+        } as any);
 
         expect(result).toBe('"$input.params().path.get(\'id\')"');
       });
@@ -43,10 +49,13 @@ describe('TemplateHelper', () => {
           name: 'filter',
           destinationName: 'filter',
           source: 'query' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'filter' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'filter',
+        } as any);
 
         expect(result).toBe('"$input.params(\'filter\')"');
       });
@@ -57,10 +66,13 @@ describe('TemplateHelper', () => {
           name: 'authorization',
           destinationName: 'authorization',
           source: 'header' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'authorization' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'authorization',
+        } as any);
 
         expect(result).toBe('"$input.params().header.get(\'authorization\')"');
       });
@@ -72,7 +84,7 @@ describe('TemplateHelper', () => {
           destinationName: 'custom',
           source: 'body' as const,
           validation: {},
-          directTemplateValue: '$custom.value'
+          directTemplateValue: '$custom.value',
         };
 
         const result = templateHelper.generateTemplate({ field } as any);
@@ -86,10 +98,14 @@ describe('TemplateHelper', () => {
           name: 'name',
           destinationName: 'name',
           source: 'path' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'name', quoteType: "'" } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'name',
+          quoteType: "'",
+        } as any);
 
         expect(result).toBe("'$input.params().path.get('name')'");
       });
@@ -102,10 +118,13 @@ describe('TemplateHelper', () => {
           name: 'age',
           destinationName: 'age',
           source: 'body' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'age' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'age',
+        } as any);
 
         expect(result).toBe("$input.json('$.age')");
       });
@@ -116,10 +135,13 @@ describe('TemplateHelper', () => {
           name: 'active',
           destinationName: 'active',
           source: 'body' as const,
-          validation: {}
+          validation: {},
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'active' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'active',
+        } as any);
 
         expect(result).toBe("$input.json('$.active')");
       });
@@ -139,12 +161,15 @@ describe('TemplateHelper', () => {
               name: 'name',
               destinationName: 'name',
               source: 'body' as const,
-              validation: {}
-            }
-          ]
+              validation: {},
+            },
+          ],
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'user' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'user',
+        } as any);
 
         expect(result).toContain('{ #set($comma = "")');
         expect(result).toContain('"name": $input.json(\'$.user.name\')');
@@ -159,7 +184,7 @@ describe('TemplateHelper', () => {
           destinationName: 'empty',
           source: 'body' as const,
           validation: {},
-          properties: []
+          properties: [],
         };
 
         const result = templateHelper.generateTemplate({ field } as any);
@@ -181,13 +206,18 @@ describe('TemplateHelper', () => {
             name: 'tag',
             destinationName: 'tag',
             source: 'body' as const,
-            validation: {}
-          }
+            validation: {},
+          },
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'tags' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'tags',
+        } as any);
 
-        expect(result).toBe('[#foreach($item0 in $input.json(\'$.tags\')) $item0 #if($foreach.hasNext),#end #end]');
+        expect(result).toBe(
+          "[#foreach($item0 in $input.json('$.tags')) $item0 #if($foreach.hasNext),#end #end]"
+        );
       });
 
       it('should generate template for array of objects', () => {
@@ -209,15 +239,18 @@ describe('TemplateHelper', () => {
                 name: 'name',
                 destinationName: 'name',
                 source: 'body' as const,
-                validation: {}
-              }
-            ]
-          }
+                validation: {},
+              },
+            ],
+          },
         };
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'users' } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'users',
+        } as any);
 
-        expect(result).toContain('[#foreach($item0 in $input.json(\'$.users\'))');
+        expect(result).toContain("[#foreach($item0 in $input.json('$.users'))");
         expect(result).toContain('{ #set($comma = "")');
         expect(result).toContain('"name": $item0.name');
         expect(result).toContain('#if($foreach.hasNext),#end #end]');
@@ -231,12 +264,16 @@ describe('TemplateHelper', () => {
           name: 'test',
           destinationName: 'test',
           source: 'body' as const,
-          validation: {}
+          validation: {},
         };
 
         const valueParser = jest.fn((value: string) => `PARSED(${value})`);
 
-        const result = templateHelper.generateTemplate({ field, currentValue: 'test', valueParser } as any);
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'test',
+          valueParser,
+        } as any);
 
         expect(valueParser).toHaveBeenCalledWith("$input.json('$.test')", 'String');
         expect(result).toBe("PARSED($input.json('$.test'))");
@@ -251,7 +288,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: true }
+        validation: { required: true },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -270,7 +307,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -289,7 +326,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -299,7 +336,9 @@ describe('TemplateHelper', () => {
         true
       );
 
-      expect(result).toBe("#if($input.json('$.arg1') && $input.json('$.arg2') && $input.json('$.arg3')) TEMPLATE_CONTENT #end");
+      expect(result).toBe(
+        "#if($input.json('$.arg1') && $input.json('$.arg2') && $input.json('$.arg3')) TEMPLATE_CONTENT #end"
+      );
     });
 
     it('should add size check for array fields', () => {
@@ -308,7 +347,7 @@ describe('TemplateHelper', () => {
         name: 'items',
         destinationName: 'items',
         source: 'body' as const,
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -318,7 +357,9 @@ describe('TemplateHelper', () => {
         true
       );
 
-      expect(result).toBe("#if($input.json('$.items') && $input.json('$.items').size() > 0) TEMPLATE_CONTENT #end");
+      expect(result).toBe(
+        "#if($input.json('$.items') && $input.json('$.items').size() > 0) TEMPLATE_CONTENT #end"
+      );
     });
 
     it('should use simple key replacement when checkSource is false', () => {
@@ -327,7 +368,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -346,7 +387,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'path' as const,
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -364,7 +405,7 @@ describe('TemplateHelper', () => {
         type: 'String' as const,
         name: 'test',
         destinationName: 'test',
-        validation: { required: false }
+        validation: { required: false },
       };
 
       const result = templateHelper.validateTemplateArgument(

@@ -23,9 +23,6 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "style": {
-        "noParameterAssign": "off"
-      },
       "suspicious": {
         "noExplicitAny": "off",
         "noShadowRestrictedNames": "off",
@@ -63,6 +60,7 @@
     "enabled": true,
     "actions": {
       "source": {
+        "useSortedAttributes": "on",
         "organizeImports": "on"
       }
     }

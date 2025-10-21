@@ -1,4 +1,5 @@
 import { enableBuildEnvVariable, getResourceHandlerMetadata } from '../../utils';
+import { createFieldDecorator } from '../field';
 import { Callback, Context, createEventDecorator, createLambdaDecorator } from './lambda';
 import {
   LambdaArgumentTypes,
@@ -93,8 +94,12 @@ describe('Lambda Decorators', () => {
       getLambdaMetadata: (props) => props,
     });
     const Event = createEventDecorator();
+    const FieldData = createFieldDecorator({ getMetadata: () => ({}) });
 
-    class Field {}
+    class Field {
+      @FieldData()
+      foo: string;
+    }
 
     class Test {
       @Lambda()
