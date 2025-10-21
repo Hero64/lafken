@@ -57,7 +57,7 @@ describe('Authorizers', () => {
     it('should exist test handler', () => {
       const resource = getMetadataPrototypeByKey<LambdaMetadata>(
         Auth,
-        AuthorizerReflectKeys.HANDLER
+        AuthorizerReflectKeys.handler
       );
 
       expect(resource.name).toBe('test');

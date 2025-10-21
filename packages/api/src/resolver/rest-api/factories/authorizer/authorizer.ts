@@ -103,7 +103,7 @@ export class AuthorizerFactory {
   private async createCustomAuthorizer({ resource, metadata }: AuthorizerDataCustom) {
     const handler = getMetadataPrototypeByKey<LambdaMetadata>(
       resource,
-      AuthorizerReflectKeys.HANDLER
+      AuthorizerReflectKeys.handler
     );
 
     if (!handler) {

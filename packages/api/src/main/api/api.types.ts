@@ -323,8 +323,3 @@ export enum Method {
   HEAD = 'HEAD',
   ANY = 'ANY',
 }
-
-export enum ApiReflectKeys {
-  PAYLOAD = 'api:payload',
-  FIELD = 'api:field',
-}

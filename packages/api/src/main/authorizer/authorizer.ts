@@ -36,7 +36,7 @@ export const AuthorizerHandler =
   (target: any, methodName: string, descriptor: PropertyDescriptor) => {
     if (isBuildEnvironment()) {
       Reflect.defineMetadata(
-        AuthorizerReflectKeys.HANDLER,
+        AuthorizerReflectKeys.handler,
         {
           ...props,
           name: methodName,

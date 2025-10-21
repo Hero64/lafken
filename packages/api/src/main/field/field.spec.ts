@@ -1,87 +1,107 @@
-// import 'reflect-metadata';
-// import { enableBuildEnvVariable, getMetadataPrototypeByKey } from '@alicanto/common';
-// import { ApiReflectKeys } from '../api';
-// import { Payload } from '../event';
-// import { Field, Param } from './field';
-// import type { ParamMetadata } from './field.types';
+import 'reflect-metadata';
+import {
+  enableBuildEnvVariable,
+  FieldProperties,
+  getMetadataPrototypeByKey,
+} from '@alicanto/common';
+import { Payload } from '../event';
+import { Field, Param } from './field';
+import type { ApiArrayParam, ApiParamMetadata } from './field.types';
 
-// describe('Field', () => {
-//   enableBuildEnvVariable();
+describe('Field', () => {
+  enableBuildEnvVariable();
 
-//   describe('Param decorator', () => {
-//     @Payload()
-//     class ObjectField {
-//       @Field()
-//       foo: number;
-//     }
+  describe('Param decorator', () => {
+    @Payload()
+    class ObjectField {
+      @Field()
+      foo: number;
+    }
 
-//     class Test {
-//       @Param({})
-//       foo: string;
+    class Test {
+      @Param({})
+      foo: string;
 
-//       @Param({
-//         name: 'bar_changed',
-//       })
-//       bar: string;
+      @Param({
+        name: 'bar_changed',
+      })
+      bar: string;
 
-//       @Param({
-//         source: 'body',
-//         type: [ObjectField],
-//       })
-//       data: ObjectField[];
-//     }
-//     const fields = getMetadataPrototypeByKey<ParamMetadata[]>(Test, ApiReflectKeys.FIELD);
+      @Param({
+        source: 'body',
+        type: [ObjectField],
+      })
+      data: ObjectField[];
+    }
+    const fields = getMetadataPrototypeByKey<ApiParamMetadata[]>(
+      Test,
+      FieldProperties.field
+    );
 
-//     it('should exist param metadata', () => {
-//       expect(fields).toHaveLength(3);
-//     });
+    it('should exist param metadata', () => {
+      expect(fields).toBeDefined();
+    });
 
-//     it('should have default metadata', () => {
-//       const foo = fields[0];
+    it('should have default metadata', () => {
+      const foo = fields[0];
 
-//       expect(foo.required).toBeTruthy();
-//       expect(foo.source).toBe('query');
-//     });
+      expect(foo.validation.required).toBeTruthy();
+      expect(foo.source).toBe('query');
+    });
 
-//     it('should accept other payload as data', () => {
-//       const data = fields[2];
+    it('should accept other payload as data', () => {
+      const data = fields[2] as ApiArrayParam;
 
-//       expect(data.fieldType).toBe('Array');
-//       expect(data.subFieldType).toBe('Object');
-//       expect(data.params).toBeDefined();
-//     });
-//   });
+      expect(data.type).toBe('Array');
+      expect(data.items).toMatchObject({
+        destinationName: 'Object',
+        name: 'Object',
+        payload: { id: 'ObjectField', name: 'ObjectField' },
+        properties: [
+          {
+            destinationName: 'foo',
+            name: 'foo',
+            type: 'Number',
+            validation: { required: true },
+          },
+        ],
+        type: 'Object',
+      });
+      expect(data.items.type).toBe('Object');
+    });
+  });
 
-//   describe('Field decorator', () => {
-//     it('should exist param metadata', () => {
-//       class Test {
-//         @Field({})
-//         foo: string;
-//       }
-//       const fields = getMetadataPrototypeByKey<ParamMetadata[]>(
-//         Test,
-//         ApiReflectKeys.FIELD
-//       );
-//       expect(fields).toHaveLength(1);
-//     });
+  describe('Field decorator', () => {
+    it('should exist param metadata', () => {
+      class Test {
+        @Field({})
+        foo: string;
+      }
+      const field = getMetadataPrototypeByKey<ApiParamMetadata[]>(
+        Test,
+        FieldProperties.field
+      );
 
-//     it('should include data in extend class', () => {
-//       class Base {
-//         @Field()
-//         bar: number;
-//       }
+      expect(field).toHaveLength(1);
+    });
 
-//       class Test extends Base {
-//         @Field({})
-//         foo: string;
-//       }
+    it('should include data in extend class', () => {
+      class Base {
+        @Field()
+        bar: number;
+      }
 
-//       const fields = getMetadataPrototypeByKey<ParamMetadata[]>(
-//         Test,
-//         ApiReflectKeys.FIELD
-//       );
+      class Test extends Base {
+        @Field({})
+        foo: string;
+      }
 
-//       expect(fields).toHaveLength(2);
-//     });
-//   });
-// });
+      const field = getMetadataPrototypeByKey<ApiParamMetadata[]>(
+        Test,
+        FieldProperties.field
+      );
+
+      expect(field).toHaveLength(2);
+    });
+  });
+});

@@ -9,7 +9,7 @@ import type { APIGatewayRequestAuthorizerEvent } from 'aws-lambda';
 import type { Method } from '../api';
 
 export enum AuthorizerReflectKeys {
-  HANDLER = 'authorizer::handler',
+  handler = 'authorizer::handler',
 }
 
 export enum ApiAuthorizerType {

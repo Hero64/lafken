@@ -1,97 +1,100 @@
-// import 'reflect-metadata';
-// import {
-//   enableBuildEnvVariable,
-//   LambdaReflectKeys,
-//   ResourceReflectKeys,
-// } from '@alicanto/common';
+import 'reflect-metadata';
+import {
+  enableBuildEnvVariable,
+  LambdaReflectKeys,
+  ResourceReflectKeys,
+} from '@alicanto/common';
 
-// import { Event } from '../event/event';
-// import { Param } from '../field/field';
-// import { Api, Get, Post } from './api';
-// import type { ApiLambdaMetadata, ApiResourceMetadata } from './api.types';
+import { Event } from '../event/event';
+import { Param } from '../field/field';
+import { Api, Get, Post } from './api';
+import type { ApiLambdaMetadata, ApiResourceMetadata } from './api.types';
 
-// enableBuildEnvVariable();
+describe('API', () => {
+  enableBuildEnvVariable();
 
-// class ExampleArgument {
-//   @Param({
-//     required: true,
-//     source: 'path',
-//   })
-//   propertyOne: string;
-// }
+  class ExampleArgument {
+    @Param({
+      validation: {
+        required: true,
+      },
+      source: 'path',
+    })
+    propertyOne: string;
+  }
 
-// @Api()
-// class ExampleApi {
-//   @Get()
-//   getLambda() {}
+  @Api()
+  class ExampleApi {
+    @Get()
+    getLambda() {}
 
-//   @Post()
-//   postLambda() {}
+    @Post()
+    postLambda() {}
 
-//   @Get()
-//   getLambdaWithEvent(@Event(ExampleArgument) _e: ExampleArgument) {}
-// }
+    @Get()
+    getLambdaWithEvent(@Event(ExampleArgument) _e: ExampleArgument) {}
+  }
+  describe('API Decorator', () => {
+    let resource: ApiResourceMetadata;
 
-// describe('API Decorator', () => {
-//   let resource: ApiResourceMetadata;
+    beforeAll(() => {
+      resource = Reflect.getMetadata(ResourceReflectKeys.resource, ExampleApi);
+    });
 
-//   beforeAll(() => {
-//     resource = Reflect.getMetadata(ResourceReflectKeys.RESOURCE, ExampleApi);
-//   });
+    it('should exist api resource', () => {
+      expect(resource).toBeDefined();
+    });
 
-//   it('Should exist api resource', () => {
-//     expect(resource).toBeDefined();
-//   });
+    it('should get resource params', () => {
+      expect(resource.name).toBe(ExampleApi.name);
+    });
+  });
 
-//   it('Should get resource params', () => {
-//     expect(resource.name).toBe(ExampleApi.name);
-//   });
-// });
+  describe('METHOD decorator', () => {
+    let handlers: ApiLambdaMetadata[];
 
-// describe('METHOD decorator', () => {
-//   let handlers: ApiLambdaMetadata[];
+    beforeAll(() => {
+      handlers = Reflect.getMetadata(LambdaReflectKeys.handlers, ExampleApi.prototype);
+    });
 
-//   beforeAll(() => {
-//     handlers = Reflect.getMetadata(LambdaReflectKeys.handlers, ExampleApi.prototype);
-//   });
+    it('should exist api handlers', () => {
+      expect(handlers).toBeDefined();
+    });
 
-//   it('Should exist api handlers', () => {
-//     expect(handlers).toBeDefined();
-//   });
+    it('should get handler for GET method', () => {
+      const getHandler = handlers[0];
 
-//   it('Should get handler for GET method', () => {
-//     const getHandler = handlers[0];
+      expect(getHandler).toBeDefined();
+      expect(getHandler.name).toBe('getLambda');
+    });
 
-//     expect(getHandler).toBeDefined();
-//     expect(getHandler.name).toBe('getLambda');
-//   });
+    it('should get handler for Post method', () => {
+      const getHandler = handlers[1];
 
-//   it('Should get handler for Post method', () => {
-//     const getHandler = handlers[1];
+      expect(getHandler).toBeDefined();
+      expect(getHandler.name).toBe('postLambda');
+    });
+  });
 
-//     expect(getHandler).toBeDefined();
-//     expect(getHandler.name).toBe('postLambda');
-//   });
-// });
+  describe('EVENT decorator', () => {
+    it('should exits event parameter', () => {
+      const handlerProperties = Reflect.getMetadata(
+        LambdaReflectKeys.arguments,
+        ExampleApi.prototype
+      );
 
-// describe('EVENT decorator', () => {
-//   it('Should exits event parameter', () => {
-//     const handlerProperties = Reflect.getMetadata(
-//       LambdaReflectKeys.arguments,
-//       ExampleApi.prototype
-//     );
+      expect(handlerProperties).toBeDefined();
+      expect(handlerProperties.getLambdaWithEvent).toBeDefined();
+    });
 
-//     expect(handlerProperties).toBeDefined();
-//     expect(handlerProperties.getLambdaWithEvent).toBeDefined();
-//   });
+    it('should get argument class', () => {
+      const argumentClass = Reflect.getMetadata(
+        LambdaReflectKeys.arguments,
+        ExampleApi.prototype
+      );
 
-//   it('Should get argument class', () => {
-//     const argumentClass = Reflect.getMetadata(
-//       LambdaReflectKeys.arguments,
-//       ExampleApi.prototype
-//     );
-
-//     expect(argumentClass).toBeDefined();
-//     expect(argumentClass.getLambdaWithEvent).toBeDefined();
-//   });
-// });
+      expect(argumentClass).toBeDefined();
+      expect(argumentClass.getLambdaWithEvent).toBeDefined();
+    });
+  });
+});
