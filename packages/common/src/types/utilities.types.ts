@@ -53,3 +53,5 @@ export type OnlyOneKey<T> = {
     [P in Exclude<keyof T, K>]?: never;
   };
 }[keyof T];
+
+export type StripReadonly<T> = { -readonly [P in keyof T]: StripReadonly<T[P]> };

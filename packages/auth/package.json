@@ -1,0 +1,43 @@
+{
+  "name": "@alicanto/auth",
+  "version": "0.0.1",
+  "private": false,
+  "license": "MIT",
+  "exports": {
+    "./main": {
+      "import": "./lib/main/index.js",
+      "require": "./lib/main/index.js",
+      "types": "./lib/main/index.d.ts"
+    },
+    "./resolver": {
+      "import": "./lib/resolver/index.js",
+      "require": "./lib/resolver/index.js",
+      "types": "./lib/resolver/index.d.ts"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "pnpm clean && tsc -p ./tsconfig.build.json",
+    "clean": "rm -rf ./lib",
+    "dev": "tsc -w",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@alicanto/common": "workspace:*",
+    "@alicanto/resolver": "workspace:*",
+    "@aws-sdk/client-s3": "3.913.0",
+    "@cdktf/provider-aws": "21.14.0",
+    "aws-xray-sdk": "3.11.0",
+    "cdktf": "0.21.0",
+    "constructs": "10.4.2",
+    "reflect-metadata": "0.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "30.0.0",
+    "jest": "30.2.0",
+    "ts-jest": "29.4.5"
+  }
+}
