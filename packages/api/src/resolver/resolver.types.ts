@@ -184,10 +184,6 @@ export interface RestApiProps {
    */
   minCompressionSize?: number;
   /**
-   * TODO: cambiar estó
-   */
-  parameters?: Record<string, string>;
-  /**
    * Defines the stage configuration for the API Gateway REST API.
    * The stage represents a deployment environment for the API, such as `dev`, `staging`, or `prod`.
    *

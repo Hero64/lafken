@@ -34,6 +34,16 @@ export interface AuthOptions<T extends ClassResource> {
    * - Token expiration times
    */
   userClient?: UserClient<T>;
+  /**
+   * Defines the list of extensions (triggers) to attach to the Cognito User Pool.
+   *
+   * This property allows you to add custom logic to different actions performed
+   * by the User Pool, such as `preSignUp`, `postConfirmation`, `preAuthentication`, etc.
+   *
+   * Each extension should be a class decorated with `@AuthExtension`, and its methods
+   * must be decorated with `@Trigger`. The `type` of each trigger must be unique
+   * to prevent conflicts.
+   */
   extensions?: ClassResource[];
   /**
    * Allows extending the Cognito User Pool with custom configurations or resources.

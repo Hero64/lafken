@@ -403,7 +403,9 @@ export interface MapDistributed<T> extends MapStateBase<T> {
    */
   resultWriter?: MapWriteResult;
   /**
-   * TODO: agregar descripcion
+   * Max Items Per Batch
+   *
+   * Defines the maximum number of items to be processed per batch in a Map state execution.
    */
   maxItemsPerBatch?: number;
 }

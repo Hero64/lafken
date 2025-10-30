@@ -172,7 +172,7 @@ describe('Api Method', () => {
         'application/json': 'Action=SendMessage',
       },
       type: 'AWS',
-      uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-rest-api.region}:sqs:path/queue', // TODO: no usar el encode acá
+      uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-rest-api.region}:sqs:path/queue',
     });
   });
 

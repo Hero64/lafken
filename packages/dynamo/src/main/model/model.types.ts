@@ -160,7 +160,19 @@ export interface DynamoModelProps<T extends Function> {
    *   the name of the decorated class.
    */
   stream?: DynamoStream<T['prototype']>;
-  // TODO: completar esto
+  /**
+   * Defines the name of the attribute used as the TTL (Time to Live) field in DynamoDB.
+   *
+   * When specified, this attribute determines when an item will automatically expire and be deleted
+   * by DynamoDB. The value of this field should be a Unix timestamp (in seconds) representing
+   * the expiration time.
+   *
+   * @example
+   * ```ts
+   * ttl: 'expiresAt'
+   * // Items with an 'expiresAt' attribute set to a future Unix timestamp will be removed after that time.
+   * ```
+   */
   ttl?: keyof OnlyNumber<T['prototype']>;
 }
 

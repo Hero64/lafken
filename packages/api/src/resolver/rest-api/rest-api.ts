@@ -96,7 +96,6 @@ export class RestApi extends Construct {
         ? this.props.apiKeySource.toUpperCase()
         : undefined,
       disableExecuteApiEndpoint: this.props.disableExecuteApiEndpoint,
-      parameters: this.props.parameters,
       minimumCompressionSize: this.props.minCompressionSize
         ? this.props.minCompressionSize.toString()
         : undefined,

@@ -123,13 +123,10 @@ export class AuthorizerFactory {
     );
 
     const lambda = await lambdaHandler.generate();
-    /**
-     * This is token type
-     */
+
     const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
       restApiId: this.scope.api.id,
-      authorizerCredentials: undefined, // TODO: ver si necesito cambiar esto,
       authorizerUri: lambda.arn,
       identitySource: metadata.header
         ? `method.request.header.${metadata.header}`

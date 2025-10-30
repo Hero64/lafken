@@ -29,6 +29,7 @@ export class Bucket extends Construct {
       bucket: name,
       bucketPrefix: prefix,
       forceDestroy: forceDestroy ?? props.forceDestroy,
+      tags: props.tags,
     });
 
     bucket.isGlobal();

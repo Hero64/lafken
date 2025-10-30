@@ -36,7 +36,12 @@ export interface Expiration {
 }
 
 export interface KeyLifeCycleRule {
-  // TODO: completar
+  /**
+   * Defines the expiration configuration for objects stored in the S3 bucket.
+   *
+   * This property specifies when the objects that match the lifecycle rule
+   * should be automatically deleted by Amazon S3.
+   */
   expiration?: OnlyOne<Expiration>;
   /**
    * Optional conditions to apply the lifecycle rule only to objects
@@ -56,10 +61,6 @@ export interface KeyLifeCycleRule {
      * The rule will only apply to objects smaller than this value.
      */
     objectSizeLessThan?: number;
-    /**
-     * TODO: ver la posibilidad de agregar tags
-     */
-    tags: Record<string, string>;
   };
   /**
    * Transition rules that define how and when objects are moved
@@ -94,7 +95,18 @@ export interface BucketProps {
    */
   eventBridgeEnabled?: boolean;
   /**
-   * TODO: completar
+   * Defines the Access Control List (ACL) configuration for the S3 bucket.
+   *
+   * This property determines the default access level applied to all objects
+   * within the bucket unless overridden at the object level.
+   *
+   * - `'private'`: Grants access only to the bucket owner. This is the most secure option
+   *   and the default behavior in most cases.
+   * - `'public-read'`: Allows anyone on the internet to read objects in the bucket,
+   *   but only the bucket owner can write or modify them.
+   * - `'public-read-write'`: Grants both read and write access to everyone.
+   *   This setting is **not recommended** for production use, as it exposes your bucket
+   *   to public writes and potential misuse.
    */
   acl?: 'private' | 'public-read' | 'public-read-write';
   /**
@@ -128,9 +140,20 @@ export interface BucketProps {
    */
   forceDestroy?: boolean;
   /**
-   * Name prefix
+   * Defines a prefix for the S3 bucket name.
+   *
+   * This property allows you to prepend a custom prefix to the bucket name,
+   * ensuring uniqueness across environments or projects.
+   * It is especially useful when multiple stacks or applications may create
+   * buckets with similar names.
    */
   prefix?: string;
+  /**
+   * tags.
+   *
+   * Specifies a set of tags that will be applied to s3 bucket.
+   */
+  tags?: Record<string, string>;
 }
 
 export interface BucketMetadataProps extends Omit<BucketProps, 'name'> {
