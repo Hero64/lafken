@@ -47,7 +47,10 @@ export class Environment extends Construct {
 
     if (typeof this.envs === 'function') {
       const resolveResources = new ResolveResources();
-      values = this.envs(resolveResources);
+      values = this.envs({
+        getResourceValue: (value, type) =>
+          resolveResources.getResourceValue(`${value}::${type}`),
+      });
       if (resolveResources.hasUnresolved()) {
         return false;
       }

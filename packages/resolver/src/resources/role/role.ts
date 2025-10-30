@@ -1,6 +1,7 @@
 import type { ServicesName, ServicesValues } from '@alicanto/common';
 import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
+import { Fn } from 'cdktf';
 import type { Construct } from 'constructs';
 import type { RoleProps } from './role.types';
 
@@ -115,7 +116,7 @@ export class Role extends IamRole {
   ) {
     super(scope, id, {
       name: props.name,
-      assumeRolePolicy: JSON.stringify({
+      assumeRolePolicy: Fn.jsonencode({
         Version: '2012-10-17',
         Statement: [
           {
@@ -134,9 +135,9 @@ export class Role extends IamRole {
   private createPolicy() {
     const policyName = `${this.props.name}-policy`;
     new IamRolePolicy(this, policyName, {
-      name: `${this.name}-policy`,
-      role: this.name,
-      policy: JSON.stringify(this.createPolicyStatement(this.props.services)),
+      name: policyName,
+      role: this.id,
+      policy: Fn.jsonencode(this.createPolicyStatement(this.props.services)),
     });
   }
 
