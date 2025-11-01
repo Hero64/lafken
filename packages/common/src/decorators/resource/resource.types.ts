@@ -10,6 +10,14 @@ export interface ResourceProps {
    * the resource within the application, stack, or deployment.
    */
   name?: string;
+  /**
+   * Resource minify
+   *
+   * Specifies whether the code should be minified when the resource is processed
+   *
+   * @default true
+   */
+  minify?: boolean;
 }
 
 export interface ResourceMetadata extends Required<ResourceProps> {

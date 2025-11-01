@@ -13,6 +13,7 @@ import {
 
 @Api({
   path: 'greeting/{id}',
+  minify: false,
 })
 export class GreetingApi {
   @Get({
@@ -20,7 +21,6 @@ export class GreetingApi {
     response: [HelloResponse],
     lambda: {
       memory: 100,
-      minify: false,
       tags: {
         aa: 'bbb',
       },

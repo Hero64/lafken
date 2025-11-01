@@ -21,6 +21,7 @@ export class Cron extends Construct {
       ...handler,
       filename: resourceMetadata.filename,
       pathName: resourceMetadata.foldername,
+      minify: resourceMetadata.minify,
       suffix: 'event',
       principal: 'events.amazonaws.com',
     });

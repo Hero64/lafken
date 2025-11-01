@@ -42,7 +42,6 @@ describe('Lambda Assets', () => {
     const { stack } = setupTestingStack();
     await lambdaAssets.buildHandler(stack, {
       filename: 'handler',
-      name: 'handler',
       pathName: '/tmp/',
     });
 

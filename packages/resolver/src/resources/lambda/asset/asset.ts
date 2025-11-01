@@ -5,8 +5,7 @@ import type { Construct } from 'constructs';
 import { build } from 'esbuild';
 import { createSha1 } from '../../../utils';
 import { AlicantoBuildPlugin } from '../build-plugin/build-plugin';
-import type { LambdaHandlerProps } from '../lambda.types';
-import type { AssetMetadata, AssetProps } from './asset.types';
+import type { AssetMetadata, AssetProps, BuildHandlerProps } from './asset.types';
 
 class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
@@ -18,7 +17,7 @@ class LambdaAssets {
     };
   }
 
-  public async buildHandler(scope: Construct, props: LambdaHandlerProps) {
+  public async buildHandler(scope: Construct, props: BuildHandlerProps) {
     const prebuildPath = this.getPrebuildPath(props.pathName, props.filename);
 
     const lambdaAsset = this.lambdaAssets[prebuildPath];
@@ -33,8 +32,8 @@ class LambdaAssets {
       entryPoints: [prebuildPath],
       outfile: outputPath,
       legalComments: 'none',
-      minify: props.lambda?.minify ?? true,
       bundle: true,
+      minify: props.minify,
       platform: 'node',
       external: ['@aws-sdk', 'aws-lambda'],
       plugins: [

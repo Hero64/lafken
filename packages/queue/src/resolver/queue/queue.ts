@@ -34,6 +34,7 @@ export class Queue extends Construct {
       ...handler,
       filename: resourceMetadata.filename,
       pathName: resourceMetadata.foldername,
+      minify: resourceMetadata.minify,
       suffix: 'queue',
     });
 

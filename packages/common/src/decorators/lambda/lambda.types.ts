@@ -3,14 +3,6 @@ import type { ServicesValues } from '../../types/services.types';
 
 export interface LambdaProps {
   /**
-   * Lambda minify code.
-   *
-   * Specifies whether the code should be minified when the lambda is processed
-   *
-   * @default true
-   */
-  minify?: boolean; // TODO: remover esto
-  /**
    * Lambda execution timeout.
    *
    * Specifies the maximum amount of time (in seconds) that the Lambda

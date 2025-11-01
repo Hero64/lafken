@@ -29,6 +29,7 @@ export class LambdaIntegration extends Construct implements Integration {
         ...handler,
         filename: resourceMetadata.filename,
         pathName: resourceMetadata.foldername,
+        minify: resourceMetadata.minify,
         principal: 'apigateway.amazonaws.com',
         suffix: 'api',
       }

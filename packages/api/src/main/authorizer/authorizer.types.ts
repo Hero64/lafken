@@ -188,4 +188,4 @@ export interface CustomAuthorizerMetadata
 
 export interface CognitoAuthorizerMetadata
   extends ResourceMetadata,
-    Omit<CognitoAuthorizerProps, 'name'> {}
+    Omit<CognitoAuthorizerProps, 'name' | 'minify'> {}

@@ -83,6 +83,7 @@ describe('Queue', () => {
         name: 'queue',
         originalName: 'queue',
         type: 'QUEUE',
+        minify: true,
       },
       classResource: TestQueue,
     });
@@ -127,6 +128,7 @@ describe('Queue', () => {
         name: 'queue',
         originalName: 'queue',
         type: 'QUEUE',
+        minify: true,
       },
       classResource: TestQueue,
     });
@@ -172,6 +174,7 @@ describe('Queue', () => {
           name: 'queue',
           originalName: 'queue',
           type: 'QUEUE',
+          minify: true,
         },
         classResource: TestQueue,
       });
@@ -192,6 +195,7 @@ describe('Queue', () => {
           name: 'queue',
           originalName: 'queue',
           type: 'QUEUE',
+          minify: true,
         },
         classResource: TestQueue,
       });

@@ -266,6 +266,7 @@ export class Schema {
       ...handler,
       filename: this.resourceMetadata.filename,
       pathName: this.resourceMetadata.foldername,
+      minify: this.resourceMetadata.minify,
       suffix: 'states',
     });
 

@@ -117,6 +117,7 @@ export class AuthorizerFactory {
         ...handler,
         filename: metadata.filename,
         pathName: metadata.foldername,
+        minify: metadata.minify,
         suffix: 'auth',
         principal: 'apigateway.amazonaws.com',
       }

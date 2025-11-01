@@ -28,6 +28,7 @@ export const createResourceDecorator =
         foldername: dirname(callerFile),
         filename: basename(callerFile).replace('.js', ''),
         originalName: constructor.name,
+        minify: props?.minify ?? true,
       },
       constructor
     );
