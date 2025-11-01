@@ -18,7 +18,7 @@
     "@alicanto/common": "workspace:*",
     "@alicanto/main": "workspace:*",
     "cdktf": "0.21.0",
-    "dayjs": "1.11.18"
+    "dayjs": "1.11.19"
   },
   "devDependencies": {
     "cdktf-cli": "0.21.0"
