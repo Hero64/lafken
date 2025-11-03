@@ -30,7 +30,7 @@ class LambdaAssets {
 
     await build({
       entryPoints: [prebuildPath],
-      outfile: outputPath,
+      outfile: join(outputPath, 'index.js'),
       legalComments: 'none',
       bundle: true,
       minify: props.minify,
@@ -47,7 +47,7 @@ class LambdaAssets {
 
     const asset = new TerraformAsset(scope, `${props.filename}-asset`, {
       path: outputPath,
-      type: AssetType.FILE,
+      type: AssetType.ARCHIVE,
     });
 
     this.lambdaAssets[prebuildPath].asset = asset;
@@ -60,7 +60,7 @@ class LambdaAssets {
   }
 
   private createOutputPath(path: string) {
-    return join(cwd(), '.out', createSha1(path), 'index.js');
+    return join(cwd(), '.out', createSha1(path));
   }
 }
 
