@@ -6,11 +6,10 @@
   "main": "index.js",
   "scripts": {
     "build-app": "tsc",
-    "clean": "rm -rf cdk.out dist",
-    "deploy": "build-app  && cdk deploy",
-    "destroy": "build-app && cdk destroy",
-    "preview": "build-app && cdk deploy --no-execute-changeset",
-    "synth": "pnpm build-app && cdktf synth"
+    "cdktf:deploy": "pnpm build-app  && cdktf deploy",
+    "cdktf:destroy": "pnpm build-app && cdktf destroy",
+    "cdktf:synth": "pnpm build-app && cdktf synth",
+    "clean": "rm -rf cdktf.out dist .out"
   },
   "dependencies": {
     "@alicanto/api": "workspace:*",

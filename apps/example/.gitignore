@@ -1,3 +1,4 @@
 .out
 cdktf.out
 dist
+terraform.*

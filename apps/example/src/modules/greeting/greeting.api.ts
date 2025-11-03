@@ -20,7 +20,7 @@ export class GreetingApi {
     path: '/hello',
     response: [HelloResponse],
     lambda: {
-      memory: 100,
+      memory: 128,
       tags: {
         aa: 'bbb',
       },
