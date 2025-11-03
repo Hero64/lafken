@@ -4,7 +4,12 @@ import { Aspects } from 'cdktf';
 import { Construct } from 'constructs';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';
-import type { CreateModuleProps, ModuleProps, ModuleResolverType } from './module.types';
+import type {
+  CreateModuleProps,
+  ModuleConstruct,
+  ModuleProps,
+  ModuleResolverType,
+} from './module.types';
 
 export class StackModule extends Construct {
   constructor(
@@ -39,7 +44,7 @@ export class StackModule extends Construct {
   }
 
   private createRole() {
-    if (this.props.globalConfig?.lambda?.services) {
+    if (!this.props.globalConfig?.lambda?.services?.length) {
       return;
     }
 
@@ -67,7 +72,7 @@ export class StackModule extends Construct {
 
 export const createModule =
   (props: CreateModuleProps) =>
-  async (scope: Construct, resolvers: Record<string, ModuleResolverType>) => {
+  async (scope: ModuleConstruct, resolvers: Record<string, ModuleResolverType>) => {
     const module = new StackModule(scope, props.name, {
       ...props,
       resolvers,

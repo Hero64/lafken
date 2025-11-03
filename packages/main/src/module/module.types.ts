@@ -1,5 +1,6 @@
 import type { ClassResource, ResourceMetadata } from '@alicanto/common';
 import type { ResolverType } from '@alicanto/resolver';
+import type { Construct } from 'constructs';
 import type { GlobalConfig } from '../app/app.types';
 import type { StackModule } from './module';
 
@@ -40,3 +41,4 @@ export interface ModuleResource {
 }
 
 export interface ModuleResolverType extends ResolverType {}
+export interface ModuleConstruct extends Construct {}
