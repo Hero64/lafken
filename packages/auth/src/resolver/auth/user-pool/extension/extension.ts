@@ -13,7 +13,7 @@ export class Extension extends Construct {
     super(scope, id);
   }
 
-  public async createTriggers(): Promise<CognitoUserPoolLambdaConfig> {
+  public createTriggers(): CognitoUserPoolLambdaConfig {
     const triggers: StripReadonly<CognitoUserPoolLambdaConfig> = {};
 
     const { handlers, resourceMetadata } = this.props;
@@ -31,29 +31,27 @@ export class Extension extends Construct {
         }
       );
 
-      const lambda = await lambdaHandler.generate();
-
       switch (handler.type) {
         case 'customEmailSender':
           triggers.customEmailSender = {
-            lambdaArn: lambda.arn,
+            lambdaArn: lambdaHandler.arn,
             lambdaVersion: 'V1_0',
           };
           break;
         case 'customSmsSender':
           triggers.customSmsSender = {
-            lambdaArn: lambda.arn,
+            lambdaArn: lambdaHandler.arn,
             lambdaVersion: 'V1_0',
           };
           break;
         case 'preTokenGenerationConfig':
           triggers.preTokenGenerationConfig = {
-            lambdaArn: lambda.arn,
+            lambdaArn: lambdaHandler.arn,
             lambdaVersion: 'V1_0',
           };
           break;
         default:
-          triggers[handler.type] = lambda.arn;
+          triggers[handler.type] = lambdaHandler.arn;
       }
     }
 

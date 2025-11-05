@@ -5,7 +5,7 @@ import {
   getResourceMetadata,
   type ResourceMetadata,
 } from '@alicanto/common';
-import { LambdaHandler, setupTestingStack } from '@alicanto/resolver';
+import { LambdaHandler, setupTestingStackWithModule } from '@alicanto/resolver';
 import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
 import { Testing } from 'cdktf';
@@ -18,9 +18,7 @@ jest.mock('@alicanto/resolver', () => {
   return {
     ...actual,
     LambdaHandler: jest.fn().mockImplementation(() => ({
-      generate: jest.fn().mockReturnValue({
-        arn: 'test-function',
-      }),
+      arn: 'test-function',
     })),
   };
 });
@@ -43,14 +41,12 @@ describe('Cron', () => {
   const handlers = getResourceHandlerMetadata<EventCronMetadata>(TestEvent);
 
   it('should create a eventbridge schedule', async () => {
-    const { stack } = setupTestingStack();
+    const { stack, module } = setupTestingStackWithModule();
 
-    const rule = new CronResolver(stack, 'cron', {
+    new CronResolver(module, 'cron', {
       handler: handlers[0],
       resourceMetadata: metadata,
     });
-
-    await rule.create();
 
     const synthesized = Testing.synth(stack);
 
@@ -67,13 +63,13 @@ describe('Cron', () => {
     );
 
     expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
-      name: 'cron-cron',
+      name: 'cron',
       schedule_expression: 'cron(* 11 10 * * *)',
     });
 
     expect(synthesized).toHaveResourceWithProperties(CloudwatchEventTarget, {
       arn: 'test-function',
-      rule: '${aws_cloudwatch_event_rule.cron-rule_1529F825.name}',
+      rule: '${aws_cloudwatch_event_rule.testing_cron-cron_3E870998.name}',
     });
   });
 });

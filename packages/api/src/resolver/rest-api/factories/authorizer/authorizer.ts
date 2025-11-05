@@ -10,6 +10,7 @@ import type { ApiGatewayMethodConfig } from '@cdktf/provider-aws/lib/api-gateway
 import { ApiGatewayUsagePlan } from '@cdktf/provider-aws/lib/api-gateway-usage-plan';
 import { ApiGatewayUsagePlanKey } from '@cdktf/provider-aws/lib/api-gateway-usage-plan-key';
 import type { CognitoUserPool } from '@cdktf/provider-aws/lib/cognito-user-pool';
+import type { TerraformResource } from 'cdktf';
 import {
   ApiAuthorizerType,
   AuthorizerReflectKeys,
@@ -26,6 +27,7 @@ import type {
 export class AuthorizerFactory {
   private authorizerIds: Record<string, string> = {};
   private authorizerMetadata: Record<string, AuthorizerData> = {};
+  private authResources: TerraformResource[] = [];
 
   constructor(
     private scope: RestApi,
@@ -41,7 +43,7 @@ export class AuthorizerFactory {
     }
   }
 
-  public async getAuthorizerProps(authorizer?: MethodAuthorizer | false) {
+  public getAuthorizerProps(authorizer?: MethodAuthorizer | false) {
     if (!authorizer) {
       return {
         authorization: 'NONE',
@@ -58,14 +60,14 @@ export class AuthorizerFactory {
     switch (authorizerMetadata.type) {
       case ApiAuthorizerType.custom: {
         if (!this.authorizerIds[id]) {
-          await this.createCustomAuthorizer(authorizerMetadata);
+          this.createCustomAuthorizer(authorizerMetadata);
         }
 
         return this.getMethodAuthorizerProps(ApiAuthorizerType.custom, authorizer);
       }
       case ApiAuthorizerType.cognito: {
         if (!this.authorizerIds[id]) {
-          await this.createCognitoAuthorizer(authorizerMetadata);
+          this.createCognitoAuthorizer(authorizerMetadata);
         }
 
         return this.getMethodAuthorizerProps(ApiAuthorizerType.cognito, authorizer);
@@ -73,7 +75,7 @@ export class AuthorizerFactory {
 
       case ApiAuthorizerType.apiKey: {
         if (!this.authorizerIds[id]) {
-          await this.createApiKeyAuthorizer(authorizerMetadata);
+          this.createApiKeyAuthorizer(authorizerMetadata);
         }
 
         return {
@@ -85,6 +87,10 @@ export class AuthorizerFactory {
         throw new Error('authorizer type  not defined');
       }
     }
+  }
+
+  get resources() {
+    return this.authResources;
   }
 
   private getMethodAuthorizerProps(
@@ -101,7 +107,7 @@ export class AuthorizerFactory {
     };
   }
 
-  private async createCustomAuthorizer({ resource, metadata }: AuthorizerDataCustom) {
+  private createCustomAuthorizer({ resource, metadata }: AuthorizerDataCustom) {
     const handler = getMetadataPrototypeByKey<LambdaMetadata>(
       resource,
       AuthorizerReflectKeys.handler
@@ -124,18 +130,15 @@ export class AuthorizerFactory {
       }
     );
 
-    const lambda = await lambdaHandler.generate();
-
     const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
-      restApiId: this.scope.api.id,
-      authorizerUri: lambda.arn,
+      restApiId: this.scope.id,
+      authorizerUri: lambdaHandler.arn,
       identitySource: metadata.header
         ? `method.request.header.${metadata.header}`
         : undefined,
     });
-
-    this.scope.addDependency(authorizer);
+    this.authResources.push(authorizer);
     this.authorizerIds[metadata.name] = authorizer.id;
   }
 
@@ -150,7 +153,7 @@ export class AuthorizerFactory {
 
     const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
-      restApiId: this.scope.api.id,
+      restApiId: this.scope.id,
       type: 'COGNITO_USER_POOLS',
       providerArns: [userPool.arn],
       identitySource: metadata.header
@@ -158,7 +161,7 @@ export class AuthorizerFactory {
         : undefined,
     });
 
-    this.scope.addDependency(authorizer);
+    this.authResources.push(authorizer);
 
     this.authorizerIds[metadata.name] = authorizer.id;
   }
@@ -168,7 +171,7 @@ export class AuthorizerFactory {
       name: metadata.name,
       apiStages: [
         {
-          apiId: this.scope.api.id,
+          apiId: this.scope.id,
           stage: this.scope.stageName,
         },
       ],
@@ -181,8 +184,7 @@ export class AuthorizerFactory {
         : undefined,
       throttleSettings: metadata.throttle,
     });
-
-    this.scope.addDependency(usagePlan);
+    this.authResources.push(usagePlan);
 
     if (metadata.defaultKeys) {
       for (const key of metadata.defaultKeys) {
@@ -191,8 +193,7 @@ export class AuthorizerFactory {
           keyType: 'API_KEY',
           usagePlanId: usagePlan.id,
         });
-
-        this.scope.addDependency(apiKey);
+        this.authResources.push(apiKey);
       }
     }
 

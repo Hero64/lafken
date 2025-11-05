@@ -20,10 +20,8 @@ jest.mock('@alicanto/resolver', () => {
   return {
     ...actual,
     LambdaHandler: jest.fn().mockImplementation(() => ({
-      generate: jest.fn().mockReturnValue({
-        arn: 'test-function',
-        invokeArn: 'invokeArn',
-      }),
+      arn: 'test-function',
+      invokeArn: 'invokeArn',
     })),
   };
 });
@@ -31,16 +29,16 @@ jest.mock('@alicanto/resolver', () => {
 describe('authorizer factory', () => {
   enableBuildEnvVariable();
 
-  it('should get a none authorizer properties', async () => {
+  it('should get a none authorizer properties', () => {
     const { restApi } = setupTestingRestApi();
-    const properties = await restApi.authorizerFactory.getAuthorizerProps();
+    const properties = restApi.authorizerFactory.getAuthorizerProps();
 
     expect(properties).toStrictEqual({
       authorization: 'NONE',
     });
   });
 
-  it('should create an api key authorizer', async () => {
+  it('should create an api key authorizer', () => {
     @ApiKeyAuthorizer({
       name: 'api-key-auth',
       defaultKeys: ['test-key'],
@@ -54,7 +52,7 @@ describe('authorizer factory', () => {
       },
     });
 
-    const properties = await restApi.authorizerFactory.getAuthorizerProps({
+    const properties = restApi.authorizerFactory.getAuthorizerProps({
       authorizerName: 'api-key-auth',
     });
 
@@ -71,7 +69,7 @@ describe('authorizer factory', () => {
     });
   });
 
-  it('should create a custom authorizer', async () => {
+  it('should create a custom authorizer', () => {
     @CustomAuthorizer({
       name: 'custom-auth',
     })
@@ -87,7 +85,7 @@ describe('authorizer factory', () => {
       },
     });
 
-    const properties = await restApi.authorizerFactory.getAuthorizerProps({
+    const properties = restApi.authorizerFactory.getAuthorizerProps({
       authorizerName: 'custom-auth',
     });
 
@@ -103,7 +101,7 @@ describe('authorizer factory', () => {
     });
   });
 
-  it('should create a cognito authorizer', async () => {
+  it('should create a cognito authorizer', () => {
     @CognitoAuthorizer({
       name: 'cognito-auth',
       userPool: 'testing-user-pool',
@@ -117,19 +115,15 @@ describe('authorizer factory', () => {
       },
     });
 
-    const userPool = alicantoResource.create(
-      'auth',
-      CognitoUserPool,
-      stack,
-      'testing-user-pool',
-      {
-        name: 'testing-user-pool',
-      }
-    );
+    const UserPool = alicantoResource.make(CognitoUserPool);
 
-    userPool.isGlobal();
+    const userPool = new UserPool(stack, 'testing-user-pool', {
+      name: 'testing-user-pool',
+    });
 
-    const properties = await restApi.authorizerFactory.getAuthorizerProps({
+    userPool.isGlobal('auth');
+
+    const properties = restApi.authorizerFactory.getAuthorizerProps({
       authorizerName: 'cognito-auth',
     });
 

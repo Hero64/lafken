@@ -3,10 +3,9 @@ import {
   getMetadataPrototypeByKey,
   LambdaReflectKeys,
 } from '@alicanto/common';
-import { alicantoResource, LambdaHandler } from '@alicanto/resolver';
+import { type AppModule, alicantoResource, LambdaHandler } from '@alicanto/resolver';
 import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
-import { Construct } from 'constructs';
 import type { QueueObjectParam, QueueParamMetadata } from '../../main';
 import type { QueueProps } from './queue.types';
 
@@ -14,17 +13,29 @@ const attributeAllowedTypes = new Set<FieldTypes>(['String', 'Number']);
 const bodyParsedTypes = new Set<FieldTypes>(['String', 'Object', 'Array']);
 const bodyUnparsedTypes = new Set<FieldTypes>(['String']);
 
-export class Queue extends Construct {
+export class Queue extends alicantoResource.make(SqsQueue) {
   constructor(
-    scope: Construct,
-    private id: string,
+    scope: AppModule,
+    id: string,
     private props: QueueProps
   ) {
-    super(scope, id);
+    const { handler } = props;
+
+    super(scope, `${id}-queue`, {
+      name: handler.name,
+      fifoQueue: handler.isFifo,
+      contentBasedDeduplication: handler.contentBasedDeduplication,
+      visibilityTimeoutSeconds: handler.visibilityTimeout,
+      messageRetentionSeconds: handler.retentionPeriod,
+      maxMessageSize: handler.maxMessageSizeBytes,
+      delaySeconds: handler.deliveryDelay,
+    });
+    this.isGlobal(scope.id);
     this.validateEventParams();
+    this.addEventSource();
   }
 
-  public async create() {
+  private addEventSource() {
     const { handler, resourceMetadata } = this.props;
 
     /**
@@ -34,33 +45,13 @@ export class Queue extends Construct {
       ...handler,
       filename: resourceMetadata.filename,
       pathName: resourceMetadata.foldername,
-      minify: resourceMetadata.minify,
       suffix: 'queue',
     });
 
-    const lambda = await lambdaHandler.generate();
-
-    const queue = alicantoResource.create(
-      resourceMetadata.name,
-      SqsQueue,
-      this,
-      `${this.id}-queue`,
-      {
-        name: handler.name,
-        fifoQueue: handler.isFifo,
-        contentBasedDeduplication: handler.contentBasedDeduplication,
-        visibilityTimeoutSeconds: handler.visibilityTimeout,
-        messageRetentionSeconds: handler.retentionPeriod,
-        maxMessageSize: handler.maxMessageSizeBytes,
-        delaySeconds: handler.deliveryDelay,
-      }
-    );
-    queue.isGlobal();
-
-    new LambdaEventSourceMapping(this, `${this.id}-event-mapping`, {
+    new LambdaEventSourceMapping(this, 'event-mapping', {
       batchSize: handler.batchSize,
-      eventSourceArn: queue.arn,
-      functionName: lambda.arn,
+      eventSourceArn: this.arn,
+      functionName: lambdaHandler.arn,
       maximumBatchingWindowInSeconds: handler.maxBatchingWindow,
       scalingConfig: handler.maxConcurrency
         ? {

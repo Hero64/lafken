@@ -146,7 +146,8 @@ describe('App', () => {
     class TestResolver implements ResolverType {
       type: string = 'test-resolver';
       async create(scope: AppModule) {
-        const bucket = alicantoResource.create('app', S3Bucket, scope, 'bucket');
+        const Bucket = alicantoResource.make(S3Bucket);
+        const bucket = new Bucket(scope, 'bucket');
         bucket.isDependent(dependentCallback);
       }
     }

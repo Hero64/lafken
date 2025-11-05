@@ -18,6 +18,10 @@ export class ModelFactory {
 
   constructor(private scope: RestApi) {}
 
+  get resources() {
+    return Object.values(this.models);
+  }
+
   public getModel({ field, defaultModelName, dependsOn }: GetModelProps) {
     const { schema, model } = this.createModel(field);
     if (model) {
@@ -28,13 +32,11 @@ export class ModelFactory {
 
     const newModel = new ApiGatewayModel(this.scope, defaultModelName || uuid(), {
       name: modelName,
-      restApiId: this.scope.api.id,
+      restApiId: this.scope.id,
       contentType: 'application/json',
       schema: JSON.stringify(schema),
       dependsOn,
     });
-
-    this.scope.addDependency(newModel);
 
     this.models[modelName] = newModel;
 
@@ -81,7 +83,7 @@ export class ModelFactory {
         return {
           model,
           schema: {
-            $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.api.id}/models/${model.name}`,
+            $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.id}/models/${model.name}`,
           },
         };
       }
@@ -93,7 +95,7 @@ export class ModelFactory {
         const { schema, model } = this.createModel(property);
         if (model) {
           properties[property.name] = {
-            $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.api.id}/models/${model.name}`,
+            $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.id}/models/${model.name}`,
           };
         } else {
           properties[property.name] = schema;
@@ -113,11 +115,9 @@ export class ModelFactory {
       const newModel = new ApiGatewayModel(this.scope, field.payload.id, {
         contentType: 'application/json',
         name: field.payload.id,
-        restApiId: this.scope.api.id,
+        restApiId: this.scope.id,
         schema: Token.asString(Fn.jsonencode(schema)),
       });
-
-      this.scope.addDependency(newModel);
 
       this.models[field.payload.id] = newModel;
 

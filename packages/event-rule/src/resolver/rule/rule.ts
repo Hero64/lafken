@@ -1,50 +1,41 @@
-import { alicantoResource, LambdaHandler } from '@alicanto/resolver';
+import { type AppModule, alicantoResource, LambdaHandler } from '@alicanto/resolver';
 import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
 import { Fn } from 'cdktf';
-import { Construct } from 'constructs';
+import type { EventRuleMetadata } from '../../main';
 import type { RuleProps } from './rule.types';
 
-export class Rule extends Construct {
+export class Rule extends alicantoResource.make(CloudwatchEventRule) {
   constructor(
-    scope: Construct,
-    private id: string,
+    scope: AppModule,
+    id: string,
     private props: RuleProps
   ) {
-    super(scope, `${id}-rule`);
+    const { handler, bus } = props;
+
+    super(scope, `${id}-rule`, {
+      name: id,
+      eventBusName: bus.name,
+      eventPattern: Fn.jsonencode(Rule.getEvent(handler)),
+    });
+
+    this.isGlobal(scope.id);
+    this.addEventTarget(id);
   }
 
-  public async create() {
-    const { handler, resourceMetadata, bus } = this.props;
-
+  private addEventTarget(id: string) {
+    const { resourceMetadata, handler } = this.props;
     const lambdaHandler = new LambdaHandler(this, 'handler', {
       ...handler,
       filename: resourceMetadata.filename,
       pathName: resourceMetadata.foldername,
-      minify: resourceMetadata.minify,
       suffix: 'event',
       principal: 'events.amazonaws.com',
     });
 
-    const lambda = await lambdaHandler.generate();
-
-    const rule = alicantoResource.create(
-      resourceMetadata.name,
-      CloudwatchEventRule,
-      this,
-      `${this.id}-rule`,
-      {
-        name: `${this.id}-rule`,
-        eventBusName: bus.name,
-        eventPattern: Fn.jsonencode(this.getEvent()),
-      }
-    );
-
-    rule.isGlobal();
-
-    new CloudwatchEventTarget(this, `${this.id}-event-target`, {
-      rule: rule.name,
-      arn: lambda.arn,
+    new CloudwatchEventTarget(this, `${id}-event-target`, {
+      rule: this.name,
+      arn: lambdaHandler.arn,
       retryPolicy: {
         maximumRetryAttempts: handler.retryAttempts,
         maximumEventAgeInSeconds: handler.maxEventAge,
@@ -53,9 +44,7 @@ export class Rule extends Construct {
     });
   }
 
-  private getEvent(): Record<string, any> {
-    const { handler } = this.props;
-
+  private static getEvent(handler: EventRuleMetadata): Record<string, any> {
     if (!handler.integration) {
       return {
         source: [handler.pattern.source],
@@ -79,7 +68,7 @@ export class Rule extends Construct {
           'detail-type': ['db:stream'],
           detail: {
             eventName: handler.pattern.detail?.eventName,
-            keys: this.keyToMarshall(handler.pattern.detail?.keys),
+            keys: Rule.keyToMarshall(handler.pattern.detail?.keys),
           },
         };
       }
@@ -89,7 +78,7 @@ export class Rule extends Construct {
     }
   }
 
-  private keyToMarshall(values?: Record<string, number | string>) {
+  private static keyToMarshall(values?: Record<string, number | string>) {
     if (!values) return undefined;
 
     return Object.entries(values).reduce(

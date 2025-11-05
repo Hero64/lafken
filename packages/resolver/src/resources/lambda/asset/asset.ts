@@ -1,31 +1,65 @@
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktf';
-import type { Construct } from 'constructs';
 import { build } from 'esbuild';
 import { createSha1 } from '../../../utils';
 import { AlicantoBuildPlugin } from '../build-plugin/build-plugin';
-import type { AssetMetadata, AssetProps, BuildHandlerProps } from './asset.types';
+import type {
+  AddLambdaProps,
+  AssetMetadata,
+  AssetProps,
+  BuildAssetProps,
+} from './asset.types';
 
 class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
-  public initializeMetadata(pathName: string, filename: string, metadata: AssetMetadata) {
+  public initializeMetadata(props: AssetMetadata) {
+    const { filename, pathName } = props;
+
     const prebuildPath = this.getPrebuildPath(pathName, filename);
     this.lambdaAssets[prebuildPath] = {
-      metadata,
+      metadata: props,
+      lambdas: [],
     };
   }
 
-  public async buildHandler(scope: Construct, props: BuildHandlerProps) {
-    const prebuildPath = this.getPrebuildPath(props.pathName, props.filename);
+  public addLambda(props: AddLambdaProps) {
+    const { pathName, filename, lambda, scope } = props;
+    const prebuildPath = this.getPrebuildPath(pathName, filename);
 
-    const lambdaAsset = this.lambdaAssets[prebuildPath];
-
-    if (lambdaAsset.asset) {
-      return lambdaAsset.asset;
+    if (!this.lambdaAssets[prebuildPath]) {
+      throw new Error(`asset from ${pathName}/${filename} not initialized`);
     }
 
+    this.lambdaAssets[prebuildPath].lambdas.push(lambda);
+    this.lambdaAssets[prebuildPath].scope ??= scope;
+  }
+
+  public async createAssets() {
+    for (const path in this.lambdaAssets) {
+      const lambdaAsset = this.lambdaAssets[path];
+      if (!lambdaAsset.lambdas.length || !lambdaAsset.scope) {
+        continue;
+      }
+
+      const asset = await this.buildAsset({
+        scope: lambdaAsset.scope,
+        metadata: lambdaAsset.metadata,
+      });
+
+      for (const lambda of lambdaAsset.lambdas) {
+        lambda.filename = asset.path;
+      }
+    }
+  }
+
+  private async buildAsset(props: BuildAssetProps) {
+    const { metadata, scope } = props;
+
+    const prebuildPath = this.getPrebuildPath(metadata.pathName, metadata.filename);
+
+    const lambdaAsset = this.lambdaAssets[prebuildPath];
     const outputPath = this.createOutputPath(prebuildPath);
 
     await build({
@@ -33,24 +67,22 @@ class LambdaAssets {
       outfile: join(outputPath, 'index.js'),
       legalComments: 'none',
       bundle: true,
-      minify: props.minify,
+      minify: metadata.minify,
       platform: 'node',
       external: ['@aws-sdk', 'aws-lambda'],
       plugins: [
         AlicantoBuildPlugin({
-          filename: props.filename,
+          filename: metadata.filename,
           removeAttributes: ['lambda'],
           export: lambdaAsset.metadata,
         }),
       ],
     });
 
-    const asset = new TerraformAsset(scope, `${props.filename}-asset`, {
+    const asset = new TerraformAsset(scope, `${metadata.filename}-asset`, {
       path: outputPath,
       type: AssetType.ARCHIVE,
     });
-
-    this.lambdaAssets[prebuildPath].asset = asset;
 
     return asset;
   }

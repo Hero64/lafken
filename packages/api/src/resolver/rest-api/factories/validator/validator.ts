@@ -7,6 +7,10 @@ export class ValidatorFactory {
 
   constructor(private scope: RestApi) {}
 
+  get resources() {
+    return Object.values(this.requestValidators);
+  }
+
   public getValidator({
     validateRequestBody,
     validateRequestParameters,
@@ -22,7 +26,7 @@ export class ValidatorFactory {
 
     this.requestValidators[id] = new ApiGatewayRequestValidator(this.scope, id, {
       name: id,
-      restApiId: this.scope.api.id,
+      restApiId: this.scope.id,
       validateRequestBody,
       validateRequestParameters,
     });

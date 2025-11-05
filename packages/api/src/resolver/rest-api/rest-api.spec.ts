@@ -4,7 +4,6 @@ import {
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@alicanto/common';
-import { ApiGatewayDeployment } from '@cdktf/provider-aws/lib/api-gateway-deployment';
 import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktf/provider-aws/lib/api-gateway-rest-api';
@@ -26,8 +25,6 @@ describe('RestApi', () => {
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResource(ApiGatewayRestApi);
-    expect(synthesized).toHaveResource(ApiGatewayStage);
-    expect(synthesized).toHaveResource(ApiGatewayDeployment);
   });
 
   it('should create a rest api with custom properties', () => {
@@ -46,12 +43,14 @@ describe('RestApi', () => {
   });
 
   it('should create a rest api stage', () => {
-    const { stack } = setupTestingRestApi({
+    const { stack, restApi } = setupTestingRestApi({
       stage: {
         stageName: 'test',
         xrayTracingEnabled: true,
       },
     });
+
+    restApi.createStageDeployment();
 
     const synthesized = Testing.synth(stack);
 

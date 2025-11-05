@@ -1,90 +1,107 @@
 import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktf/provider-aws/lib/lambda-permission';
-import type { TerraformAsset } from 'cdktf';
-import { Construct } from 'constructs';
+import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
 import { Environment } from '../environment/environment';
 import { alicantoResource } from '../resource';
 import { Role } from '../role';
 import { lambdaAssets } from './asset/asset';
-import type { LambdaHandlerProps } from './lambda.types';
+import type {
+  GetCurrentOrContextValueProps,
+  GetEnvironmentProps,
+  GetRoleArnProps,
+  LambdaHandlerProps,
+} from './lambda.types';
 
-export class LambdaHandler extends Construct {
-  private appContext: GlobalContext;
-  private moduleContext?: GlobalContext;
+export class LambdaHandler extends alicantoResource.make(LambdaFunction) {
+  constructor(scope: Construct, id: string, props: LambdaHandlerProps) {
+    const appContext = LambdaHandler.getAppContext(scope);
+    const moduleContext = LambdaHandler.getModuleContext(scope);
+    const contextValueProps = {
+      lambda: props.lambda,
+      appContext: appContext,
+      moduleContext: moduleContext,
+    };
+    const runtime = LambdaHandler.getCurrentOrContextValue({
+      key: 'runtime',
+      defaultValue: 22,
+      ...contextValueProps,
+    });
 
-  constructor(
-    private scope: Construct,
-    private id: string,
-    private props: LambdaHandlerProps
-  ) {
-    super(scope, id);
-    this.appContext = this.getAppContext();
-    this.moduleContext = this.getModuleContext();
-  }
+    const environmentProps: GetEnvironmentProps = {
+      ...contextValueProps,
+      scope,
+    };
 
-  async generate() {
-    const asset = await lambdaAssets.buildHandler(this.scope, this.props);
-    return this.createLambdaFunction(asset);
-  }
+    let environments = LambdaHandler.getCurrentEnvironment(environmentProps);
 
-  private createLambdaFunction(asset: TerraformAsset) {
-    const name = this.getHandlerName();
-    const roleId = this.getRoleArn(name);
+    const handlerName =
+      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}${props.suffix ? `-${props.suffix}` : ''}`.toLowerCase();
+    const roleArn = LambdaHandler.getRoleArn({
+      name: handlerName,
+      scope,
+      appContext,
+      moduleContext,
+      services: props.lambda?.services,
+    });
 
-    let environments = this.getCurrentEnvironment();
-
-    const lambda = alicantoResource.create(
-      'lambda',
-      LambdaFunction,
-      this.scope,
-      'lambda',
-      {
-        functionName: name,
-        role: roleId,
-        filename: asset.path,
-        handler: `index.${this.props.name}`,
-        runtime: this.getRuntime(),
-        timeout: this.getCurrentOrContextValue('timeout'),
-        memorySize: this.getCurrentOrContextValue('memory'),
-        description: this.props.description,
-        tracingConfig: {
-          mode: this.props.lambda?.enableTrace ? 'Active' : 'PassThrough',
-        },
-        environment: {
-          variables: !environments ? {} : environments,
-        },
-      }
-    );
+    super(scope, id, {
+      functionName: handlerName,
+      role: roleArn,
+      filename: 'unresolved',
+      handler: `index.${props.name}`,
+      runtime: `nodejs${runtime}.x`,
+      timeout: LambdaHandler.getCurrentOrContextValue({
+        key: 'timeout',
+        ...contextValueProps,
+      }),
+      memorySize: LambdaHandler.getCurrentOrContextValue({
+        key: 'memory',
+        ...contextValueProps,
+      }),
+      description: props.description,
+      tracingConfig: {
+        mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
+      },
+      environment: {
+        variables: !environments ? {} : environments,
+      },
+    });
 
     if (!environments) {
-      lambda.isDependent(() => {
-        environments = this.getCurrentEnvironment();
+      this.isDependent(() => {
+        environments = LambdaHandler.getCurrentEnvironment(environmentProps);
 
         if (environments) {
           throw new Error(`unresolved dependencies in ${name} lambda`);
         }
 
-        lambda.addOverride('environment.variables', environments);
+        this.addOverride('environment.variables', environments);
       });
     }
 
-    this.addPermission(name);
-    return lambda;
+    lambdaAssets.addLambda({
+      filename: props.filename,
+      pathName: props.pathName,
+      lambda: this,
+      scope: this,
+    });
+
+    this.addPermission(handlerName, props.principal);
   }
 
-  private addPermission(name: string) {
-    if (this.props.principal) {
+  private addPermission(name: string, principal?: string) {
+    if (principal) {
       new LambdaPermission(this, 'permission', {
         functionName: name,
         action: 'lambda:InvokeFunction',
-        principal: this.props.principal,
+        principal,
       });
     }
   }
 
-  private getAppContext() {
-    const context = this.node.tryGetContext(ContextName.app);
+  private static getAppContext(scope: Construct) {
+    const context = scope.node.tryGetContext(ContextName.app);
     if (!context) {
       throw new Error('Context not found');
     }
@@ -92,61 +109,52 @@ export class LambdaHandler extends Construct {
     return context;
   }
 
-  private getModuleContext() {
-    return this.node.tryGetContext(ContextName.module);
+  private static getModuleContext(scope: Construct) {
+    return scope.node.tryGetContext(ContextName.module);
   }
 
-  private getCurrentOrContextValue<T extends keyof Omit<GlobalContext, 'contextCreator'>>(
-    key: T,
-    defaultValue?: GlobalContext[T]
-  ) {
-    return (
-      this.props.lambda?.[key] ??
-      this.moduleContext?.[key] ??
-      this.appContext?.[key] ??
-      defaultValue
-    );
+  private static getCurrentOrContextValue<
+    T extends keyof Omit<GlobalContext, 'contextCreator'>,
+  >(props: GetCurrentOrContextValueProps<T>) {
+    const { lambda = {}, appContext, moduleContext, key, defaultValue } = props;
+
+    return lambda?.[key] ?? moduleContext?.[key] ?? appContext?.[key] ?? defaultValue;
   }
 
-  private getRuntime() {
-    return `nodejs${this.getCurrentOrContextValue('runtime', 22)}.x`;
-  }
-
-  private getHandlerName() {
-    return `${this.id}-${this.moduleContext?.contextCreator || this.appContext.contextCreator}${this.props.suffix ? `-${this.props.suffix}` : ''}`.toLowerCase();
-  }
-
-  private getCurrentEnvironment() {
+  private static getCurrentEnvironment(props: GetEnvironmentProps) {
+    const { appContext, moduleContext, lambda, scope } = props;
     const globalEnv = {
-      ...(this.appContext.env || {}),
-      ...(this.moduleContext?.env || {}),
+      ...(appContext.env || {}),
+      ...(moduleContext?.env || {}),
     };
     const env = new Environment(
-      this,
+      scope,
       'lambda-env',
-      !this.props.lambda?.env ? {} : this.props.lambda?.env,
+      !lambda?.env ? {} : lambda?.env,
       globalEnv
     );
 
     return env.getValues();
   }
 
-  private getRoleArn(name: string) {
-    if (!this.props.lambda?.services) {
+  private static getRoleArn(props: GetRoleArnProps) {
+    const { services, appContext, moduleContext, name, scope } = props;
+
+    if (!services) {
       const appRole = alicantoResource.getResource<Role>(
-        `app-${this.appContext.contextCreator}-global-role`
+        `app-${appContext.contextCreator}-global-role`
       );
 
       const moduleRole = alicantoResource.getResource<Role | undefined>(
-        `module-${this.appContext.contextCreator}-module-role`
+        `module-${moduleContext?.contextCreator}-module-role`
       );
 
       return moduleRole?.arn || appRole.arn;
     }
 
-    const role = new Role(this, 'lambda-role', {
+    const role = new Role(scope, 'lambda-role', {
       name: `${name}-role`,
-      services: this.props.lambda.services,
+      services,
     });
 
     return role.arn;

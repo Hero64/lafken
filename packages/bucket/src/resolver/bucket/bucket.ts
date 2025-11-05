@@ -6,11 +6,11 @@ import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
 import { S3BucketNotification } from '@cdktf/provider-aws/lib/s3-bucket-notification';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-import { Construct } from 'constructs';
+import type { Construct } from 'constructs';
 import { getBucketInformation } from '../../service';
 import type { BucketProps } from './bucket.types';
 
-export class Bucket extends Construct {
+export class Bucket extends alicantoResource.make(S3Bucket) {
   constructor(scope: Construct, props: BucketProps) {
     const {
       name,
@@ -21,36 +21,38 @@ export class Bucket extends Construct {
       transferAcceleration,
       versioned,
       lifeCycleRules,
+      tags,
     } = getBucketInformation(props.classResource);
 
-    super(scope, `${name}-bucket`);
-
-    const bucket = alicantoResource.create('bucket', S3Bucket, this, name, {
+    super(scope, `${name}-bucket`, {
       bucket: name,
       bucketPrefix: prefix,
       forceDestroy: forceDestroy ?? props.forceDestroy,
-      tags: props.tags,
+      tags: tags ?? {
+        ...(tags || {}),
+        ...(props.tags || {}),
+      },
     });
 
-    bucket.isGlobal();
+    this.isGlobal('bucket');
 
     if (eventBridgeEnabled ?? props.eventBridgeEnabled) {
       new S3BucketNotification(this, `${name}-notification`, {
-        bucket: bucket.id,
+        bucket: this.id,
         eventbridge: true,
       });
     }
 
     if (acl || props.acl) {
       new S3BucketAcl(this, `${name}-acl`, {
-        bucket: bucket.id,
+        bucket: this.id,
         acl: acl || props.acl,
       });
     }
 
     if (versioned ?? props.versioned) {
       new S3BucketVersioningA(this, `${name}-versioned`, {
-        bucket: bucket.id,
+        bucket: this.id,
         versioningConfiguration: {
           status: 'Enabled',
         },
@@ -58,8 +60,8 @@ export class Bucket extends Construct {
     }
 
     if (transferAcceleration ?? props.transferAcceleration) {
-      new S3BucketAccelerateConfiguration(this, `${name}-versioned`, {
-        bucket: bucket.id,
+      new S3BucketAccelerateConfiguration(this, `${name}-accelerate-config`, {
+        bucket: this.id,
         status: 'Enabled',
       });
     }
@@ -68,7 +70,7 @@ export class Bucket extends Construct {
 
     if (Object.keys(lifeCycle).length > 0) {
       new S3BucketLifecycleConfiguration(this, `${name}-lifecycle`, {
-        bucket: bucket.id,
+        bucket: this.id,
         rule: Object.keys(lifeCycle).map((key) => {
           const rule = lifeCycle[key];
           return {

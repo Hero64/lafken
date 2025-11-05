@@ -1,9 +1,9 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { enableBuildEnvVariable } from '@alicanto/common';
-import { LambdaHandler } from '@alicanto/resolver';
+import { LambdaHandler, setupTestingStackWithModule } from '@alicanto/resolver';
 import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
-import { TerraformStack, Testing } from 'cdktf';
+import { Testing } from 'cdktf';
 import { Event, Fifo, Param, Payload, Queue, Standard } from '../../main';
 import { Queue as QueueResolver } from './queue';
 
@@ -15,22 +15,10 @@ jest.mock('@alicanto/resolver', () => {
   return {
     ...actual,
     LambdaHandler: jest.fn().mockImplementation(() => ({
-      generate: jest.fn().mockReturnValue({
-        arn: 'test-function',
-      }),
+      arn: 'test-function',
     })),
   };
 });
-
-const setupQueueApp = () => {
-  const app = Testing.app();
-  const stack = new TerraformStack(app, 'testing-stack');
-
-  return {
-    app,
-    stack,
-  };
-};
 
 describe('Queue', () => {
   enableBuildEnvVariable();
@@ -69,10 +57,10 @@ describe('Queue', () => {
     bodyError(@Event(BodyError) _e: BodyError) {}
   }
 
-  it('should create a fifo queue integration without file creation', async () => {
-    const { stack } = setupQueueApp();
+  it('should create a fifo queue integration without file creation', () => {
+    const { stack, module } = setupTestingStackWithModule();
 
-    const queue = new QueueResolver(stack, 'fifo', {
+    new QueueResolver(module, 'fifo', {
       handler: {
         name: 'fifo',
         isFifo: true,
@@ -87,8 +75,6 @@ describe('Queue', () => {
       },
       classResource: TestQueue,
     });
-
-    await queue.create();
 
     const synthesized = Testing.synth(stack);
 
@@ -110,14 +96,14 @@ describe('Queue', () => {
     });
 
     expect(synthesized).toHaveResourceWithProperties(LambdaEventSourceMapping, {
-      event_source_arn: '${aws_sqs_queue.fifo_fifo-queue_7BB3186C.arn}',
+      event_source_arn: '${aws_sqs_queue.testing_fifo-queue_786F7E64.arn}',
       function_name: 'test-function',
     });
   });
 
-  it('should create a standard queue integration without file creation', async () => {
-    const { stack } = setupQueueApp();
-    const queue = new QueueResolver(stack, 'standard', {
+  it('should create a standard queue integration without file creation', () => {
+    const { stack, module } = setupTestingStackWithModule();
+    new QueueResolver(module, 'standard', {
       handler: {
         name: 'standard',
         isFifo: false,
@@ -132,8 +118,6 @@ describe('Queue', () => {
       },
       classResource: TestQueue,
     });
-
-    await queue.create();
 
     const synthesized = Testing.synth(stack);
 
@@ -155,15 +139,15 @@ describe('Queue', () => {
     });
 
     expect(synthesized).toHaveResourceWithProperties(LambdaEventSourceMapping, {
-      event_source_arn: '${aws_sqs_queue.standard_standard-queue_C8EAAF87.arn}',
+      event_source_arn: '${aws_sqs_queue.testing_standard-queue_F7393BE3.arn}',
       function_name: 'test-function',
     });
   });
 
   it('should throw error with invalid attribute event param', () => {
-    const { stack } = setupQueueApp();
+    const { module } = setupTestingStackWithModule();
     expect(() => {
-      new QueueResolver(stack, 'standard', {
+      new QueueResolver(module, 'standard', {
         handler: {
           name: 'paramTypeError',
           isFifo: false,
@@ -182,9 +166,9 @@ describe('Queue', () => {
   });
 
   it('should throw error with invalid body event', () => {
-    const { stack } = setupQueueApp();
+    const { module } = setupTestingStackWithModule();
     expect(() => {
-      new QueueResolver(stack, 'standard', {
+      new QueueResolver(module, 'standard', {
         handler: {
           name: 'bodyError',
           isFifo: false,

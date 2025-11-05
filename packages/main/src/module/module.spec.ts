@@ -33,7 +33,7 @@ describe('Module', () => {
   it('should initialize module', async () => {
     const { stack } = setupTestingStack();
     const module = createModule({
-      name: 'testing',
+      name: 'testing-module',
       resources: [],
     });
 
@@ -43,7 +43,7 @@ describe('Module', () => {
   it('should create context', async () => {
     const { stack } = setupTestingStack();
     const module = createModule({
-      name: 'testing',
+      name: 'testing-module',
       resources: [],
       globalConfig: {
         lambda: {
@@ -57,7 +57,7 @@ describe('Module', () => {
     const stackModule = await module(stack, {});
 
     expect(stackModule.node.tryGetContext(ContextName.module)).toStrictEqual({
-      contextCreator: 'testing',
+      contextCreator: 'testing-module',
       memory: 100,
       runtime: 20,
       timeout: 30,
@@ -67,7 +67,7 @@ describe('Module', () => {
   it('should create a global lambda role', async () => {
     const { stack } = setupTestingStack();
     const module = createModule({
-      name: 'testing',
+      name: 'testing-module',
       resources: [],
       globalConfig: {
         lambda: {
@@ -77,7 +77,7 @@ describe('Module', () => {
     });
 
     await module(stack, {});
-    const role = alicantoResource.getResource<Role>('module-testing-module-role');
+    const role = alicantoResource.getResource<Role>('module-testing-module-module-role');
 
     expect(role).toBeDefined();
     expect(role).toBeInstanceOf(Role);
@@ -92,7 +92,7 @@ describe('Module', () => {
 
     const { stack } = setupTestingStack();
     const module = createModule({
-      name: 'testing',
+      name: 'testing-module',
       resources: [TestResource],
     });
 
@@ -113,7 +113,7 @@ describe('Module', () => {
 
     const { stack } = setupTestingStack();
     const module = createModule({
-      name: 'testing',
+      name: 'testing-module',
       resources: [TestResource],
       globalConfig: {
         tags: {
@@ -130,7 +130,7 @@ describe('Module', () => {
 
     expect(synthesized).toHaveResourceWithProperties(S3Bucket, {
       tags: {
-        'alicanto:module': 'testing',
+        'alicanto:module': 'testing-module',
         foo: 'bar',
       },
     });

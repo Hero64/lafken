@@ -20,7 +20,7 @@ describe('AuthResolver', () => {
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
       lambda_config: {},
-      name: 'test-user-pool',
+      name: 'test',
     });
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPoolClient, {

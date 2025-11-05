@@ -73,7 +73,7 @@ export class AppStack extends TerraformStack {
   private createRole() {
     const roleName = `${this.props.name}-global-role`;
 
-    const lambdaRole = alicantoResource.create('app', Role, this, roleName, {
+    const lambdaRole = new Role(this, roleName, {
       name: roleName,
       services: this.props.globalConfig?.lambda?.services || [
         'dynamodb',
@@ -88,7 +88,7 @@ export class AppStack extends TerraformStack {
       ],
     });
 
-    lambdaRole.isGlobal();
+    lambdaRole.isGlobal('app');
   }
 
   private addAspectProperties() {

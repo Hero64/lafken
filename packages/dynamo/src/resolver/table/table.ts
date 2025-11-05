@@ -9,7 +9,7 @@ import {
   type DynamodbTableLocalSecondaryIndex,
 } from '@cdktf/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktf/provider-aws/lib/pipes-pipe';
-import { Construct } from 'constructs';
+import type { Construct } from 'constructs';
 import type { DynamoIndex, DynamoStream, FieldsMetadata } from '../../main';
 import { getModelInformation } from '../../service';
 import type { TableProps } from './table.types';
@@ -20,7 +20,7 @@ const mapFieldType: Partial<Record<FieldTypes, string>> = {
   Boolean: 'BOOL',
 };
 
-export class Table extends Construct {
+export class Table extends alicantoResource.make(DynamodbTable) {
   constructor(scope: Construct, props: TableProps) {
     const {
       modelProps,
@@ -29,36 +29,28 @@ export class Table extends Construct {
       fields,
     } = getModelInformation(props.classResource);
 
-    super(scope, `${modelProps.name}-table`);
+    const { globalIndexes, localIndexes } = Table.getIndexes(modelProps.indexes);
 
-    const { globalIndexes, localIndexes } = this.getIndexes(modelProps.indexes);
+    super(scope, `${modelProps.name}-table`, {
+      name: modelProps.name,
+      rangeKey: sortKeyName,
+      hashKey: partitionKeyName,
+      attribute: Table.getAttributes(fields),
+      globalSecondaryIndex: globalIndexes,
+      localSecondaryIndex: localIndexes,
+      streamEnabled: !!modelProps.stream?.enabled,
+      streamViewType: modelProps.stream?.enabled
+        ? modelProps.stream?.type || 'NEW_AND_OLD_IMAGES'
+        : undefined,
+      ttl: modelProps.ttl
+        ? {
+            attributeName: modelProps.ttl.toString(),
+            enabled: true,
+          }
+        : undefined,
+    });
 
-    const table = alicantoResource.create(
-      'dynamo',
-      DynamodbTable,
-      this,
-      modelProps.name,
-      {
-        name: modelProps.name,
-        rangeKey: sortKeyName,
-        hashKey: partitionKeyName,
-        attribute: this.getAttributes(fields),
-        globalSecondaryIndex: globalIndexes,
-        localSecondaryIndex: localIndexes,
-        streamEnabled: !!modelProps.stream?.enabled,
-        streamViewType: modelProps.stream?.enabled
-          ? modelProps.stream?.type || 'NEW_AND_OLD_IMAGES'
-          : undefined,
-        ttl: modelProps.ttl
-          ? {
-              attributeName: modelProps.ttl.toString(),
-              enabled: true,
-            }
-          : undefined,
-      }
-    );
-
-    table.isGlobal();
+    this.isGlobal('dynamo');
 
     if (modelProps.stream?.enabled) {
       const defaultBus = new DataAwsCloudwatchEventBus(scope, 'DefaultBus', {
@@ -75,7 +67,7 @@ export class Table extends Construct {
               'GetShardIterator',
               'ListStreams',
             ],
-            resources: [table.arn],
+            resources: [this.arn],
           },
           {
             type: 'event',
@@ -92,7 +84,7 @@ export class Table extends Construct {
       new PipesPipe(scope, `${modelProps.name}-pipe`, {
         name: `${modelProps.name}-pipe`,
         roleArn: role.arn,
-        source: table.streamArn,
+        source: this.streamArn,
         target: defaultBus.arn,
         desiredState: 'RUNNING',
         sourceParameters: {
@@ -117,7 +109,7 @@ export class Table extends Construct {
     }
   }
 
-  private getAttributes(fields: FieldsMetadata) {
+  private static getAttributes(fields: FieldsMetadata) {
     const attributes: DynamodbTableAttribute[] = [];
 
     for (const key in fields) {
@@ -136,7 +128,7 @@ export class Table extends Construct {
     return attributes;
   }
 
-  private getIndexes(indexes: DynamoIndex<any>[] = []) {
+  private static getIndexes(indexes: DynamoIndex<any>[] = []) {
     if (indexes.length === 0) {
       return {};
     }

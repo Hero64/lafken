@@ -19,7 +19,7 @@ describe('Auth generation', () => {
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
       lambda_config: {},
-      name: 'auth-user-pool',
+      name: 'auth',
     });
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPoolClient, {

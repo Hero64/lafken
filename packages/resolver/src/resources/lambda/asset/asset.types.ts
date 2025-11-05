@@ -1,15 +1,27 @@
-import type { TerraformAsset } from 'cdktf';
+import type { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
+import type { Construct } from 'constructs';
 import type { LambdaHandlerProps } from '../lambda.types';
 
-export interface AssetMetadata {
+interface BaseAsset
+  extends Pick<LambdaHandlerProps, 'filename' | 'pathName' | 'minify'> {}
+
+export interface AssetMetadata extends BaseAsset {
   className: string;
   methods: string[];
 }
 
 export interface AssetProps {
   metadata: AssetMetadata;
-  asset?: TerraformAsset;
+  scope?: Construct;
+  lambdas: LambdaFunction[];
 }
 
-export interface BuildHandlerProps
-  extends Pick<LambdaHandlerProps, 'filename' | 'pathName' | 'minify'> {}
+export interface BuildAssetProps {
+  scope: Construct;
+  metadata: AssetMetadata;
+}
+
+export interface AddLambdaProps extends Omit<BaseAsset, 'minify'> {
+  lambda: LambdaFunction;
+  scope: Construct;
+}

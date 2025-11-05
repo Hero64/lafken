@@ -11,7 +11,7 @@ export class BucketResolver implements ResolverType {
     private config: BucketGlobalConfig = {}
   ) {}
 
-  public async beforeCreate(scope: AppModule) {
+  public beforeCreate(scope: AppModule) {
     for (const bucket of this.buckets) {
       new Bucket(scope, {
         ...this.config,
@@ -20,7 +20,7 @@ export class BucketResolver implements ResolverType {
     }
   }
 
-  public async create() {
+  public create() {
     throw new Error('It is not possible to parse this service');
   }
 }

@@ -161,7 +161,7 @@ describe('Dynamo table', () => {
       desired_state: 'RUNNING',
       name: 'Test-pipe',
       role_arn: '${aws_iam_role.pipe-dynamo-Test-role.arn}',
-      source: '${aws_dynamodb_table.Test-table_Test_27EC560A.stream_arn}',
+      source: '${aws_dynamodb_table.Test-table.stream_arn}',
       source_parameters: {
         dynamodb_stream_parameters: {
           batch_size: 10,

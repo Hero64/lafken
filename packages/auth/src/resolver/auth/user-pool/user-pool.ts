@@ -18,7 +18,7 @@ import {
 } from '@cdktf/provider-aws/lib/cognito-user-pool';
 import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
 import { Token } from 'cdktf';
-import { Construct } from 'constructs';
+import type { Construct } from 'constructs';
 import type {
   AuthAttributes,
   CustomAttributesMetadata,
@@ -34,6 +34,7 @@ import type {
   AutoVerifyAttributes,
   CognitoPlan,
   EmailConfig,
+  IdentityProvider as IdentityProviderType,
   InvitationMessage,
   Mfa,
   PasswordPolicy,
@@ -42,62 +43,65 @@ import type {
   UserVerification,
 } from './user-pool.types';
 
-export class UserPool extends Construct {
+export class UserPool extends alicantoResource.make(CognitoUserPool) {
   public attributeByName: Record<
     string,
     CustomAttributesMetadata | StandardAttributeMetadata
   > = {};
-  public cognitoUserPool: CognitoUserPool;
-  constructor(
-    scope: Construct,
-    private id: string,
-    private props: UserPoolProps
-  ) {
-    super(scope, 'user-pool');
-  }
+  constructor(scope: Construct, id: string, props: UserPoolProps) {
+    const attributes = UserPool.getUserAttributes(props.attributes);
 
-  public async create() {
-    const userPool = alicantoResource.create('auth', CognitoUserPool, this, this.id, {
-      ...this.getMfaConfig(this.props.mfa),
-      name: `${this.id}-user-pool`,
-      autoVerifiedAttributes: this.getAutoVerifiedAttributes(
-        this.props.autoVerifyAttributes
+    super(scope, `${id}-user-pool`, {
+      ...UserPool.getMfaConfig(props.mfa),
+      name: id,
+      autoVerifiedAttributes: UserPool.getAutoVerifiedAttributes(
+        props.autoVerifyAttributes
       ),
-      accountRecoverySetting: this.getAccountRecoverySettings(this.props.accountRecovery),
-      aliasAttributes: this.getAliasAttributes(this.props.signInAliases),
-      adminCreateUserConfig: this.getAdminCreateUserConfig(
-        this.props.selfSignUpEnabled,
-        this.props.invitationMessage
+      accountRecoverySetting: UserPool.getAccountRecoverySettings(props.accountRecovery),
+      aliasAttributes: UserPool.getAliasAttributes(props.signInAliases),
+      adminCreateUserConfig: UserPool.getAdminCreateUserConfig(
+        props.selfSignUpEnabled,
+        props.invitationMessage
       ),
-      passwordPolicy: this.getPasswordPolicy(this.props.passwordPolicy),
-      emailConfiguration: this.getEmailConfig(this.props.email),
-      userPoolTier: this.getCognitoPlan(this.props.cognitoPlan),
-      usernameConfiguration: this.getSignInCaseSensitive(this.props.signInCaseSensitive),
-      verificationMessageTemplate: this.getUserVerification(this.props.userVerification),
-      schema: this.getUserAttributes(this.props.attributes),
-      smsConfiguration: this.getSmsConfig(this.props.mfa, this.props.userVerification),
-      lambdaConfig: await this.getLambdaConfig(),
+      passwordPolicy: UserPool.getPasswordPolicy(props.passwordPolicy),
+      emailConfiguration: UserPool.getEmailConfig(props.email),
+      userPoolTier: UserPool.getCognitoPlan(props.cognitoPlan),
+      usernameConfiguration: UserPool.getSignInCaseSensitive(props.signInCaseSensitive),
+      verificationMessageTemplate: UserPool.getUserVerification(props.userVerification),
+      schema: attributes?.schema,
+      smsConfiguration: UserPool.getSmsConfig(
+        scope,
+        id,
+        props.mfa,
+        props.userVerification
+      ),
+      lambdaConfig: UserPool.getLambdaConfig(scope, props.extensions),
     });
 
-    userPool.isGlobal();
+    if (attributes?.attributeByName) {
+      this.attributeByName = attributes.attributeByName;
+    }
 
-    this.cognitoUserPool = userPool;
+    this.isGlobal('auth');
+    this.assignIdentityProviders(props.identityProviders);
+  }
 
-    if (this.props.identityProviders?.length) {
-      for (const identityProvider of this.props.identityProviders) {
+  private assignIdentityProviders(identityProviders?: IdentityProviderType<any>[]) {
+    if (identityProviders?.length) {
+      for (const identityProvider of identityProviders) {
         new IdentityProvider(this, identityProvider.type, {
           ...identityProvider,
           attributeByName: this.attributeByName,
-          userPoolId: userPool.id,
+          userPoolId: this.id,
         });
       }
     }
   }
 
-  private async getLambdaConfig() {
+  private static getLambdaConfig(scope: Construct, extensions: ClassResource[] = []) {
     let lambdaConfig: StripReadonly<CognitoUserPoolLambdaConfig> = {};
 
-    for (const extension of this.props.extensions || []) {
+    for (const extension of extensions) {
       const metadata = getResourceMetadata(extension);
 
       if (metadata.type !== RESOURCE_TYPE) {
@@ -106,12 +110,12 @@ export class UserPool extends Construct {
 
       const handlers = getResourceHandlerMetadata<TriggerMetadata>(extension);
 
-      const trigger = new Extension(this, `${metadata.name}-extension`, {
+      const trigger = new Extension(scope, `${metadata.name}-extension`, {
         handlers,
         resourceMetadata: metadata,
       });
 
-      const triggers = await trigger.createTriggers();
+      const triggers = trigger.createTriggers();
       for (const key in triggers) {
         const configKey = key as keyof CognitoUserPoolLambdaConfig;
         if (lambdaConfig[configKey] !== undefined) {
@@ -128,15 +132,21 @@ export class UserPool extends Construct {
     return lambdaConfig;
   }
 
-  private getSmsConfig(mfa?: Mfa, userVerification?: UserVerification) {
+  private static getSmsConfig(
+    scope: Construct,
+    id: string,
+    mfa?: Mfa,
+    userVerification?: UserVerification
+  ) {
     if ((!mfa || mfa.status === 'off' || !mfa.sms) && !userVerification) {
       return;
     }
 
-    const externalId = `${this.id}-sms-config`;
+    const externalId = `${id}-sms-config`;
+    const roleId = `${id}-cognito-sms-role`;
 
-    const snsRole = new IamRole(this, 'cognitoSmsRole', {
-      name: 'cognito-sms-role',
+    const snsRole = new IamRole(scope, roleId, {
+      name: roleId,
       assumeRolePolicy: JSON.stringify({
         Version: '2012-10-17',
         Statement: [
@@ -175,7 +185,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getMfaConfig(mfa?: Mfa): Partial<CognitoUserPoolConfig> | undefined {
+  private static getMfaConfig(mfa?: Mfa): Partial<CognitoUserPoolConfig> | undefined {
     if (!mfa || mfa.status === 'off') {
       return;
     }
@@ -204,10 +214,15 @@ export class UserPool extends Construct {
     return config as Partial<CognitoUserPoolConfig>;
   }
 
-  private getUserAttributes(attributeClass?: ClassResource) {
+  private static getUserAttributes(attributeClass?: ClassResource) {
     if (!attributeClass) {
       return;
     }
+
+    const attributeByName: Record<
+      string,
+      CustomAttributesMetadata | StandardAttributeMetadata
+    > = {};
 
     const schema: CognitoUserPoolSchema[] = [];
 
@@ -216,7 +231,7 @@ export class UserPool extends Construct {
     >(attributeClass, FieldProperties.field);
 
     for (const attribute of attributeMetadata) {
-      this.attributeByName[attribute.name] = attribute;
+      attributeByName[attribute.name] = attribute;
       if (attribute.attributeType === 'standard') {
         const attributeName = mapUserAttributes[attribute.name as keyof AuthAttributes];
 
@@ -262,10 +277,13 @@ export class UserPool extends Construct {
         });
       }
     }
-    return schema;
+    return {
+      schema,
+      attributeByName,
+    };
   }
 
-  private getUserVerification(userVerification?: UserVerification) {
+  private static getUserVerification(userVerification?: UserVerification) {
     if (!userVerification) {
       return;
     }
@@ -293,7 +311,7 @@ export class UserPool extends Construct {
     return verificationTemplate;
   }
 
-  private getSignInCaseSensitive(signInCaseSensitive?: boolean) {
+  private static getSignInCaseSensitive(signInCaseSensitive?: boolean) {
     if (signInCaseSensitive === undefined) {
       return;
     }
@@ -303,7 +321,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getCognitoPlan(plan?: CognitoPlan) {
+  private static getCognitoPlan(plan?: CognitoPlan) {
     if (!plan) {
       return;
     }
@@ -311,7 +329,7 @@ export class UserPool extends Construct {
     return plan.toUpperCase();
   }
 
-  private getEmailConfig(email?: EmailConfig) {
+  private static getEmailConfig(email?: EmailConfig) {
     if (!email) {
       return;
     }
@@ -333,7 +351,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getAutoVerifiedAttributes(attributes?: AutoVerifyAttributes[]) {
+  private static getAutoVerifiedAttributes(attributes?: AutoVerifyAttributes[]) {
     if (!attributes) {
       return undefined;
     }
@@ -346,7 +364,7 @@ export class UserPool extends Construct {
     return attributes.map((attr) => verifyAttributes[attr]);
   }
 
-  private getPasswordPolicy(policy?: PasswordPolicy) {
+  private static getPasswordPolicy(policy?: PasswordPolicy) {
     if (!policy) {
       return undefined;
     }
@@ -361,7 +379,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getAdminCreateUserConfig(
+  private static getAdminCreateUserConfig(
     selfSignUpEnabled?: boolean,
     invitationMessage?: InvitationMessage
   ) {
@@ -382,7 +400,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getAccountRecoverySettings(accountRecovery?: AccountRecovery[]) {
+  private static getAccountRecoverySettings(accountRecovery?: AccountRecovery[]) {
     if (!accountRecovery) {
       return undefined;
     }
@@ -395,7 +413,7 @@ export class UserPool extends Construct {
     };
   }
 
-  private getAliasAttributes(signInAliases?: SignInAliases[]) {
+  private static getAliasAttributes(signInAliases?: SignInAliases[]) {
     if (!signInAliases) {
       return undefined;
     }

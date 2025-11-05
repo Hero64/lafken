@@ -14,7 +14,7 @@ export class AuthResolver<T extends ClassResource = ClassResource>
 
   public async beforeCreate(scope: AppModule) {
     this.auth = new Auth(scope, this.options.name, this.options);
-    await this.auth.create();
+    this.auth.create();
   }
 
   public async create() {

@@ -167,14 +167,15 @@ describe('Model factory', () => {
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
       content_type: 'application/json',
       name: 'test-model',
+      rest_api_id: '${aws_api_gateway_rest_api.testing-api-api.id}',
       schema:
-        '${jsonencode({"type" = "object", "required" = ["foo", "bar"], "properties" = {"foo" = {"type" = "string", "minLength" = 10, "maxLength" = 100, "format" = "password"}, "bar" = {"$ref" = "http://apigateway.amazonaws.com/restapis/${aws_api_gateway_rest_api.testing-rest-api.id}/models/${aws_api_gateway_model.testing-api_sub-model_C087AC38.name}"}}})}',
+        '${jsonencode({"type" = "object", "required" = ["foo", "bar"], "properties" = {"foo" = {"type" = "string", "minLength" = 10, "maxLength" = 100, "format" = "password"}, "bar" = {"$ref" = "https://apigateway.amazonaws.com/restapis/${aws_api_gateway_rest_api.testing-api-api.id}/models/${aws_api_gateway_model.testing-api-api_sub-model_D6402FA3.name}"}}})}',
     });
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
       content_type: 'application/json',
       name: 'sub-model',
-      rest_api_id: '${aws_api_gateway_rest_api.testing-rest-api.id}',
+      rest_api_id: '${aws_api_gateway_rest_api.testing-api-api.id}',
       schema:
         '${jsonencode({"type" = "object", "required" = [], "properties" = {"sub-bar" = {"type" = "number"}}})}',
     });

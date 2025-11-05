@@ -1,3 +1,4 @@
+import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
 import { TerraformAsset } from 'cdktf';
 import { build } from 'esbuild';
 import { setupTestingStack } from '../../../utils';
@@ -22,7 +23,9 @@ jest.mock('cdktf', () => {
 
 describe('Lambda Assets', () => {
   it('should initialize asset metadata', async () => {
-    lambdaAssets.initializeMetadata('/tmp', 'handler', {
+    lambdaAssets.initializeMetadata({
+      pathName: '/tmp',
+      filename: 'handler',
       className: 'Testing',
       methods: ['foo', 'bar'],
     });
@@ -31,19 +34,37 @@ describe('Lambda Assets', () => {
     const internalState = (lambdaAssets as any).lambdaAssets;
 
     expect(internalState[prebuildPath]).toEqual({
+      lambdas: [],
       metadata: {
         className: 'Testing',
+        filename: 'handler',
         methods: ['foo', 'bar'],
+        pathName: '/tmp',
       },
     });
   });
 
   it('should create terraform asset', async () => {
     const { stack } = setupTestingStack();
-    await lambdaAssets.buildHandler(stack, {
+    lambdaAssets.initializeMetadata({
+      pathName: '/tmp',
       filename: 'handler',
-      pathName: '/tmp/',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
     });
+
+    const lambda = new LambdaFunction(stack, 'test-handler', {
+      functionName: 'index.test',
+      role: '',
+    });
+
+    lambdaAssets.addLambda({
+      filename: 'handler',
+      pathName: '/tmp',
+      scope: stack,
+      lambda,
+    });
+    await lambdaAssets.createAssets();
 
     expect(build).toHaveBeenCalledTimes(1);
     expect(TerraformAsset).toHaveBeenCalledTimes(1);

@@ -1,5 +1,5 @@
 import { getResourceMetadata } from '@alicanto/common';
-import { alicantoResource, ContextName, Role } from '@alicanto/resolver';
+import { ContextName, Role } from '@alicanto/resolver';
 import { Aspects } from 'cdktf';
 import { Construct } from 'constructs';
 import { AppAspect } from '../aspect/aspect';
@@ -50,12 +50,12 @@ export class StackModule extends Construct {
 
     const roleName = `${this.props.name}-module-role`;
 
-    const lambdaRole = alicantoResource.create('module', Role, this, roleName, {
+    const lambdaRole = new Role(this, roleName, {
       name: roleName,
       services: this.props.globalConfig?.lambda?.services || [],
     });
 
-    lambdaRole.isGlobal();
+    lambdaRole.isGlobal('module');
   }
 
   private addAspectProperties() {

@@ -40,7 +40,10 @@ export class ApiResolver implements ResolverType {
   public async create(module: AppModule, resource: ClassResource) {
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
-    lambdaAssets.initializeMetadata(metadata.foldername, metadata.filename, {
+    lambdaAssets.initializeMetadata({
+      pathName: metadata.foldername,
+      filename: metadata.filename,
+      minify: metadata.minify,
       className: metadata.originalName,
       methods: handlers
         .filter((handler) => !handler.integration)

@@ -40,7 +40,7 @@ export enum ContextName {
 
 export interface ResolverType {
   type: string;
-  beforeCreate?: (scope: AppStack) => Promise<void>;
-  create: (module: AppModule, resource: ClassResource) => Promise<void>;
-  afterCreate?: (scope: AppStack) => Promise<void>;
+  beforeCreate?: (scope: AppStack) => Promise<void> | void;
+  create: (module: AppModule, resource: ClassResource) => Promise<void> | void;
+  afterCreate?: (scope: AppStack) => Promise<void> | void;
 }

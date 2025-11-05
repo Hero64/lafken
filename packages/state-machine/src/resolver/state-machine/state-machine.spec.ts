@@ -4,7 +4,7 @@ import {
   enableBuildEnvVariable,
   getResourceMetadata,
 } from '@alicanto/common';
-import { type Role, setupTestingStack } from '@alicanto/resolver';
+import { type Role, setupTestingStackWithModule } from '@alicanto/resolver';
 import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
 import { Testing } from 'cdktf';
 import {
@@ -23,18 +23,16 @@ jest.mock('@alicanto/resolver', () => {
   return {
     ...actual,
     LambdaHandler: jest.fn().mockImplementation(() => ({
-      generate: jest.fn().mockReturnValue({
-        arn: 'test-function',
-        functionName: 'test-function',
-      }),
+      arn: 'test-function',
+      functionName: 'test-function',
     })),
   };
 });
 
-const createStateMachine = async (classResource: ClassResource) => {
-  const { stack } = setupTestingStack();
+const createStateMachine = (classResource: ClassResource) => {
+  const { stack, module } = setupTestingStackWithModule();
 
-  const resource = new StateMachineResource(stack, 'testing', {
+  new StateMachineResource(module, 'testing', {
     classResource: classResource,
     resourceMetadata: getResourceMetadata(classResource),
     role: {
@@ -42,7 +40,6 @@ const createStateMachine = async (classResource: ClassResource) => {
     } as Role,
   });
 
-  await resource.create();
   return {
     stack,
   };
@@ -50,7 +47,7 @@ const createStateMachine = async (classResource: ClassResource) => {
 
 describe('State Machine', () => {
   enableBuildEnvVariable();
-  it('should create a simple state machine', async () => {
+  it('should create a simple state machine', () => {
     @StateMachine({
       startAt: {
         type: 'wait',
@@ -88,7 +85,7 @@ describe('State Machine', () => {
     })
     class TestingSM {}
 
-    const { stack } = await createStateMachine(TestingSM);
+    const { stack } = createStateMachine(TestingSM);
 
     const synthesized = Testing.synth(stack);
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
@@ -98,7 +95,7 @@ describe('State Machine', () => {
     });
   });
 
-  it('should create a state machine with lambda functions', async () => {
+  it('should create a state machine with lambda functions', () => {
     @Payload()
     class TestPayload {
       @Param({
@@ -126,7 +123,7 @@ describe('State Machine', () => {
       task2(@Event(`{% $state.input.data %}`) _e: any) {}
     }
 
-    const { stack } = await createStateMachine(TestingSM);
+    const { stack } = createStateMachine(TestingSM);
 
     const synthesized = Testing.synth(stack);
 
@@ -137,7 +134,7 @@ describe('State Machine', () => {
     });
   });
 
-  it('should crete a state machine with parallel state', async () => {
+  it('should crete a state machine with parallel state', () => {
     @NestedStateMachine({
       startAt: {
         type: 'wait',
@@ -184,7 +181,7 @@ describe('State Machine', () => {
     })
     class TestingSM {}
 
-    const { stack } = await createStateMachine(TestingSM);
+    const { stack } = createStateMachine(TestingSM);
 
     const synthesized = Testing.synth(stack);
 
@@ -194,7 +191,7 @@ describe('State Machine', () => {
     });
   });
 
-  it('should create a state machine with distributed map', async () => {
+  it('should create a state machine with distributed map', () => {
     @NestedStateMachine({
       startAt: {
         type: 'wait',
@@ -222,7 +219,7 @@ describe('State Machine', () => {
     })
     class TestingSM {}
 
-    const { stack } = await createStateMachine(TestingSM);
+    const { stack } = createStateMachine(TestingSM);
 
     const synthesized = Testing.synth(stack);
 

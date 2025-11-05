@@ -11,22 +11,23 @@ import { Queue } from './queue/queue';
 export class QueueResolver implements ResolverType {
   public type = RESOURCE_TYPE;
 
-  public async create(module: AppModule, resource: ClassResource) {
+  public create(module: AppModule, resource: ClassResource) {
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<QueueLambdaMetadata>(resource);
-    lambdaAssets.initializeMetadata(metadata.foldername, metadata.filename, {
+    lambdaAssets.initializeMetadata({
+      pathName: metadata.foldername,
+      filename: metadata.filename,
+      minify: metadata.minify,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
     });
 
     for (const handler of handlers) {
-      const queue = new Queue(module, `${metadata.name}-${handler.name}`, {
+      new Queue(module, `${metadata.name}-${handler.name}`, {
         resourceMetadata: metadata,
         classResource: resource,
         handler,
       });
-
-      await queue.create();
     }
   }
 }

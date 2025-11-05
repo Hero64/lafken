@@ -16,10 +16,8 @@ jest.mock('@alicanto/resolver', () => {
   return {
     ...actual,
     LambdaHandler: jest.fn().mockImplementation(() => ({
-      generate: jest.fn().mockReturnValue({
-        arn: 'test-function',
-        invokeArn: 'invokeArn',
-      }),
+      arn: 'test-function',
+      invokeArn: 'invokeArn',
     })),
   };
 });
@@ -40,7 +38,7 @@ describe('User pool extension', () => {
     preSignUp() {}
   }
 
-  it('should create lambda config triggers', async () => {
+  it('should create lambda config triggers', () => {
     const { stack } = setupTestingStack();
     const metadata = getResourceMetadata(UserPoolExtensions);
     const handlers = getResourceHandlerMetadata<TriggerMetadata>(UserPoolExtensions);
@@ -50,7 +48,7 @@ describe('User pool extension', () => {
       resourceMetadata: metadata,
     });
 
-    const triggers = await extension.createTriggers();
+    const triggers = extension.createTriggers();
     Testing.synth(stack);
 
     expect(LambdaHandler).toHaveBeenCalledTimes(2);

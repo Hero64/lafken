@@ -60,8 +60,10 @@ describe('Environment', () => {
   it('should resolve global parameter value', () => {
     const { stack } = setupTestingStack();
 
-    const bucket = alicantoResource.create('bucket', S3Bucket, stack, 'test', {});
-    bucket.isGlobal();
+    const Bucket = alicantoResource.make(S3Bucket);
+
+    const bucket = new Bucket(stack, 'test', {});
+    bucket.isGlobal('bucket');
 
     const env = new Environment(stack, 'env-test', ({ getResourceValue }) => ({
       foo: getResourceValue('bucket::test', 'id'),

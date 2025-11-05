@@ -21,11 +21,9 @@ export class Auth extends Construct {
       extensions: this.props.extensions,
     });
 
-    await this.userPool.create();
-
     this.userPoolClient = new UserPoolClient(this, this.id, {
       ...this.props.userClient,
-      userPoolId: this.userPool.cognitoUserPool.id,
+      userPoolId: this.userPool.id,
       attributeByName: this.userPool.attributeByName,
     });
   }
@@ -34,7 +32,7 @@ export class Auth extends Construct {
     if (this.props.extend) {
       await this.props.extend({
         scope: this,
-        userPool: this.userPool.cognitoUserPool,
+        userPool: this.userPool,
         userPoolClient: this.userPoolClient.cognitoUserPoolClient,
       });
     }

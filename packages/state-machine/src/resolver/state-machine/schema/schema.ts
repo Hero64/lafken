@@ -53,8 +53,8 @@ export class Schema {
     this.getMetadata();
   }
 
-  public async create() {
-    const startName = await this.getNextState(this.resourceMetadata.startAt);
+  public getDefinition() {
+    const startName = this.getNextState(this.resourceMetadata.startAt);
 
     return {
       StartAt: startName as string,
@@ -75,7 +75,7 @@ export class Schema {
     );
   }
 
-  private async getNextState(currentState?: StateTypes<string>, end = false) {
+  private getNextState(currentState?: StateTypes<string>, end = false) {
     if (!currentState || end) {
       return;
     }
@@ -92,7 +92,7 @@ export class Schema {
           Type: 'Wait',
           Seconds: currentState.seconds,
           Timestamp: currentState.timestamp,
-          Next: await this.getNextState(currentState.next),
+          Next: this.getNextState(currentState.next),
         };
         break;
       }
@@ -102,14 +102,14 @@ export class Schema {
         for (const choice of currentState.choices) {
           choices.push({
             Condition: choice.condition,
-            Next: (await this.getNextState(choice.next)) as string,
+            Next: this.getNextState(choice.next) as string,
           });
         }
 
         this.states[stateName] = {
           Type: 'Choice',
           Choices: choices,
-          Default: await this.getNextState(currentState.default),
+          Default: this.getNextState(currentState.default),
         };
 
         break;
@@ -135,7 +135,7 @@ export class Schema {
           Assign: currentState.assign,
           Output: currentState.output,
           End: currentState.end,
-          Next: await this.getNextState(currentState.next, currentState.end),
+          Next: this.getNextState(currentState.next, currentState.end),
         };
         break;
       }
@@ -144,7 +144,7 @@ export class Schema {
 
         for (const branch of currentState.branches) {
           const branchSchema = new Schema(this.scope, branch);
-          branchStates.push(await branchSchema.create());
+          branchStates.push(branchSchema.getDefinition());
         }
 
         this.states[stateName] = {
@@ -153,15 +153,15 @@ export class Schema {
           Output: currentState.output,
           Assign: currentState.assign,
           End: currentState.end,
-          Next: await this.getNextState(currentState.next, currentState.end),
+          Next: this.getNextState(currentState.next, currentState.end),
           Branches: branchStates,
         };
-        await this.addRetryAndCatch(currentState, stateName);
+        this.addRetryAndCatch(currentState, stateName);
         break;
       }
       case 'map': {
         const mapSchema = new Schema(this.scope, currentState.states);
-        const mapState = await mapSchema.create();
+        const mapState = mapSchema.getDefinition();
 
         const itemProcessor: Partial<ItemProcessor> = {
           ...mapState,
@@ -174,7 +174,7 @@ export class Schema {
           Type: 'Map',
           ItemProcessor: itemProcessor as ItemProcessor,
           End: currentState.end,
-          Next: await this.getNextState(currentState.next, currentState.end),
+          Next: this.getNextState(currentState.next, currentState.end),
           Output: currentState.output,
           Assign: currentState.assign,
         };
@@ -237,7 +237,7 @@ export class Schema {
         }
 
         this.states[stateName] = mapTask;
-        await this.addRetryAndCatch(currentState, stateName);
+        this.addRetryAndCatch(currentState, stateName);
 
         break;
       }
@@ -256,7 +256,7 @@ export class Schema {
     return `${currentState.type}-${this.stateNameCount[currentState.type]}`;
   }
 
-  private async addLambdaState(handler: LambdaStateMetadata) {
+  private addLambdaState(handler: LambdaStateMetadata) {
     if (this.states[handler.name]) {
       return handler.name;
     }
@@ -270,22 +270,20 @@ export class Schema {
       suffix: 'states',
     });
 
-    const lambda = await lambdaHandler.generate();
-
     this.states[handler.name] = {
       Type: 'Task',
       Resource: 'arn:aws:states:::lambda:invoke',
-      Next: await this.getNextState(handler.next, handler.end),
+      Next: this.getNextState(handler.next, handler.end),
       End: handler.end,
       Arguments: {
         Payload: this.getLambdaPayload(handler.name),
-        FunctionName: lambda.functionName,
+        FunctionName: lambdaHandler.functionName,
       },
       Assign: handler.assign,
       Output: handler.output,
     };
 
-    await this.addRetryAndCatch(handler, handler.name);
+    this.addRetryAndCatch(handler, handler.name);
     return handler.name;
   }
 
@@ -298,8 +296,6 @@ export class Schema {
     if (!paramsByMethod) {
       return {};
     }
-
-    console.log(params);
 
     if (paramsByMethod.type === 'String') {
       return paramsByMethod.initialValue || '';
@@ -404,7 +400,7 @@ export class Schema {
     this.states[stateName] = currentState;
   }
 
-  private async addCatch(state: RetryCatchTypes<any>, stateName: string) {
+  private addCatch(state: RetryCatchTypes<any>, stateName: string) {
     if (!state.catch || state.catch.length === 0) {
       return;
     }
@@ -414,7 +410,7 @@ export class Schema {
     for (const catchValue of state.catch || []) {
       catches.push({
         ErrorEquals: catchValue.errorEquals,
-        Next: (await this.getNextState(catchValue.next)) as string,
+        Next: this.getNextState(catchValue.next) as string,
       });
     }
 
@@ -424,8 +420,8 @@ export class Schema {
     this.states[stateName] = currentState;
   }
 
-  private async addRetryAndCatch(state: RetryCatchTypes<any>, stateName: string) {
+  private addRetryAndCatch(state: RetryCatchTypes<any>, stateName: string) {
     this.addCatch(state, stateName);
-    await this.addRetry(state, stateName);
+    this.addRetry(state, stateName);
   }
 }

@@ -4,18 +4,22 @@ import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource
 import type { RestApi } from '../../rest-api';
 
 export class ResourceFactory {
-  private resources: Record<string, ApiGatewayResource> = {};
+  private apiResources: Record<string, ApiGatewayResource> = {};
 
   constructor(private scope: RestApi) {}
 
+  get resources() {
+    return Object.values(this.apiResources);
+  }
+
   public getResource(fullPath: string = '/') {
-    let resourceId = this.scope.api.rootResourceId;
+    let resourceId = this.scope.rootResourceId;
     if (fullPath === '/') {
       return resourceId;
     }
 
-    if (this.resources[fullPath]) {
-      return this.resources[fullPath].id;
+    if (this.apiResources[fullPath]) {
+      return this.apiResources[fullPath].id;
     }
 
     const paths = [];
@@ -23,20 +27,18 @@ export class ResourceFactory {
     for (const resourcePath of resourcePaths) {
       paths.push(resourcePath);
       const path = paths.join('/');
-      if (this.resources[path]) {
-        resourceId = this.resources[path].id;
+      if (this.apiResources[path]) {
+        resourceId = this.apiResources[path].id;
         continue;
       }
 
       const resource = new ApiGatewayResource(this.scope, cleanString(path), {
         parentId: resourceId,
         pathPart: resourcePath,
-        restApiId: this.scope.api.id,
+        restApiId: this.scope.id,
       });
 
-      this.scope.addDependency(resource);
-
-      this.resources[path] = resource;
+      this.apiResources[path] = resource;
       resourceId = resource.id;
     }
 

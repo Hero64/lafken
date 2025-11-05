@@ -1,47 +1,41 @@
-import type { Construct } from 'constructs';
-import type { DependentResource } from './resource.types';
+import { Construct } from 'constructs';
 
 class AlicantoResource {
   private globals: Record<string, Construct> = {};
-  private dependent: DependentResource[] = [];
+  private dependent: (() => void)[] = [];
 
-  create = <T extends new (...args: any[]) => Construct>(
-    module: string,
-    ExtendResource: T,
-    ...props: ConstructorParameters<T>
-  ): InstanceType<T> & {
-    isGlobal(): void;
-    isDependent(resolveDependency: () => void): void;
-  } => {
+  make<T extends new (...args: any[]) => Construct>(ExtendResource: T) {
     const self = this;
 
+    if (!(ExtendResource.prototype instanceof Construct)) {
+      throw new Error('Only classes that extend from Construct are permitted.');
+    }
+
     class Resource extends ExtendResource {
-      isGlobal() {
-        const id = props[1] as string;
-        self.globals[`${module}-${id}`] = this;
+      #id: string;
+
+      constructor(...props: any[]) {
+        super(...props);
+        this.#id = props[1];
+      }
+      isGlobal(module: string) {
+        self.globals[`${module}-${this.#id}`] = this;
       }
 
       isDependent(resolveDependency: () => void) {
-        self.dependent.push({
-          resolveDependency,
-          resource: this,
-        });
+        self.dependent.push(resolveDependency);
       }
     }
 
-    return new Resource(...props) as InstanceType<T> & {
-      isGlobal(): void;
-      isDependent(resolveDependency: () => void): void;
-    };
-  };
-
+    return Resource;
+  }
   getResource<T = any>(id: string): T {
     return this.globals[id] as T;
   }
 
   async callDependentCallbacks() {
-    for (const resource of this.dependent) {
-      await resource.resolveDependency();
+    for (const callback of this.dependent) {
+      await callback();
     }
   }
 }

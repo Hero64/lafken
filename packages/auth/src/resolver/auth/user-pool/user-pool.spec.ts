@@ -12,14 +12,13 @@ describe('Auth user pool', () => {
   it('should create a simple user pool', async () => {
     const { stack } = setupTestingStack();
 
-    const userPool = new UserPool(stack, 'test', {});
+    new UserPool(stack, 'test', {});
 
-    await userPool.create();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
       lambda_config: {},
-      name: 'test-user-pool',
+      name: 'test',
     });
   });
 
@@ -41,7 +40,7 @@ describe('Auth user pool', () => {
 
     const { stack } = setupTestingStack();
 
-    const userPool = new UserPool(stack, 'test', {
+    new UserPool(stack, 'test', {
       attributes: AuthAttributes,
       accountRecovery: ['verified_email', 'verified_phone_number'],
       autoVerifyAttributes: ['email', 'phone'],
@@ -97,7 +96,6 @@ describe('Auth user pool', () => {
       },
     });
 
-    await userPool.create();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
@@ -136,7 +134,7 @@ describe('Auth user pool', () => {
       },
       lambda_config: {},
       mfa_configuration: 'OPTIONAL',
-      name: 'test-user-pool',
+      name: 'test',
       password_policy: {
         minimum_length: 100,
         require_numbers: true,
@@ -169,7 +167,7 @@ describe('Auth user pool', () => {
       sms_authentication_message: 'MFA',
       sms_configuration: {
         external_id: 'test-sms-config',
-        sns_caller_arn: '${aws_iam_role.user-pool_cognitoSmsRole_83C9FCA5.arn}',
+        sns_caller_arn: '${aws_iam_role.test-cognito-sms-role.arn}',
       },
       user_pool_tier: 'PLUS',
       username_configuration: {

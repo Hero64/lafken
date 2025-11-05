@@ -1,49 +1,39 @@
-import { alicantoResource, LambdaHandler } from '@alicanto/resolver';
+import { type AppModule, alicantoResource, LambdaHandler } from '@alicanto/resolver';
 import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
-import { Construct } from 'constructs';
 import type { ScheduleTime } from '../../main';
 import type { CronProps } from './cron.types';
 
-export class Cron extends Construct {
+export class Cron extends alicantoResource.make(CloudwatchEventRule) {
   constructor(
-    scope: Construct,
-    private id: string,
+    scope: AppModule,
+    id: string,
     private props: CronProps
   ) {
-    super(scope, `${id}-rule`);
+    const { handler } = props;
+    super(scope, `${handler.name}-cron`, {
+      name: handler.name,
+      scheduleExpression: Cron.buildScheduleExpression(handler.schedule),
+    });
+
+    this.isGlobal(scope.id);
+    this.addEventTarget(id);
   }
 
-  public async create() {
+  public addEventTarget(id: string) {
     const { handler, resourceMetadata } = this.props;
 
     const lambdaHandler = new LambdaHandler(this, 'handler', {
       ...handler,
       filename: resourceMetadata.filename,
       pathName: resourceMetadata.foldername,
-      minify: resourceMetadata.minify,
       suffix: 'event',
       principal: 'events.amazonaws.com',
     });
 
-    const lambda = await lambdaHandler.generate();
-
-    const rule = alicantoResource.create(
-      resourceMetadata.name,
-      CloudwatchEventRule,
-      this,
-      `${this.id}-rule`,
-      {
-        name: `${handler.name}-cron`,
-        scheduleExpression: this.buildScheduleExpression(handler.schedule),
-      }
-    );
-
-    rule.isGlobal();
-
-    new CloudwatchEventTarget(this, `${this.id}-event-target`, {
-      rule: rule.name,
-      arn: lambda.arn,
+    new CloudwatchEventTarget(this, `${id}-event-target`, {
+      rule: this.name,
+      arn: lambdaHandler.arn,
       retryPolicy: {
         maximumRetryAttempts: handler.retryAttempts,
         maximumEventAgeInSeconds: handler.maxEventAge,
@@ -51,7 +41,7 @@ export class Cron extends Construct {
     });
   }
 
-  private buildScheduleExpression(schedule: string | ScheduleTime): string {
+  private static buildScheduleExpression(schedule: string | ScheduleTime): string {
     if (typeof schedule === 'string') {
       return `cron(${schedule})`;
     }

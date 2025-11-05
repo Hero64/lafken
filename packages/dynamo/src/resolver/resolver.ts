@@ -7,7 +7,7 @@ export class DynamoResolver implements ResolverType {
 
   constructor(private models: ClassResource[]) {}
 
-  public async beforeCreate(scope: AppModule) {
+  public beforeCreate(scope: AppModule) {
     for (const bucket of this.models) {
       new Table(scope, {
         classResource: bucket,
@@ -15,7 +15,7 @@ export class DynamoResolver implements ResolverType {
     }
   }
 
-  public async create() {
+  public create() {
     throw new Error('It is not possible to parse this service');
   }
 }

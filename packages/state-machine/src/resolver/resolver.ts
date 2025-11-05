@@ -22,7 +22,7 @@ export class StateMachineResolver implements ResolverType {
   public type = RESOURCE_TYPE;
   private role: Role;
 
-  public async beforeCreate(scope: AppStack) {
+  public beforeCreate(scope: AppStack) {
     this.role = new Role(scope, 'state-machine-global-role', {
       name: 'state-machine-global-role',
       services: [
@@ -39,21 +39,22 @@ export class StateMachineResolver implements ResolverType {
     });
   }
 
-  public async create(module: AppModule, resource: ClassResource) {
+  public create(module: AppModule, resource: ClassResource) {
     const metadata = getResourceMetadata<StateMachineResourceMetadata>(resource);
     const handlers = getResourceHandlerMetadata<LambdaStateMetadata>(resource);
 
-    lambdaAssets.initializeMetadata(metadata.foldername, metadata.filename, {
+    lambdaAssets.initializeMetadata({
+      pathName: metadata.foldername,
+      filename: metadata.filename,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
+      minify: metadata.minify,
     });
 
-    const stateMachine = new StateMachine(module, metadata.name, {
+    new StateMachine(module, metadata.name, {
       classResource: resource,
       resourceMetadata: metadata,
       role: this.role,
     });
-
-    await stateMachine.create();
   }
 }

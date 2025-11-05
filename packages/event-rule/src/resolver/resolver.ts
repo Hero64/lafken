@@ -45,32 +45,31 @@ export class EventRuleResolver implements ResolverType {
     }
   }
 
-  public async create(module: AppModule, resource: ClassResource) {
+  public create(module: AppModule, resource: ClassResource) {
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<EventLambdaMetadata>(resource);
-    lambdaAssets.initializeMetadata(metadata.foldername, metadata.filename, {
+    lambdaAssets.initializeMetadata({
+      pathName: metadata.foldername,
+      filename: metadata.filename,
+      minify: metadata.minify,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
     });
 
     for (const handler of handlers) {
-      const id = `${metadata.name}-${handler.name}`;
+      const id = `${handler.name}-${metadata.name}`;
       if (handler.eventType === 'rule') {
         const bus = this.eventBuses[handler.bus || 'default'];
-        const rule = new Rule(module, id, {
+        new Rule(module, id, {
           bus,
           handler,
           resourceMetadata: metadata,
         });
-
-        await rule.create();
       } else if (handler.eventType === 'cron') {
-        const cron = new Cron(module, id, {
+        new Cron(module, id, {
           handler,
           resourceMetadata: metadata,
         });
-
-        await cron.create();
       }
     }
   }

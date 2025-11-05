@@ -16,13 +16,13 @@ describe('Response factory', () => {
       authorization: 'NONE',
       httpMethod: 'GET',
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
     });
 
     const integration = new ApiGatewayIntegration(stack, 'test-integration', {
       httpMethod: method.httpMethod,
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
       type: '',
     });
 
@@ -52,13 +52,13 @@ describe('Response factory', () => {
       authorization: 'NONE',
       httpMethod: 'GET',
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
     });
 
     const integration = new ApiGatewayIntegration(stack, 'test-integration', {
       httpMethod: method.httpMethod,
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
       type: '',
     });
 
@@ -102,13 +102,13 @@ describe('Response factory', () => {
       authorization: 'NONE',
       httpMethod: 'GET',
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
     });
 
     const integration = new ApiGatewayIntegration(stack, 'test-integration', {
       httpMethod: method.httpMethod,
       resourceId: '',
-      restApiId: restApi.api.id,
+      restApiId: restApi.id,
       type: '',
     });
 
@@ -153,7 +153,7 @@ describe('Response factory', () => {
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayMethodResponse, {
       response_models: {
-        'application/json': '${aws_api_gateway_model.testing-api_test_F4216966.id}',
+        'application/json': '${aws_api_gateway_model.testing-api-api_test_CD03EE9D.name}',
       },
       response_parameters: {
         parameter: true,
