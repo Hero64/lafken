@@ -15,9 +15,9 @@ class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
   public initializeMetadata(props: AssetMetadata) {
-    const { filename, pathName } = props;
+    const { filename, foldername } = props;
 
-    const prebuildPath = this.getPrebuildPath(pathName, filename);
+    const prebuildPath = this.getPrebuildPath(foldername, filename);
     this.lambdaAssets[prebuildPath] = {
       metadata: props,
       lambdas: [],
@@ -25,11 +25,11 @@ class LambdaAssets {
   }
 
   public addLambda(props: AddLambdaProps) {
-    const { pathName, filename, lambda, scope } = props;
-    const prebuildPath = this.getPrebuildPath(pathName, filename);
+    const { foldername, filename, lambda, scope } = props;
+    const prebuildPath = this.getPrebuildPath(foldername, filename);
 
     if (!this.lambdaAssets[prebuildPath]) {
-      throw new Error(`asset from ${pathName}/${filename} not initialized`);
+      throw new Error(`asset from ${foldername}/${filename} not initialized`);
     }
 
     this.lambdaAssets[prebuildPath].lambdas.push(lambda);
@@ -57,7 +57,7 @@ class LambdaAssets {
   private async buildAsset(props: BuildAssetProps) {
     const { metadata, scope } = props;
 
-    const prebuildPath = this.getPrebuildPath(metadata.pathName, metadata.filename);
+    const prebuildPath = this.getPrebuildPath(metadata.foldername, metadata.filename);
 
     const lambdaAsset = this.lambdaAssets[prebuildPath];
     const outputPath = this.createOutputPath(prebuildPath);
@@ -79,6 +79,10 @@ class LambdaAssets {
       ],
     });
 
+    if (lambdaAsset.metadata.afterBuild) {
+      await lambdaAsset.metadata.afterBuild(outputPath);
+    }
+
     const asset = new TerraformAsset(scope, `${metadata.filename}-asset`, {
       path: outputPath,
       type: AssetType.ARCHIVE,
@@ -87,8 +91,8 @@ class LambdaAssets {
     return asset;
   }
 
-  private getPrebuildPath(pathName: string, filename: string) {
-    return join(pathName, `${filename}.js`);
+  private getPrebuildPath(foldername: string, filename: string) {
+    return join(foldername, `${filename}.js`);
   }
 
   private createOutputPath(path: string) {

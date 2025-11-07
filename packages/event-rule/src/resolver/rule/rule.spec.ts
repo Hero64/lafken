@@ -62,7 +62,7 @@ describe('Rule', () => {
         filename: metadata.filename,
         pattern: { source: 'foo.bar' },
         name: 'rule',
-        pathName: metadata.foldername,
+        foldername: metadata.foldername,
         suffix: 'event',
       })
     );

@@ -68,7 +68,7 @@ describe('lambda integration', () => {
         method: 'GET',
         name: 'lambdaHandler1',
         path: '/',
-        pathName: __dirname,
+        foldername: __dirname,
         principal: 'apigateway.amazonaws.com',
         suffix: 'api',
       })
@@ -94,7 +94,7 @@ describe('lambda integration', () => {
         method: 'GET',
         name: 'lambdaHandler2',
         path: '/',
-        pathName: __dirname,
+        foldername: __dirname,
         principal: 'apigateway.amazonaws.com',
         suffix: 'api',
       })
@@ -119,7 +119,7 @@ describe('lambda integration', () => {
         method: 'GET',
         name: 'lambdaHandler3',
         path: '/',
-        pathName: __dirname,
+        foldername: __dirname,
         principal: 'apigateway.amazonaws.com',
         suffix: 'api',
       })

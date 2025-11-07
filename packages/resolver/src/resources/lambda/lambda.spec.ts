@@ -28,15 +28,16 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function', () => {
     lambdaAssets.initializeMetadata({
-      pathName: '/temp',
+      foldername: '/temp',
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
+      minify: false,
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
       name: 'lambda-test',
-      pathName: '/temp',
+      foldername: '/temp',
     });
 
     const synthesized = Testing.synth(stack);
@@ -56,15 +57,16 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with custom variables', () => {
     lambdaAssets.initializeMetadata({
-      pathName: '/temp',
+      foldername: '/temp',
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
+      minify: false,
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
       name: 'lambda-test',
-      pathName: '/temp',
+      foldername: '/temp',
       lambda: {
         enableTrace: true,
         services: ['s3'],

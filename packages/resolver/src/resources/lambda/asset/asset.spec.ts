@@ -22,12 +22,13 @@ jest.mock('cdktf', () => {
 });
 
 describe('Lambda Assets', () => {
-  it('should initialize asset metadata', async () => {
+  it('should initialize asset metadata', () => {
     lambdaAssets.initializeMetadata({
-      pathName: '/tmp',
+      foldername: '/tmp',
       filename: 'handler',
       className: 'Testing',
       methods: ['foo', 'bar'],
+      minify: false,
     });
 
     const prebuildPath = '/tmp/handler.js';
@@ -39,7 +40,8 @@ describe('Lambda Assets', () => {
         className: 'Testing',
         filename: 'handler',
         methods: ['foo', 'bar'],
-        pathName: '/tmp',
+        foldername: '/tmp',
+        minify: false,
       },
     });
   });
@@ -47,10 +49,11 @@ describe('Lambda Assets', () => {
   it('should create terraform asset', async () => {
     const { stack } = setupTestingStack();
     lambdaAssets.initializeMetadata({
-      pathName: '/tmp',
+      foldername: '/tmp',
       filename: 'handler',
       className: 'Testing',
       methods: ['foo', 'bar'],
+      minify: false,
     });
 
     const lambda = new LambdaFunction(stack, 'test-handler', {
@@ -60,7 +63,7 @@ describe('Lambda Assets', () => {
 
     lambdaAssets.addLambda({
       filename: 'handler',
-      pathName: '/tmp',
+      foldername: '/tmp',
       scope: stack,
       lambda,
     });

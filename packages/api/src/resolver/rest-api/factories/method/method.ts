@@ -40,9 +40,11 @@ export class MethodFactory {
     const validatorId = this.scope.validatorFactory.getValidator(
       requestHelper.getValidatorProperties()
     );
-    const authorizationProps = await this.scope.authorizerFactory.getAuthorizerProps(
-      handler.auth ?? resourceMetadata.auth
-    );
+    const authorizationProps = await this.scope.authorizerFactory.getAuthorizerProps({
+      fullPath,
+      method: handler.method,
+      authorizer: handler.auth ?? resourceMetadata.auth,
+    });
 
     let modelName: string | undefined;
 

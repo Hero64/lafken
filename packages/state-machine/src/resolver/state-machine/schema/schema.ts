@@ -265,8 +265,7 @@ export class Schema {
     const lambdaHandler = new LambdaHandler(this.scope, id, {
       ...handler,
       filename: this.resourceMetadata.filename,
-      pathName: this.resourceMetadata.foldername,
-      minify: this.resourceMetadata.minify,
+      foldername: this.resourceMetadata.foldername,
       suffix: 'states',
     });
 

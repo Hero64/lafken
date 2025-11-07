@@ -23,7 +23,7 @@ export class LambdaIntegration implements Integration {
       {
         ...handler,
         filename: resourceMetadata.filename,
-        pathName: resourceMetadata.foldername,
+        foldername: resourceMetadata.foldername,
         principal: 'apigateway.amazonaws.com',
         suffix: 'api',
       }

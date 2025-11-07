@@ -26,7 +26,7 @@ export class Cron extends alicantoResource.make(CloudwatchEventRule) {
     const lambdaHandler = new LambdaHandler(this, 'handler', {
       ...handler,
       filename: resourceMetadata.filename,
-      pathName: resourceMetadata.foldername,
+      foldername: resourceMetadata.foldername,
       suffix: 'event',
       principal: 'events.amazonaws.com',
     });

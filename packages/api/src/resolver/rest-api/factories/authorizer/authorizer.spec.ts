@@ -11,6 +11,7 @@ import {
   AuthorizerHandler,
   CognitoAuthorizer,
   CustomAuthorizer,
+  Method,
 } from '../../../../main';
 import { setupTestingRestApi } from '../../../utils/testing.utils';
 
@@ -31,7 +32,10 @@ describe('authorizer factory', () => {
 
   it('should get a none authorizer properties', () => {
     const { restApi } = setupTestingRestApi();
-    const properties = restApi.authorizerFactory.getAuthorizerProps();
+    const properties = restApi.authorizerFactory.getAuthorizerProps({
+      fullPath: '/',
+      method: Method.GET,
+    });
 
     expect(properties).toStrictEqual({
       authorization: 'NONE',
@@ -53,7 +57,11 @@ describe('authorizer factory', () => {
     });
 
     const properties = restApi.authorizerFactory.getAuthorizerProps({
-      authorizerName: 'api-key-auth',
+      fullPath: '/',
+      method: Method.GET,
+      authorizer: {
+        authorizerName: 'api-key-auth',
+      },
     });
 
     const synthesized = Testing.synth(stack);
@@ -86,7 +94,11 @@ describe('authorizer factory', () => {
     });
 
     const properties = restApi.authorizerFactory.getAuthorizerProps({
-      authorizerName: 'custom-auth',
+      fullPath: '/',
+      method: Method.GET,
+      authorizer: {
+        authorizerName: 'custom-auth',
+      },
     });
 
     const synthesized = Testing.synth(stack);
@@ -124,18 +136,54 @@ describe('authorizer factory', () => {
     userPool.isGlobal('auth');
 
     const properties = restApi.authorizerFactory.getAuthorizerProps({
-      authorizerName: 'cognito-auth',
+      fullPath: '/',
+      method: Method.GET,
+      authorizer: {
+        authorizerName: 'cognito-auth',
+      },
     });
 
     const synthesized = Testing.synth(stack);
 
     expect(properties).toMatchObject({
       authorization: 'COGNITO_USER_POOLS',
-      authorizationScopes: [],
+      authorizationScopes: undefined,
     });
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayAuthorizer, {
       type: 'COGNITO_USER_POOLS',
+    });
+  });
+
+  it('should get authorizers permissions', () => {
+    @CustomAuthorizer({
+      name: 'authorizer-permission',
+    })
+    class CustomAuthTest {
+      @AuthorizerHandler()
+      handler() {}
+    }
+
+    const { restApi } = setupTestingRestApi({
+      auth: {
+        authorizers: [CustomAuthTest],
+        defaultAuthorizerName: 'authorizer-permission',
+      },
+    });
+
+    restApi.authorizerFactory.getAuthorizerProps({
+      fullPath: '/',
+      method: Method.GET,
+      authorizer: {
+        authorizerName: 'authorizer-permission',
+        scopes: ['foo', 'bar'],
+      },
+    });
+
+    expect(restApi.authorizerFactory.permissions).toContainEqual({
+      filename: 'authorizer.spec.ts',
+      foldername: __dirname,
+      pathScopes: { '/': { GET: ['foo', 'bar'] } },
     });
   });
 });

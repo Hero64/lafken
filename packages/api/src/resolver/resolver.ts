@@ -41,7 +41,7 @@ export class ApiResolver implements ResolverType {
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
     lambdaAssets.initializeMetadata({
-      pathName: metadata.foldername,
+      foldername: metadata.foldername,
       filename: metadata.filename,
       minify: metadata.minify,
       className: metadata.originalName,
@@ -82,23 +82,10 @@ export class ApiResolver implements ResolverType {
         continue;
       }
 
-      option.extend({
+      await option.extend({
         scope,
         api,
       });
     }
-    // TODO: crear esto
-    // const pathPermissions = apiManager.getPathPermissions();
-    // for (const apiName in pathPermissions) {
-    //   for (const authorizerName in pathPermissions[apiName]) {
-    //     const authorizer = apiManager.getAuthorizer(
-    //       authorizerName,
-    //       apiName
-    //     ) as CustomAuthorizerData;
-    //     const permissions = JSON.stringify(pathPermissions[apiName][authorizerName]);
-    //     const path = join(process.cwd(), 'cdk.out', authorizer.assetPath);
-    //     await writeFile(`${path}/${PERMISSION_DEFINITION_FILE}`, permissions);
-    //   }
-    // }
   }
 }

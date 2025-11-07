@@ -2,6 +2,7 @@ import { enableBuildEnvVariable } from '@alicanto/common';
 import {
   alicantoResource,
   ContextName,
+  lambdaAssets,
   type ResolverType,
   Role,
 } from '@alicanto/resolver';
@@ -41,6 +42,7 @@ export class AppStack extends TerraformStack {
 
     this.addAspectProperties();
     await alicantoResource.callDependentCallbacks();
+    await lambdaAssets.createAssets();
     if (extend) {
       await extend(this);
     }

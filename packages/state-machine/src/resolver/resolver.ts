@@ -44,7 +44,7 @@ export class StateMachineResolver implements ResolverType {
     const handlers = getResourceHandlerMetadata<LambdaStateMetadata>(resource);
 
     lambdaAssets.initializeMetadata({
-      pathName: metadata.foldername,
+      foldername: metadata.foldername,
       filename: metadata.filename,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),

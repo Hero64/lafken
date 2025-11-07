@@ -30,6 +30,7 @@ export class LambdaHandler extends alicantoResource.make(LambdaFunction) {
 
     const environmentProps: GetEnvironmentProps = {
       ...contextValueProps,
+      id,
       scope,
     };
 
@@ -82,7 +83,7 @@ export class LambdaHandler extends alicantoResource.make(LambdaFunction) {
 
     lambdaAssets.addLambda({
       filename: props.filename,
-      pathName: props.pathName,
+      foldername: props.foldername,
       lambda: this,
       scope: this,
     });
@@ -122,14 +123,14 @@ export class LambdaHandler extends alicantoResource.make(LambdaFunction) {
   }
 
   private static getCurrentEnvironment(props: GetEnvironmentProps) {
-    const { appContext, moduleContext, lambda, scope } = props;
+    const { appContext, moduleContext, lambda, scope, id } = props;
     const globalEnv = {
       ...(appContext.env || {}),
       ...(moduleContext?.env || {}),
     };
     const env = new Environment(
       scope,
-      'lambda-env',
+      `${id}-lambda-env`,
       !lambda?.env ? {} : lambda?.env,
       globalEnv
     );

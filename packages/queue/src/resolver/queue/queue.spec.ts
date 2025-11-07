@@ -85,7 +85,7 @@ describe('Queue', () => {
         filename: 'test.js',
         isFifo: true,
         name: 'fifo',
-        pathName: __dirname,
+        foldername: __dirname,
         suffix: 'queue',
       })
     );
@@ -128,7 +128,7 @@ describe('Queue', () => {
         filename: 'test.js',
         isFifo: true,
         name: 'fifo',
-        pathName: __dirname,
+        foldername: __dirname,
         suffix: 'queue',
       })
     );

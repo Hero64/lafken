@@ -57,7 +57,7 @@ describe('Cron', () => {
         filename: metadata.filename,
         schedule: { day: 10, hour: 11 },
         name: 'cron',
-        pathName: metadata.foldername,
+        foldername: metadata.foldername,
         suffix: 'event',
       })
     );

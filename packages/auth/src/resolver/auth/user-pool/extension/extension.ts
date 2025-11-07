@@ -24,8 +24,7 @@ export class Extension extends Construct {
         {
           ...handler,
           filename: resourceMetadata.filename,
-          pathName: resourceMetadata.foldername,
-          minify: resourceMetadata.minify,
+          foldername: resourceMetadata.foldername,
           principal: 'cognito-idp.amazonaws.com',
           suffix: 'auth',
         }

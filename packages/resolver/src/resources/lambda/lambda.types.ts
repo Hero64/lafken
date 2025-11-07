@@ -1,14 +1,18 @@
-import type { LambdaMetadata, LambdaProps, ServicesValues } from '@alicanto/common';
+import type {
+  LambdaMetadata,
+  LambdaProps,
+  ResourceMetadata,
+  ServicesValues,
+} from '@alicanto/common';
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 
-export interface LambdaHandlerProps extends LambdaMetadata {
-  pathName: string;
+export interface LambdaHandlerProps
+  extends LambdaMetadata,
+    Pick<ResourceMetadata, 'filename' | 'foldername'> {
   filename: string;
   suffix?: string;
-  excludeFiles?: string[];
   principal?: string;
-  minify?: boolean;
 }
 
 export interface GetRoleArnProps {
@@ -33,5 +37,6 @@ export interface GetCurrentOrContextValueProps<
 }
 
 export interface GetEnvironmentProps extends CommonContextProps {
+  id: string;
   scope: Construct;
 }

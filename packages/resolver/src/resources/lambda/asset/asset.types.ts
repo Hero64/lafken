@@ -1,13 +1,14 @@
+import type { ResourceMetadata } from '@alicanto/common';
 import type { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
 import type { Construct } from 'constructs';
-import type { LambdaHandlerProps } from '../lambda.types';
 
 interface BaseAsset
-  extends Pick<LambdaHandlerProps, 'filename' | 'pathName' | 'minify'> {}
+  extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'minify'> {}
 
 export interface AssetMetadata extends BaseAsset {
   className: string;
   methods: string[];
+  afterBuild?: (outputPath: string) => void;
 }
 
 export interface AssetProps {

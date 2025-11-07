@@ -40,7 +40,11 @@ export class RestApi extends alicantoResource.make(ApiGatewayRestApi) {
     this.stageName = this.getStageName();
     this.resourceFactory = new ResourceFactory(this);
     this.validatorFactory = new ValidatorFactory(this);
-    this.authorizerFactory = new AuthorizerFactory(this, props.auth?.authorizers || []);
+    this.authorizerFactory = new AuthorizerFactory(
+      this,
+      props.auth?.authorizers || [],
+      props.auth?.defaultAuthorizerName
+    );
     this.modelFactory = new ModelFactory(this);
     this.responseFactory = new ResponseFactory(this);
     this.methodFactory = new MethodFactory(this);

@@ -49,7 +49,7 @@ export class EventRuleResolver implements ResolverType {
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<EventLambdaMetadata>(resource);
     lambdaAssets.initializeMetadata({
-      pathName: metadata.foldername,
+      foldername: metadata.foldername,
       filename: metadata.filename,
       minify: metadata.minify,
       className: metadata.originalName,
