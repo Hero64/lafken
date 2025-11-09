@@ -4,6 +4,8 @@ import { alicantoResource } from '@alicanto/resolver';
 import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
+import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
 import { Testing } from 'cdktf';
 import {
@@ -109,6 +111,16 @@ describe('State machine status integration', () => {
         'application/json': '{"error": "Internal server error"}',
       },
       status_code: '500',
+    });
+    expect(synthesized).toHaveResourceWithProperties(IamRole, {
+      assume_role_policy:
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
+      name: 'state_machine-delete',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
+      policy:
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["states:StopExecution"], "Resource" = ["*"]}]})}',
     });
   });
 

@@ -56,9 +56,9 @@ export class IntegrationHelper {
         (S3Permissions | StateMachinePermissions | DynamoPermissions | SQSPermissions)[]
       >
     > = {
-      's3.write': ['GetObject'],
-      's3.read': ['GetObject', 'PutObject'],
-      's3.delete': ['DeleteItem'],
+      's3.read': ['GetObject'],
+      's3.write': ['GetObject', 'PutObject'],
+      's3.delete': ['DeleteObject'],
       'state_machine.read': ['DescribeExecution'],
       'state_machine.write': ['StopExecution', 'StartExecution'],
       'state_machine.delete': ['StopExecution'],

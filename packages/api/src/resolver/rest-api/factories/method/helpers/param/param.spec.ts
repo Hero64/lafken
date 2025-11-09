@@ -1,5 +1,5 @@
-import { ParamHelper } from './param';
 import { getMetadataPrototypeByKey, LambdaReflectKeys } from '@alicanto/common';
+import { ParamHelper } from './param';
 
 // Mock the metadata function
 jest.mock('@alicanto/common', () => ({
@@ -372,6 +372,50 @@ describe('ParamHelper', () => {
       const result = paramHelper.paramsBySource;
 
       expect(result).toEqual({});
+    });
+  });
+
+  describe('validate path params', () => {
+    it('should throw error in non resolver param in path', () => {
+      const mockParams = {
+        testMethod: {
+          type: 'Object',
+          properties: [
+            {
+              type: 'String',
+              name: 'name',
+              source: 'path',
+              validation: {},
+            },
+          ],
+        },
+      };
+
+      mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
+      expect(() => {
+        paramHelper.validateParamsInPath('/');
+      }).toThrow();
+    });
+
+    it('should throw error with extra parameters', () => {
+      const mockParams = {
+        testMethod: {
+          type: 'Object',
+          properties: [
+            {
+              type: 'String',
+              name: 'name',
+              source: 'path',
+              validation: {},
+            },
+          ],
+        },
+      };
+
+      mockGetMetadataPrototypeByKey.mockReturnValue(mockParams);
+      expect(() => {
+        paramHelper.validateParamsInPath('/{name}/{lastName+}');
+      }).toThrow();
     });
   });
 });
