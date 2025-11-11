@@ -32,11 +32,15 @@ export class ResourceFactory {
         continue;
       }
 
-      const resource = new ApiGatewayResource(this.scope, cleanString(path), {
-        parentId: resourceId,
-        pathPart: resourcePath,
-        restApiId: this.scope.id,
-      });
+      const resource = new ApiGatewayResource(
+        this.scope,
+        cleanString(path.replace(/[+*]/g, (m) => (m === '+' ? 'plus' : 'asterisk'))),
+        {
+          parentId: resourceId,
+          pathPart: resourcePath,
+          restApiId: this.scope.id,
+        }
+      );
 
       this.apiResources[path] = resource;
       resourceId = resource.id;
