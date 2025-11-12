@@ -104,7 +104,7 @@ describe('Dynamo put integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Item": "{ "foo": { "S": "bar" },"bar": { "S": "foo" },"list": { "L": "[{ "N": "1" },{ "N": "2" },{ "N": "3" },{ "N": "4" },{ "N": "5" }]" },"user": { "M": "{ "name": { "S": "test" },"isAdmin": { "BOOL": true },"address": { "L": "[{ "M": "{ "city": { "S": "springfield" } }" }]" } }" } }"}',
+          '{"TableName": "test","Item": { "foo": { "S": "bar" },"bar": { "S": "foo" },"list": { "L": [{ "N": "1" },{ "N": "2" },{ "N": "3" },{ "N": "4" },{ "N": "5" }] },"user": { "M": { "name": { "S": "test" },"isAdmin": { "BOOL": true },"address": { "L": [{ "M": { "city": { "S": "springfield" } } }] } } } }}',
       },
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:dynamodb:action/PutItem',
     });
@@ -161,7 +161,7 @@ describe('Dynamo put integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "${aws_dynamodb_table.test.id}","Item": "{ "name": { "S": "foo" },"date": { "S": "$context.requestTimeEpoch" } }"}',
+          '{"TableName": "${aws_dynamodb_table.test.id}","Item": { "name": { "S": "foo" },"date": { "S": "$context.requestTimeEpoch" } }}',
       },
     });
   });
@@ -178,7 +178,7 @@ describe('Dynamo put integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Item": "{ #set($comma = "") $comma"id": { "S": "$input.params().path.get(\'id\')" } #set($comma = ",")$comma"age": { "N": "$input.params(\'age\')" } #set($comma = ",") }"}',
+          '{"TableName": "test","Item": { #set($comma = "") $comma"id": { "S": "$input.params().path.get(\'id\')" } #set($comma = ",")$comma"age": { "N": "$input.params(\'age\')" } #set($comma = ",") }}',
       },
     });
   });

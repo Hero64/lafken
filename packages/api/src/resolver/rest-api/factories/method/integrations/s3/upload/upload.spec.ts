@@ -7,6 +7,7 @@ import {
 import { alicantoResource } from '@alicanto/resolver';
 import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
+import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
 import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource';
 import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
@@ -102,7 +103,7 @@ describe('Bucket upload integration', () => {
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResource(ApiGatewayResource);
-    expect(synthesized).toHaveResource(ApiGatewayResource);
+    expect(synthesized).toHaveResource(ApiGatewayMethod);
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
       integration_http_method: 'PUT',
       type: 'AWS',

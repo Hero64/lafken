@@ -98,7 +98,7 @@ describe('Dynamo delete integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Key": "{ "name": { "S": "foo" },"age": { "N": "30" } }"}',
+          '{"TableName": "test","Key": { "name": { "S": "foo" },"age": { "N": "30" } }}',
       },
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:dynamodb:action/DeleteItem',
     });
@@ -155,7 +155,7 @@ describe('Dynamo delete integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "${aws_dynamodb_table.test.id}","Key": "{ "name": { "S": "foo" },"age": { "N": "30" } }"}',
+          '{"TableName": "${aws_dynamodb_table.test.id}","Key": { "name": { "S": "foo" },"age": { "N": "30" } }}',
       },
     });
   });
@@ -172,7 +172,7 @@ describe('Dynamo delete integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Key": "{ "name": { "S": "$input.params().path.get(\'id\')" } }"}',
+          '{"TableName": "test","Key": { "name": { "S": "$input.params().path.get(\'id\')" } }}',
       },
     });
   });

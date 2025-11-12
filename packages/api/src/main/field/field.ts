@@ -8,7 +8,7 @@ export const Field = createFieldDecorator<ApiFieldProps, ApiFieldMetadata>({
     return {
       validation: {
         ...(props?.validation || {}),
-        required: props?.validation?.required || true,
+        required: props?.validation?.required ?? true,
       },
     };
   },
@@ -20,7 +20,7 @@ export const Param = createFieldDecorator<ApiFieldProps, ApiParamMetadata>({
       source: props?.source || 'query',
       validation: {
         ...(props?.validation || {}),
-        required: props?.validation?.required || true,
+        required: props?.validation?.required ?? true,
       },
     };
   },

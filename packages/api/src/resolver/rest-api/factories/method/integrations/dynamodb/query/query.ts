@@ -12,19 +12,16 @@ export class QueryIntegration
   extends DynamoBaseIntegration<DynamoQueryIntegrationResponse>
   implements Integration
 {
-  protected condition = '';
-  protected attributeValues: ApiObjectParam = {
+  private condition = '';
+  private attributeValues: Pick<ApiObjectParam, 'type' | 'properties'> = {
     type: 'Object',
-    destinationName: 'query',
-    name: 'query',
-    payload: {
-      id: 'query',
-      name: 'query',
-    },
     properties: [],
-    source: 'body',
-    validation: {},
   };
+  private attributeNames: Pick<ApiObjectParam, 'type'> & { properties: TemplateParam[] } =
+    {
+      type: 'Object',
+      properties: [],
+    };
   constructor(props: IntegrationProps) {
     super({
       ...props,
@@ -45,7 +42,7 @@ export class QueryIntegration
               integrationResponse.sortKey,
               props.paramHelper.pathParams
             ),
-            '&&'
+            'and'
           );
         }
 
@@ -64,19 +61,26 @@ export class QueryIntegration
           props.paramHelper.pathParams
         );
 
+        const attributeNameTemplate = props.templateHelper.generateTemplate({
+          field: this.attributeNames as ApiObjectParam,
+        });
+
         const tableTemplate = `"TableName": ${props.templateHelper.getTemplateFromProxyValue(tableResolver)},`;
         const keyConditionTemplate = `"KeyConditionExpression": "${this.condition.trim()}",`;
-        const expressionTemplate = `"ExpressionAttributeValues": ${this.getAttributeValueExpression()}`;
+        const expressionTemplate = `"ExpressionAttributeValues": ${this.getAttributeValueExpression()},`;
+        const expressionNameTemplate = `"ExpressionAttributeNames": ${attributeNameTemplate}`;
         const indexTemplate = `${index ? `,${index}` : ''}`;
-        return `{${tableTemplate}${keyConditionTemplate}${expressionTemplate}${indexTemplate}}`;
+
+        return `{${tableTemplate}${keyConditionTemplate}${expressionTemplate}${expressionNameTemplate}${indexTemplate}}`;
       },
     });
   }
 
   protected getAttributeValueExpression() {
     const { templateHelper } = this.props;
+
     const valueExpression = templateHelper.generateTemplate({
-      field: this.attributeValues,
+      field: this.attributeValues as ApiObjectParam,
       propertyWrapper: (template, field) => this.marshallField(template, field.type),
       valueParser: (value, fieldType) => {
         return fieldType === 'String' ? value : `"${value}"`;
@@ -110,7 +114,7 @@ export class QueryIntegration
   private resolveKeyCondition(
     keyValue: string,
     resolver: ProxyResolveObjectKeyValue,
-    union: '&&' | '||' | '' = ''
+    union: 'and' | 'or' | '' = ''
   ) {
     const { templateHelper } = this.props;
     const field: ApiParamMetadata = this.attributeToParam(keyValue, {
@@ -123,19 +127,30 @@ export class QueryIntegration
           ? `"${resolver.value}"`
           : resolver.value,
     });
-
-    let template = `${union} ${resolver.key} = ${keyValue}`;
+    const attributeName = `#${resolver.key}`;
+    let valueTemplate = `${union} ${attributeName} = ${keyValue}`;
 
     if (resolver.field) {
-      template = templateHelper.validateTemplateArgument(
+      valueTemplate = templateHelper.validateTemplateArgument(
         resolver.path.split('.'),
         field,
-        template,
+        valueTemplate,
         true
       );
     }
 
-    this.condition += ` ${template}`;
+    this.attributeNames.properties.push({
+      destinationName: attributeName,
+      type: 'String',
+      name: attributeName,
+      source: 'body',
+      validation: resolver.field?.validation || {
+        required: true,
+      },
+      directTemplateValue: `"${resolver.key}"`,
+    });
+
+    this.condition += ` ${valueTemplate}`;
     this.attributeValues.properties.push(field);
   }
 }

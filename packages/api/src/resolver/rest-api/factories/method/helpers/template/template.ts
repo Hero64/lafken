@@ -52,7 +52,6 @@ export class TemplateHelper {
       for (const property of field.properties) {
         const value = `${currentValue ? `${currentValue}.` : ''}${property.name}`;
         const key = `${quoteType}${property.destinationName}${quoteType}`;
-
         const fieldTemplate = this.generateTemplate(
           {
             field: {
@@ -73,7 +72,7 @@ export class TemplateHelper {
           {
             ...field,
             source: field.source || property.source || 'body',
-            validation: {},
+            validation: property.validation,
           },
           objectTemplate,
           index === 0
@@ -86,7 +85,6 @@ export class TemplateHelper {
     if (field.type === 'String') {
       const quoteTypeValue = field.source === 'body' ? '' : quoteType;
       const template = `${quoteTypeValue}${value}${quoteTypeValue}`;
-
       return valueParser(field.directTemplateValue || template, field.type);
     }
 
@@ -120,7 +118,7 @@ export class TemplateHelper {
         validationTemplate += ` && ${sourceType.replace(TEMPLATE_KEY_REPLACE, lastValue)}.size() > 0`;
       }
 
-      validationTemplate = `#if(${validationTemplate}) ${template} #end`;
+      validationTemplate = `#if(${validationTemplate}) ${field.directTemplateValue || template} #end`;
       return validationTemplate;
     }
 

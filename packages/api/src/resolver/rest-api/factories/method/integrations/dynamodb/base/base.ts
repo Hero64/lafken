@@ -14,8 +14,6 @@ const mapDynamoType: Record<FieldTypes, string> = {
   String: 'S',
 };
 
-const noStringConvertTypes = new Set<FieldTypes>(['String', 'Boolean']);
-
 export class DynamoBaseIntegration<T> implements Integration {
   constructor(protected props: DynamoIntegrationBaseProps<T>) {}
 
@@ -141,7 +139,7 @@ export class DynamoBaseIntegration<T> implements Integration {
       },
       parseObjectValue: (template, type, isRoot) => {
         return this.marshallByType(
-          noStringConvertTypes.has(type) ? template : `"${template}"`,
+          type !== 'Number' ? template : `"${template}"`,
           type,
           isRoot
         );
@@ -149,7 +147,7 @@ export class DynamoBaseIntegration<T> implements Integration {
       templateOptions: {
         propertyWrapper: (template, param) => this.marshallField(template, param.type),
         valueParser: (value, type) => {
-          return noStringConvertTypes.has(type) ? value : `"${value}"`;
+          return type !== 'Number' ? value : `"${value}"`;
         },
       },
     });
