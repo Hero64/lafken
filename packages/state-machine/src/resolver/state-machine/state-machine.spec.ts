@@ -129,7 +129,7 @@ describe('State Machine', () => {
 
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       definition:
-        '{"StartAt":"task1","States":{"task2":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","End":true,"Arguments":{"Payload":"{% $state.input.data %}","FunctionName":"test-function"}},"task1":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Next":"task2","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"Assign":{"foo":1}}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"task1","States":{"task2":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","End":true,"Arguments":{"Payload":"{% $state.input.data %}","FunctionName":"test-function"},"Output":"{% $states.result.Payload %}"},"task1":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Next":"task2","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"Assign":{"foo":1},"Output":"{% $states.result.Payload %}"}},"QueryLanguage":"JSONata"}',
       name: 'TestingSM',
     });
   });

@@ -1,9 +1,5 @@
 import 'reflect-metadata';
-import {
-  createLambdaDecorator,
-  createResourceDecorator,
-  LambdaArgumentTypes,
-} from '@alicanto/common';
+import { createLambdaDecorator, createResourceDecorator } from '@alicanto/common';
 
 import {
   type DefaultMethod,
@@ -41,8 +37,5 @@ export const State =
         ...props,
         name: methodName as string,
       }),
-      argumentParser: {
-        [LambdaArgumentTypes.event]: ({ event }) => event.Payload, // TODO: verfificar si estó es necesatio
-      },
     })(props)(target, methodName as string, descriptor);
   };

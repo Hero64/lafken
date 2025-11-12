@@ -1,4 +1,5 @@
 import type {
+  AllowedTypes,
   ArrayField,
   BooleanField,
   NumberField,
@@ -29,6 +30,17 @@ type ParamContextBase<C, T> = {
    * Value or context parameter
    */
   source: T;
+  /**
+   * Field data type.
+   *
+   * Specifies the type of the field. By default, the type is inferred
+   * from the property that decorates the field. However, it can be
+   * explicitly set to a primitive type such as `String`, `Number`,
+   * `Boolean`, or to another payload type.
+   *
+   * This ensures correct parsing, validation, and serialization of the field's value.
+   */
+  type?: AllowedTypes;
 };
 
 export type InputParamContext = ParamContextBase<'input', string>;

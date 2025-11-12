@@ -279,7 +279,7 @@ export class Schema {
         FunctionName: lambdaHandler.functionName,
       },
       Assign: handler.assign,
-      Output: handler.output,
+      Output: handler.output || '{% $states.result.Payload %}',
     };
 
     this.addRetryAndCatch(handler, handler.name);
@@ -287,9 +287,10 @@ export class Schema {
   }
 
   private getLambdaPayload(stateName: string) {
-    const params = getMetadataPrototypeByKey<
-      Record<string, StateMachineStringParam | StateMachineObjectParam>
-    >(this.resource, LambdaReflectKeys.event_param);
+    const params =
+      getMetadataPrototypeByKey<
+        Record<string, StateMachineStringParam | StateMachineObjectParam>
+      >(this.resource, LambdaReflectKeys.event_param) || {};
 
     const paramsByMethod = params[stateName];
     if (!paramsByMethod) {
