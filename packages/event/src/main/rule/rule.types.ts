@@ -5,7 +5,7 @@ import type {
   LambdaMetadata,
 } from '@alicanto/common';
 
-export interface CommonEventProps {
+export interface EventRuleBaseProps {
   /**
    * Maximum event age.
    *
@@ -20,9 +20,6 @@ export interface CommonEventProps {
    * an event to the target if the initial attempt fails.
    */
   retryAttempts?: number;
-}
-
-export interface EventRuleBaseProps extends CommonEventProps {
   /**
    * Event bus name.
    *
@@ -171,40 +168,4 @@ export interface DynamoRuleProps extends EventRuleBaseProps {
 
 export type EventRuleProps = EventDefaultRuleProps | EventS3RuleProps | DynamoRuleProps;
 
-type ScheduleExpressions = number | '*' | '?' | `${number}-${number}` | `*/${number}`;
-
-export interface ScheduleTime {
-  day?: ScheduleExpressions;
-  hour?: ScheduleExpressions;
-  minute?: ScheduleExpressions;
-  month?: ScheduleExpressions;
-  weekDay?: ScheduleExpressions;
-  year?: ScheduleExpressions;
-}
-
-export interface EventCronProps extends CommonEventProps {
-  /**
-   * Schedule for the EventBridge rule.
-   *
-   * Defines when the rule should trigger, either using a cron expression
-   * or a structured schedule object. This allows for time-based Lambda invocation
-   *
-   * You can provide:
-   * - A cron string in the standard AWS format: `cron(* * * * * *)`
-   * - A `ScheduleTime` object to specify individual fields:
-   *   - `minute`, `hour`, `day`, `month`, `weekDay`, `year`
-   *   - Each field can be a number, '*', '?', a range `${number}-${number}`
-   */
-  schedule: string | ScheduleTime;
-}
-
-export type EventRuleMetadata = LambdaMetadata &
-  EventRuleProps & {
-    eventType: 'rule';
-  };
-
-export interface EventCronMetadata extends LambdaMetadata, EventCronProps {
-  eventType: 'cron';
-}
-
-export type EventLambdaMetadata = EventRuleMetadata | EventCronMetadata;
+export type EventRuleMetadata = LambdaMetadata & EventRuleProps;

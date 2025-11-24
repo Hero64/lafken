@@ -12,8 +12,7 @@ import {
 } from '@alicanto/resolver';
 import { CloudwatchEventBus } from '@cdktf/provider-aws/lib/cloudwatch-event-bus';
 import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
-import { type EventLambdaMetadata, RESOURCE_TYPE } from '../main';
-import { Cron } from './cron/cron';
+import { type EventRuleMetadata, RESOURCE_TYPE } from '../main';
 import type { EventRuleResolverProps } from './resolver.types';
 import { Rule } from './rule/rule';
 
@@ -47,7 +46,7 @@ export class EventRuleResolver implements ResolverType {
 
   public create(module: AppModule, resource: ClassResource) {
     const metadata: ResourceMetadata = getResourceMetadata(resource);
-    const handlers = getResourceHandlerMetadata<EventLambdaMetadata>(resource);
+    const handlers = getResourceHandlerMetadata<EventRuleMetadata>(resource);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
@@ -58,19 +57,12 @@ export class EventRuleResolver implements ResolverType {
 
     for (const handler of handlers) {
       const id = `${handler.name}-${metadata.name}`;
-      if (handler.eventType === 'rule') {
-        const bus = this.eventBuses[handler.bus || 'default'];
-        new Rule(module, id, {
-          bus,
-          handler,
-          resourceMetadata: metadata,
-        });
-      } else if (handler.eventType === 'cron') {
-        new Cron(module, id, {
-          handler,
-          resourceMetadata: metadata,
-        });
-      }
+      const bus = this.eventBuses[handler.bus || 'default'];
+      new Rule(module, id, {
+        bus,
+        handler,
+        resourceMetadata: metadata,
+      });
     }
   }
 }

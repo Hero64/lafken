@@ -9,7 +9,7 @@ import { LambdaHandler, setupTestingStackWithModule } from '@alicanto/resolver';
 import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
 import { Testing } from 'cdktf';
-import { Cron, type EventCronMetadata, EventRule } from '../../main';
+import { Cron, type EventCronMetadata, Schedule } from '../../main';
 import { Cron as CronResolver } from './cron';
 
 jest.mock('@alicanto/resolver', () => {
@@ -26,7 +26,7 @@ jest.mock('@alicanto/resolver', () => {
 describe('Cron', () => {
   enableBuildEnvVariable();
 
-  @EventRule()
+  @Schedule()
   class TestEvent {
     @Cron({
       schedule: {

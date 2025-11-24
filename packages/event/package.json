@@ -1,5 +1,5 @@
 {
-  "name": "@alicanto/event-rule",
+  "name": "@alicanto/event",
   "version": "0.0.1",
   "private": false,
   "license": "MIT",
@@ -7,10 +7,6 @@
     "./main": {
       "import": "./lib/main/index.js",
       "require": "./lib/main/index.js"
-    },
-    "./service": {
-      "import": "./lib/service/index.js",
-      "require": "./lib/service/index.js"
     },
     "./resolver": {
       "import": "./lib/resolver/index.js",
@@ -32,18 +28,14 @@
     "@alicanto/resolver": "workspace:*",
     "@aws-sdk/client-sqs": "3.922.0",
     "@cdktf/provider-aws": "21.16.0",
-    "aws-lambda": "1.0.7",
-    "aws-xray-sdk": "3.11.0",
     "cdktf": "0.21.0",
     "constructs": "10.4.2",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
     "@jest/types": "^30.2.0",
-    "@types/aws-lambda": "8.10.157",
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
-    "jest-dynalite": "3.6.1",
     "ts-jest": "29.4.5"
   }
 }
