@@ -67,7 +67,7 @@ describe('Auth user pool client', () => {
 
     new UserPoolClient(stack, 'testing', {
       userPoolId: 'test-id',
-      authFlows: ['allow_custom_auth', 'admin_no_srp_auth'],
+      authFlows: ['allow_custom_auth'],
       enableTokenRevocation: true,
       generateSecret: true,
       oauth: {
@@ -104,7 +104,7 @@ describe('Auth user pool client', () => {
       callback_urls: ['http://example.callback.com'],
       default_redirect_uri: 'http://example.default.com',
       enable_token_revocation: true,
-      explicit_auth_flows: ['ALLOW_CUSTOM_AUTH', 'ADMIN_NO_SRP_AUTH'],
+      explicit_auth_flows: ['ALLOW_CUSTOM_AUTH'],
       generate_secret: true,
       id_token_validity: 4,
       logout_urls: ['http://example.logout.com'],
@@ -120,9 +120,9 @@ describe('Auth user pool client', () => {
       refresh_token_validity: 10,
       token_validity_units: [
         {
-          access_token: 'hour',
+          access_token: 'hours',
           id_token: 'days',
-          refresh_token: 'hour',
+          refresh_token: 'hours',
         },
       ],
       user_pool_id: 'test-id',

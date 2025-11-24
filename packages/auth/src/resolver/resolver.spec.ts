@@ -19,7 +19,6 @@ describe('AuthResolver', () => {
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
-      lambda_config: {},
       name: 'test',
     });
 

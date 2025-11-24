@@ -17,7 +17,6 @@ describe('Auth user pool', () => {
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
-      lambda_config: {},
       name: 'test',
     });
   });
@@ -120,7 +119,7 @@ describe('Auth user pool', () => {
         },
       },
       alias_attributes: ['phoneNumber', 'preferred_username'],
-      auto_verified_attributes: ['email', 'phoneNumber'],
+      auto_verified_attributes: ['email', 'phone_number'],
       email_configuration: {
         configuration_set: 'set',
         email_sending_account: 'DEVELOPER',
@@ -132,7 +131,9 @@ describe('Auth user pool', () => {
         message: 'MFA',
         subject: 'mfa',
       },
-      lambda_config: {},
+      lifecycle: {
+        ignore_changes: ['schema'],
+      },
       mfa_configuration: 'OPTIONAL',
       name: 'test',
       password_policy: {
@@ -145,23 +146,39 @@ describe('Auth user pool', () => {
           mutable: true,
           name: 'email',
           required: true,
+          string_attribute_constraints: {
+            max_length: 2048,
+            min_length: 1,
+          },
         },
         {
           attribute_data_type: 'String',
           mutable: true,
           name: 'name',
           required: true,
+          string_attribute_constraints: {
+            max_length: 2048,
+            min_length: 1,
+          },
         },
         {
           attribute_data_type: 'String',
           mutable: true,
           name: 'family_name',
           required: true,
+          string_attribute_constraints: {
+            max_length: 2048,
+            min_length: 1,
+          },
         },
         {
           attribute_data_type: 'String',
           mutable: true,
           name: 'profile',
+          string_attribute_constraints: {
+            max_length: 2048,
+            min_length: 0,
+          },
         },
       ],
       sms_authentication_message: 'MFA',

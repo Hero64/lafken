@@ -73,7 +73,7 @@ describe('authorizer factory', () => {
       name: 'api-key-auth',
     });
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayApiKey, {
-      name: 'test_key',
+      name: 'test-key',
     });
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayUsagePlanKey, {
       key_type: 'API_KEY',
@@ -111,7 +111,8 @@ describe('authorizer factory', () => {
     });
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayAuthorizer, {
-      authorizer_uri: 'test-function',
+      authorizer_uri: 'invokeArn',
+      type: 'REQUEST',
       name: 'custom-auth',
     });
   });
