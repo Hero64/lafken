@@ -26,9 +26,9 @@
   "dependencies": {
     "@alicanto/common": "workspace:*",
     "@alicanto/resolver": "workspace:*",
-    "@cdktf/provider-aws": "21.16.0",
+    "@cdktf/provider-aws": "21.19.0",
     "cdktf": "0.21.0",
-    "constructs": "10.4.2",
+    "constructs": "10.4.3",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {

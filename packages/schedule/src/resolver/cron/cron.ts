@@ -23,13 +23,17 @@ export class Cron extends alicantoResource.make(CloudwatchEventRule) {
   public addEventTarget(id: string) {
     const { handler, resourceMetadata } = this.props;
 
-    const lambdaHandler = new LambdaHandler(this, 'handler', {
-      ...handler,
-      filename: resourceMetadata.filename,
-      foldername: resourceMetadata.foldername,
-      suffix: 'event',
-      principal: 'events.amazonaws.com',
-    });
+    const lambdaHandler = new LambdaHandler(
+      this,
+      `${handler.name}-${resourceMetadata.name}`,
+      {
+        ...handler,
+        filename: resourceMetadata.filename,
+        foldername: resourceMetadata.foldername,
+        suffix: 'event',
+        principal: 'events.amazonaws.com',
+      }
+    );
 
     new CloudwatchEventTarget(this, `${id}-event-target`, {
       rule: this.name,
@@ -46,8 +50,29 @@ export class Cron extends alicantoResource.make(CloudwatchEventRule) {
       return `cron(${schedule})`;
     }
 
-    const { minute, hour, day, month, year, weekDay } = schedule;
+    const {
+      minute = '*',
+      hour = '*',
+      day = '*',
+      month = '*',
+      year = '*',
+      weekDay = '*',
+    } = schedule;
 
-    return `cron(${minute ?? '*'} ${hour ?? '*'} ${day ?? '?'} ${month ?? '*'} ${weekDay ?? '*'} ${year ?? '*'})`;
+    let dayValue: string;
+    let weekDayValue: string;
+
+    if (day && day !== '*' && day !== '?') {
+      dayValue = day.toString();
+      weekDayValue = '?';
+    } else if (weekDay && weekDay !== '*' && weekDay !== '?') {
+      dayValue = '?';
+      weekDayValue = weekDay.toString();
+    } else {
+      dayValue = day?.toString() ?? '*';
+      weekDayValue = '?';
+    }
+
+    return `cron(${minute} ${hour} ${dayValue} ${month} ${weekDayValue} ${year})`;
   }
 }

@@ -1,6 +1,6 @@
 import type { LambdaMetadata } from '@alicanto/common';
 
-type ScheduleExpressions = number | '*' | '?' | `${number}-${number}` | `*/${number}`;
+type ScheduleExpressions = number | '*' | '?' | (string & {});
 
 export interface ScheduleTime {
   day?: ScheduleExpressions;

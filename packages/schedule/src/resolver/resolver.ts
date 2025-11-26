@@ -8,7 +8,7 @@ import { type AppModule, lambdaAssets, type ResolverType } from '@alicanto/resol
 import { type EventCronMetadata, RESOURCE_TYPE } from '../main';
 import { Cron } from './cron/cron';
 
-export class CronResolver implements ResolverType {
+export class ScheduleResolver implements ResolverType {
   public type = RESOURCE_TYPE;
 
   public create(module: AppModule, resource: ClassResource) {
