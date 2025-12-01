@@ -19,6 +19,18 @@ interface IndexBase<T extends Function> {
   projection?: (keyof T['prototype'])[] | 'ALL';
 }
 
+type AttributeFilter<T> = {
+  [key in keyof T]?:
+    | (
+        | T[key]
+        | { 'anything-but': T[key][] }
+        | { exists: boolean }
+        | { prefix: T[key] }
+        | ''
+      )[]
+    | null;
+};
+
 export interface LocalIndex<T extends Function> extends IndexBase<T> {
   type: 'local';
   sortKey: keyof OnlyNumberString<T['prototype']>;
@@ -39,11 +51,6 @@ export type DynamoIndex<T extends Function> = LocalIndex<T> | GlobalIndex<T>;
 
 export type StreamTypes = 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY';
 
-export interface ImageFilter<T> {
-  keys: ModelPartition<T>;
-  attributes: DeepPartial<T>;
-}
-
 export interface FilterCriteria<T> {
   /**
    * Event types to include in the stream.
@@ -59,21 +66,21 @@ export interface FilterCriteria<T> {
    *
    * Only records with the specified partition key values will be included.
    */
-  keys?: ModelPartition<T>;
+  keys?: AttributeFilter<ModelPartition<T>>;
   /**
    * Filter based on the new image of the item.
    *
    * Allows applying conditions to the attributes of the new item image
    * after an INSERT or MODIFY event.
    */
-  newImage?: ImageFilter<T>;
+  newImage?: AttributeFilter<DeepPartial<T>>;
   /**
    * Filter based on the old image of the item.
    *
    * Allows applying conditions to the attributes of the old item image
    * before a MODIFY or REMOVE event.
    */
-  oldImage?: ImageFilter<T>;
+  oldImage?: AttributeFilter<DeepPartial<T>>;
 }
 
 export interface DynamoStream<T> {

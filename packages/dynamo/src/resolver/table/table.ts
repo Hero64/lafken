@@ -1,6 +1,5 @@
 import type { FieldTypes } from '@alicanto/common';
 import { alicantoResource, Role } from '@alicanto/resolver';
-import { marshall } from '@aws-sdk/util-dynamodb';
 import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
 import {
   DynamodbTable,
@@ -40,7 +39,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
       name: modelProps.name,
       rangeKey: sortKeyName,
       hashKey: partitionKeyName,
-      attribute: Table.getAttributes(fields),
+      attribute: Table.getAttributes(fields, modelProps.ttl as string),
       globalSecondaryIndex: globalIndexes,
       localSecondaryIndex: localIndexes,
       streamEnabled: !!modelProps.stream?.enabled,
@@ -59,7 +58,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
     this.isGlobal('dynamo', modelProps.name);
 
     if (modelProps.stream?.enabled) {
-      const defaultBus = new DataAwsCloudwatchEventBus(scope, 'DefaultBus', {
+      const defaultBus = new DataAwsCloudwatchEventBus(this, 'DefaultBus', {
         name: 'default',
       });
 
@@ -73,7 +72,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
               'GetShardIterator',
               'ListStreams',
             ],
-            resources: [this.arn],
+            resources: [this.streamArn],
           },
           {
             type: 'event',
@@ -85,7 +84,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
         principal: 'pipes.amazonaws.com',
       });
 
-      const filters = this.createFilterCriteria(modelProps.stream);
+      const filters = this.createFilterCriteria(modelProps.stream, fields);
 
       new PipesPipe(scope, `${modelProps.name}-pipe`, {
         name: `${modelProps.name}-pipe`,
@@ -99,6 +98,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
             batchSize: modelProps.stream.batchSize || 10,
             maximumBatchingWindowInSeconds:
               modelProps.stream.maximumBatchingWindowInSeconds || 1,
+            maximumRecordAgeInSeconds: -1,
           },
           filterCriteria: filters.length
             ? { filter: filters.map((f) => ({ pattern: f.pattern })) }
@@ -109,19 +109,19 @@ export class Table extends alicantoResource.make(DynamodbTable) {
             detailType: 'db:stream',
             source: `dynamodb.${modelProps.name}`,
           },
-          inputTemplate: '<aws.pipes.event.json>',
+          // inputTemplate: '<aws.pipes.event.json>',
         },
       });
     }
   }
 
-  private static getAttributes(fields: FieldsMetadata) {
+  private static getAttributes(fields: FieldsMetadata, ttl?: string) {
     const attributes: DynamodbTableAttribute[] = [];
 
     for (const key in fields) {
       const field = fields[key];
       const parsedType = mapFieldType[field.type];
-      if (!parsedType) {
+      if (!parsedType || field.name === ttl) {
         continue;
       }
 
@@ -193,7 +193,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
     };
   }
 
-  private createFilterCriteria(stream: DynamoStream<any>) {
+  private createFilterCriteria(stream: DynamoStream<any>, fields: FieldsMetadata) {
     const filters: { pattern: string }[] = [];
     if (!stream.filters) return [];
 
@@ -203,7 +203,11 @@ export class Table extends alicantoResource.make(DynamodbTable) {
 
     if (stream.filters.keys) {
       filters.push({
-        pattern: JSON.stringify({ dynamodb: { Keys: marshall(stream.filters.keys) } }),
+        pattern: JSON.stringify({
+          dynamodb: {
+            Keys: this.getKeyFilterCriteria(stream.filters.keys, fields),
+          },
+        }),
       });
     }
 
@@ -211,14 +215,7 @@ export class Table extends alicantoResource.make(DynamodbTable) {
       filters.push({
         pattern: JSON.stringify({
           dynamodb: {
-            NewImage: {
-              ...(stream.filters.newImage.keys
-                ? marshall(stream.filters.newImage.keys)
-                : {}),
-              ...(stream.filters.newImage.attributes
-                ? marshall(stream.filters.newImage.attributes)
-                : {}),
-            },
+            NewImage: this.getKeyFilterCriteria(stream.filters.newImage, fields),
           },
         }),
       });
@@ -228,19 +225,34 @@ export class Table extends alicantoResource.make(DynamodbTable) {
       filters.push({
         pattern: JSON.stringify({
           dynamodb: {
-            OldImage: {
-              ...(stream.filters.oldImage.keys
-                ? marshall(stream.filters.oldImage.keys)
-                : {}),
-              ...(stream.filters.oldImage.attributes
-                ? marshall(stream.filters.oldImage.attributes)
-                : {}),
-            },
+            OldImage: this.getKeyFilterCriteria(stream.filters.oldImage, fields),
           },
         }),
       });
     }
 
     return filters;
+  }
+
+  private getKeyFilterCriteria(keys: Record<string, any>, fields: FieldsMetadata) {
+    return Object.entries(keys).reduce((acc, [key, value]) => {
+      const field = fields[key];
+
+      if (!field) {
+        throw new Error(`field ${key} not found in dynamo table`);
+      }
+
+      const fieldType = mapFieldType[field.type];
+
+      if (!fieldType) {
+        throw new Error(`field ${key} has not valid type in filter criteria`);
+      }
+
+      acc[key] = {
+        [fieldType]: value,
+      };
+
+      return acc;
+    }, {} as any);
   }
 }

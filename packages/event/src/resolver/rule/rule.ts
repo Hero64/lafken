@@ -2,7 +2,11 @@ import { type AppModule, alicantoResource, LambdaHandler } from '@alicanto/resol
 import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
 import { Fn } from 'cdktf';
-import type { EventRuleMetadata } from '../../main';
+import type {
+  DynamoAttributeFilters,
+  EventBridgePattern,
+  EventRuleMetadata,
+} from '../../main';
 import type { RuleProps } from './rule.types';
 
 export class Rule extends alicantoResource.make(CloudwatchEventRule) {
@@ -25,13 +29,17 @@ export class Rule extends alicantoResource.make(CloudwatchEventRule) {
 
   private addEventTarget(id: string) {
     const { resourceMetadata, handler } = this.props;
-    const lambdaHandler = new LambdaHandler(this, 'handler', {
-      ...handler,
-      filename: resourceMetadata.filename,
-      foldername: resourceMetadata.foldername,
-      suffix: 'event',
-      principal: 'events.amazonaws.com',
-    });
+    const lambdaHandler = new LambdaHandler(
+      this,
+      `${handler.name}-${resourceMetadata.name}`,
+      {
+        ...handler,
+        filename: resourceMetadata.filename,
+        foldername: resourceMetadata.foldername,
+        suffix: 'event',
+        principal: 'events.amazonaws.com',
+      }
+    );
 
     new CloudwatchEventTarget(this, `${id}-event-target`, {
       rule: this.name,
@@ -63,13 +71,39 @@ export class Rule extends alicantoResource.make(CloudwatchEventRule) {
       }
 
       case 'dynamodb': {
+        const dynamoDetail = {
+          ...(handler.pattern.detail?.keys
+            ? {
+                Keys: Rule.transformAttributes(handler.pattern.detail?.keys),
+              }
+            : {}),
+          ...(handler.pattern.detail?.newImage
+            ? {
+                NewImage: Rule.transformAttributes(handler.pattern.detail?.newImage),
+              }
+            : {}),
+          ...(handler.pattern.detail?.oldImage
+            ? {
+                OldImage: Rule.transformAttributes(handler.pattern.detail?.oldImage),
+              }
+            : {}),
+        };
+
         return {
           source: [`dynamodb.${handler.pattern.source}`],
           'detail-type': ['db:stream'],
-          detail: {
-            eventName: handler.pattern.detail?.eventName,
-            keys: Rule.keyToMarshall(handler.pattern.detail?.keys),
-          },
+          ...(Object.keys(dynamoDetail).length > 0 || handler.pattern.detail?.eventName
+            ? {
+                detail: {
+                  ...(handler.pattern.detail?.eventName
+                    ? {
+                        eventName: handler.pattern.detail?.eventName,
+                      }
+                    : {}),
+                  dynamodb: dynamoDetail,
+                },
+              }
+            : {}),
         };
       }
 
@@ -78,17 +112,32 @@ export class Rule extends alicantoResource.make(CloudwatchEventRule) {
     }
   }
 
-  private static keyToMarshall(values?: Record<string, number | string>) {
-    if (!values) return undefined;
+  private static inferDynamoDBType(value: EventBridgePattern): string {
+    if (typeof value === 'string') return 'S';
+    if (typeof value === 'number') return 'N';
+    if (typeof value === 'boolean') return 'BOOL';
+    if (typeof value === 'object') {
+      if ('numeric' in value) return 'N';
+      if ('prefix' in value || 'suffix' in value || 'equals-ignore-case' in value)
+        return 'S';
+    }
+    return 'S';
+  }
 
-    return Object.entries(values).reduce(
-      (acc, [key, value]) => {
-        acc[key] = {
-          [typeof value === 'number' ? 'N' : 'S']: value.toString(),
-        };
-        return acc;
-      },
-      {} as Record<string, any>
-    );
+  private static transformAttributes(attrs: DynamoAttributeFilters | undefined) {
+    if (!attrs) return undefined;
+
+    const transformed: any = {};
+
+    for (const [key, value] of Object.entries(attrs)) {
+      const values = Array.isArray(value) ? value : [value];
+      const type = Rule.inferDynamoDBType(values[0]);
+
+      transformed[key] = {
+        [type]: values,
+      };
+    }
+
+    return transformed;
   }
 }

@@ -30,22 +30,17 @@ export interface EventRuleBaseProps {
 }
 
 export type S3DetailType = 'Object Created' | 'Object Deleted';
-export type S3ObjectKey =
-  | {
-      type: 'prefix';
-      value: string;
-    }
-  | {
-      type: 'suffix';
-      value: string;
-    };
+export type S3ObjectKey = {
+  prefix?: string;
+  suffix?: string;
+};
 
 export interface S3Detail {
   bucket?: {
     name: BucketNames[];
   };
   object?: {
-    key?: S3ObjectKey[];
+    key?: (S3ObjectKey | string)[];
   };
 }
 
@@ -115,20 +110,46 @@ export interface EventS3RuleProps extends EventRuleBaseProps {
      * Optional array of event types (detailType) that should trigger the rule.
      * If not specified, all event types from the source are captured.
      */
-    detailType?: S3DetailType[];
+    detailType: S3DetailType[];
     /**
      * Additional filtering criteria on the event payload.
      *
      * Optional object specifying conditions on event attributes to further
      * filter which events trigger the rule.
      */
-    detail?: S3Detail;
+    detail: S3Detail;
   };
 }
 
+type PrefixPattern = { prefix: string };
+type SuffixPattern = { suffix: string };
+type AnythingButPattern = { 'anything-but': string | string[] };
+type NumericPattern = {
+  numeric:
+    | ['=' | '>' | '>=' | '<' | '<=', number]
+    | ['>' | '>=', number, '<' | '<=', number];
+};
+type ExistsPattern = { exists: boolean };
+type EqualsIgnoreCasePattern = { 'equals-ignore-case': string };
+
+export type EventBridgePattern =
+  | string
+  | number
+  | boolean
+  | PrefixPattern
+  | SuffixPattern
+  | AnythingButPattern
+  | NumericPattern
+  | ExistsPattern
+  | EqualsIgnoreCasePattern;
+
+export type DynamoAttributeFilter = EventBridgePattern | EventBridgePattern[];
+export type DynamoAttributeFilters = Record<string, DynamoAttributeFilter>;
 interface DynamoDetail {
   eventName?: ('INSERT' | 'MODIFY' | 'REMOVE')[];
-  keys?: Record<string, number | string>;
+  keys?: DynamoAttributeFilters;
+  newImage?: DynamoAttributeFilters;
+  oldImage?: DynamoAttributeFilters;
 }
 
 export interface DynamoRuleProps extends EventRuleBaseProps {

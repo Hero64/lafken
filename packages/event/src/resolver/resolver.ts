@@ -23,7 +23,7 @@ export class EventRuleResolver implements ResolverType {
   constructor(private props: EventRuleResolverProps[] = []) {}
 
   public async beforeCreate(scope: AppStack) {
-    const defaultBus = new DataAwsCloudwatchEventBus(scope, 'DefaultBus', {
+    const defaultBus = new DataAwsCloudwatchEventBus(scope, 'EventDefaultBus', {
       name: 'default',
     });
 
