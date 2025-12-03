@@ -23,6 +23,7 @@ export class Extension extends Construct {
         `${handler.name}-${resourceMetadata.name}`,
         {
           ...handler,
+          originalName: resourceMetadata.originalName,
           filename: resourceMetadata.filename,
           foldername: resourceMetadata.foldername,
           principal: 'cognito-idp.amazonaws.com',

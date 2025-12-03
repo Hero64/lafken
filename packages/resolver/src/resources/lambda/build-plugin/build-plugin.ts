@@ -10,15 +10,19 @@ export const AlicantoBuildPlugin = (props: AlicantoBuildPluginProps): Plugin => 
     setup(build) {
       build.onLoad({ filter: fileRegex }, async (args) => {
         let source = await promises.readFile(args.path, 'utf8');
+        let exportContent = '';
 
-        const instanceName = `${props.export.className}Instance`;
-        const instance = `const ${instanceName} = new ${props.export.className}()`;
+        for (const exportResources of props.exports) {
+          const instanceName = `${exportResources.className}Instance`;
+          const instance = `const ${instanceName} = new ${exportResources.className}()`;
 
-        const exports = props.export.methods.map((handler) => {
-          return `exports.${handler} = ${instanceName}.${handler}.bind(${instanceName})`;
-        });
+          const exports = exportResources.methods.map((handler) => {
+            return `exports.${handler}_${exportResources.className} = ${instanceName}.${handler}.bind(${instanceName})`;
+          });
+          exportContent += `\n${instance}\n${exports.join('\n')}\n;`;
+        }
 
-        source += `\n${instance}\n${exports.join('\n')}\n;`;
+        source += exportContent;
 
         return {
           contents: source,

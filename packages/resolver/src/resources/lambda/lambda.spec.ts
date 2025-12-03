@@ -38,6 +38,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       name: 'lambda-test',
       foldername: '/temp',
+      originalName: 'test',
     });
 
     const synthesized = Testing.synth(stack);
@@ -67,6 +68,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       name: 'lambda-test',
       foldername: '/temp',
+      originalName: 'test',
       lambda: {
         enableTrace: true,
         services: ['s3'],

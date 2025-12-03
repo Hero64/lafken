@@ -9,7 +9,7 @@ import type { GlobalContext } from '../../types';
 
 export interface LambdaHandlerProps
   extends LambdaMetadata,
-    Pick<ResourceMetadata, 'filename' | 'foldername'> {
+    Pick<ResourceMetadata, 'filename' | 'foldername' | 'originalName'> {
   filename: string;
   suffix?: string;
   principal?: string;

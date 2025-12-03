@@ -51,7 +51,7 @@ export class LambdaHandler extends alicantoResource.make(LambdaFunction) {
       functionName: handlerName,
       role: roleArn,
       filename: 'unresolved',
-      handler: `index.${props.name}`,
+      handler: `index.${props.name}_${props.originalName}`,
       runtime: `nodejs${runtime}.x`,
       timeout: LambdaHandler.getCurrentOrContextValue({
         key: 'timeout',

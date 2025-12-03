@@ -34,6 +34,7 @@ export class Rule extends alicantoResource.make(CloudwatchEventRule) {
       `${handler.name}-${resourceMetadata.name}`,
       {
         ...handler,
+        originalName: resourceMetadata.originalName,
         filename: resourceMetadata.filename,
         foldername: resourceMetadata.foldername,
         suffix: 'event',

@@ -1,14 +1,10 @@
-import type { ClassResource } from '@alicanto/common';
 import type {
   CsvDelimiter,
   HeaderLocation,
   ResultOutputType,
   ResultTransformation,
 } from '../../../main';
-
-export interface SchemaProps {
-  classResource: ClassResource;
-}
+import type { LambdaStates, StateNames } from './schema.utils';
 
 export interface Retry {
   ErrorEquals: string[];
@@ -96,7 +92,7 @@ interface ResultWriter {
     Transformation?: ResultTransformation;
     OutputType?: ResultOutputType;
   };
-  Parameters: {
+  Arguments: {
     Bucket: string;
     Prefix?: string;
   };
@@ -177,3 +173,9 @@ export type States =
   | FailTask;
 
 export type StatesWithCatchErrors = StateTask | ParallelTask | MapTask;
+
+export interface SchemaProps {
+  initializeAssets?: boolean;
+  stateNames?: StateNames | undefined;
+  lambdas?: LambdaStates | undefined;
+}

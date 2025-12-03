@@ -1,3 +1,4 @@
+import { LambdaHandler } from '@alicanto/resolver';
 import type {
   ExecutionSource,
   StateMachineSource,
@@ -28,3 +29,32 @@ export const mapSourceState: Record<StateSource, string> = {
 export const mapSourceTask: Record<TaskSource, string> = {
   token: 'Token',
 };
+
+export class StateNames {
+  private nameCount: Record<string, number> = {};
+
+  createName(name: string) {
+    this.nameCount[name] ??= 0;
+    this.nameCount[name]++;
+
+    if (this.nameCount[name] === 1) {
+      return name;
+    }
+    return `${name}-${this.nameCount[name]}`;
+  }
+}
+
+export class LambdaStates {
+  private lambdas: Record<string, LambdaHandler> = {};
+
+  createLambda([scope, id, props]: ConstructorParameters<typeof LambdaHandler>) {
+    if (this.lambdas[id]) {
+      return this.lambdas[id];
+    }
+
+    const lambda = new LambdaHandler(scope, id, props);
+    this.lambdas[id] = lambda;
+
+    return lambda;
+  }
+}

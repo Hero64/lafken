@@ -5,14 +5,17 @@ import type { Construct } from 'constructs';
 interface BaseAsset
   extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'minify'> {}
 
-export interface AssetMetadata extends BaseAsset {
+export interface AssetResource {
   className: string;
   methods: string[];
+}
+export interface AssetMetadata extends BaseAsset, AssetResource {
   afterBuild?: (outputPath: string) => void;
 }
 
 export interface AssetProps {
   metadata: AssetMetadata;
+  resources: Record<string, AssetResource>;
   scope?: Construct;
   lambdas: LambdaFunction[];
 }

@@ -15,12 +15,20 @@ class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
   public initializeMetadata(props: AssetMetadata) {
-    const { filename, foldername } = props;
+    const { filename, foldername, className, methods } = props;
 
     const prebuildPath = this.getPrebuildPath(foldername, filename);
-    this.lambdaAssets[prebuildPath] = {
-      metadata: props,
-      lambdas: [],
+    if (!this.lambdaAssets[prebuildPath]) {
+      this.lambdaAssets[prebuildPath] = {
+        metadata: props,
+        resources: {},
+        lambdas: [],
+      };
+    }
+
+    this.lambdaAssets[prebuildPath].resources[className] = {
+      className,
+      methods,
     };
   }
 
@@ -74,7 +82,7 @@ class LambdaAssets {
         AlicantoBuildPlugin({
           filename: metadata.filename,
           removeAttributes: ['lambda'],
-          export: lambdaAsset.metadata,
+          exports: Object.values(lambdaAsset.resources),
         }),
       ],
     });

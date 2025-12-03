@@ -33,6 +33,10 @@ export interface StateMachineBaseProps<T> {
    * This defines the entry point of the workflow.
    */
   startAt: InitialStateType<T>;
+  /**
+   * TODO: completar esto
+   */
+  minify?: boolean;
 }
 
 interface StateMachineProps<T> extends StateMachineBaseProps<T> {
@@ -359,7 +363,7 @@ interface MapReaderCSVItem extends MapReaderItemBase {
 
 interface MapWriteResult {
   bucket: BucketNames;
-  key: string;
+  // key: string;
   prefix?: string;
   config?: {
     outputType: 'JSON' | 'JSONL';
@@ -545,7 +549,7 @@ export interface StateMachineResourceProps<T> extends StateMachineProps<T> {
 }
 
 export interface StateMachineResourceMetadata
-  extends StateMachineProps<any>,
+  extends Omit<StateMachineProps<any>, 'minify'>,
     ResourceMetadata {
   startAt: InitialStateType<string>;
 }
@@ -555,7 +559,7 @@ export interface NestedStateMachineResourceProps<T>
     ResourceProps {}
 
 export interface NestedStateMachineResourceMetadata
-  extends StateMachineBaseProps<any>,
+  extends Omit<StateMachineBaseProps<any>, 'minify'>,
     ResourceMetadata {
   startAt: InitialStateType<string>;
 }

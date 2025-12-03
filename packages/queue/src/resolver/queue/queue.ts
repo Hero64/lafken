@@ -41,6 +41,7 @@ export class Queue extends alicantoResource.make(SqsQueue) {
 
     const lambdaHandler = new LambdaHandler(this, `${id}-handler`, {
       ...handler,
+      originalName: resourceMetadata.originalName,
       filename: resourceMetadata.filename,
       foldername: resourceMetadata.foldername,
       suffix: 'queue',

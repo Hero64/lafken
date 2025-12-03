@@ -207,6 +207,7 @@ export class AuthorizerFactory {
       `${metadata.name}-${resource.name}`,
       {
         ...handler,
+        originalName: metadata.originalName,
         filename: metadata.filename,
         foldername: metadata.foldername,
         suffix: 'api-auth',

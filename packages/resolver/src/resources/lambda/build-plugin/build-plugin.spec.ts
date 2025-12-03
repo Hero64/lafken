@@ -26,10 +26,12 @@ describe('AlicantoBuildPlugin', () => {
       plugins: [
         AlicantoBuildPlugin({
           filename: 'input',
-          export: {
-            className: 'Testing',
-            methods: ['foo', 'bar'],
-          },
+          exports: [
+            {
+              className: 'Testing',
+              methods: ['foo', 'bar'],
+            },
+          ],
           removeAttributes: [],
         }),
       ],

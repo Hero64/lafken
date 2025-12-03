@@ -6,7 +6,7 @@ import {
   getResourceMetadata,
   LambdaReflectKeys,
 } from '@alicanto/common';
-import { LambdaHandler } from '@alicanto/resolver';
+import { lambdaAssets } from '@alicanto/resolver';
 import type { Construct } from 'constructs';
 import type {
   LambdaStateMetadata,
@@ -30,27 +30,35 @@ import type {
   MapTask,
   ParallelBranch,
   Retry,
+  SchemaProps,
   States,
   StatesWithCatchErrors,
 } from './schema.types';
 import {
+  LambdaStates,
   mapSourceExecution,
   mapSourceState,
   mapSourceStateMachine,
   mapSourceTask,
+  StateNames,
 } from './schema.utils';
 
 export class Schema {
   private states: Record<string, States> = {};
   private resourceMetadata: StateMachineResourceMetadata;
   private handlers: Record<string, LambdaStateMetadata> = {};
-  private stateNameCount: Record<string, number> = {};
+  private stateNames: StateNames;
+  private lambdaStates: LambdaStates;
 
   constructor(
     private scope: Construct,
-    private resource: ClassResource
+    private resource: ClassResource,
+    props: SchemaProps = {}
   ) {
-    this.getMetadata();
+    this.stateNames = props.stateNames || new StateNames();
+    this.lambdaStates = props.lambdas || new LambdaStates();
+
+    this.getMetadata(props.initializeAssets ?? false);
   }
 
   public getDefinition() {
@@ -62,17 +70,28 @@ export class Schema {
     };
   }
 
-  private getMetadata() {
+  private getMetadata(initializeAssets: boolean) {
     this.resourceMetadata = getResourceMetadata<StateMachineResourceMetadata>(
       this.resource
     );
-    this.handlers = getResourceHandlerMetadata<LambdaStateMetadata>(this.resource).reduce(
+    const handlers = getResourceHandlerMetadata<LambdaStateMetadata>(this.resource);
+    this.handlers = handlers.reduce(
       (acc, handler) => {
         acc[handler.name] = handler;
         return acc;
       },
       {} as Record<string, LambdaStateMetadata>
     );
+
+    if (initializeAssets) {
+      lambdaAssets.initializeMetadata({
+        foldername: this.resourceMetadata.foldername,
+        filename: this.resourceMetadata.filename,
+        className: this.resourceMetadata.originalName,
+        methods: handlers.map((handler) => handler.name),
+        minify: this.resourceMetadata.minify,
+      });
+    }
   }
 
   private getNextState(currentState?: StateTypes<string>, end = false) {
@@ -142,8 +161,13 @@ export class Schema {
       case 'parallel': {
         const branchStates: ParallelBranch[] = [];
 
-        for (const branch of currentState.branches) {
-          const branchSchema = new Schema(this.scope, branch);
+        for (let i = 0; i < currentState.branches.length; i++) {
+          const branch = currentState.branches[i];
+          const branchSchema = new Schema(this.scope, branch, {
+            initializeAssets: true,
+            lambdas: this.lambdaStates,
+            stateNames: this.stateNames,
+          });
           branchStates.push(branchSchema.getDefinition());
         }
 
@@ -152,7 +176,7 @@ export class Schema {
           Arguments: this.getParallelArguments(currentState.arguments),
           Output: currentState.output,
           Assign: currentState.assign,
-          End: currentState.end,
+          End: currentState.end ?? currentState.next === undefined,
           Next: this.getNextState(currentState.next, currentState.end),
           Branches: branchStates,
         };
@@ -160,7 +184,11 @@ export class Schema {
         break;
       }
       case 'map': {
-        const mapSchema = new Schema(this.scope, currentState.states);
+        const mapSchema = new Schema(this.scope, currentState.states, {
+          initializeAssets: true,
+          lambdas: this.lambdaStates,
+          stateNames: this.stateNames,
+        });
         const mapState = mapSchema.getDefinition();
 
         const itemProcessor: Partial<ItemProcessor> = {
@@ -172,8 +200,9 @@ export class Schema {
 
         const mapTask: MapTask = {
           Type: 'Map',
+          Items: currentState.items,
           ItemProcessor: itemProcessor as ItemProcessor,
-          End: currentState.end,
+          End: currentState.end ?? currentState.next === undefined,
           Next: this.getNextState(currentState.next, currentState.end),
           Output: currentState.output,
           Assign: currentState.assign,
@@ -216,7 +245,7 @@ export class Schema {
           if (currentState.resultWriter) {
             mapTask.ResultWriter = {
               Resource: 'arn:aws:states:::s3:putObject',
-              Parameters: {
+              Arguments: {
                 Bucket: currentState.resultWriter.bucket,
                 Prefix: currentState.resultWriter.prefix,
               },
@@ -251,25 +280,30 @@ export class Schema {
       return '';
     }
 
-    this.stateNameCount[currentState.type] ??= 0;
-    this.stateNameCount[currentState.type]++;
-    return `${currentState.type}-${this.stateNameCount[currentState.type]}`;
+    return this.stateNames.createName(currentState.type);
   }
 
   private addLambdaState(handler: LambdaStateMetadata) {
-    if (this.states[handler.name]) {
+    const stateName = this.stateNames.createName(handler.name);
+    if (this.states[stateName]) {
       return handler.name;
     }
 
     const id = `${handler.name}-${this.resourceMetadata.name}`;
-    const lambdaHandler = new LambdaHandler(this.scope, id, {
-      ...handler,
-      filename: this.resourceMetadata.filename,
-      foldername: this.resourceMetadata.foldername,
-      suffix: 'states',
-    });
 
-    this.states[handler.name] = {
+    const lambdaHandler = this.lambdaStates.createLambda([
+      this.scope,
+      id,
+      {
+        ...handler,
+        originalName: this.resourceMetadata.originalName,
+        filename: this.resourceMetadata.filename,
+        foldername: this.resourceMetadata.foldername,
+        suffix: 'states',
+      },
+    ]);
+
+    this.states[stateName] = {
       Type: 'Task',
       Resource: 'arn:aws:states:::lambda:invoke',
       Next: this.getNextState(handler.next, handler.end),
@@ -282,8 +316,8 @@ export class Schema {
       Output: handler.output || '{% $states.result.Payload %}',
     };
 
-    this.addRetryAndCatch(handler, handler.name);
-    return handler.name;
+    this.addRetryAndCatch(handler, stateName);
+    return stateName;
   }
 
   private getLambdaPayload(stateName: string) {
