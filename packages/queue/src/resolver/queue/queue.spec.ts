@@ -81,7 +81,7 @@ describe('Queue', () => {
 
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
-      'handler',
+      'fifo-handler',
       expect.objectContaining({
         filename: 'test.js',
         isFifo: true,
@@ -93,7 +93,7 @@ describe('Queue', () => {
 
     expect(synthesized).toHaveResourceWithProperties(SqsQueue, {
       fifo_queue: true,
-      name: 'fifo',
+      name: 'fifo.fifo',
     });
 
     expect(synthesized).toHaveResourceWithProperties(LambdaEventSourceMapping, {
@@ -125,7 +125,7 @@ describe('Queue', () => {
 
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
-      'handler',
+      'fifo-handler',
       expect.objectContaining({
         filename: 'test.js',
         isFifo: true,

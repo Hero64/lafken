@@ -40,7 +40,7 @@ describe('Cron', () => {
   const metadata: ResourceMetadata = getResourceMetadata(TestEvent);
   const handlers = getResourceHandlerMetadata<EventCronMetadata>(TestEvent);
 
-  it('should create a eventbridge schedule', async () => {
+  it('should create an eventbridge schedule', async () => {
     const { stack, module } = setupTestingStackWithModule();
 
     new CronResolver(module, 'cron', {
@@ -49,10 +49,9 @@ describe('Cron', () => {
     });
 
     const synthesized = Testing.synth(stack);
-
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
-      'handler',
+      'cron-TestEvent',
       expect.objectContaining({
         filename: metadata.filename,
         schedule: { day: 10, hour: 11 },
@@ -64,7 +63,7 @@ describe('Cron', () => {
 
     expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
       name: 'cron',
-      schedule_expression: 'cron(* 11 10 * * *)',
+      schedule_expression: 'cron(* 11 10 * ? *)',
     });
 
     expect(synthesized).toHaveResourceWithProperties(CloudwatchEventTarget, {

@@ -69,10 +69,6 @@ describe('Dynamo table', () => {
           name: 'name',
           type: 'S',
         },
-        {
-          name: 'ttl',
-          type: 'N',
-        },
       ],
       ttl: {
         attribute_name: 'ttl',
@@ -166,16 +162,16 @@ describe('Dynamo table', () => {
         dynamodb_stream_parameters: {
           batch_size: 10,
           maximum_batching_window_in_seconds: 1,
+          maximum_record_age_in_seconds: -1,
           starting_position: 'LATEST',
         },
       },
-      target: '${data.aws_cloudwatch_event_bus.DefaultBus.arn}',
+      target: '${data.aws_cloudwatch_event_bus.Test-table_DefaultBus_10907519.arn}',
       target_parameters: {
         eventbridge_event_bus_parameters: {
           detail_type: 'db:stream',
           source: 'dynamodb.Test',
         },
-        input_template: '<aws.pipes.event.json>',
       },
     });
   });

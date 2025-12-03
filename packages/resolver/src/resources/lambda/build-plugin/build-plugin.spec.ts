@@ -40,10 +40,10 @@ describe('AlicantoBuildPlugin', () => {
     const outputContent = await fs.readFile(outputFile, 'utf-8');
     expect(outputContent).toContain('var TestingInstance = new Testing();');
     expect(outputContent).toContain(
-      'exports.foo = TestingInstance.foo.bind(TestingInstance);'
+      'exports.foo_Testing = TestingInstance.foo.bind(TestingInstance);'
     );
     expect(outputContent).toContain(
-      'exports.bar = TestingInstance.bar.bind(TestingInstance);'
+      'exports.bar_Testing = TestingInstance.bar.bind(TestingInstance);'
     );
   });
 });

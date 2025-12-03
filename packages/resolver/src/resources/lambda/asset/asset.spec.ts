@@ -37,11 +37,15 @@ describe('Lambda Assets', () => {
     expect(internalState[prebuildPath]).toEqual({
       lambdas: [],
       metadata: {
-        className: 'Testing',
         filename: 'handler',
-        methods: ['foo', 'bar'],
         foldername: '/tmp',
         minify: false,
+      },
+      resources: {
+        Testing: {
+          className: 'Testing',
+          methods: ['foo', 'bar'],
+        },
       },
     });
   });

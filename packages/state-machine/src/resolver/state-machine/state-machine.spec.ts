@@ -91,7 +91,7 @@ describe('State Machine', () => {
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       name: 'TestingSM',
       definition:
-        '{"StartAt":"wait-1","States":{"succeed-1":{"Type":"Succeed"},"fail-1":{"Type":"Fail","Error":"Error"},"pass-1":{"Type":"Pass","End":true},"pass-2":{"Type":"Pass","End":true},"choice-1":{"Type":"Choice","Choices":[{"Condition":"{% $foo = 1 %}","Next":"succeed-1"},{"Condition":"{% $foo = 2 %}","Next":"fail-1"},{"Condition":"{% $foo = 3 %}","Next":"pass-1"}],"Default":"pass-2"},"wait-1":{"Type":"Wait","Seconds":2,"Next":"choice-1"}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"wait","States":{"succeed":{"Type":"Succeed"},"fail":{"Type":"Fail","Error":"Error"},"pass":{"Type":"Pass","End":true},"pass-2":{"Type":"Pass","End":true},"choice":{"Type":"Choice","Choices":[{"Condition":"{% $foo = 1 %}","Next":"succeed"},{"Condition":"{% $foo = 2 %}","Next":"fail"},{"Condition":"{% $foo = 3 %}","Next":"pass"}],"Default":"pass-2"},"wait":{"Type":"Wait","Seconds":2,"Next":"choice"}},"QueryLanguage":"JSONata"}',
     });
   });
 
@@ -187,7 +187,7 @@ describe('State Machine', () => {
 
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       definition:
-        '{"StartAt":"parallel-1","States":{"parallel-1":{"Type":"Parallel","Arguments":{"executionId":"{% $states.context.Execution.Id %}"},"Branches":[{"StartAt":"wait-1","States":{"succeed-1":{"Type":"Succeed"},"wait-1":{"Type":"Wait","Seconds":2,"Next":"succeed-1"}}},{"StartAt":"wait-1","States":{"succeed-1":{"Type":"Succeed"},"wait-1":{"Type":"Wait","Seconds":4,"Next":"succeed-1"}}}],"Retry":[{"ErrorEquals":["States.ALL"],"MaxDelaySeconds":2}]}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"parallel","States":{"parallel":{"Type":"Parallel","Arguments":{"executionId":"{% $states.context.Execution.Id %}"},"End":true,"Branches":[{"StartAt":"wait","States":{"succeed":{"Type":"Succeed"},"wait":{"Type":"Wait","Seconds":2,"Next":"succeed"}}},{"StartAt":"wait-2","States":{"succeed-2":{"Type":"Succeed"},"wait-2":{"Type":"Wait","Seconds":4,"Next":"succeed-2"}}}],"Retry":[{"ErrorEquals":["States.ALL"],"MaxDelaySeconds":2}]}},"QueryLanguage":"JSONata"}',
     });
   });
 
@@ -225,7 +225,7 @@ describe('State Machine', () => {
 
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       definition:
-        '{"StartAt":"map-1","States":{"map-1":{"Type":"Map","ItemProcessor":{"StartAt":"wait-1","States":{"succeed-1":{"Type":"Succeed"},"wait-1":{"Type":"Wait","Seconds":2,"Next":"succeed-1"}},"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"EXPRESS"}},"Retry":[{"ErrorEquals":["States.ALL"],"MaxDelaySeconds":2}]}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"map","States":{"map":{"Type":"Map","ItemProcessor":{"StartAt":"wait","States":{"succeed":{"Type":"Succeed"},"wait":{"Type":"Wait","Seconds":2,"Next":"succeed"}},"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"EXPRESS"}},"End":true,"Retry":[{"ErrorEquals":["States.ALL"],"MaxDelaySeconds":2}]}},"QueryLanguage":"JSONata"}',
     });
   });
 });

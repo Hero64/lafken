@@ -40,7 +40,7 @@ describe('Rule', () => {
   const metadata: ResourceMetadata = getResourceMetadata(TestEvent);
   const handlers = getResourceHandlerMetadata<EventRuleMetadata>(TestEvent);
 
-  it('should create a eventbridge event', async () => {
+  it('should create an eventbridge event', async () => {
     const { stack, module } = setupTestingStackWithModule();
 
     const defaultBus = new DataAwsCloudwatchEventBus(stack, 'DefaultBus', {
@@ -57,7 +57,7 @@ describe('Rule', () => {
 
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
-      'handler',
+      'rule-TestEvent',
       expect.objectContaining({
         filename: metadata.filename,
         pattern: { source: 'foo.bar' },

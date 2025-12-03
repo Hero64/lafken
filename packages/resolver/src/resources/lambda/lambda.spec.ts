@@ -48,7 +48,7 @@ describe('Lambda handler', () => {
         variables: {},
       },
       function_name: 'test-app',
-      handler: 'index.lambda-test',
+      handler: 'index.lambda-test_test',
       runtime: 'nodejs22.x',
       tracing_config: {
         mode: 'PassThrough',
@@ -91,7 +91,7 @@ describe('Lambda handler', () => {
         },
       },
       function_name: 'test-app',
-      handler: 'index.lambda-test',
+      handler: 'index.lambda-test_test',
       memory_size: 200,
       runtime: 'nodejs20.x',
       timeout: 100,
