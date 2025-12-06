@@ -2,6 +2,7 @@ import { Api, Delete, Event, Get, Post, response } from '@alicanto/api/main';
 import dayjs from 'dayjs';
 
 import {
+  BaseEvent,
   type Bye307,
   type Bye404,
   ByeEvent,
@@ -28,6 +29,9 @@ export class GreetingApi {
         aa: 'bbb',
       },
     },
+    auth: {
+      authorizerName: 'api-key-auth',
+    },
   })
   sayHello(@Event(HelloEvent) e: HelloEvent): HelloResponse[] {
     console.log(`Hello my name is ${e.name}. My greeting id is ${e.id}`);
@@ -43,6 +47,7 @@ export class GreetingApi {
   @Delete({
     path: '/bye/{type}',
     response: ByeResponse,
+    auth: false,
   })
   sayBye(@Event(ByeEvent) e: ByeEvent): ByeResponse {
     const fullName = `${e.name} ${e.lastName}`;
@@ -64,10 +69,24 @@ export class GreetingApi {
     };
   }
 
-  @Post()
+  @Post({
+    auth: {
+      scopes: ['foo', 'bar'],
+    },
+  })
   createNewGreeting(@Event(NewGreetingEvent) e: NewGreetingEvent) {
     console.log(`wsp from post ${e.name} ${e.lastName}`);
 
     return e;
+  }
+
+  @Get({
+    path: 'cognito',
+    auth: {
+      authorizerName: 'cognito-auth',
+    },
+  })
+  authCognito(@Event(BaseEvent) _e: BaseEvent) {
+    return 1;
   }
 }

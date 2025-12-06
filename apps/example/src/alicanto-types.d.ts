@@ -10,6 +10,9 @@ declare module '@alicanto/common' {
       StateMachine: {
         GreetingStepFunction: true;
       };
+      Queue: {
+        'greeting-standard-queue': true;
+      };
     };
   }
 
@@ -19,6 +22,19 @@ declare module '@alicanto/common' {
 
   interface ApiRestAvailable {
     ExampleApi: boolean;
+  }
+
+  interface ApiAuthorizerAvailable {
+    'api-key-auth': true;
+    'cognito-auth': true;
+  }
+
+  interface DynamoTableAvailable {
+    clients: true;
+  }
+
+  interface AuthAvailable {
+    'example-user-pool': true;
   }
 }
 

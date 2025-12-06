@@ -5,11 +5,14 @@
     "rootDir": "src",
     "types": ["node"],
     "paths": {
-      //"@alicanto/dynamodb/*": ["../../packages/dynamo/lib/*"],
+      "@alicanto/dynamo/*": ["../../packages/dynamo/lib/*"],
       "@alicanto/api/*": ["../../packages/api/lib/*"],
-      // "@alicanto/event/*": ["../../packages/event/lib/*"],
-      // "@alicanto/state-machine/*": ["../../packages/state-machine/lib/*"],
-      "@alicanto/bucket/*": ["../../packages/bucket/lib/*"]
+      "@alicanto/schedule/*": ["../../packages/schedule/lib/*"],
+      "@alicanto/event/*": ["../../packages/event/lib/*"],
+      "@alicanto/state-machine/*": ["../../packages/state-machine/lib/*"],
+      "@alicanto/bucket/*": ["../../packages/bucket/lib/*"],
+      "@alicanto/queue/*": ["../../packages/queue/lib/*"],
+      "@alicanto/auth/*": ["../../packages/auth/lib/*"]
     }
   },
   "include": ["src/**/*"],

@@ -13,9 +13,15 @@
   },
   "dependencies": {
     "@alicanto/api": "workspace:*",
+    "@alicanto/auth": "workspace:*",
     "@alicanto/bucket": "workspace:*",
     "@alicanto/common": "workspace:*",
+    "@alicanto/dynamo": "workspace:*",
+    "@alicanto/event": "workspace:*",
     "@alicanto/main": "workspace:*",
+    "@alicanto/queue": "workspace:*",
+    "@alicanto/schedule": "workspace:*",
+    "@alicanto/state-machine": "workspace:*",
     "cdktf": "0.21.0",
     "dayjs": "1.11.19"
   },

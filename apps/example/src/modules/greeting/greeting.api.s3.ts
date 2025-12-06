@@ -2,6 +2,7 @@ import {
   Api,
   type BucketIntegrationOption,
   type BucketIntegrationResponse,
+  Delete,
   Event,
   Get,
   IntegrationOptions,
@@ -29,8 +30,24 @@ export class BucketIntegration {
   @Post({
     integration: 'bucket',
     action: 'Upload',
+    path: '/{fileName}',
   })
   upload(
+    @Event(S3UploadFileEvent) e: S3UploadFileEvent,
+    @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
+  ): BucketIntegrationResponse {
+    return {
+      bucket: getResourceValue('alicanto-example-documents', 'id'),
+      object: e.fileName,
+    };
+  }
+
+  @Delete({
+    integration: 'bucket',
+    action: 'Delete',
+    path: '/{fileName}',
+  })
+  delete(
     @Event(S3UploadFileEvent) e: S3UploadFileEvent,
     @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
   ): BucketIntegrationResponse {
