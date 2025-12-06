@@ -1,6 +1,6 @@
 {
   "name": "@alicanto/resolver",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": false,
   "license": "MIT",
   "main": "lib/index.js",
@@ -9,6 +9,7 @@
     "build": "pnpm clean && tsc -p ./tsconfig.build.json",
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
+    "prepublishOnly": "pnpm build",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -24,5 +25,8 @@
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
     "ts-jest": "29.4.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
