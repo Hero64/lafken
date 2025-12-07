@@ -17,7 +17,7 @@ describe('Cron rule', () => {
     expect(metadata).toMatchObject({
       type: 'CRON',
       name: 'CronTest',
-      filename: 'schedule.test.ts',
+      filename: 'schedule.spec.ts',
       originalName: 'CronTest',
       minify: true,
     });

@@ -20,6 +20,19 @@
       "types": "./lib/resolver/index.d.ts"
     }
   },
+  "typesVersions": {
+    "*": {
+      "main": [
+        "./lib/main/index.d.ts"
+      ],
+      "./service": [
+        "./lib/service/index.d.ts"
+      ],
+      "resolver": [
+        "./lib/resolver/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "lib"
   ],
@@ -47,7 +60,8 @@
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
     "jest-dynalite": "3.6.1",
-    "ts-jest": "29.4.5"
+    "ts-jest": "29.4.5",
+    "ts-node": "10.9.2"
   },
   "publishConfig": {
     "access": "public"

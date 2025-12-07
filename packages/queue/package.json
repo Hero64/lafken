@@ -6,15 +6,28 @@
   "exports": {
     "./main": {
       "import": "./lib/main/index.js",
+      "types": "./lib/main/index.d.ts",
       "require": "./lib/main/index.js"
     },
     "./service": {
       "import": "./lib/service/index.js",
+      "types": "./lib/service/index.d.ts",
       "require": "./lib/service/index.js"
     },
     "./resolver": {
       "import": "./lib/resolver/index.js",
+      "types": "./lib/resolver/index.d.ts",
       "require": "./lib/resolver/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "main": [
+        "./lib/main/index.d.ts"
+      ],
+      "resolver": [
+        "./lib/resolver/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -43,7 +56,8 @@
     "@types/aws-lambda": "8.10.159",
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
-    "ts-jest": "29.4.5"
+    "ts-jest": "29.4.5",
+    "ts-node": "10.9.2"
   },
   "publishConfig": {
     "access": "public"
