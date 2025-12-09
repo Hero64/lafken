@@ -19,8 +19,13 @@ import { Rule } from './rule/rule';
 export class EventRuleResolver implements ResolverType {
   public type = RESOURCE_TYPE;
   private eventBuses: Record<string, CloudwatchEventBus> = {};
+  private props: EventRuleResolverProps[] = [];
 
-  constructor(private props: EventRuleResolverProps[] = []) {}
+  constructor(...props: EventRuleResolverProps[]) {
+    if (props) {
+      this.props = props;
+    }
+  }
 
   public async beforeCreate(scope: AppStack) {
     const defaultBus = new DataAwsCloudwatchEventBus(scope, 'EventDefaultBus', {
