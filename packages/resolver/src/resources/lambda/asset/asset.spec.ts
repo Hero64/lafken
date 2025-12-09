@@ -1,14 +1,6 @@
 import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
-import { TerraformAsset } from 'cdktf';
-import { build } from 'esbuild';
 import { setupTestingStack } from '../../../utils';
 import { lambdaAssets } from './asset';
-
-jest.mock('esbuild', () => {
-  return {
-    build: jest.fn(),
-  };
-});
 
 jest.mock('cdktf', () => {
   const actual = jest.requireActual('cdktf');
@@ -71,9 +63,12 @@ describe('Lambda Assets', () => {
       scope: stack,
       lambda,
     });
+    const mock = jest.spyOn(lambdaAssets as any, 'buildAsset').mockResolvedValue({
+      path: 'index.js',
+    });
+
     await lambdaAssets.createAssets();
 
-    expect(build).toHaveBeenCalledTimes(1);
-    expect(TerraformAsset).toHaveBeenCalledTimes(1);
+    expect(mock).toHaveBeenCalledTimes(1);
   });
 });

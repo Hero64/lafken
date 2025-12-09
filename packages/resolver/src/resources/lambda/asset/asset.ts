@@ -1,7 +1,8 @@
+import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktf';
-import { build } from 'esbuild';
+
 import { createSha1 } from '../../../utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
@@ -75,22 +76,47 @@ class LambdaAssets {
     const lambdaAsset = this.lambdaAssets[prebuildPath];
     const outputPath = this.createOutputPath(prebuildPath);
 
-    await build({
-      entryPoints: [prebuildPath],
-      outfile: join(outputPath, 'index.js'),
-      legalComments: 'none',
-      bundle: true,
-      minify: metadata.minify,
-      platform: 'node',
-      external: ['@aws-sdk', 'aws-lambda'],
-      plugins: [
-        LafkenBuildPlugin({
-          filename: metadata.filename,
-          removeAttributes: ['lambda'],
-          exports: Object.values(lambdaAsset.resources),
-        }),
-      ],
+    await mkdir(outputPath, {
+      recursive: true,
     });
+
+    (async () => {
+      const { build } = await import('rolldown');
+
+      await build({
+        input: prebuildPath,
+        platform: 'node',
+        external: ['@aws-sdk', 'aws-lambda'],
+        plugins: [
+          LafkenBuildPlugin({
+            filename: prebuildPath,
+            removeAttributes: ['lambda'],
+            exports: Object.values(lambdaAsset.resources),
+          }),
+        ],
+        output: {
+          format: 'cjs',
+          dir: outputPath,
+          entryFileNames: 'index.js',
+          chunkFileNames: '[name].js',
+          minify: metadata.minify,
+          legalComments: 'none',
+          advancedChunks: {
+            groups: [
+              {
+                name(moduleId) {
+                  if (prebuildPath === moduleId) {
+                    return null;
+                  }
+
+                  return 'vendor';
+                },
+              },
+            ],
+          },
+        },
+      });
+    })();
 
     if (lambdaAsset.metadata.afterBuild) {
       await lambdaAsset.metadata.afterBuild(outputPath);

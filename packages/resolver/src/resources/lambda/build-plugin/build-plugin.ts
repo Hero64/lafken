@@ -1,34 +1,26 @@
-import { promises } from 'node:fs';
-import type { Plugin } from 'esbuild';
 import type { LafkenBuildPluginProps } from './build-plugin.types';
 
-export const LafkenBuildPlugin = (props: LafkenBuildPluginProps): Plugin => {
-  const fileRegex = new RegExp(`${props.filename.replace('.', '\\.')}\\.js$`);
-
+export const LafkenBuildPlugin = (props: LafkenBuildPluginProps) => {
   return {
     name: 'lafken-build-plugin',
-    setup(build) {
-      build.onLoad({ filter: fileRegex }, async (args) => {
-        let source = await promises.readFile(args.path, 'utf8');
+    transform(code: string, id: string) {
+      if (id === props.filename) {
         let exportContent = '';
 
         for (const exportResources of props.exports) {
           const instanceName = `${exportResources.className}Instance`;
-          const instance = `const ${instanceName} = new ${exportResources.className}()`;
-
+          const instance = `const ${instanceName} = new ${exportResources.className}();`;
           const exports = exportResources.methods.map((handler) => {
-            return `exports.${handler}_${exportResources.className} = ${instanceName}.${handler}.bind(${instanceName})`;
+            return `exports.${handler}_${exportResources.className} = ${instanceName}.${handler}.bind(${instanceName});`;
           });
-          exportContent += `\n${instance}\n${exports.join('\n')}\n;`;
+          exportContent += `\n${instance}\n${exports.join('\n')}\n`;
         }
 
-        source += exportContent;
-
         return {
-          contents: source,
-          loader: 'js',
+          code: code + exportContent,
+          map: null,
         };
-      });
+      }
     },
   };
 };

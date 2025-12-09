@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -10,6 +11,6 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "declaration": true,
-    "moduleResolution": "node"
+    "isolatedModules": true
   }
 }

@@ -1,48 +1,30 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
-import esbuild from 'esbuild';
 import { LafkenBuildPlugin } from './build-plugin';
 
 describe('LafkenBuildPlugin', () => {
   const tempDir: string = path.join(__dirname, 'temp');
 
-  beforeEach(async () => {
-    await fs.mkdir(tempDir, { recursive: true });
-  });
-
-  afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
-  });
-
   test('should export lambda functions', async () => {
     const inputFile = path.join(tempDir, 'input.js');
-    const outputFile = path.join(tempDir, 'output.js');
-    await fs.writeFile(inputFile, 'class Testing {}');
 
-    await esbuild.build({
-      entryPoints: [inputFile],
-      bundle: true,
-      outfile: outputFile,
-      plugins: [
-        LafkenBuildPlugin({
-          filename: 'input',
-          exports: [
-            {
-              className: 'Testing',
-              methods: ['foo', 'bar'],
-            },
-          ],
-          removeAttributes: [],
-        }),
+    const plugin = LafkenBuildPlugin({
+      filename: inputFile,
+      exports: [
+        {
+          className: 'Testing',
+          methods: ['foo', 'bar'],
+        },
       ],
+      removeAttributes: [],
     });
 
-    const outputContent = await fs.readFile(outputFile, 'utf-8');
-    expect(outputContent).toContain('var TestingInstance = new Testing();');
-    expect(outputContent).toContain(
+    const response = plugin.transform('class Testing {}', inputFile);
+
+    expect(response?.code).toContain('const TestingInstance = new Testing()');
+    expect(response?.code).toContain(
       'exports.foo_Testing = TestingInstance.foo.bind(TestingInstance);'
     );
-    expect(outputContent).toContain(
+    expect(response?.code).toContain(
       'exports.bar_Testing = TestingInstance.bar.bind(TestingInstance);'
     );
   });
