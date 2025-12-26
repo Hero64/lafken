@@ -1,4 +1,3 @@
 {
-  "*.{ts,tsx,js,jsx,json}": ["pnpm biome format --write"],
-  "*.{ts,tsx,js,jsx}": ["pnpm biome lint --write"]
+  "*.{ts,tsx,js,jsx,json}": ["pnpm biome check --write"]
 }

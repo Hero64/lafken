@@ -127,8 +127,8 @@ describe('ParamHelper', () => {
       expect(result).toHaveProperty('');
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('name');
-      expect(result['id']).toEqual(mockParams.testMethod.properties[0]);
-      expect(result['name']).toEqual(mockParams.testMethod.properties[1]);
+      expect(result.id).toEqual(mockParams.testMethod.properties[0]);
+      expect(result.name).toEqual(mockParams.testMethod.properties[1]);
     });
 
     it('should return flattened field structure for nested object', () => {
@@ -261,19 +261,19 @@ describe('ParamHelper', () => {
 
       expect(result.path).toBeDefined();
       expect(result.path).toHaveLength(1);
-      expect(result.path![0]).toEqual(mockParams.testMethod.properties[0]);
+      expect(result.path?.[0]).toEqual(mockParams.testMethod.properties[0]);
 
       expect(result.query).toBeDefined();
       expect(result.query).toHaveLength(1);
-      expect(result.query![0]).toEqual(mockParams.testMethod.properties[1]);
+      expect(result.query?.[0]).toEqual(mockParams.testMethod.properties[1]);
 
       expect(result.body).toBeDefined();
       expect(result.body).toHaveLength(1);
-      expect(result.body![0]).toEqual(mockParams.testMethod.properties[2]);
+      expect(result.body?.[0]).toEqual(mockParams.testMethod.properties[2]);
 
       expect(result.header).toBeDefined();
       expect(result.header).toHaveLength(1);
-      expect(result.header![0]).toEqual(mockParams.testMethod.properties[3]);
+      expect(result.header?.[0]).toEqual(mockParams.testMethod.properties[3]);
     });
 
     it('should default to query source when source is not specified', () => {

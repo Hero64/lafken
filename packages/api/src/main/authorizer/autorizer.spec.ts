@@ -45,7 +45,7 @@ describe('Authorizers', () => {
     @CustomAuthorizer()
     class Auth {
       @AuthorizerHandler()
-      test(e: any) {
+      test(_e: any) {
         return {
           principalId: 'test@test.com',
           allow: true,

@@ -1,6 +1,6 @@
 import { SendMessageCommand } from '@aws-sdk/client-sqs';
-import { SendMessage } from './send-message';
 import { client } from '../../client/client';
+import { SendMessage } from './send-message';
 
 jest.mock('../../client/client', () => ({
   client: {

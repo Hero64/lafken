@@ -1,12 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
     "useIgnoreFile": false
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "includes": ["**", "!**/dist", "!**/lib", "!**/.out", "!**/coverage"]
   },
   "formatter": {
     "enabled": true,
@@ -27,7 +28,8 @@
         "noExplicitAny": "off",
         "noShadowRestrictedNames": "off",
         "noEmptyInterface": "off",
-        "noExportsInTest": "off"
+        "noExportsInTest": "off",
+        "noTemplateCurlyInString": "off"
       },
       "complexity": {
         "noBannedTypes": "off",

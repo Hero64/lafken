@@ -1,8 +1,7 @@
 import { SendMessageCommand } from '@aws-sdk/client-sqs';
-
-import type { SendMessageProps } from './send-message.types';
 import { client } from '../../client/client';
 import { SendMessageBase } from '../send-message-base/send-message-base';
+import type { SendMessageProps } from './send-message.types';
 
 export class SendMessage extends SendMessageBase {
   constructor(private props: SendMessageProps) {

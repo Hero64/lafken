@@ -1,6 +1,6 @@
 import { SendMessageBatchCommand } from '@aws-sdk/client-sqs';
-import { SendMessageBatch } from './send-message-batch';
 import { client } from '../../client/client';
+import { SendMessageBatch } from './send-message-batch';
 import type { SendMessagesBatchProps } from './send-message-batch.types';
 
 jest.mock('../../client/client', () => ({

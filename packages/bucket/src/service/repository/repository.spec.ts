@@ -1,15 +1,14 @@
 import 'reflect-metadata';
 import {
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
   CopyObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
   ListObjectsV2Command,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
-
-import { createRepository } from './repository';
 import { Bucket } from '../../main';
 import * as clientModule from '../client/client';
+import { createRepository } from './repository';
 
 @Bucket({ name: 'example' })
 class ExampleBucket {}
