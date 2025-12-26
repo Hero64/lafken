@@ -47,6 +47,26 @@ The `lafkenResource` is the base class for resources in the framework. It provid
 - **Global Resource Tracking:** Allows resources to be registered and accessed globally across the application.
 - **Dependency Management:** Manages dependencies between resources, ensuring they are created in the correct order and configurations are fully resolved before deployment.
 
+### Environment
+
+Provides a mechanism to manage environment variables in order to expose resources and configuration data to Lambda functions. Environment variables are received and parsed at deployment time, making them available for use during execution.
+
+Variables can be defined as direct static values or as SSM-backed parameters, allowing values to be resolved dynamically from AWS Systems Manager Parameter Store.
+
+This approach enables a consistent and secure way to inject configuration, resource references, and sensitive data into Lambda functions
+
+Supported Environment Variable Types
+
+Environment variables can be defined as static values or resolved dynamically from AWS Systems Manager (SSM).
+
+SSM-backed variables must follow the structure: `SSM::{TYPE}::/path/of/ssm/parameter`
+
+Where {TYPE} defines how the parameter is resolved. The following types are supported:
+
+STRING — Resolves an SSM String parameter
+
+SECURE_STRING — Resolves an SSM SecureString parameter
+
 ## Usage
 
 This package is primarily used internally by other `@lafken/*` packages (like `@lafken/api`, `@lafken/event`, etc.) to implement their specific resource resolvers. However, it can be used directly to create custom infrastructure components that adhere to the framework's patterns.
