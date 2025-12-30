@@ -29,7 +29,8 @@ export class AppStack extends TerraformStack {
       globalConfig: props.globalConfig?.lambda,
       contextCreator: props.name,
     });
-    new AwsProvider(scope, 'AWS', props.awsProviderConfig);
+    new AwsProvider(this, 'AWS', props.awsProviderConfig);
+
     this.createRole();
   }
 
