@@ -25,6 +25,7 @@ import {
   type TaskSource,
 } from '../../../main';
 import type {
+  BucketPermission,
   Catch,
   ChoiceCondition,
   DefinitionSchema,
@@ -34,6 +35,7 @@ import type {
   ItemReaderTypes,
   MapTask,
   ParallelBranch,
+  PermissionType,
   Retry,
   SchemaProps,
   States,
@@ -57,6 +59,7 @@ export class Schema {
   private stateNames: StateNames;
   private lambdaStates: LambdaStates;
   private unresolvedDependency: boolean = false;
+  private bucketPermissions: BucketPermission = {};
 
   constructor(
     private scope: Construct,
@@ -101,6 +104,10 @@ export class Schema {
 
   get hasUnresolvedDependency() {
     return this.unresolvedDependency;
+  }
+
+  get buckets() {
+    return this.bucketPermissions;
   }
 
   private getMetadata(initializeAssets: boolean) {
@@ -202,6 +209,7 @@ export class Schema {
             stateNames: this.stateNames,
           });
           branchStates.push(branchSchema.getDefinition());
+          this.mergeBucketPermissions(branchSchema.buckets);
           this.setUnresolvedDependency(branchSchema.unresolvedDependency);
         }
 
@@ -223,6 +231,7 @@ export class Schema {
           lambdas: this.lambdaStates,
           stateNames: this.stateNames,
         });
+        this.mergeBucketPermissions(mapSchema.buckets);
         const mapState = mapSchema.getDefinition();
         this.setUnresolvedDependency(mapSchema.hasUnresolvedDependency);
 
@@ -253,6 +262,7 @@ export class Schema {
 
           mapTask.ItemProcessor = itemProcessor as ItemProcessor;
           if (currentState.itemReader) {
+            this.addBucketPermission(currentState.itemReader.bucket, 'read');
             const readerConfig: ItemReader = {
               Resource: 'arn:aws:states:::s3:getObject',
               Arguments: {
@@ -278,6 +288,7 @@ export class Schema {
           }
 
           if (currentState.resultWriter) {
+            this.addBucketPermission(currentState.resultWriter.bucket, 'write');
             mapTask.ResultWriter = {
               Resource: 'arn:aws:states:::s3:putObject',
               Arguments: {
@@ -558,5 +569,22 @@ export class Schema {
     }
 
     this.unresolvedDependency = true;
+  }
+
+  private mergeBucketPermissions(bucketPermissions: BucketPermission) {
+    for (const bucket in bucketPermissions) {
+      this.addBucketPermission(bucket, bucketPermissions[bucket]);
+    }
+  }
+
+  private addBucketPermission(bucketName: string, permission: PermissionType) {
+    if (!this.bucketPermissions[bucketName]) {
+      this.bucketPermissions[bucketName] = permission;
+      return;
+    }
+
+    if (this.bucketPermissions[bucketName] === 'read' && permission === 'write') {
+      this.bucketPermissions[bucketName] = permission;
+    }
   }
 }

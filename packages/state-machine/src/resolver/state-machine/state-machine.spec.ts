@@ -1,4 +1,5 @@
 import 'cdktf/lib/testing/adapters/jest';
+import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
 import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
 import {
@@ -7,7 +8,7 @@ import {
   type GetResourceProps,
   getResourceMetadata,
 } from '@lafken/common';
-import { lafkenResource, type Role, setupTestingStackWithModule } from '@lafken/resolver';
+import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktf';
 import {
   Event,
@@ -38,9 +39,7 @@ const createStateMachine = async (classResource: ClassResource) => {
   const stateMachine = new StateMachineResource(module, 'testing', {
     classResource: classResource,
     resourceMetadata: getResourceMetadata(classResource),
-    role: {
-      arn: '',
-    } as Role,
+    moduleName: 'testing',
   });
 
   stateMachine.attachDefinition();
@@ -301,5 +300,95 @@ describe('State Machine', () => {
     expect(lafkenResource.callDependentCallbacks()).rejects.toThrow(
       'The schema has a unresolved dependency'
     );
+  });
+
+  it('should create a simple state machine role', async () => {
+    @StateMachine({
+      startAt: {
+        type: 'wait',
+        seconds: 10,
+        next: {
+          type: 'succeed',
+        },
+      },
+    })
+    class TestingSM {}
+
+    const { stack } = await createStateMachine(TestingSM);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
+      policy:
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogDelivery", "logs:GetLogDelivery", "logs:UpdateLogDelivery", "logs:DeleteLogDelivery", "logs:ListLogDeliveries", "logs:PutResourcePolicy", "logs:DescribeResourcePolicies", "logs:DescribeLogGroups"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["lambda:InvokeFunction"], "Resource" = "*"}]})}',
+    });
+  });
+
+  it('should add bucket permissions to state machine role', async () => {
+    @NestedStateMachine({
+      startAt: {
+        type: 'wait',
+        seconds: 2,
+        next: {
+          type: 'succeed',
+        },
+      },
+    })
+    class MapState {}
+
+    @StateMachine({
+      startAt: {
+        type: 'map',
+        mode: 'distributed',
+        states: MapState,
+        itemReader: {
+          bucket: 'testing',
+          key: 'test.json',
+          source: 'json',
+        },
+      },
+    })
+    class TestingSM {}
+
+    const { stack } = await createStateMachine(TestingSM);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
+      policy:
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogDelivery", "logs:GetLogDelivery", "logs:UpdateLogDelivery", "logs:DeleteLogDelivery", "logs:ListLogDeliveries", "logs:PutResourcePolicy", "logs:DescribeResourcePolicies", "logs:DescribeLogGroups"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["lambda:InvokeFunction"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["s3:GetObject", "s3:ListBucket"], "Resource" = ["arn:aws:s3:::testing", "arn:aws:s3:::testing/*"]}]})}',
+    });
+  });
+
+  it('should include custom services to state machine role', async () => {
+    @StateMachine({
+      services: ({ getResourceValue }) => [
+        {
+          type: 'sqs',
+          permissions: ['GetQueueUrl', 'ReceiveMessage'],
+          resources: [getResourceValue('queue::test', 'id')],
+        },
+      ],
+      startAt: {
+        type: 'wait',
+        seconds: 10,
+        next: {
+          type: 'succeed',
+        },
+      },
+    })
+    class TestingSM {}
+
+    const { stack } = await createStateMachine(TestingSM);
+    const Queue = lafkenResource.make(SqsQueue);
+
+    const queue = new Queue(stack, 'test');
+    queue.isGlobal('queue', 'test');
+
+    await lafkenResource.callDependentCallbacks();
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
+      policy:
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogDelivery", "logs:GetLogDelivery", "logs:UpdateLogDelivery", "logs:DeleteLogDelivery", "logs:ListLogDeliveries", "logs:PutResourcePolicy", "logs:DescribeResourcePolicies", "logs:DescribeLogGroups"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["lambda:InvokeFunction"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["sqs:GetQueueUrl", "sqs:ReceiveMessage"], "Resource" = [aws_sqs_queue.test.id]}]})}',
+    });
   });
 });

@@ -3,13 +3,7 @@ import {
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
-import {
-  type AppModule,
-  type AppStack,
-  lambdaAssets,
-  type ResolverType,
-  Role,
-} from '@lafken/resolver';
+import { type AppModule, lambdaAssets, type ResolverType } from '@lafken/resolver';
 
 import {
   type LambdaStateMetadata,
@@ -20,24 +14,6 @@ import { StateMachine } from './state-machine/state-machine';
 
 export class StateMachineResolver implements ResolverType {
   public type = RESOURCE_TYPE;
-  private role: Role;
-
-  public beforeCreate(scope: AppStack) {
-    this.role = new Role(scope, 'state-machine-global-role', {
-      name: 'state-machine-global-role',
-      services: [
-        'cloudwatch',
-        'lambda',
-        'kms',
-        'state_machine',
-        {
-          type: 's3',
-          permissions: ['PutObject', 'GetObject', 'ListBucket'],
-        },
-      ],
-      principal: 'states.amazonaws.com',
-    });
-  }
 
   public async create(module: AppModule, resource: ClassResource) {
     const metadata = getResourceMetadata<StateMachineResourceMetadata>(resource);
@@ -54,7 +30,7 @@ export class StateMachineResolver implements ResolverType {
     const stateMachine = new StateMachine(module, metadata.name, {
       classResource: resource,
       resourceMetadata: metadata,
-      role: this.role,
+      moduleName: module.id,
     });
 
     await stateMachine.attachDefinition();

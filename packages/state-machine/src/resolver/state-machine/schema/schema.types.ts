@@ -181,3 +181,6 @@ export interface DefinitionSchema {
   StartAt: string;
   States: Record<string, States>;
 }
+
+export type PermissionType = 'read' | 'write';
+export type BucketPermission = Record<string, PermissionType>;
