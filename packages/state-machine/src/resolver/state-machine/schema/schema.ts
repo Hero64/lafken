@@ -349,15 +349,6 @@ export class Schema {
       (event: Record<string, any>, context: GetResourceProps) => any
     > = new this.resource();
 
-    const argumentValues = resolveCallbackResource((props) =>
-      resource[handler.name]({}, props)
-    );
-
-    if (argumentValues) {
-      task.Arguments = argumentValues;
-      return task;
-    }
-
     this.unresolvedDependency = true;
 
     task.Arguments = async () => {
@@ -413,7 +404,9 @@ export class Schema {
       Next: this.getNextState(handler.next, handler.end),
       End: handler.end,
       Assign: handler.assign,
-      Output: handler.output || '{% $states.result.Payload %}',
+      Output:
+        handler.output ||
+        '{% $exist($states.result.Payload) ? $states.result.Payload) : {} %}',
       ...(handler.integrationService !== undefined
         ? this.getIntegrationTask(handler)
         : this.getLambdaTask(handler)),
