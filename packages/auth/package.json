@@ -1,7 +1,15 @@
 {
   "name": "@lafken/auth",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Simplify creation and management of Amazon Cognito User Pools and Client",
+  "keywords": [
+    "aws",
+    "cognito",
+    "auth",
+    "serverless",
+    "lafken"
+  ],
   "license": "MIT",
   "exports": {
     "./main": {

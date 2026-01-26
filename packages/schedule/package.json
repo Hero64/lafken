@@ -1,7 +1,16 @@
 {
   "name": "@lafken/schedule",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Create and manage Amazon EventBridge scheduled rules (Cron jobs) with Lambda integration",
+  "keywords": [
+    "aws",
+    "eventbridge",
+    "schedule",
+    "cron",
+    "serverless",
+    "lafken"
+  ],
   "license": "MIT",
   "exports": {
     "./main": {

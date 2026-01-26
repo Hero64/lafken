@@ -1,7 +1,14 @@
 {
   "name": "@lafken/api",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Build AWS REST APIs in the simplest possible way using TypeScript and API Gateway",
+  "keywords": [
+    "aws",
+    "serverless",
+    "api gateway",
+    "lafken"
+  ],
   "license": "MIT",
   "exports": {
     "./main": {

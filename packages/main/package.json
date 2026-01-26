@@ -1,7 +1,15 @@
 {
   "name": "@lafken/main",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Core entry point for Lafken applications, orchestrating infrastructure creation and resolver registration",
+  "keywords": [
+    "aws",
+    "serverless",
+    "lafken",
+    "infrastructure",
+    "cdktf"
+  ],
   "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

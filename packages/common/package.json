@@ -1,7 +1,15 @@
 {
   "name": "@lafken/common",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Core utility package for Lafken framework providing decorator factories and metadata utilities",
+  "keywords": [
+    "aws",
+    "serverless",
+    "lafken",
+    "common",
+    "utility"
+  ],
   "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

@@ -1,7 +1,14 @@
 {
   "name": "@lafken/dynamo",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Create and manage DynamoDB tables in TypeScript with declarative configuration",
+  "keywords": [
+    "aws",
+    "dynamodb",
+    "serverless",
+    "lafken"
+  ],
   "license": "MIT",
   "exports": {
     "./main": {

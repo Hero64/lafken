@@ -1,7 +1,15 @@
 {
   "name": "@lafken/event",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Create EventBridge event listeners in TypeScript with Lambda integration",
+  "keywords": [
+    "aws",
+    "eventbridge",
+    "event",
+    "serverless",
+    "lafken"
+  ],
   "license": "MIT",
   "exports": {
     "./main": {

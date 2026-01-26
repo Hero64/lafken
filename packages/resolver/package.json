@@ -1,7 +1,16 @@
 {
   "name": "@lafken/resolver",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": false,
+  "description": "Foundational package for building resolvers, managing AWS Lambda and IAM Roles",
+  "keywords": [
+    "aws",
+    "lambda",
+    "iam",
+    "serverless",
+    "lafken",
+    "resolver"
+  ],
   "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
