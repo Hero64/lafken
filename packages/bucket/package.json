@@ -1,6 +1,6 @@
 {
   "name": "@lafken/bucket",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": false,
   "description": "Create and manage Amazon S3 buckets in TypeScript with automatic infrastructure generation",
   "keywords": [

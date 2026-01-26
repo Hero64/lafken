@@ -1,6 +1,6 @@
 {
   "name": "@lafken/resolver",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": false,
   "description": "Foundational package for building resolvers, managing AWS Lambda and IAM Roles",
   "keywords": [

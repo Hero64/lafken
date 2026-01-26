@@ -1,5 +1,13 @@
 # @lafken/resolver
 
+## 0.6.3
+
+### Patch Changes
+
+- fix export module
+- Updated dependencies
+  - @lafken/common@0.6.3
+
 ## 0.6.2
 
 ### Patch Changes
