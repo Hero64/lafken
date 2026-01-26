@@ -1,6 +1,6 @@
 {
   "name": "@lafken/api",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": false,
   "description": "Build AWS REST APIs in the simplest possible way using TypeScript and API Gateway",
   "keywords": [

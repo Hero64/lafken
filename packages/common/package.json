@@ -1,6 +1,6 @@
 {
   "name": "@lafken/common",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": false,
   "description": "Core utility package for Lafken framework providing decorator factories and metadata utilities",
   "keywords": [

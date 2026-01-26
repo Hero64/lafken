@@ -1,6 +1,6 @@
 {
   "name": "@lafken/main",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": false,
   "description": "Core entry point for Lafken applications, orchestrating infrastructure creation and resolver registration",
   "keywords": [

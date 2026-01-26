@@ -1,6 +1,6 @@
 {
   "name": "@lafken/dynamo",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": false,
   "description": "Create and manage DynamoDB tables in TypeScript with declarative configuration",
   "keywords": [

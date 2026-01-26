@@ -1,5 +1,11 @@
 # @lafken/common
 
+## 0.6.2
+
+### Patch Changes
+
+- add package description
+
 ## 0.1.1
 
 ### Patch Changes

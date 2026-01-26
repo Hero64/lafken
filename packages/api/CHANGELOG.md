@@ -1,5 +1,14 @@
 # @lafken/api
 
+## 0.6.2
+
+### Patch Changes
+
+- add package description
+- Updated dependencies
+  - @lafken/common@0.6.2
+  - @lafken/resolver@0.6.2
+
 ## 0.1.1
 
 ### Patch Changes
