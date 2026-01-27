@@ -406,7 +406,7 @@ export class Schema {
       Assign: handler.assign,
       Output:
         handler.output ||
-        '{% $exist($states.result.Payload) ? $states.result.Payload) : {} %}',
+        '{% $exist($states.result.Payload) ? $states.result.Payload : {} %}',
       ...(handler.integrationService !== undefined
         ? this.getIntegrationTask(handler)
         : this.getLambdaTask(handler)),

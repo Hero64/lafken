@@ -137,7 +137,7 @@ describe('State Machine', () => {
 
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       definition:
-        '{"StartAt":"task1","States":{"task2":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":"{% $state.input.data %}","FunctionName":"test-function"},"End":true,"Output":"{% $exist($states.result.Payload) ? $states.result.Payload) : {} %}"},"task1":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"Next":"task2","Assign":{"foo":1},"Output":"{% $exist($states.result.Payload) ? $states.result.Payload) : {} %}"}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"task1","States":{"task2":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":"{% $state.input.data %}","FunctionName":"test-function"},"End":true,"Output":"{% $exist($states.result.Payload) ? $states.result.Payload : {} %}"},"task1":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"Next":"task2","Assign":{"foo":1},"Output":"{% $exist($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
       name: 'TestingSM',
     });
   });
@@ -269,7 +269,7 @@ describe('State Machine', () => {
     const synthesized = Testing.synth(stack);
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
       definition:
-        '{"StartAt":"integration","States":{"integration":{"Type":"Task","Resource":"arn:aws:states:::sqs:sendMessage.waitForTaskToken","Arguments":{"QueueUrl":"${aws_sqs_queue.test.id}","MessageBody":{"Message":"test","TaskToken":"{% $states.context.Task.Token %}"}},"Output":"{% $exist($states.result.Payload) ? $states.result.Payload) : {} %}"}},"QueryLanguage":"JSONata"}',
+        '{"StartAt":"integration","States":{"integration":{"Type":"Task","Resource":"arn:aws:states:::sqs:sendMessage.waitForTaskToken","Arguments":{"QueueUrl":"${aws_sqs_queue.test.id}","MessageBody":{"Message":"test","TaskToken":"{% $states.context.Task.Token %}"}},"Output":"{% $exist($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
       name: 'TestingSM',
     });
   });
