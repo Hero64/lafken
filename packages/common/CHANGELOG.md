@@ -1,5 +1,11 @@
 # @lafken/common
 
+## 0.6.4
+
+### Patch Changes
+
+- fix: state-machine schema generator
+
 ## 0.6.3
 
 ### Patch Changes

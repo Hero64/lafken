@@ -1,6 +1,6 @@
 {
   "name": "@lafken/state-machine",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": false,
   "description": "Create and manage AWS Step Functions state machines using TypeScript",
   "keywords": [

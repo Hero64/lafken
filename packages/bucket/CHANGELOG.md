@@ -1,5 +1,14 @@
 # @lafken/bucket
 
+## 0.6.4
+
+### Patch Changes
+
+- fix: state-machine schema generator
+- Updated dependencies
+  - @lafken/common@0.6.4
+  - @lafken/resolver@0.6.4
+
 ## 0.6.3
 
 ### Patch Changes
