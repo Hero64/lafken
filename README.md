@@ -1,3 +1,21 @@
+> ℹ️ **Information**  
+> Hello and welcome to **Lafken**.  
+>  
+> If you landed in this repository, you are probably looking for a different way to manage your infrastructure and application code — something simpler, more expressive, and more developer-friendly. That is exactly what Lafken aims to provide.  
+>  
+> Lafken was born from the idea of simplifying the life of serverless developers on AWS. It is built on top of CDKTF and allows you to define infrastructure using decorators that describe *what* you want, while Lafken takes care of *how* it should be provisioned.  
+>  
+> Unfortunately, HashiCorp has deprecated CDKTF and its related packages, which currently makes the evolution of this framework more challenging. However, not everything is lost.  
+>  
+> The **Open Constructs** community has taken the initiative to maintain and evolve this ecosystem under a new project called **cdk-terrain**, giving it a second life.  
+>  
+> Please consider supporting Open Constructs so we can eventually migrate Lafken to a more stable and future-proof foundation.  
+>  
+> If you still want to try Lafken, feel free to do so — I will be happy to receive your feedback and ideas.  
+>  
+> **Good coding!**
+
+
 # Lafken
 
 Lafken is a lightweight framework for building serverless applications on AWS with minimal infrastructure overhead.
