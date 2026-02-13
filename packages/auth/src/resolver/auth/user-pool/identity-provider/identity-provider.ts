@@ -33,7 +33,7 @@ export class IdentityProvider extends Construct {
         this.createAppleProvider(props);
         break;
       case 'oidc':
-        this.createOdicProvider(props);
+        this.createOidcProvider(props);
         break;
     }
   }
@@ -88,7 +88,7 @@ export class IdentityProvider extends Construct {
   }
 
   private createAppleProvider(props: AppleIdentityProvider<any>) {
-    new CognitoIdentityProvider(this, 'amazon-identity-provider', {
+    new CognitoIdentityProvider(this, 'apple-identity-provider', {
       userPoolId: this.props.userPoolId,
       providerName: `${this.id}-identity-provider`,
       providerType: 'SignInWithApple',
@@ -105,7 +105,7 @@ export class IdentityProvider extends Construct {
     });
   }
 
-  private createOdicProvider(props: OidcIdentityProvider<any>) {
+  private createOidcProvider(props: OidcIdentityProvider<any>) {
     new CognitoIdentityProvider(this, 'oidc-identity-provider', {
       userPoolId: this.props.userPoolId,
       providerName: `${this.id}-identity-provider`,
