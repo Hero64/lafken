@@ -2,15 +2,26 @@
   "name": "@lafken/common",
   "version": "0.6.4",
   "private": false,
-  "description": "Core utility package for Lafken framework providing decorator factories and metadata utilities",
+  "description": "Lafken utilities - TypeScript decorator factories and metadata reflection for infrastructure-as-code decorators",
   "keywords": [
     "aws",
     "serverless",
     "lafken",
-    "common",
+    "decorators",
+    "metadata",
+    "reflection",
+    "typescript",
     "utility"
   ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/common"
+  },
   "license": "MIT",
+  "author": "Aníbal Jorquera",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -32,6 +43,9 @@
     "jest": "30.2.0",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2"
+  },
+  "engines": {
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"

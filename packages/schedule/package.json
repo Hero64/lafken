@@ -2,16 +2,27 @@
   "name": "@lafken/schedule",
   "version": "0.6.4",
   "private": false,
-  "description": "Create and manage Amazon EventBridge scheduled rules (Cron jobs) with Lambda integration",
+  "description": "Define EventBridge scheduled rules and cron jobs using TypeScript decorators with Lafken",
   "keywords": [
     "aws",
     "eventbridge",
     "schedule",
     "cron",
+    "scheduling",
     "serverless",
+    "typescript",
+    "decorators",
     "lafken"
   ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/schedule"
+  },
   "license": "MIT",
+  "author": "Aníbal Jorquera",
   "exports": {
     "./main": {
       "import": "./lib/main/index.js",
@@ -59,6 +70,9 @@
     "jest": "30.2.0",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2"
+  },
+  "engines": {
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"

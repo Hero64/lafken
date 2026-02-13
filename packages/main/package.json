@@ -2,15 +2,27 @@
   "name": "@lafken/main",
   "version": "0.6.4",
   "private": false,
-  "description": "Core entry point for Lafken applications, orchestrating infrastructure creation and resolver registration",
+  "description": "Lafken core engine - orchestrate AWS serverless infrastructure using decorators with automatic CDKTF code generation",
   "keywords": [
     "aws",
     "serverless",
     "lafken",
     "infrastructure",
-    "cdktf"
+    "infrastructure-as-code",
+    "cdktf",
+    "typescript",
+    "decorators",
+    "terraform"
   ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/main"
+  },
   "license": "MIT",
+  "author": "Aníbal Jorquera",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -38,6 +50,9 @@
     "jest": "30.2.0",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2"
+  },
+  "engines": {
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"

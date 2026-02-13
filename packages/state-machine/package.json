@@ -2,16 +2,27 @@
   "name": "@lafken/state-machine",
   "version": "0.6.4",
   "private": false,
-  "description": "Create and manage AWS Step Functions state machines using TypeScript",
+  "description": "Build Step Functions workflows with TypeScript decorators - declarative orchestration with Lafken",
   "keywords": [
     "aws",
     "step functions",
     "state machine",
+    "workflow",
+    "orchestration",
     "serverless",
-    "lafken",
-    "workflow"
+    "typescript",
+    "decorators",
+    "lafken"
   ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/state-machine"
+  },
   "license": "MIT",
+  "author": "Aníbal Jorquera",
   "exports": {
     "./main": {
       "import": "./lib/main/index.js",
@@ -64,6 +75,9 @@
     "jest-dynalite": "3.6.1",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2"
+  },
+  "engines": {
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"
