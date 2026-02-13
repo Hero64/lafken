@@ -1,120 +1,164 @@
-> ℹ️ **Information**  
-> Hello and welcome to **Lafken**.  
->  
-> If you landed in this repository, you are probably looking for a different way to manage your infrastructure and application code — something simpler, more expressive, and more developer-friendly. That is exactly what Lafken aims to provide.  
->  
-> Lafken was born from the idea of simplifying the life of serverless developers on AWS. It is built on top of CDKTF and allows you to define infrastructure using decorators that describe *what* you want, while Lafken takes care of *how* it should be provisioned.  
->  
-> Unfortunately, HashiCorp has deprecated CDKTF and its related packages, which currently makes the evolution of this framework more challenging. However, not everything is lost.  
->  
-> The **Open Constructs** community has taken the initiative to maintain and evolve this ecosystem under a new project called **cdk-terrain**, giving it a second life.  
->  
-> Please consider supporting Open Constructs so we can eventually migrate Lafken to a more stable and future-proof foundation.  
->  
-> If you still want to try Lafken, feel free to do so — I will be happy to receive your feedback and ideas.  
->  
-> **Good coding!**
-
-
 # Lafken
 
-Lafken is a lightweight framework for building serverless applications on AWS with minimal infrastructure overhead.
-Instead of manually orchestrating resources, Lafken uses CDK for Terraform (CDKTF) under the hood to generate, synthesize, and manage all AWS infrastructure defined in your modules.
+**A TypeScript framework for building serverless applications on AWS using decorators.**
 
-You focus on writing your application logic. Lafken takes care of the infrastructure
+Lafken simplifies AWS infrastructure by letting you define resources with decorators in your TypeScript code. Focus on your application logic while Lafken automatically generates and manages all the infrastructure using Terraform.
 
-## Features
+> ℹ️ **Note on CDKTF Deprecation**  
+> Lafken currently uses CDKTF, which HashiCorp has deprecated. The community project [cdk-terrain](https://github.com/open-constructs/cdk-terrain) is actively maintaining this ecosystem. We're planning to migrate Lafken to this new foundation for long-term stability.
 
-* Simple and modular structure
-* Easy creation of serverless APIs and other resources
-* No infrastructure knowledge required
-* Works well for small or large projects
-* Extensible through modules and resolvers
+## ✨ Key Features
 
-## Installation
+- **Decorator-Based**: Define infrastructure with familiar TypeScript decorators
+- **Type-Safe**: Full TypeScript support with autocomplete for resources
+- **Zero Configuration**: Start building immediately with sensible defaults
+- **Modular**: Organize resources into logical modules
+- **Extensible**: Create custom resolvers for additional AWS services
+- **Infrastructure as Code**: Infrastructure is version-controlled TypeScript code
+
+## 🚀 Getting Started
+
+### Installation
+
+Create a new Lafken project:
 
 ```bash
 npm create lafken@latest
 ```
 
-## Quick Example
+Or install in an existing TypeScript project:
 
-### Create an application
-
-```ts
-import { ApiResolver } from '@lafken/api/resolver';
-
-createApp({
-  name: 'awesome-app',
-  resolvers: [new ApiResolver()],
-  modules: [greetingModule]
-});
+```bash
+npm install @lafken/main @lafken/api @lafken/resolver
 ```
 
-### Create a module
+### System Requirements
 
-```ts
-import { createModule } from '@lafken/main';
-import { GreetingApi } from './greeting.api';
+- Node.js >= 20.19
+- pnpm >= 10.20.0
+- TypeScript >= 5.0
 
-const greetingModule = createModule({
-  name: 'greeting',
-  resources: [GreetingApi],
-});
+## 📚 Core Concepts
+
+Lafken works through three key components:
+
+1. **Decorators**: Mark your classes and methods to define infrastructure (`@Api`, `@Get`, `@Queue`, etc.)
+2. **Modules**: Group related resources together with shared configuration
+3. **App**: Register modules and resolvers to generate your infrastructure
+
+Here's the flow:
+
+```
+TypeScript Code (with decorators)
+    ↓
+Module (groups resources)
+    ↓
+App + Resolvers (processes decorators)
+    ↓
+Terraform Configuration (generated automatically)
 ```
 
-### Create a resource
+## 💡 5-Minute Example
+
+Here's a complete serverless API:
+
+### 1. Define Your Resource
 
 ```ts
-@Api({
-  path: 'awesome'
-})
-export class GreetingApi {
-  @Get({
-    path: '',
-    lambda: {
-      env: ({ getResourceValue }) => ({
-        bar: 'simple-value',
-        foo: process.env.FOO,
-        apiId: getResourceValue('api::ExampleApi', 'id'),
-        ssmValue: 'SSM::STRING::/path/to/awesome/ssm/value'
-      }),
-    }
+import { Api, Get, Payload, Param  } from '@lafken/api/main';
+
+@Payload()
+export class HelloEvent {
+  @Param({
+    source: 'path',
   })
-  sayHello() {
-    return 'hello';
+  name: number;
+}
+
+
+@Api({
+  path: '/hello'
+})
+export class HelloApi {
+  @Get({
+    path: '/{name}'
+  })
+  greet(@Event(HelloEvent) event: HelloEvent) {
+    return {
+      message: `Hello, ${event.name}!`
+    };
   }
 }
 ```
 
-### How It Works
+### 2. Create a Module
 
-Everything starts with the `main` library. This library provides all the required building blocks to bootstrap the application, allowing you to define global configuration and load the resolvers and modules that compose your application.
+```ts
+import { createModule } from '@lafken/main';
 
-Modules are responsible for loading resources, which in turn rely on resolvers to be processed. Internally, each resolver defines how resource properties are interpreted and how the required infrastructure is provisioned. The most common responsibility of a resolver is the creation of AWS Lambda functions and their integration with downstream services. These Lambda functions may be configured with events, execution context, and callbacks, all of which are used at runtime.
+export const apiModule = createModule({
+  name: 'api',
+  resources: [HelloApi],
+});
+```
 
-Each Lambda also supports additional configuration options such as memory size, runtime, environment variables, and more. By default, environment variables can be defined at both the Lambda level and the application level through global configuration, either in the module or in the application itself.
+### 3. Create Your App
 
-Environment variables support both static and dynamic values, including values retrieved directly from AWS Systems Manager Parameter Store (SSM). This is achieved using the `SSM::STRING` or `SSM::SECURE_STRING` notation followed by the parameter path, for example:
-`SSM::STRING::/path/from/ssm/variable`.
+```ts
+import { createApp } from '@lafken/main';
+import { ApiResolver } from '@lafken/api/resolver';
 
-Each resolver enforces its own rules for infrastructure creation using CDK for Terraform (CDKTF). The framework allows you to create custom resolvers by implementing the ResolverType interface provided by the `@lafken/resolver` package. This package also includes helpers and reusable resources to simplify the implementation of Lambda functions, IAM roles, and environment variables.
+createApp({
+  name: 'hello-app',
+  resolvers: [new ApiResolver()],
+  modules: [apiModule],
+});
+```
 
-Additionally, the `@lafken/common` package provides utility helpers for creating decorators, enabling the definition of resources in custom libraries in a consistent and declarative manner.
+That's it! Lafken generates all the AWS infrastructure:
+- API Gateway REST API
+- Lambda function
+- IAM roles with least-privilege permissions
+- Terraform configuration
 
-#### Overriding Resource Names
+## 🔧 Advanced Features
 
-It is very common to reference resources by name in order to retrieve properties such as the resource ARN or ID, which can then be used as integrations or environment variables. To support this use case, the `@lafken/common` library exposes a set of types that can be overridden.
+### Environment Variables
 
-These types represent the resources available within your application and provide TypeScript autocomplete and type safety when referencing existing infrastructure resources.
+Define environment variables for your Lambda functions with support for static and dynamic values:
 
-Configuration
+```ts
+@Api({ path: '/users' })
+export class UserApi {
+  @Get({
+    path: '/{id}',
+    lambda: {
+      env: ({ getResourceValue }) => ({
+        // Static value
+        APP_NAME: 'my-app',
+        
+        // Environment variable
+        DEBUG: process.env.DEBUG || 'false',
+        
+        // Dynamic reference to another resource
+        TABLE_NAME: getResourceValue('dynamo::users', 'name'),
+        
+        // AWS Systems Manager Parameter Store
+        API_KEY: 'SSM::STRING::/my-app/api-key'
+      }),
+    }
+  })
+  getUser() { /* ... */ }
+}
+```
 
-To enable this functionality, create or update the `lafken-types.d.ts` file and extend the `@lafken/common` module by declaring the resources available in your application.
+### Type-Safe Resource References
 
-Below is an example configuration:
+Enable TypeScript autocomplete for your infrastructure:
 
-```typescript
+Create `lafken-types.d.ts` in your project root:
+
+```ts
 declare module '@lafken/common' {
 
   // Register application modules
@@ -139,62 +183,93 @@ declare module '@lafken/common' {
   }
   // api
   interface ApiRestAvailable {
-    ExampleApi: boolean;
+    UserApi: true;
   }
 
-  // api authorizers
-  interface ApiAuthorizerAvailable {
-    'api-key-auth': true;
-    'cognito-auth': true;
-  }
-
-  // dynamo tables
   interface DynamoTableAvailable {
-    clients: true;
-  }
-
-  // cognito user pools
-  interface AuthAvailable {
-    'example-user-pool': true;
+    users: true;
   }
 }
 
 export {};
 ```
 
-Supported Resource Types
+Now you get full autocomplete:
 
-The following interfaces can be extended to declare available resources:
-
-```typescript
-interface ModulesAvailable {}
-interface AuthAvailable {}
-interface BucketAvailable {}
-interface ApiRestAvailable {}
-interface ApiAuthorizerAvailable {}
-interface EventBusAvailable {}
-interface DynamoTableAvailable {}
+```ts
+getResourceValue('dynamo::users', 'arn')  // ✓ TypeScript knows this is valid
+getResourceValue('dynamo::invalid', 'arn') // ✗ TypeScript error
 ```
 
-Each interface corresponds to a specific type of infrastructure resource and can be extended as needed to reflect the resources defined in your application.
+### Creating Custom Resolvers
 
-### Additional Documentation
+Extend Lafken with your own AWS services:
 
-Lafken includes several sub-packages with their own documentation:
+```ts
+import { ResolverType } from '@lafken/resolver';
 
-* [Main module](packages/main/README.md)
-* [Common module](packages/common/README.md)
-* [Resolver module](packages/resolver/README.md)
-* [API Module](packages/api/README.md)
-* [Bucket Module](packages/bucket/README.md)
-* [Dynamo Module](packages/dynamo/README.md)
-* [Queue Module](packages/queue/README.md)
-* [Event Module](packages/event/README.md)
-* [Schedule Module](packages/schedule/README.md)
-* [State Machine Module](packages/state-machine/README.md)
-* [Auth Module](packages/auth/README.md)
+export class MyServiceResolver implements ResolverType {
+  async beforeCreate(scope) { /* Shared resources */ }
+  async create(module, resource) { /* Process resource */ }
+  async afterCreate(scope) { /* Configure integrations */ }
+}
+```
 
-## Configuration
+## 📖 Complete Package Documentation
 
-Lafken can be configured depending on your project needs.
-More details will be added as configuration options are defined.
+Lafken is organized into focused packages. Here's what each does:
+
+| Package | Purpose |
+|---------|---------|
+| **@lafken/main** | Core engine - create apps and modules |
+| **@lafken/api** | REST APIs with API Gateway |
+| **@lafken/queue** | SQS queues and message processing |
+| **@lafken/event** | EventBridge event buses |
+| **@lafken/schedule** | Scheduled Lambda functions |
+| **@lafken/state-machine** | Step Functions workflows |
+| **@lafken/bucket** | S3 bucket management |
+| **@lafken/dynamo** | DynamoDB tables |
+| **@lafken/auth** | Cognito authentication |
+| **@lafken/resolver** | Base utilities for creating resolvers |
+| **@lafken/common** | Decorators and type utilities |
+
+**View full documentation for each package:**
+
+- [Main Module](packages/main/README.md) - Application setup and configuration
+- [API Module](packages/api/README.md) - Create REST APIs
+- [Queue Module](packages/queue/README.md) - SQS queues and workers
+- [Event Module](packages/event/README.md) - EventBridge event buses
+- [Schedule Module](packages/schedule/README.md) - Scheduled tasks
+- [State Machine Module](packages/state-machine/README.md) - Step Functions
+- [Bucket Module](packages/bucket/README.md) - S3 buckets
+- [Dynamo Module](packages/dynamo/README.md) - DynamoDB tables
+- [Auth Module](packages/auth/README.md) - Cognito setup
+- [Resolver Module](packages/resolver/README.md) - Create custom resolvers
+- [Common Module](packages/common/README.md) - Utilities and decorators
+
+## 🤝 Contributing
+
+We welcome contributions! Here are some ways to help:
+
+- **Report Bugs**: Use the [bug report template](https://github.com/Hero64/lafken/issues/new?template=bug_report.md)
+- **Suggest Features**: Use the [feature request template](https://github.com/Hero64/lafken/issues/new?template=feature_request.md)
+- **Improve Docs**: Open a [documentation issue](https://github.com/Hero64/lafken/issues/new?template=documentation.md)
+- **Submit Code**: Read our [Contributing Guide](CONTRIBUTING.md)
+
+## 🛡️ Security
+
+Found a security vulnerability? Please report it responsibly via [SECURITY.md](SECURITY.md). Do not open public issues for security vulnerabilities.
+
+## 📜 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## ❓ Need Help?
+
+- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/Hero64/lafken/discussions)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/Hero64/lafken/issues)
+- **Code of Conduct**: Please review our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+---
+
+**Happy building with Lafken! 🚀**
