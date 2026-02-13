@@ -1,0 +1,46 @@
+name: 🔍 Lint & Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.20.0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 📝 Check formatting
+        run: pnpm format --check
+
+      - name: ✨ Run linting
+        run: pnpm lint
+
+      - name: 🔬 Check types
+        run: pnpm check-types
+
+      - name: 📋 Verify no console logs
+        run: |
+          if grep -r "console\\.\\(log\\|warn\\|error\\)(" packages --include="*.ts" --exclude-dir=node_modules; then
+            echo "❌ Found console statements in source code"
+            exit 1
+          fi
+        continue-on-error: true

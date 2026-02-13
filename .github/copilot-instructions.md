@@ -1,5 +1,9 @@
 # Lafken Codebase Instructions for AI Agents
 
+## 🌍 Language Requirement
+
+**All documentation, comments, issues, templates, and communications must be written in English.** This ensures consistency and accessibility for the global community.
+
 ## Architecture Overview
 
 **Lafken** is a serverless framework built on CDKTF that defines AWS infrastructure using TypeScript decorators. The architecture follows a **Resolver Pattern** where:

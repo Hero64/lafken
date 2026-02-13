@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://github.com/Hero64/lafken#readme
+    about: Read Lafken's main documentation
+  - name: 💬 Discussions
+    url: https://github.com/Hero64/lafken/discussions
+    about: Ask questions and share ideas with the community
+  - name: 🚨 Security Issues
+    url: https://github.com/Hero64/lafken/security/advisories
+    about: Report security vulnerabilities responsibly
