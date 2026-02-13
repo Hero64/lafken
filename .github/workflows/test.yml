@@ -35,11 +35,4 @@ jobs:
         run: pnpm build
 
       - name: 🧪 Run tests
-        run: pnpm test --coverage
-
-      - name: 📊 Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/coverage-final.json
-          flags: unittests
-          fail_ci_if_error: false
+        run: pnpm test
