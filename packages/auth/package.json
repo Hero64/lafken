@@ -61,7 +61,7 @@
     "@lafken/common": "workspace:*",
     "@lafken/resolver": "workspace:*",
     "cdktf": "0.21.0",
-    "constructs": "10.4.4",
+    "constructs": "10.4.5",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {

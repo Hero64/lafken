@@ -64,18 +64,17 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "3.956.0",
-    "@aws-sdk/util-dynamodb": "3.956.0",
+    "@aws-sdk/client-dynamodb": "3.990.0",
+    "@aws-sdk/util-dynamodb": "3.990.0",
     "@cdktf/provider-aws": "21.22.0",
     "@lafken/common": "workspace:*",
     "@lafken/resolver": "workspace:*",
     "aws-xray-sdk": "3.12.0",
     "cdktf": "0.21.0",
-    "constructs": "10.4.4",
+    "constructs": "10.4.5",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@jest/types": "^30.2.0",
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
     "jest-dynalite": "3.6.1",

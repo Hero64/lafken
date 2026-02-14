@@ -60,11 +60,10 @@
     "@lafken/common": "workspace:*",
     "@lafken/resolver": "workspace:*",
     "cdktf": "0.21.0",
-    "constructs": "10.4.4",
+    "constructs": "10.4.5",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@jest/types": "^30.2.0",
     "@types/jest": "30.0.0",
     "jest": "30.2.0",
     "ts-jest": "29.4.6",
