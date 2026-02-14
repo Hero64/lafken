@@ -6,6 +6,9 @@ const config: Config = {
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^@lafken/(.*)$': '<rootDir>/../$1/src',
+  },
 };
 
 export default config;
