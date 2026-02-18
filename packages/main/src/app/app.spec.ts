@@ -22,7 +22,7 @@ describe('App', () => {
   enableBuildEnvVariable();
 
   afterAll(async () => {
-    await rm(join(__dirname, '../..', 'cdktn.out'), {
+    await rm(join(__dirname, '../..', 'cdktf.out'), {
       recursive: true,
       force: true,
     });
