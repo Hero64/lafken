@@ -1,6 +1,6 @@
 {
   "name": "@lafken/main",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "private": false,
   "description": "Lafken core engine - orchestrate AWS serverless infrastructure using decorators with automatic CDKTN code generation",
   "keywords": [

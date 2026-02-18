@@ -1,5 +1,11 @@
 # @lafken/common
 
+## 0.7.0
+
+### Minor Changes
+
+- Migrate cdftf to cdk-terrain
+
 ## 0.6.4
 
 ### Patch Changes

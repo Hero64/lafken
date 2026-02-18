@@ -1,5 +1,17 @@
 # @lafken/api
 
+## 0.7.0
+
+### Minor Changes
+
+- Migrate cdftf to cdk-terrain
+
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.7.0
+  - @lafken/resolver@0.7.0
+
 ## 0.6.4
 
 ### Patch Changes

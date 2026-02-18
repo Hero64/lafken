@@ -1,6 +1,6 @@
 {
   "name": "@lafken/event",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "private": false,
   "description": "Define EventBridge event listeners using TypeScript decorators - serverless event-driven infrastructure",
   "keywords": [

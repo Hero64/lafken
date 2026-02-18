@@ -1,6 +1,6 @@
 {
   "name": "@lafken/queue",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "private": false,
   "description": "Define SQS queues and consumers using TypeScript decorators - automatic infrastructure generation with Lafken",
   "keywords": [
