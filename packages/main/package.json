@@ -2,7 +2,7 @@
   "name": "@lafken/main",
   "version": "0.6.4",
   "private": false,
-  "description": "Lafken core engine - orchestrate AWS serverless infrastructure using decorators with automatic CDKTF code generation",
+  "description": "Lafken core engine - orchestrate AWS serverless infrastructure using decorators with automatic CDKTN code generation",
   "keywords": [
     "aws",
     "serverless",

@@ -4,8 +4,9 @@
 
 Lafken simplifies AWS infrastructure by letting you define resources with decorators in your TypeScript code. Focus on your application logic while Lafken automatically generates and manages all the infrastructure using Terraform.
 
-> ℹ️ **Note on CDKTF Deprecation**  
-> Lafken currently uses CDKTF, which HashiCorp has deprecated. The community project [cdk-terrain](https://github.com/open-constructs/cdk-terrain) is actively maintaining this ecosystem. We're planning to migrate Lafken to this new foundation for long-term stability.
+Lafken leverages [cdk-terrain](https://github.com/open-constructs/cdk-terrain) to transform application code into Terraform-based infrastructure.
+
+If you find Lafken useful, please consider supporting the cdk-terrain project. Your support helps us grow the ecosystem and continue building better tools together.
 
 ## ✨ Key Features
 

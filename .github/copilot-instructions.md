@@ -6,14 +6,14 @@
 
 ## Architecture Overview
 
-**Lafken** is a serverless framework built on CDKTF that defines AWS infrastructure using TypeScript decorators. The architecture follows a **Resolver Pattern** where:
+**Lafken** is a serverless framework built on CDKTN that defines AWS infrastructure using TypeScript decorators. The architecture follows a **Resolver Pattern** where:
 
 1. **Decorators** mark classes/methods as infrastructure resources (e.g., `@Api`, `@Queue`, `@StateMachine`)
-2. **Resolvers** process decorated resources and generate CDKTF constructs (e.g., `ApiResolver`, `QueueResolver`)
+2. **Resolvers** process decorated resources and generate CDKTN constructs (e.g., `ApiResolver`, `QueueResolver`)
 3. **Modules** organize resources into logical units with shared configuration
 4. **Apps** orchestrate modules and resolvers into complete serverless applications
 
-**Key Flow**: `@Decorator` → `Resource Class` → `Module` → `createApp()` → `Resolver` → CDKTF Infrastructure
+**Key Flow**: `@Decorator` → `Resource Class` → `Module` → `createApp()` → `Resolver` → CDKTN Infrastructure
 
 ## Monorepo Structure
 
@@ -24,7 +24,7 @@ This is a **pnpm + Turbo monorepo** with packages organized by AWS service:
 - `packages/api` - REST API resolver and decorators (`@Api`, `@Get`, `@Post`)
 - `packages/queue`, `packages/event`, `packages/schedule`, `packages/state-machine`, `packages/bucket`, `packages/dynamo` - Service-specific resolvers
 - `packages/common` - Decorator factories, metadata reflection, shared types
-- `apps/example` - Example application using CDKTF
+- `apps/example` - Example application using CDKTN
 
 **Building**: `pnpm build` or `pnpm dev` (watch mode). **Testing**: `pnpm test` (runs with Turbo, max 2 concurrent packages).
 
@@ -72,7 +72,7 @@ Resources can register globally using `isGlobal(module, id)` and reference each 
 getResourceValue('module::resourceId', 'arn') // Retrieves registered resources
 ```
 
-This is implemented via `lafkenResource.make()` which wraps CDKTF Constructs and enables global registration via `isDependent()` callbacks.
+This is implemented via `lafkenResource.make()` which wraps CDKTN Constructs and enables global registration via `isDependent()` callbacks.
 
 ### 5. Environment Variables & Context
 Lambda environment variables support:
@@ -127,10 +127,10 @@ Without this, metadata reflection fails and decorated classes won't be recognize
 
 ## Testing Guidelines
 
-- Use `setupTestingStack()` from `@lafken/resolver` for CDKTF test stubs
+- Use `setupTestingStack()` from `@lafken/resolver` for CDKTN test stubs
 - Enable `enableBuildEnvVariable()` before declaring decorated classes
 - Mock resolvers by implementing `ResolverType` interface
-- Use `matchTemplate()` from `cdktf/testing` to validate generated Terraform
+- Use `matchTemplate()` from `cdktN/testing` to validate generated Terraform
 
 ## Common Pitfalls
 

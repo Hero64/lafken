@@ -14,7 +14,7 @@ npm install @lafken/api
 
 The first step is to add a resolver to your application. To do this, import ApiResolver from @lafken/api/resolver and include it in the resolvers array by instantiating the class: new ApiResolver({}).
 
-If you don’t provide any configuration, a default API will be created using minimal settings. By passing properties to the resolver, you can customize the API name, CORS options, authorizers, supported media types, and more. You can also extend the API’s capabilities using CDKTF.
+If you don’t provide any configuration, a default API will be created using minimal settings. By passing properties to the resolver, you can customize the API name, CORS options, authorizers, supported media types, and more. You can also extend the API’s capabilities using CDKTN.
 
 ```typescript
 import { ApiResolver } from '@lafken/api/resolver';
@@ -334,7 +334,7 @@ These scopes allow you to define fine-grained authorization rules for each metho
 ### Extending API Capabilities
 
 The `ApiResolver` allows you to enhance and customize the generated API by providing an `extend` function.  
-This function receives the created API instance, enabling you to modify or augment its configuration using CDKTF—for example, adding a custom domain or adjusting internal settings.
+This function receives the created API instance, enabling you to modify or augment its configuration using CDKTN, for example, adding a custom domain or adjusting internal settings.
 
 ```typescript
 new ApiResolver({
