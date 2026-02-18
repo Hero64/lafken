@@ -1,5 +1,5 @@
-import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
-import { LambdaPermission } from '@cdktf/provider-aws/lib/lambda-permission';
+import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
 import { Environment } from '../environment/environment';

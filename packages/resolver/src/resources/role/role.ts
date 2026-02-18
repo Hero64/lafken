@@ -1,12 +1,12 @@
-import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
+import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import type {
   ServiceFunction,
   Services,
   ServicesName,
   ServicesValues,
 } from '@lafken/common';
-import { Fn } from 'cdktf';
+import { Fn } from 'cdktn';
 import type { Construct } from 'constructs';
 import { resolveCallbackResource } from '../../utils';
 import { lafkenResource } from '../resource';

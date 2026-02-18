@@ -6,14 +6,14 @@ import {
   Role,
   setupTestingStack,
 } from '@lafken/resolver';
-import 'cdktf/lib/testing/adapters/jest';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import 'cdktn/lib/testing/adapters/jest';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import {
   createLambdaDecorator,
   createResourceDecorator,
   enableBuildEnvVariable,
 } from '@lafken/common';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { createModule, StackModule } from './module';
 
 describe('Module', () => {

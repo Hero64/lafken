@@ -1,9 +1,9 @@
-import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
+import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { setupTestingStack } from '../../../utils';
 import { lambdaAssets } from './asset';
 
-jest.mock('cdktf', () => {
-  const actual = jest.requireActual('cdktf');
+jest.mock('cdktn', () => {
+  const actual = jest.requireActual('cdktn');
 
   return {
     ...actual,

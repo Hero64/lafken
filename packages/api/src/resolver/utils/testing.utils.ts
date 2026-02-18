@@ -4,7 +4,7 @@ import {
   getResourceMetadata,
 } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
-import { TerraformStack, Testing } from 'cdktf';
+import { TerraformStack, Testing } from 'cdktn';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from '../../main';
 import type { RestApiProps } from '../resolver.types';
 import { RestApi } from '../rest-api/rest-api';

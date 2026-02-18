@@ -11,7 +11,7 @@
     "typescript",
     "decorators",
     "infrastructure-as-code",
-    "cdktf",
+    "cdktn",
     "lafken"
   ],
   "homepage": "https://github.com/Hero64/lafken#readme",

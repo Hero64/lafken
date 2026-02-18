@@ -1,10 +1,10 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
-import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource';
-import { ApiGatewayStage } from '@cdktf/provider-aws/lib/api-gateway-stage';
+import 'cdktn/lib/testing/adapters/jest';
+import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
+import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { type AppStack, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { Api, Get } from '../main';
 import { ApiResolver } from './resolver';
 import { RestApi } from './rest-api/rest-api';

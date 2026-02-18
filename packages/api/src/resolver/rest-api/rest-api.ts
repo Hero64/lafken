@@ -1,6 +1,6 @@
-import { ApiGatewayDeployment } from '@cdktf/provider-aws/lib/api-gateway-deployment';
-import { ApiGatewayRestApi } from '@cdktf/provider-aws/lib/api-gateway-rest-api';
-import { ApiGatewayStage } from '@cdktf/provider-aws/lib/api-gateway-stage';
+import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
+import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { lafkenResource } from '@lafken/resolver';
 import type { Construct } from 'constructs';
 import type { RestApiProps } from '../resolver.types';

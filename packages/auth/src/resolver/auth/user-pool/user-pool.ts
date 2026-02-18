@@ -6,9 +6,9 @@ import {
   type CognitoUserPoolSchemaNumberAttributeConstraints,
   type CognitoUserPoolSchemaStringAttributeConstraints,
   type CognitoUserPoolVerificationMessageTemplate,
-} from '@cdktf/provider-aws/lib/cognito-user-pool';
-import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
+} from '@cdktn/provider-aws/lib/cognito-user-pool';
+import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import {
   type ClassResource,
   getMetadataPrototypeByKey,
@@ -17,7 +17,7 @@ import {
   type StripReadonly,
 } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
-import { Token } from 'cdktf';
+import { Token } from 'cdktn';
 import type { Construct } from 'constructs';
 import {
   type AuthAttributes,

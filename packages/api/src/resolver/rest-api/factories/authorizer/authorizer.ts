@@ -1,12 +1,12 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { ApiGatewayApiKey } from '@cdktf/provider-aws/lib/api-gateway-api-key';
-import { ApiGatewayAuthorizer } from '@cdktf/provider-aws/lib/api-gateway-authorizer';
-import type { ApiGatewayMethodConfig } from '@cdktf/provider-aws/lib/api-gateway-method';
-import type { ApiGatewayStage } from '@cdktf/provider-aws/lib/api-gateway-stage';
-import { ApiGatewayUsagePlan } from '@cdktf/provider-aws/lib/api-gateway-usage-plan';
-import { ApiGatewayUsagePlanKey } from '@cdktf/provider-aws/lib/api-gateway-usage-plan-key';
-import type { CognitoUserPool } from '@cdktf/provider-aws/lib/cognito-user-pool';
+import { ApiGatewayApiKey } from '@cdktn/provider-aws/lib/api-gateway-api-key';
+import { ApiGatewayAuthorizer } from '@cdktn/provider-aws/lib/api-gateway-authorizer';
+import type { ApiGatewayMethodConfig } from '@cdktn/provider-aws/lib/api-gateway-method';
+import type { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
+import { ApiGatewayUsagePlan } from '@cdktn/provider-aws/lib/api-gateway-usage-plan';
+import { ApiGatewayUsagePlanKey } from '@cdktn/provider-aws/lib/api-gateway-usage-plan-key';
+import type { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
 import {
   type ClassResource,
   getMetadataPrototypeByKey,
@@ -14,7 +14,7 @@ import {
   type LambdaMetadata,
 } from '@lafken/common';
 import { LambdaHandler, lafkenResource, lambdaAssets } from '@lafken/resolver';
-import type { TerraformResource } from 'cdktf';
+import type { TerraformResource } from 'cdktn';
 import {
   ApiAuthorizerType,
   AuthorizerReflectKeys,

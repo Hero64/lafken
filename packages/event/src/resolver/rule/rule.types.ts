@@ -1,4 +1,4 @@
-import type { CloudwatchEventBus } from '@cdktf/provider-aws/lib/cloudwatch-event-bus';
+import type { CloudwatchEventBus } from '@cdktn/provider-aws/lib/cloudwatch-event-bus';
 import type { ResourceMetadata } from '@lafken/common';
 import type { EventRuleMetadata } from '../../main';
 

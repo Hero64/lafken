@@ -1,8 +1,8 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
+import 'cdktn/lib/testing/adapters/jest';
+import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { Api, Event, Get, Param, Payload } from '../../../../../../main';
 import {
   initializeMethod,

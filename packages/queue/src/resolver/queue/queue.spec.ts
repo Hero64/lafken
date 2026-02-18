@@ -1,9 +1,9 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
-import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
+import 'cdktn/lib/testing/adapters/jest';
+import { LambdaEventSourceMapping } from '@cdktn/provider-aws/lib/lambda-event-source-mapping';
+import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { Event, Fifo, Param, Payload, Queue, Standard } from '../../main';
 import { Queue as QueueResolver } from './queue';
 

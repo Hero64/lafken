@@ -1,3 +1,3 @@
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 
 Testing.setupJest();

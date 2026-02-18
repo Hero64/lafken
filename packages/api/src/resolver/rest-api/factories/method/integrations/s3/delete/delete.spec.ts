@@ -1,18 +1,18 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
-import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
-import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
-import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource';
-import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import 'cdktn/lib/testing/adapters/jest';
+import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
+import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
+import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
+import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
+import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import {
   Api,
   type ApiLambdaMetadata,

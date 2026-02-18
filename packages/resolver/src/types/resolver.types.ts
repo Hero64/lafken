@@ -1,5 +1,5 @@
 import type { ClassResource, LambdaProps } from '@lafken/common';
-import type { TerraformStack } from 'cdktf';
+import type { TerraformStack } from 'cdktn';
 import type { Construct } from 'constructs';
 
 import type { Role } from '../resources';

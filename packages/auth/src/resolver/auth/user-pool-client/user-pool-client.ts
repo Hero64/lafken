@@ -2,7 +2,7 @@ import {
   CognitoUserPoolClient,
   type CognitoUserPoolClientConfig,
   type CognitoUserPoolClientRefreshTokenRotation,
-} from '@cdktf/provider-aws/lib/cognito-user-pool-client';
+} from '@cdktn/provider-aws/lib/cognito-user-pool-client';
 import { Construct } from 'constructs';
 import type { AuthAttributes } from '../../../main';
 import { mapUserAttributes } from '../auth.utils';

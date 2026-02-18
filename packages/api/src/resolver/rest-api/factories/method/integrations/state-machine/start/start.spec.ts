@@ -1,14 +1,14 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
-import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
-import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
-import { ApiGatewayModel } from '@cdktf/provider-aws/lib/api-gateway-model';
-import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
+import 'cdktn/lib/testing/adapters/jest';
+import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
+import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
+import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
+import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
+import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import {
   Api,
   Event,

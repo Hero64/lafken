@@ -1,4 +1,4 @@
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from './resource';
 

@@ -1,11 +1,11 @@
-import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
+import { DataAwsCloudwatchEventBus } from '@cdktn/provider-aws/lib/data-aws-cloudwatch-event-bus';
 import {
   DynamodbTable,
   type DynamodbTableAttribute,
   type DynamodbTableGlobalSecondaryIndex,
   type DynamodbTableLocalSecondaryIndex,
-} from '@cdktf/provider-aws/lib/dynamodb-table';
-import { PipesPipe } from '@cdktf/provider-aws/lib/pipes-pipe';
+} from '@cdktn/provider-aws/lib/dynamodb-table';
+import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
 import type { FieldTypes } from '@lafken/common';
 import { lafkenResource, Role } from '@lafken/resolver';
 import type { Construct } from 'constructs';

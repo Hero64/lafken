@@ -1,9 +1,9 @@
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
-import { S3BucketAccelerateConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-accelerate-configuration';
-import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
-import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
-import { S3BucketNotification } from '@cdktf/provider-aws/lib/s3-bucket-notification';
-import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { S3BucketAccelerateConfiguration } from '@cdktn/provider-aws/lib/s3-bucket-accelerate-configuration';
+import { S3BucketAcl } from '@cdktn/provider-aws/lib/s3-bucket-acl';
+import { S3BucketLifecycleConfiguration } from '@cdktn/provider-aws/lib/s3-bucket-lifecycle-configuration';
+import { S3BucketNotification } from '@cdktn/provider-aws/lib/s3-bucket-notification';
+import { S3BucketVersioningA } from '@cdktn/provider-aws/lib/s3-bucket-versioning';
 import { cleanString } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import type { Construct } from 'constructs';

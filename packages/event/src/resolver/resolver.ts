@@ -1,5 +1,5 @@
-import { CloudwatchEventBus } from '@cdktf/provider-aws/lib/cloudwatch-event-bus';
-import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
+import { CloudwatchEventBus } from '@cdktn/provider-aws/lib/cloudwatch-event-bus';
+import { DataAwsCloudwatchEventBus } from '@cdktn/provider-aws/lib/data-aws-cloudwatch-event-bus';
 import {
   type ClassResource,
   getResourceHandlerMetadata,

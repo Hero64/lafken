@@ -1,8 +1,8 @@
 import { setupTestingStack } from '@lafken/resolver';
-import 'cdktf/lib/testing/adapters/jest';
-import { CognitoUserPool } from '@cdktf/provider-aws/lib/cognito-user-pool';
-import { CognitoUserPoolClient } from '@cdktf/provider-aws/lib/cognito-user-pool-client';
-import { Testing } from 'cdktf';
+import 'cdktn/lib/testing/adapters/jest';
+import { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
+import { CognitoUserPoolClient } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
+import { Testing } from 'cdktn';
 import { Auth } from './auth';
 
 describe('Auth generation', () => {

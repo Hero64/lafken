@@ -1,11 +1,11 @@
-import 'cdktf/lib/testing/adapters/jest';
+import 'cdktn/lib/testing/adapters/jest';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
 import { LambdaHandler, setupTestingStack } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { AuthExtension, Trigger } from '../../../../main/extension/extension';
 import type { TriggerMetadata } from '../../../../main/extension/extension.types';
 import { Extension } from './extension';

@@ -1,4 +1,4 @@
-import { CognitoIdentityProvider } from '@cdktf/provider-aws/lib/cognito-identity-provider';
+import { CognitoIdentityProvider } from '@cdktn/provider-aws/lib/cognito-identity-provider';
 import { Construct } from 'constructs';
 import type { AuthAttributes } from '../../../../main';
 import { mapUserAttributes } from '../../auth.utils';

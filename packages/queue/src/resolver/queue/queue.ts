@@ -1,5 +1,5 @@
-import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
-import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
+import { LambdaEventSourceMapping } from '@cdktn/provider-aws/lib/lambda-event-source-mapping';
+import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
 import {
   type FieldTypes,
   getMetadataPrototypeByKey,

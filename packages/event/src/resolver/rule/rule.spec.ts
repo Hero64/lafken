@@ -1,7 +1,7 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
-import { DataAwsCloudwatchEventBus } from '@cdktf/provider-aws/lib/data-aws-cloudwatch-event-bus';
+import 'cdktn/lib/testing/adapters/jest';
+import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
+import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
+import { DataAwsCloudwatchEventBus } from '@cdktn/provider-aws/lib/data-aws-cloudwatch-event-bus';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -9,7 +9,7 @@ import {
   type ResourceMetadata,
 } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { EventRule, type EventRuleMetadata, Rule } from '../../main';
 import { Rule as RuleResolver } from './rule';
 

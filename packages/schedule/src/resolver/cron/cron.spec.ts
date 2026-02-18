@@ -1,6 +1,6 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
+import 'cdktn/lib/testing/adapters/jest';
+import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
+import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -8,7 +8,7 @@ import {
   type ResourceMetadata,
 } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { Cron, type EventCronMetadata, Schedule } from '../../main';
 import { Cron as CronResolver } from './cron';
 

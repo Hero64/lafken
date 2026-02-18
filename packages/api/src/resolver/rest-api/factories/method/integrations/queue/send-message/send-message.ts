@@ -1,4 +1,4 @@
-import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
+import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
 import {
   type ApiParamMetadata,
   Method,

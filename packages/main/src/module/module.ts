@@ -1,6 +1,6 @@
 import { getResourceMetadata } from '@lafken/common';
 import { ContextName, Role } from '@lafken/resolver';
-import { Aspects } from 'cdktf';
+import { Aspects } from 'cdktn';
 import { Construct } from 'constructs';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';

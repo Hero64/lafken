@@ -1,4 +1,4 @@
-import type { AwsProviderConfig } from '@cdktf/provider-aws/lib/provider';
+import type { AwsProviderConfig } from '@cdktn/provider-aws/lib/provider';
 import type { LambdaGlobalConfig, ResolverType } from '@lafken/resolver';
 import type { StackModule } from '../module';
 import type { ModuleResolverType } from '../module/module.types';

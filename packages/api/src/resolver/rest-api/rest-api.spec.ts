@@ -1,14 +1,14 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
-import { ApiGatewayResource } from '@cdktf/provider-aws/lib/api-gateway-resource';
-import { ApiGatewayRestApi } from '@cdktf/provider-aws/lib/api-gateway-rest-api';
-import { ApiGatewayStage } from '@cdktf/provider-aws/lib/api-gateway-stage';
+import 'cdktn/lib/testing/adapters/jest';
+import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
+import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
+import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import {
   Api,
   type ApiLambdaMetadata,

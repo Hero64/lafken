@@ -1,7 +1,7 @@
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
-import { AssetType, TerraformAsset } from 'cdktf';
+import { AssetType, TerraformAsset } from 'cdktn';
 
 import { createSha1 } from '../../../utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';

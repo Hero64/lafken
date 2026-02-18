@@ -1,4 +1,4 @@
-import type { ApiGatewayIntegrationResponseConfig } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
+import type { ApiGatewayIntegrationResponseConfig } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import type { ResponseFieldMetadata } from '../../../../../../main';
 
 export interface ResponseHandler

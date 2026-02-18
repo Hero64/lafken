@@ -1,4 +1,4 @@
-import type { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
+import type { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import type { ResourceMetadata } from '@lafken/common';
 import type { Construct } from 'constructs';
 

@@ -1,4 +1,4 @@
-import { TerraformStack, Testing } from 'cdktf';
+import { TerraformStack, Testing } from 'cdktn';
 import { Construct } from 'constructs';
 
 export const setupTestingStack = () => {

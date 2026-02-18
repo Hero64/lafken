@@ -1,4 +1,4 @@
-import type { IAspect } from 'cdktf';
+import type { IAspect } from 'cdktn';
 import type { Construct, IConstruct } from 'constructs';
 
 interface TaggableResource extends Construct {

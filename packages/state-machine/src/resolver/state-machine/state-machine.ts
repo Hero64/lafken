@@ -1,4 +1,4 @@
-import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
+import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import type { S3Permissions, Services } from '@lafken/common';
 import { type AppModule, lafkenResource, Role } from '@lafken/resolver';
 import { Schema } from './schema/schema';

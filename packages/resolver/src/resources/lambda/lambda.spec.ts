@@ -1,7 +1,7 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
-import { type TerraformStack, Testing } from 'cdktf';
+import 'cdktn/lib/testing/adapters/jest';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import { type TerraformStack, Testing } from 'cdktn';
 import { ContextName } from '../../types';
 import { setupTestingStack } from '../../utils';
 import { Role } from '../role';

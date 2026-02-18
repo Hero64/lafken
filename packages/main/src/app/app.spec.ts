@@ -1,7 +1,7 @@
-import 'cdktf/lib/testing/adapters/jest';
+import 'cdktn/lib/testing/adapters/jest';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import {
   createLambdaDecorator,
   createResourceDecorator,
@@ -14,7 +14,7 @@ import {
   type ResolverType,
   Role,
 } from '@lafken/resolver';
-import { App, Testing } from 'cdktf';
+import { App, Testing } from 'cdktn';
 import { createModule } from '../module';
 import { AppStack, createApp } from './app';
 
@@ -22,7 +22,7 @@ describe('App', () => {
   enableBuildEnvVariable();
 
   afterAll(async () => {
-    await rm(join(__dirname, '../..', 'cdktf.out'), {
+    await rm(join(__dirname, '../..', 'cdktn.out'), {
       recursive: true,
       force: true,
     });

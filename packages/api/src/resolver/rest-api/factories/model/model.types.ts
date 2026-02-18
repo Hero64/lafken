@@ -1,5 +1,5 @@
-import type { ApiGatewayModel } from '@cdktf/provider-aws/lib/api-gateway-model';
-import type { ITerraformDependable } from 'cdktf';
+import type { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
+import type { ITerraformDependable } from 'cdktn';
 import type { ApiFieldMetadata } from '../../../../main';
 
 export interface JsonSchema {

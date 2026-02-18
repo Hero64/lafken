@@ -1,13 +1,13 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
-import { S3BucketAccelerateConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-accelerate-configuration';
-import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
-import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
-import { S3BucketNotification } from '@cdktf/provider-aws/lib/s3-bucket-notification';
-import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
+import 'cdktn/lib/testing/adapters/jest';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { S3BucketAccelerateConfiguration } from '@cdktn/provider-aws/lib/s3-bucket-accelerate-configuration';
+import { S3BucketAcl } from '@cdktn/provider-aws/lib/s3-bucket-acl';
+import { S3BucketLifecycleConfiguration } from '@cdktn/provider-aws/lib/s3-bucket-lifecycle-configuration';
+import { S3BucketNotification } from '@cdktn/provider-aws/lib/s3-bucket-notification';
+import { S3BucketVersioningA } from '@cdktn/provider-aws/lib/s3-bucket-versioning';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { setupTestingStack } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import { Bucket as BucketDecorator } from '../../main';
 import { Bucket } from './bucket';
 

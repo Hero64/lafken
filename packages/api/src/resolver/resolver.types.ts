@@ -1,4 +1,4 @@
-import type { ApiGatewayStageConfig } from '@cdktf/provider-aws/lib/api-gateway-stage';
+import type { ApiGatewayStageConfig } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import type { ApiAuthorizerNames, ApiRestNames, ClassResource } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
 

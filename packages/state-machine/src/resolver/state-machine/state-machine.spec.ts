@@ -1,7 +1,7 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import { SfnStateMachine } from '@cdktf/provider-aws/lib/sfn-state-machine';
-import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
+import 'cdktn/lib/testing/adapters/jest';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
+import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
 import {
   type ClassResource,
   enableBuildEnvVariable,
@@ -9,7 +9,7 @@ import {
   getResourceMetadata,
 } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 import {
   Event,
   IntegrationOptions,

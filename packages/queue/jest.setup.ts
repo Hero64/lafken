@@ -1,4 +1,3 @@
-import { Testing } from 'cdktf';
+import { Testing } from 'cdktn';
 
-// Setup CDKTF Jest matchers
 Testing.setupJest();

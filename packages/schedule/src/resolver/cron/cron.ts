@@ -1,5 +1,5 @@
-import { CloudwatchEventRule } from '@cdktf/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktf/provider-aws/lib/cloudwatch-event-target';
+import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
+import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
 import { type AppModule, LambdaHandler, lafkenResource } from '@lafken/resolver';
 import type { ScheduleTime } from '../../main';
 import type { CronProps } from './cron.types';

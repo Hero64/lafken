@@ -1,5 +1,5 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import 'cdktn/lib/testing/adapters/jest';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from '../resource';
 import { Environment } from './environment';

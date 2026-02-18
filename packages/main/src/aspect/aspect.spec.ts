@@ -1,7 +1,7 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import 'cdktn/lib/testing/adapters/jest';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { setupTestingStack } from '@lafken/resolver';
-import { Aspects, Testing } from 'cdktf';
+import { Aspects, Testing } from 'cdktn';
 import { Construct } from 'constructs';
 import { AppAspect } from './aspect';
 

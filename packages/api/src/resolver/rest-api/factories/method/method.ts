@@ -1,8 +1,8 @@
-import { ApiGatewayIntegration } from '@cdktf/provider-aws/lib/api-gateway-integration';
-import { ApiGatewayIntegrationResponse } from '@cdktf/provider-aws/lib/api-gateway-integration-response';
-import { ApiGatewayMethod } from '@cdktf/provider-aws/lib/api-gateway-method';
-import { ApiGatewayMethodResponse } from '@cdktf/provider-aws/lib/api-gateway-method-response';
-import type { TerraformResource } from 'cdktf';
+import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
+import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
+import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
+import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
 import type { CorsOptions } from '../../../resolver.types';
 import type { RestApi } from '../../rest-api';

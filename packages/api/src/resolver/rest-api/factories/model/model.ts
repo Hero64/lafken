@@ -1,6 +1,6 @@
-import { ApiGatewayModel } from '@cdktf/provider-aws/lib/api-gateway-model';
+import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { uuid } from '@lafken/resolver';
-import { Fn, Token } from 'cdktf';
+import { Fn, Token } from 'cdktn';
 import type { ApiFieldMetadata } from '../../../../main';
 import type { RestApi } from '../../rest-api';
 import type { CreateModelResponse, GetModelProps, JsonSchema } from './model.types';

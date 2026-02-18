@@ -1,8 +1,8 @@
-import 'cdktf/lib/testing/adapters/jest';
-import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
-import { IamRolePolicy } from '@cdktf/provider-aws/lib/iam-role-policy';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
-import { Testing } from 'cdktf';
+import 'cdktn/lib/testing/adapters/jest';
+import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
+import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { Testing } from 'cdktn';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from '../resource';
 import { Role } from './role';

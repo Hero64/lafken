@@ -1,4 +1,4 @@
-import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
+import { AwsProvider } from '@cdktn/provider-aws/lib/provider';
 import { enableBuildEnvVariable } from '@lafken/common';
 import {
   ContextName,
@@ -7,7 +7,7 @@ import {
   type ResolverType,
   Role,
 } from '@lafken/resolver';
-import { App, Aspects, TerraformStack } from 'cdktf';
+import { App, Aspects, TerraformStack } from 'cdktn';
 import PrettyError from 'pretty-error';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';

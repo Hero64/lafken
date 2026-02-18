@@ -1,4 +1,4 @@
-import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
+import { DataAwsSsmParameter } from '@cdktn/provider-aws/lib/data-aws-ssm-parameter';
 import { cleanString, type EnvironmentValue } from '@lafken/common';
 import { Construct } from 'constructs';
 import { resolveCallbackResource } from '../../utils/resolve-resource.utils';
