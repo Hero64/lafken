@@ -101,7 +101,7 @@ class LambdaAssets {
           chunkFileNames: '[name].js',
           minify: metadata.minify,
           legalComments: 'none',
-          advancedChunks: {
+          codeSplitting: {
             groups: [
               {
                 name(moduleId) {

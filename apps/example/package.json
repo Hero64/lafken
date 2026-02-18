@@ -6,12 +6,13 @@
   "main": "index.js",
   "scripts": {
     "build-app": "tsc",
-    "cdktf:deploy": "pnpm build-app  && cdktf deploy",
-    "cdktf:destroy": "pnpm build-app && cdktf destroy",
-    "cdktf:synth": "pnpm build-app && cdktf synth",
+    "cdktn:deploy": "pnpm build-app  && cdktn deploy",
+    "cdktn:destroy": "pnpm build-app && cdktn destroy",
+    "cdktn:synth": "pnpm build-app && cdktn synth",
     "clean": "rm -rf cdktf.out dist .out"
   },
   "dependencies": {
+    "@cdktn/provider-aws": "^23.0.0",
     "@lafken/api": "workspace:*",
     "@lafken/auth": "workspace:*",
     "@lafken/bucket": "workspace:*",
@@ -22,10 +23,11 @@
     "@lafken/queue": "workspace:*",
     "@lafken/schedule": "workspace:*",
     "@lafken/state-machine": "workspace:*",
-    "cdktf": "0.21.0",
+    "cdktn": "^0.22.0",
+    "constructs": "^10.4.5",
     "dayjs": "1.11.19"
   },
   "devDependencies": {
-    "cdktf-cli": "0.21.0"
+    "cdktn-cli": "^0.22.0"
   }
 }
