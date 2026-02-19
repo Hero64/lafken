@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { S3BucketAccelerateConfiguration } from '@cdktn/provider-aws/lib/s3-bucket-accelerate-configuration';
 import { S3BucketAcl } from '@cdktn/provider-aws/lib/s3-bucket-acl';
@@ -8,6 +7,7 @@ import { S3BucketVersioningA } from '@cdktn/provider-aws/lib/s3-bucket-versionin
 import { enableBuildEnvVariable } from '@lafken/common';
 import { setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import { Bucket as BucketDecorator } from '../../main';
 import { Bucket } from './bucket';
 

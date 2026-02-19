@@ -24,19 +24,19 @@
   "author": "Aníbal Jorquera",
   "exports": {
     "./main": {
+      "types": "./lib/main/index.d.ts",
       "import": "./lib/main/index.js",
-      "require": "./lib/main/index.js",
-      "types": "./lib/main/index.d.ts"
+      "require": "./lib/main/index.js"
     },
     "./service": {
+      "types": "./lib/service/index.d.ts",
       "import": "./lib/service/index.js",
-      "require": "./lib/service/index.js",
-      "types": "./lib/service/index.d.ts"
+      "require": "./lib/service/index.js"
     },
     "./resolver": {
+      "types": "./lib/resolver/index.d.ts",
       "import": "./lib/resolver/index.js",
-      "require": "./lib/resolver/index.js",
-      "types": "./lib/resolver/index.d.ts"
+      "require": "./lib/resolver/index.js"
     }
   },
   "typesVersions": {
@@ -60,24 +60,22 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.990.0",
     "@lafken/resolver": "workspace:*",
     "aws-xray-sdk": "^3.12.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.990.0",
     "@cdktn/provider-aws": "^23.0.0",
     "@lafken/common": "workspace:*",
     "@types/jest": "^30.0.0",
     "cdktn": "^0.22.0",
+    "cdktn-vitest": "^1.0.0",
     "constructs": "^10.4.5",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2"
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "@cdktn/provider-aws": "^23.0.0",

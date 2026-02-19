@@ -6,6 +6,15 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockInstance,
+  vi,
+} from 'vitest';
 import { Bucket } from '../../main';
 import * as clientModule from '../client/client';
 import { createRepository } from './repository';
@@ -15,17 +24,17 @@ class ExampleBucket {}
 
 describe('createRepository', () => {
   let repository: ReturnType<typeof createRepository>;
-  let sendMock: jest.SpyInstance;
+  let sendMock: MockInstance;
 
   beforeEach(() => {
-    sendMock = jest
+    sendMock = vi
       .spyOn(clientModule.client, 'send')
       .mockImplementation(async (_command: any) => ({}));
     repository = createRepository(ExampleBucket);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should call PutObjectCommand with correct bucket', async () => {
