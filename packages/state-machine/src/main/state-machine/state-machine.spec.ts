@@ -4,6 +4,7 @@ import {
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { NestedStateMachine, RESOURCE_TYPE, State, StateMachine } from './state-machine';
 import {

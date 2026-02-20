@@ -10,6 +10,7 @@ import {
 } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   Event,
   IntegrationOptions,
@@ -21,18 +22,17 @@ import {
 } from '../../main';
 import { StateMachine as StateMachineResource } from './state-machine';
 
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
 
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-      functionName: 'test-function',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+      this.functionName = 'test-function';
+    }),
   };
 });
-
 const createStateMachine = async (classResource: ClassResource) => {
   const { stack, module } = setupTestingStackWithModule();
 
@@ -297,7 +297,7 @@ describe('State Machine', () => {
 
     await createStateMachine(TestingSM);
 
-    expect(lafkenResource.callDependentCallbacks()).rejects.toThrow(
+    await expect(lafkenResource.callDependentCallbacks()).rejects.toThrow(
       'The schema has a unresolved dependency'
     );
   });
