@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
