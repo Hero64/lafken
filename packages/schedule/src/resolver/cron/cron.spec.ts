@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
 import {
@@ -9,17 +8,18 @@ import {
 } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { Cron, type EventCronMetadata, Schedule } from '../../main';
 import { Cron as CronResolver } from './cron';
 
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
 
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+    }),
   };
 });
 
