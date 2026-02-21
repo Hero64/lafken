@@ -1,22 +1,20 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { LambdaEventSourceMapping } from '@cdktn/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { Event, Fifo, Param, Payload, Queue, Standard } from '../../main';
 import { Queue as QueueResolver } from './queue';
 
-Testing.setupJest();
-
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
 
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+    }),
   };
 });
 

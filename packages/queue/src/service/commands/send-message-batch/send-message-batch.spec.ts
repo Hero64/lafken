@@ -1,17 +1,20 @@
 import { SendMessageBatchCommand } from '@aws-sdk/client-sqs';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { client } from '../../client/client';
 import { SendMessageBatch } from './send-message-batch';
 import type { SendMessagesBatchProps } from './send-message-batch.types';
 
-jest.mock('../../client/client', () => ({
-  client: {
-    send: jest.fn(),
-  },
-}));
+vi.mock('../../client/client', () => {
+  return {
+    client: {
+      send: vi.fn(),
+    },
+  };
+});
 
 describe('SendMessageBatch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should generate batch entries from batch message', async () => {
@@ -37,7 +40,7 @@ describe('SendMessageBatch', () => {
 
     const sendMessageBatch = new SendMessageBatch(props);
 
-    (client.send as jest.Mock).mockResolvedValueOnce({
+    (client.send as Mock).mockResolvedValueOnce({
       Successful: [{ Id: '0' }, { Id: '1' }],
     });
 
@@ -45,7 +48,7 @@ describe('SendMessageBatch', () => {
 
     expect(client.send).toHaveBeenCalledTimes(1);
 
-    const commandInstance = (client.send as jest.Mock).mock.calls[0][0];
+    const commandInstance = (client.send as Mock).mock.calls[0][0];
     expect(commandInstance).toBeInstanceOf(SendMessageBatchCommand);
 
     expect((commandInstance as SendMessageBatchCommand).input).toEqual({

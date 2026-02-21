@@ -7,6 +7,7 @@ import {
   type ResourceMetadata,
   ResourceReflectKeys,
 } from '@lafken/common';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { Event, Field, Param, Payload } from '../event';
 import { Fifo, Queue, RESOURCE_TYPE, Standard } from './queue';
 import type { QueueLambdaMetadata } from './queue.types';

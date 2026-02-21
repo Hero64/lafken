@@ -4,6 +4,7 @@ import {
   enableBuildEnvVariable,
   type PayloadMetadata,
 } from '@lafken/common';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { Fifo, Queue } from '../queue';
 import { Event, Field, Param, Payload, queueFieldKey, queuePayloadKey } from './event';
 import type { QueueParamMetadata } from './event.types';

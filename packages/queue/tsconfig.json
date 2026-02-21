@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["node", "jest"]
+    "types": ["node", "cdktn-vitest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
