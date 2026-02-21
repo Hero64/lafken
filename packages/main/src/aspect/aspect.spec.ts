@@ -1,8 +1,8 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { setupTestingStack } from '@lafken/resolver';
 import { Aspects, Testing } from 'cdktn';
 import { Construct } from 'constructs';
+import { describe, expect, it } from 'vitest';
 import { AppAspect } from './aspect';
 
 describe('App Aspect', () => {

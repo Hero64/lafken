@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
@@ -15,6 +14,7 @@ import {
   Role,
 } from '@lafken/resolver';
 import { App, Testing } from 'cdktn';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import { createModule } from '../module';
 import { AppStack, createApp } from './app';
 
@@ -90,7 +90,7 @@ describe('App', () => {
   });
 
   it('should process module resources', async () => {
-    const createMock = jest.fn();
+    const createMock = vi.fn();
     class TestResolver implements ResolverType {
       type: string = 'test-resolver';
       create = createMock;
@@ -110,12 +110,12 @@ describe('App', () => {
   });
 
   it('should trigger resolver hooks', async () => {
-    const createMock = jest.fn();
+    const createMock = vi.fn();
     const callOrder: string[] = [];
-    const beforeCreateMock = jest.fn().mockImplementation(() => {
+    const beforeCreateMock = vi.fn().mockImplementation(() => {
       callOrder.push('before');
     });
-    const afterCreateMock = jest.fn().mockImplementation(() => {
+    const afterCreateMock = vi.fn().mockImplementation(() => {
       callOrder.push('after');
     });
 
@@ -142,7 +142,7 @@ describe('App', () => {
   });
 
   it('should resolver dependencies after complete create resources', async () => {
-    const dependentCallback = jest.fn();
+    const dependentCallback = vi.fn();
     class TestResolver implements ResolverType {
       type: string = 'test-resolver';
       async create(scope: AppModule) {
@@ -200,7 +200,7 @@ describe('App', () => {
     });
   });
   it('should call extend callback', async () => {
-    const extendCallback = jest.fn();
+    const extendCallback = vi.fn();
     const { appStack } = await createApp({
       name: 'testing',
       modules: [],

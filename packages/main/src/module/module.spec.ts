@@ -1,3 +1,9 @@
+import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import {
+  createLambdaDecorator,
+  createResourceDecorator,
+  enableBuildEnvVariable,
+} from '@lafken/common';
 import {
   type AppModule,
   ContextName,
@@ -6,14 +12,8 @@ import {
   Role,
   setupTestingStack,
 } from '@lafken/resolver';
-import 'cdktn/lib/testing/adapters/jest';
-import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
-import {
-  createLambdaDecorator,
-  createResourceDecorator,
-  enableBuildEnvVariable,
-} from '@lafken/common';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { createModule, StackModule } from './module';
 
 describe('Module', () => {
@@ -84,7 +84,7 @@ describe('Module', () => {
   });
 
   it('should process module resource', async () => {
-    const createMock = jest.fn();
+    const createMock = vi.fn();
     class TestResolver implements ResolverType {
       type: string = 'test-resolver';
       create = createMock;

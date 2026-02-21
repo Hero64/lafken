@@ -1,4 +1,5 @@
 import { ContextName, setupTestingStack } from '@lafken/resolver';
+import { describe, expect, it } from 'vitest';
 import { AppContext } from './context';
 
 describe('App context', () => {
