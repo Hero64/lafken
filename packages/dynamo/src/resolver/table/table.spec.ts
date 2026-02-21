@@ -1,9 +1,10 @@
 import 'reflect-metadata';
-import 'cdktn/lib/testing/adapters/jest';
+
 import { DynamodbTable } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { TerraformStack, Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import { Field, Model, PartitionKey, type PrimaryPartition, SortKey } from '../../main';
 import { Table } from './table';
 

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import type { ModelMetadata } from '../../service';
 import { Field, Model, PartitionKey, SortKey } from './model';
 import { type FieldsMetadata, ModelMetadataKeys } from './model.types';
