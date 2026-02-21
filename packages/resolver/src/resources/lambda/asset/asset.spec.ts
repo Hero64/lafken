@@ -1,15 +1,16 @@
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import { describe, expect, it, vi } from 'vitest';
 import { setupTestingStack } from '../../../utils';
 import { lambdaAssets } from './asset';
 
-jest.mock('cdktn', () => {
-  const actual = jest.requireActual('cdktn');
+vi.mock('cdktn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('cdktn')>();
 
   return {
     ...actual,
-    TerraformAsset: jest.fn().mockImplementation(() => ({
-      id: 'testing',
-    })),
+    TerraformAsset: vi.fn().mockImplementation(function (this: any) {
+      this.id = 'testing';
+    }),
   };
 });
 
@@ -63,7 +64,7 @@ describe('Lambda Assets', () => {
       scope: stack,
       lambda,
     });
-    const mock = jest.spyOn(lambdaAssets as any, 'buildAsset').mockResolvedValue({
+    const mock = vi.spyOn(lambdaAssets as any, 'buildAsset').mockResolvedValue({
       path: 'index.js',
     });
 

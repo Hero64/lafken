@@ -1,10 +1,11 @@
 import path from 'node:path';
+import { describe, expect, it } from 'vitest';
 import { LafkenBuildPlugin } from './build-plugin';
 
 describe('LafkenBuildPlugin', () => {
   const tempDir: string = path.join(__dirname, 'temp');
 
-  test('should export lambda functions', async () => {
+  it('should export lambda functions', async () => {
     const inputFile = path.join(tempDir, 'input.js');
 
     const plugin = LafkenBuildPlugin({

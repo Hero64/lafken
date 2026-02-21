@@ -1,8 +1,8 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from '../resource';
 import { Role } from './role';
@@ -117,6 +117,6 @@ describe('Role', () => {
       ],
     });
 
-    expect(lafkenResource.callDependentCallbacks()).rejects.toThrow();
+    await expect(lafkenResource.callDependentCallbacks()).rejects.toThrow();
   });
 });

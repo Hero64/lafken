@@ -1,4 +1,5 @@
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { describe, expect, it, vitest } from 'vitest';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from './resource';
 
@@ -30,7 +31,7 @@ describe('Lafken resource', () => {
 
     const bucket = new Bucket(stack, 'testing');
 
-    const dependentFn = jest.fn();
+    const dependentFn = vitest.fn();
 
     bucket.isDependent(dependentFn);
     await lafkenResource.callDependentCallbacks();
