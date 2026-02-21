@@ -25,14 +25,14 @@
   "author": "Aníbal Jorquera",
   "exports": {
     "./main": {
+      "types": "./lib/main/index.d.ts",
       "import": "./lib/main/index.js",
-      "require": "./lib/main/index.js",
-      "types": "./lib/main/index.d.ts"
+      "require": "./lib/main/index.js"
     },
     "./resolver": {
+      "types": "./lib/resolver/index.d.ts",
       "import": "./lib/resolver/index.js",
-      "require": "./lib/resolver/index.js",
-      "types": "./lib/resolver/index.d.ts"
+      "require": "./lib/resolver/index.js"
     }
   },
   "typesVersions": {
@@ -53,8 +53,7 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test": "vitest"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -63,12 +62,14 @@
   "devDependencies": {
     "@cdktn/provider-aws": "^23.0.0",
     "@lafken/common": "workspace:*",
-    "@types/jest": "^30.0.0",
+    "@swc/core": "^1.15.11",
+    "@swc/helpers": "^0.5.18",
+    "@vitest/runner": "^4.0.18",
     "cdktn": "^0.22.0",
+    "cdktn-vitest": "^4.0.18",
     "constructs": "^10.4.5",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2"
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "@cdktn/provider-aws": "^23.0.0",

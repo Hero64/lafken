@@ -3,6 +3,7 @@ import {
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
+import { describe, expect, it } from 'vitest';
 import { AuthExtension, Trigger } from './extension';
 import type { TriggerMetadata } from './extension.types';
 

@@ -1,8 +1,8 @@
-import { setupTestingStack } from '@lafken/resolver';
-import 'cdktn/lib/testing/adapters/jest';
 import { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
 import { CognitoUserPoolClient } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
+import { setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { Auth } from './auth';
 
 describe('Auth generation', () => {
@@ -28,7 +28,7 @@ describe('Auth generation', () => {
 
   it('should call extend callback', async () => {
     const { stack } = setupTestingStack();
-    const extendFn = jest.fn();
+    const extendFn = vi.fn();
 
     const auth = new Auth(stack, 'auth', {
       name: 'testing-auth',

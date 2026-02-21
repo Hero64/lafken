@@ -4,6 +4,7 @@ import {
   getMetadataPrototypeByKey,
   type PayloadMetadata,
 } from '@lafken/common';
+import { describe, expect, it } from 'vitest';
 import { Attributes, authFieldKey, authPayloadKey, Custom, Standard } from './attribute';
 import type {
   CustomAttributesMetadata,

@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -6,19 +5,20 @@ import {
 } from '@lafken/common';
 import { LambdaHandler, setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { AuthExtension, Trigger } from '../../../../main/extension/extension';
 import type { TriggerMetadata } from '../../../../main/extension/extension.types';
 import { Extension } from './extension';
 
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
 
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-      invokeArn: 'invokeArn',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+      this.invokeArn = 'invokeArn';
+    }),
   };
 });
 
