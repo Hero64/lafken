@@ -7,10 +7,11 @@
     "changeset:release": "turbo run build && pnpm -r publish --access public --no-git-checks",
     "changeset:version": "changeset version && pnpm install",
     "check-types": "turbo run check-types",
-    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf {} +",
+    "clean": "turbo run clean",
     "dev": "turbo run dev",
     "format": "pnpm biome format --write . ",
     "lint": "turbo run lint",
+    "modules:clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf {} +",
     "prepare": "husky",
     "test": "turbo run test --concurrency=4"
   },
