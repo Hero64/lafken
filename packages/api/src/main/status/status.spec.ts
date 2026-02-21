@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { response } from './status';
 import { HTTP_STATUS_CODE } from './status.types';
 

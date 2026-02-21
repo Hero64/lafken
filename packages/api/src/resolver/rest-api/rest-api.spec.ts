@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
@@ -9,6 +8,7 @@ import {
   getResourceMetadata,
 } from '@lafken/common';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import {
   Api,
   type ApiLambdaMetadata,

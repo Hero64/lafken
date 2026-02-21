@@ -1,7 +1,7 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import { setupTestingRestApi } from '../../../utils/testing.utils';
 
 describe('Resource factory', () => {

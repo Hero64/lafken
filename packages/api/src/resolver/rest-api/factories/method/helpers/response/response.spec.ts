@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { Method } from '../../../../../../main';
 import { ResponseHelper } from './response';
 import { defaultResponses, getSuccessStatusCode } from './response.utils';

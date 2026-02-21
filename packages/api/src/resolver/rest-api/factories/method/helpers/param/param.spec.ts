@@ -1,15 +1,16 @@
 import { getMetadataPrototypeByKey, LambdaReflectKeys } from '@lafken/common';
+import { beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest';
 import { ParamHelper } from './param';
 
 // Mock the metadata function
-jest.mock('@lafken/common', () => ({
-  getMetadataPrototypeByKey: jest.fn(),
+vi.mock('@lafken/common', () => ({
+  getMetadataPrototypeByKey: vi.fn(),
   LambdaReflectKeys: {
     event_param: 'event_param',
   },
 }));
 
-const mockGetMetadataPrototypeByKey = getMetadataPrototypeByKey as jest.MockedFunction<
+const mockGetMetadataPrototypeByKey = getMetadataPrototypeByKey as MockedFunction<
   typeof getMetadataPrototypeByKey
 >;
 
@@ -19,7 +20,7 @@ describe('ParamHelper', () => {
   const methodName = 'testMethod';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     paramHelper = new ParamHelper(mockClassResource, methodName);
   });
 

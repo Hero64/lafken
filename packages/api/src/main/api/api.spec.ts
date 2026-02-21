@@ -4,6 +4,7 @@ import {
   LambdaReflectKeys,
   ResourceReflectKeys,
 } from '@lafken/common';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { Event } from '../event/event';
 import { Param } from '../field/field';

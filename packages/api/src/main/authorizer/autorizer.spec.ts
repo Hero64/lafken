@@ -6,6 +6,7 @@ import {
   getResourceMetadata,
   type LambdaMetadata,
 } from '@lafken/common';
+import { describe, expect, it, vi } from 'vitest';
 import {
   ApiKeyAuthorizer,
   AuthorizerHandler,
@@ -69,7 +70,7 @@ describe('Authorizers', () => {
     });
 
     it('should get permissions in lambda execution', async () => {
-      jest.spyOn(fs, 'readFile').mockImplementation(() =>
+      vi.spyOn(fs, 'readFile').mockImplementation(() =>
         Promise.resolve(`{
         "/test": {
           "GET": ["foo", "bar"]

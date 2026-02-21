@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TemplateHelper } from './template';
 
 describe('TemplateHelper', () => {
@@ -267,7 +268,7 @@ describe('TemplateHelper', () => {
           validation: {},
         };
 
-        const valueParser = jest.fn((value: string) => `PARSED(${value})`);
+        const valueParser = vi.fn((value: string) => `PARSED(${value})`);
 
         const result = templateHelper.generateTemplate({
           field,

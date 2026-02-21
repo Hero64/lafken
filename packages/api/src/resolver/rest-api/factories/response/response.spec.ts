@@ -1,10 +1,10 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import { setupTestingRestApi } from '../../../utils/testing.utils';
 
 describe('Response factory', () => {

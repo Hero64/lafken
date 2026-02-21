@@ -1,10 +1,10 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import {
   Api,
   type BucketIntegrationResponse,
@@ -15,15 +15,14 @@ import {
 } from '../../../../main';
 import { initializeMethod, setupTestingRestApi } from '../../../utils/testing.utils';
 
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
-
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-      invokeArn: 'invokeArn',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+      this.invokeArn = 'invokeArn';
+    }),
   };
 });
 

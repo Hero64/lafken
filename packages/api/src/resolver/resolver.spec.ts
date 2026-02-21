@@ -1,23 +1,22 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { type AppStack, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it, vi } from 'vitest';
 import { Api, Get } from '../main';
 import { ApiResolver } from './resolver';
 import { RestApi } from './rest-api/rest-api';
 
-jest.mock('@lafken/resolver', () => {
-  const actual = jest.requireActual('@lafken/resolver');
-
+vi.mock('@lafken/resolver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lafken/resolver')>();
   return {
     ...actual,
-    LambdaHandler: jest.fn().mockImplementation(() => ({
-      arn: 'test-function',
-      invokeArn: 'invokeArn',
-    })),
+    LambdaHandler: vi.fn().mockImplementation(function (this: any) {
+      this.arn = 'test-function';
+      this.invokeArn = 'invokeArn';
+    }),
   };
 });
 
@@ -160,7 +159,7 @@ describe('Api Resolver', () => {
     }
 
     await resolver.beforeCreate(module as AppStack);
-    expect(resolver.create(module, TestApi)).rejects.toThrow();
+    await expect(resolver.create(module, TestApi)).rejects.toThrow();
   });
 
   it('should create api stage in after create hook', async () => {
@@ -218,7 +217,7 @@ describe('Api Resolver', () => {
   it('should call extends method in after create hook', async () => {
     const { stack, module } = setupTestingStackWithModule();
 
-    const extend = jest.fn();
+    const extend = vi.fn();
 
     const resolver = new ApiResolver({
       restApi: {

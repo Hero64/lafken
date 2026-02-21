@@ -53,8 +53,7 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test": "vitest"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -63,13 +62,15 @@
   "devDependencies": {
     "@cdktn/provider-aws": "^23.0.0",
     "@lafken/common": "workspace:*",
+    "@swc/core": "^1.15.11",
+    "@swc/helpers": "^0.5.18",
     "@types/aws-lambda": "^8.10.160",
-    "@types/jest": "^30.0.0",
+    "@vitest/runner": "^4.0.18",
     "cdktn": "^0.22.0",
+    "cdktn-vitest": "^4.0.18",
     "constructs": "^10.4.5",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2"
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "@cdktn/provider-aws": "^23.0.0",

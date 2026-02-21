@@ -1,4 +1,3 @@
-import 'cdktn/lib/testing/adapters/jest';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
@@ -8,6 +7,7 @@ import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
+import { describe, expect, it } from 'vitest';
 import {
   Api,
   type DynamoIntegrationOption,
