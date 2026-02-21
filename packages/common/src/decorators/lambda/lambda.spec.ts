@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { enableBuildEnvVariable, getResourceHandlerMetadata } from '../../utils';
 import { createFieldDecorator } from '../field';
 import { Callback, Context, createEventDecorator, createLambdaDecorator } from './lambda';

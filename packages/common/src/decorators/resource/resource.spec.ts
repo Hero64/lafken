@@ -1,4 +1,5 @@
 import { basename } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
 import { enableBuildEnvVariable, getResourceMetadata } from '../../utils';
 import { createResourceDecorator } from './resource';

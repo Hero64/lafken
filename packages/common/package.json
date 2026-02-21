@@ -32,17 +32,18 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test": "vitest"
   },
   "dependencies": {
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@types/jest": "30.0.0",
-    "jest": "30.2.0",
-    "ts-jest": "29.4.6",
-    "ts-node": "10.9.2"
+    "@swc/core": "^1.15.11",
+    "@swc/helpers": "^0.5.18",
+    "@vitest/runner": "^4.0.18",
+    "cdktn-vitest": "^4.0.18",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20.19"

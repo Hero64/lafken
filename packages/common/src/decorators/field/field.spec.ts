@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { enableBuildEnvVariable, getMetadataPrototypeByKey } from '../../utils';
 import { createFieldDecorator, createFieldName, getEventFields } from './field';
 import { type FieldMetadata, FieldProperties, type FieldProps } from './field.types';

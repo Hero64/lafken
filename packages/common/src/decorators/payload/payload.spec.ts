@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { enableBuildEnvVariable, getMetadataByKey } from '../../utils';
 import { createFieldName, FieldProperties } from '../field';
 import { createPayloadDecorator } from './payload';
