@@ -72,7 +72,7 @@
     "@types/aws-lambda": "^8.10.160",
     "@vitest/runner": "^4.0.18",
     "cdktn": "^0.22.0",
-    "cdktn-vitest": "^4.0.18",
+    "cdktn-vitest": "^1.0.0",
     "constructs": "^10.4.5",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.0.18"

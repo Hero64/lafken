@@ -41,7 +41,7 @@
     "@swc/core": "^1.15.11",
     "@swc/helpers": "^0.5.18",
     "@vitest/runner": "^4.0.18",
-    "cdktn-vitest": "^4.0.18",
+    "cdktn-vitest": "^1.0.0",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.0.18"
   },

@@ -78,7 +78,7 @@
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-vitest": "^7.0.1",
     "cdktn": "^0.22.0",
-    "cdktn-vitest": "^4.0.18",
+    "cdktn-vitest": "^1.0.0",
     "constructs": "^10.4.5",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.0.18"

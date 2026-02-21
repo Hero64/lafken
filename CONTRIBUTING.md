@@ -188,7 +188,7 @@ pnpm test --filter=@lafken/api
 
 ### Writing Tests
 
-- Use [Jest](https://jestjs.io/)
+- Use [Vitest](https://vitest.dev/)
 - Place tests near the code they test
 - Use descriptive names
 - Test edge cases
