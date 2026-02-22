@@ -119,6 +119,47 @@ To report documentation issues:
    pnpm check-types
    ```
 
+### Commit Message Guidelines
+
+We follow **Conventional Commits** specification for all commits. This ensures clear history and enables automatic changelog generation.
+
+**Format:**
+```
+<type>(<optional-scope>): <subject>
+```
+
+**Type:** Must be one of:
+- `feat` - A new feature
+- `fix` - A bug fix
+- `docs` - Documentation changes
+- `style` - Code style changes (formatting, etc.)
+- `refactor` - Code refactoring without changing behavior
+- `perf` - Performance improvements
+- `test` - Adding or updating tests
+- `chore` - Maintenance tasks, dependencies
+- `ci` - CI/CD configuration changes
+- `revert` - Revert a previous commit
+
+**Scope:** Optional, should indicate the affected package (e.g., `api`, `resolver`, `queue`)
+
+**Subject:**
+- Use lowercase (except proper nouns)
+- No period at the end
+- Imperative mood ("add" not "added" or "adds")
+- Max 100 characters
+- Clear and concise
+
+**Examples:**
+```bash
+feat(api): add support for CORS headers
+fix(resolver): handle null values in Lambda environment
+docs: update installation instructions
+test(queue): improve event handler coverage
+chore: upgrade TypeScript to 5.9.3
+```
+
+The commit message format is validated automatically via `commitlint` when you commit.
+
 ### Submitting a Pull Request
 
 1. **Ensure it's up to date**
