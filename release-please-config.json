@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance Improvements" },
+    { "type": "refactor", "section": "Code Refactoring" },
+    { "type": "docs", "section": "Documentation" },
+    { "type": "chore", "section": "Miscellaneous" },
+    { "type": "ci", "section": "CI/CD" },
+    { "type": "test", "section": "Tests", "hidden": true },
+    { "type": "style", "section": "Styles", "hidden": true }
+  ],
+  "packages": {
+    "packages/api": {
+      "component": "@lafken/api",
+      "release-type": "node"
+    },
+    "packages/auth": {
+      "component": "@lafken/auth",
+      "release-type": "node"
+    },
+    "packages/bucket": {
+      "component": "@lafken/bucket",
+      "release-type": "node"
+    },
+    "packages/common": {
+      "component": "@lafken/common",
+      "release-type": "node"
+    },
+    "packages/dynamo": {
+      "component": "@lafken/dynamo",
+      "release-type": "node"
+    },
+    "packages/event": {
+      "component": "@lafken/event",
+      "release-type": "node"
+    },
+    "packages/main": {
+      "component": "@lafken/main",
+      "release-type": "node"
+    },
+    "packages/queue": {
+      "component": "@lafken/queue",
+      "release-type": "node"
+    },
+    "packages/resolver": {
+      "component": "@lafken/resolver",
+      "release-type": "node"
+    },
+    "packages/schedule": {
+      "component": "@lafken/schedule",
+      "release-type": "node"
+    },
+    "packages/state-machine": {
+      "component": "@lafken/state-machine",
+      "release-type": "node"
+    }
+  }
+}

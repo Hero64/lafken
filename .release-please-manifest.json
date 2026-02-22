@@ -1,0 +1,13 @@
+{
+  "packages/api": "0.7.0",
+  "packages/auth": "0.7.0",
+  "packages/bucket": "0.7.0",
+  "packages/common": "0.7.0",
+  "packages/dynamo": "0.7.0",
+  "packages/event": "0.7.0",
+  "packages/main": "0.7.0",
+  "packages/queue": "0.7.0",
+  "packages/resolver": "0.7.0",
+  "packages/schedule": "0.7.0",
+  "packages/state-machine": "0.7.0"
+}
