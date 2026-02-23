@@ -20,9 +20,12 @@ import type {
 import { ScanBuilder } from '../query-builder/scan/scan';
 import { UpdateBuilder } from '../query-builder/update/update';
 import { UpsertBuilder } from '../query-builder/upsert/upsert';
+import type { RepositoryReturn } from './repository.types';
 import { getModelInformation } from './repository.utils';
 
-export const createRepository = <E extends ClassResource>(model: E) => {
+export const createRepository = <E extends ClassResource>(
+  model: E
+): RepositoryReturn<E> => {
   const { modelProps, partitionKey, sortKey, fields } = getModelInformation(model);
 
   const queryBuilderProps: QueryBuilderProps<E> = {

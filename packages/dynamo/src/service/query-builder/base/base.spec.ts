@@ -1,4 +1,6 @@
+import { it } from 'node:test';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { describe, expect } from 'vitest';
 import { QueryBuilderBase } from './base';
 import type { QueryBuilderProps } from './base.types';
 

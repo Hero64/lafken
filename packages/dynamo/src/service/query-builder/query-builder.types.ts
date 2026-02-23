@@ -212,7 +212,7 @@ export interface QueryProps<E extends Function> extends FindProps<E> {
 export interface QueryOneProps<E extends Function> extends Omit<QueryProps<E>, 'limit'> {}
 
 export interface QueryResponse<E extends Function> {
-  data: Partial<E['prototype']>[];
+  data: E['prototype'][];
   cursor?: Cursor<E['prototype']>;
 }
 

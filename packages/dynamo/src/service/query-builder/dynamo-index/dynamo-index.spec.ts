@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { DynamoIndexes } from './dynamo-index';
 
 describe('Dynamo Index', () => {

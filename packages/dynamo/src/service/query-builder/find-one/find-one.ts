@@ -8,9 +8,9 @@ export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
     this.find();
   }
 
-  public async exec() {
+  public async exec(): Promise<InstanceType<E> | undefined> {
     const { data } = await this.runQuery(this.command);
 
-    return data?.[0];
+    return (data as E[])?.[0] as InstanceType<E> | undefined;
   }
 }
