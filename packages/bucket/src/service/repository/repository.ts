@@ -13,10 +13,12 @@ import {
 } from '@aws-sdk/client-s3';
 import type { ClassResource } from '@lafken/common';
 import { client, getClientWithXRay } from '../client/client';
-import type { InputWithoutBucket } from './repository.types';
+import type { InputWithoutBucket, RepositoryReturn } from './repository.types';
 import { getBucketInformation } from './repository.utils';
 
-export const createRepository = <E extends ClassResource>(bucket: E) => {
+export const createRepository = <E extends ClassResource>(
+  bucket: E
+): RepositoryReturn<E> => {
   const { name, tracing } = getBucketInformation(bucket);
 
   const bucketClient = tracing ? getClientWithXRay() : client;
