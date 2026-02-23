@@ -6,22 +6,15 @@
 
 declare module '@lafken/common' {
   interface ModulesAvailable {
-    greeting: {
-      StateMachine: {
-        GreetingStepFunction: true;
-      };
-      Queue: {
-        'greeting-standard-queue': true;
-      };
-    };
+    'pokemon-module': {};
   }
 
   interface BucketAvailable {
-    'lafken-example-documents': true;
+    'lafken-pokemon-backups': true;
   }
 
   interface ApiRestAvailable {
-    ExampleApi: boolean;
+    'poke-api': boolean;
   }
 
   interface ApiAuthorizerAvailable {
@@ -30,7 +23,7 @@ declare module '@lafken/common' {
   }
 
   interface DynamoTableAvailable {
-    clients: true;
+    pokemons: true;
   }
 
   interface AuthAvailable {
