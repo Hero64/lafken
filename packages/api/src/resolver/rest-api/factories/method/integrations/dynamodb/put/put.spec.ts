@@ -10,13 +10,14 @@ import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import {
   Api,
+  ApiRequest,
   type DynamoIntegrationOption,
   type DynamoPutIntegrationResponse,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
+  QueryParam,
 } from '../../../../../../../main';
 import {
   initializeMethod,
@@ -26,14 +27,12 @@ import {
 describe('Dynamo put integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class PutData {
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     id: string;
 
-    @Param()
+    @QueryParam()
     age: number;
   }
 

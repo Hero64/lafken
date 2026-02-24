@@ -3,7 +3,7 @@ import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
-import { Api, Event, Get, Param, Payload } from '../../../../../../main';
+import { Api, ApiRequest, BodyParam, Event, Get } from '../../../../../../main';
 import {
   initializeMethod,
   setupTestingRestApi,
@@ -23,16 +23,12 @@ vi.mock('@lafken/resolver', async (importOriginal) => {
 describe('lambda integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class Data {
-    @Param({
-      source: 'body',
-    })
+    @BodyParam()
     name: string;
 
-    @Param({
-      source: 'body',
-    })
+    @BodyParam()
     age: number;
   }
 

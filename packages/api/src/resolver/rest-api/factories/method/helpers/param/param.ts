@@ -3,11 +3,11 @@ import {
   getMetadataPrototypeByKey,
   LambdaReflectKeys,
 } from '@lafken/common';
-import type { ApiObjectParam, ApiParamMetadata } from '../../../../../../main';
+import type { ApiObjectMetadata, ApiParamMetadata } from '../../../../../../main';
 import type { ParamBySource } from './param.types';
 
 export class ParamHelper {
-  private _params: ApiObjectParam;
+  private _params: ApiObjectMetadata;
   private _pathParams: Record<string, ApiParamMetadata>;
   private _paramsBySource: ParamBySource;
 
@@ -22,7 +22,7 @@ export class ParamHelper {
     }
 
     const params =
-      getMetadataPrototypeByKey<Record<string, ApiObjectParam>>(
+      getMetadataPrototypeByKey<Record<string, ApiObjectMetadata>>(
         this.classResource,
         LambdaReflectKeys.event_param
       ) || {};

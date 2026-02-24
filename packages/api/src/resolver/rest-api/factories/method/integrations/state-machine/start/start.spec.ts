@@ -12,10 +12,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   Api,
+  ApiRequest,
+  BodyParam,
   Event,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
   Post,
   type StateMachineIntegrationOption,
   type StateMachineStartIntegrationResponse,
@@ -28,22 +29,17 @@ import {
 describe('State machine start integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class Data {
-    @Param({
-      source: 'body',
-    })
+    @BodyParam()
     foo: string;
 
-    @Param({
-      source: 'body',
+    @BodyParam({
       type: [Number],
     })
     ids: number[];
 
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     name: string;
   }
 

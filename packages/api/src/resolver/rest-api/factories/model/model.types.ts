@@ -1,12 +1,26 @@
 import type { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import type { ITerraformDependable } from 'cdktn';
-import type { ApiFieldMetadata } from '../../../../main';
+import type {
+  ApiBooleanMetadata,
+  ApiNumberMetadata,
+  ApiStringMetadata,
+  ResponseArrayField,
+  ResponseObjectMetadata,
+} from '../../../../main';
+
+export type ModelMetadata =
+  | Omit<ApiStringMetadata, 'source'>
+  | Omit<ApiNumberMetadata, 'source'>
+  | Omit<ApiBooleanMetadata, 'source'>
+  | Omit<ResponseObjectMetadata, 'source'>
+  | Omit<ResponseArrayField, 'source'>;
 
 export interface JsonSchema {
   type?: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
   description?: string;
   default?: unknown;
   example?: unknown;
+  nullable?: boolean;
   enum?: unknown[];
   format?: string;
   minLength?: number;
@@ -43,7 +57,7 @@ export interface CreateModelResponse {
 }
 
 export interface GetModelProps {
-  field: ApiFieldMetadata;
+  field: ModelMetadata;
   dependsOn?: ITerraformDependable[];
   defaultModelName?: string;
 }

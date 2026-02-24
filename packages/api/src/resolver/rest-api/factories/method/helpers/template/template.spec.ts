@@ -16,7 +16,6 @@ describe('TemplateHelper', () => {
           name: 'username',
           destinationName: 'username',
           source: 'body' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -33,7 +32,6 @@ describe('TemplateHelper', () => {
           name: 'id',
           destinationName: 'id',
           source: 'path' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -50,7 +48,6 @@ describe('TemplateHelper', () => {
           name: 'filter',
           destinationName: 'filter',
           source: 'query' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -67,7 +64,6 @@ describe('TemplateHelper', () => {
           name: 'authorization',
           destinationName: 'authorization',
           source: 'header' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -84,7 +80,6 @@ describe('TemplateHelper', () => {
           name: 'custom',
           destinationName: 'custom',
           source: 'body' as const,
-          validation: {},
           directTemplateValue: '$custom.value',
         };
 
@@ -99,7 +94,6 @@ describe('TemplateHelper', () => {
           name: 'name',
           destinationName: 'name',
           source: 'path' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -119,7 +113,6 @@ describe('TemplateHelper', () => {
           name: 'age',
           destinationName: 'age',
           source: 'body' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -136,7 +129,6 @@ describe('TemplateHelper', () => {
           name: 'active',
           destinationName: 'active',
           source: 'body' as const,
-          validation: {},
         };
 
         const result = templateHelper.generateTemplate({
@@ -155,14 +147,12 @@ describe('TemplateHelper', () => {
           name: 'user',
           destinationName: 'user',
           source: 'body' as const,
-          validation: {},
           properties: [
             {
               type: 'String' as const,
               name: 'name',
               destinationName: 'name',
               source: 'body' as const,
-              validation: {},
             },
           ],
         };
@@ -184,7 +174,6 @@ describe('TemplateHelper', () => {
           name: 'empty',
           destinationName: 'empty',
           source: 'body' as const,
-          validation: {},
           properties: [],
         };
 
@@ -201,13 +190,11 @@ describe('TemplateHelper', () => {
           name: 'tags',
           destinationName: 'tags',
           source: 'body' as const,
-          validation: {},
           items: {
             type: 'String' as const,
             name: 'tag',
             destinationName: 'tag',
             source: 'body' as const,
-            validation: {},
           },
         };
 
@@ -227,20 +214,17 @@ describe('TemplateHelper', () => {
           name: 'users',
           destinationName: 'users',
           source: 'body' as const,
-          validation: {},
           items: {
             type: 'Object' as const,
             name: 'user',
             destinationName: 'user',
             source: 'body' as const,
-            validation: {},
             properties: [
               {
                 type: 'String' as const,
                 name: 'name',
                 destinationName: 'name',
                 source: 'body' as const,
-                validation: {},
               },
             ],
           },
@@ -265,7 +249,6 @@ describe('TemplateHelper', () => {
           name: 'test',
           destinationName: 'test',
           source: 'body' as const,
-          validation: {},
         };
 
         const valueParser = vi.fn((value: string) => `PARSED(${value})`);
@@ -289,7 +272,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: true },
+        required: true,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -308,7 +291,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -327,7 +310,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -348,7 +331,7 @@ describe('TemplateHelper', () => {
         name: 'items',
         destinationName: 'items',
         source: 'body' as const,
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -369,7 +352,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'body' as const,
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -388,7 +371,7 @@ describe('TemplateHelper', () => {
         name: 'test',
         destinationName: 'test',
         source: 'path' as const,
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(
@@ -406,7 +389,7 @@ describe('TemplateHelper', () => {
         type: 'String' as const,
         name: 'test',
         destinationName: 'test',
-        validation: { required: false },
+        required: false,
       };
 
       const result = templateHelper.validateTemplateArgument(

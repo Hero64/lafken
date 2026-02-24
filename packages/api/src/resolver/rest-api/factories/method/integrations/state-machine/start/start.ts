@@ -22,24 +22,19 @@ export class StartIntegration
               destinationName: 'startDate',
               name: 'startDate',
               type: 'String',
-              validation: {
-                required: true,
-              },
+              required: true,
             },
             {
               destinationName: 'executionId',
               name: 'executionId',
               type: 'String',
-              validation: {
-                required: true,
-              },
+              required: true,
             },
           ],
           payload: {
             id: 'StartStateMachineResponse',
             name: 'StartStateMachineResponse',
           },
-          validation: {},
         },
         template: "$input.json('$')",
       },

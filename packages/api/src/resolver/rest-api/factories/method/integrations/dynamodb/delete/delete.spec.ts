@@ -10,14 +10,14 @@ import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import {
   Api,
+  ApiRequest,
   Delete,
   type DynamoDeleteIntegrationResponse,
   type DynamoIntegrationOption,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
 } from '../../../../../../../main';
 import {
   initializeMethod,
@@ -27,11 +27,9 @@ import {
 describe('Dynamo delete integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class DeleteEvent {
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     id: string;
   }
 

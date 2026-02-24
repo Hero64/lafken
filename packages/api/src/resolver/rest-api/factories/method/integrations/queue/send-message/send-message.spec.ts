@@ -10,12 +10,12 @@ import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import {
   Api,
+  ApiRequest,
   Delete,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  QueryParam,
   type QueueIntegrationOption,
   type QueueSendMessageIntegrationResponse,
 } from '../../../../../../../main';
@@ -27,9 +27,9 @@ import {
 describe('Queue send message integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class SendMessageEvent {
-    @Param()
+    @QueryParam()
     attribute1: string;
   }
 

@@ -1,3 +1,3 @@
-import type { ApiFieldMetadata, Source } from '../../../../../../main';
+import type { ApiParamMetadata, Source } from '../../../../../../main';
 
-export type ParamBySource = Partial<Record<Source, ApiFieldMetadata[]>>;
+export type ParamBySource = Partial<Record<Source, ApiParamMetadata[]>>;

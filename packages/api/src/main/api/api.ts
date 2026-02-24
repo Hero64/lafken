@@ -5,7 +5,7 @@ import {
   createResourceDecorator,
   getEventFields,
 } from '@lafken/common';
-
+import type { ResponseFieldMetadata } from '../response';
 import {
   type ApiLambdaBaseProps,
   type ApiLambdaIntegrationProps,
@@ -13,7 +13,6 @@ import {
   type ApiLambdaProps,
   type ApiProps,
   Method,
-  type ResponseFieldMetadata,
 } from './api.types';
 
 export const RESOURCE_TYPE = 'REST_API' as const;

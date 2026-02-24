@@ -16,30 +16,27 @@ import { describe, expect, it } from 'vitest';
 import {
   Api,
   type ApiLambdaMetadata,
+  ApiRequest,
   type ApiResourceMetadata,
   type BucketIntegrationOption,
   type BucketIntegrationResponse,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
+  QueryParam,
 } from '../../../../../../../main';
 import { setupTestingRestApi } from '../../../../../../utils/testing.utils';
 
 describe('Bucket delete integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class Delete {
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     bucket: string;
 
-    @Param({
-      source: 'query',
-    })
+    @QueryParam()
     object: string;
   }
 

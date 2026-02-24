@@ -72,7 +72,7 @@ export class TemplateHelper {
           {
             ...field,
             source: field.source || property.source || 'body',
-            validation: property.validation,
+            required: property.required ?? field.required,
           },
           objectTemplate,
           index === 0
@@ -96,7 +96,7 @@ export class TemplateHelper {
     template: string,
     checkSource: boolean
   ) {
-    if (field.validation?.required === false) {
+    if (field.required === false) {
       const totalItems = argumentNames.length - 1;
       const lastValue = argumentNames[totalItems];
       let validationTemplate = '';

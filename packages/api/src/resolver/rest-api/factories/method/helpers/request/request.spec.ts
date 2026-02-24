@@ -29,13 +29,13 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: { required: true },
+            required: true,
           },
           {
             type: 'String',
             name: 'sort',
             destinationName: 'sort',
-            validation: { required: false },
+            required: false,
           },
         ],
       };
@@ -55,13 +55,12 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: { required: true },
+            required: true,
           },
           {
             type: 'String',
             name: 'userId',
             destinationName: 'userId',
-            validation: {},
           },
         ],
       };
@@ -81,13 +80,13 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'authorization',
             destinationName: 'authorization',
-            validation: { required: true },
+            required: true,
           },
           {
             type: 'String',
             name: 'content-type',
             destinationName: 'contentType',
-            validation: { required: false },
+            required: false,
           },
         ],
       };
@@ -107,7 +106,7 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: { required: true },
+            required: true,
           },
         ],
         path: [
@@ -115,7 +114,7 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: { required: true },
+            required: true,
           },
         ],
         header: [
@@ -123,7 +122,7 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'authorization',
             destinationName: 'authorization',
-            validation: { required: false },
+            required: false,
           },
         ],
       };
@@ -144,7 +143,6 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'param',
             destinationName: 'param',
-            validation: {},
           },
         ],
       };
@@ -208,7 +206,6 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {},
           },
         ],
       };
@@ -226,7 +223,6 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'id',
             destinationName: 'id',
-            validation: {},
           },
         ],
       };
@@ -244,13 +240,13 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: true },
+            required: true,
           },
           {
             type: 'String',
             name: 'description',
             destinationName: 'description',
-            validation: { required: false },
+            required: true,
           },
         ],
       };
@@ -268,13 +264,12 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: false },
+            required: false,
           },
           {
             type: 'String',
             name: 'description',
             destinationName: 'description',
-            validation: {},
           },
         ],
       };
@@ -292,7 +287,6 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {},
           },
         ],
         body: [
@@ -300,7 +294,7 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'name',
             destinationName: 'name',
-            validation: { required: true },
+            required: true,
           },
         ],
       };
@@ -318,7 +312,6 @@ describe('RequestHelper', () => {
             type: 'String',
             name: 'filter',
             destinationName: 'filter',
-            validation: {},
           },
         ],
         body: undefined,

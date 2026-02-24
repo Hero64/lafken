@@ -7,14 +7,7 @@ import type {
   ResourceMetadata,
   ResourceProps,
 } from '@lafken/common';
-import type { ResponseMetadata } from '../event';
-import type {
-  ApiArrayField,
-  ApiBooleanField,
-  ApiNumberField,
-  ApiObjectField,
-  ApiStringField,
-} from '../field';
+import type { ResponseFieldMetadata } from '../response';
 
 export interface MethodAuthorizer {
   /**
@@ -317,22 +310,6 @@ export interface ApiProps extends ResourceProps {
 }
 
 export interface ApiResourceMetadata extends Required<ApiProps>, ResourceMetadata {}
-
-export type ResponseFieldMetadata =
-  | ApiStringField
-  | ApiNumberField
-  | ApiBooleanField
-  | ResponseApiObjectField
-  | ResponseApiArrayField;
-
-export interface ResponseApiObjectField
-  extends Omit<ApiObjectField, 'properties' | 'payload'> {
-  properties: ResponseFieldMetadata[];
-  payload: ResponseMetadata;
-}
-export interface ResponseApiArrayField extends Omit<ApiArrayField, 'items'> {
-  items: ResponseFieldMetadata;
-}
 
 export interface ApiLambdaMetadata extends LambdaMetadata {
   path: string;

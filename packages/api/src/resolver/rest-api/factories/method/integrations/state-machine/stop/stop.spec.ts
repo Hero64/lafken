@@ -10,11 +10,11 @@ import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import {
   Api,
+  ApiRequest,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
   type StateMachineIntegrationOption,
   type StateMachineStatusIntegrationResponse,
 } from '../../../../../../../main';
@@ -26,11 +26,9 @@ import {
 describe('State machine status integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class Status {
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     id: string;
   }
 

@@ -23,17 +23,13 @@ describe('Model factory', () => {
             destinationName: 'foo',
             name: 'foo',
             type: 'String',
-            validation: {
-              required: true,
-              maxLength: 100,
-              minLength: 10,
-              format: 'password',
-            },
+            required: true,
+            maxLength: 100,
+            minLength: 10,
+            format: 'password',
           },
         ],
-        validation: {
-          required: true,
-        },
+        required: true,
       },
     });
 
@@ -64,17 +60,14 @@ describe('Model factory', () => {
             destinationName: 'foo',
             name: 'foo',
             type: 'String',
-            validation: {
-              required: true,
-              maxLength: 100,
-              minLength: 10,
-              format: 'password',
-            },
+            required: true,
+            maxLength: 100,
+            minLength: 10,
+            format: 'password',
           },
         ],
-        validation: {
-          required: true,
-        },
+
+        required: true,
       },
     });
 
@@ -92,17 +85,13 @@ describe('Model factory', () => {
             destinationName: 'foo',
             name: 'foo',
             type: 'String',
-            validation: {
-              required: true,
-              maxLength: 100,
-              minLength: 10,
-              format: 'password',
-            },
+            required: true,
+            maxLength: 100,
+            minLength: 10,
+            format: 'password',
           },
         ],
-        validation: {
-          required: true,
-        },
+        required: true,
       },
     });
 
@@ -126,12 +115,10 @@ describe('Model factory', () => {
             destinationName: 'foo',
             name: 'foo',
             type: 'String',
-            validation: {
-              required: true,
-              maxLength: 100,
-              minLength: 10,
-              format: 'password',
-            },
+            required: true,
+            maxLength: 100,
+            minLength: 10,
+            format: 'password',
           },
           {
             destinationName: 'bar',
@@ -141,24 +128,18 @@ describe('Model factory', () => {
               id: 'sub-model',
               name: 'sub-model',
             },
-            validation: {
-              required: true,
-            },
+            required: true,
             properties: [
               {
                 destinationName: 'sub-bar',
                 name: 'sub-bar',
                 type: 'Number',
-                validation: {
-                  required: false,
-                },
+                required: false,
               },
             ],
           },
         ],
-        validation: {
-          required: true,
-        },
+        required: true,
       },
     });
 
@@ -177,7 +158,7 @@ describe('Model factory', () => {
       name: 'sub-model',
       rest_api_id: '${aws_api_gateway_rest_api.testing-api-api.id}',
       schema:
-        '${jsonencode({"type" = "object", "required" = [], "properties" = {"sub-bar" = {"type" = "number"}}})}',
+        '${jsonencode({"type" = "object", "properties" = {"sub-bar" = {"type" = "number"}}})}',
     });
   });
 });

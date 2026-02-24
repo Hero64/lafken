@@ -1,5 +1,5 @@
 import type {
-  ApiObjectParam,
+  ApiObjectMetadata,
   ApiParamMetadata,
   DynamoQueryIntegrationResponse,
 } from '../../../../../../../main';
@@ -13,15 +13,16 @@ export class QueryIntegration
   implements Integration
 {
   private condition = '';
-  private attributeValues: Pick<ApiObjectParam, 'type' | 'properties'> = {
+  private attributeValues: Pick<ApiObjectMetadata, 'type' | 'properties'> = {
     type: 'Object',
     properties: [],
   };
-  private attributeNames: Pick<ApiObjectParam, 'type'> & { properties: TemplateParam[] } =
-    {
-      type: 'Object',
-      properties: [],
-    };
+  private attributeNames: Pick<ApiObjectMetadata, 'type'> & {
+    properties: TemplateParam[];
+  } = {
+    type: 'Object',
+    properties: [],
+  };
   constructor(props: IntegrationProps) {
     super({
       ...props,
@@ -62,7 +63,7 @@ export class QueryIntegration
         );
 
         const attributeNameTemplate = props.templateHelper.generateTemplate({
-          field: this.attributeNames as ApiObjectParam,
+          field: this.attributeNames as ApiObjectMetadata,
         });
 
         const tableTemplate = `"TableName": ${props.templateHelper.getTemplateFromProxyValue(tableResolver)},`;
@@ -80,7 +81,7 @@ export class QueryIntegration
     const { templateHelper } = this.props;
 
     const valueExpression = templateHelper.generateTemplate({
-      field: this.attributeValues as ApiObjectParam,
+      field: this.attributeValues as ApiObjectMetadata,
       propertyWrapper: (template, field) => this.marshallField(template, field.type),
       valueParser: (value, fieldType) => {
         return fieldType === 'String' ? value : `"${value}"`;
@@ -95,15 +96,13 @@ export class QueryIntegration
     {
       type = 'Object',
       source = 'body',
-      validation = {
-        required: true,
-      },
+      required = true,
       ...rest
     }: Partial<Omit<TemplateParam, 'destinationName'>>
   ) {
     return {
       name,
-      validation,
+      required,
       type,
       source,
       ...rest,
@@ -140,13 +139,11 @@ export class QueryIntegration
     }
 
     this.attributeNames.properties.push({
-      destinationName: attributeName,
       type: 'String',
-      name: attributeName,
       source: 'body',
-      validation: resolver.field?.validation || {
-        required: true,
-      },
+      destinationName: attributeName,
+      name: attributeName,
+      required: resolver.field?.required ?? true,
       directTemplateValue: `"${resolver.key}"`,
     });
 

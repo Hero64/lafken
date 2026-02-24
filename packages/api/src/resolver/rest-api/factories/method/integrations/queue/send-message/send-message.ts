@@ -154,10 +154,7 @@ export class SendMessageIntegration implements Integration {
       ? templateHelper.generateTemplate({
           field: {
             ...field,
-            validation: {
-              ...field.validation,
-              required: true,
-            },
+            required: true,
           },
           quoteType: '',
           currentValue: path,

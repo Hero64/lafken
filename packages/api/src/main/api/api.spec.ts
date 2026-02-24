@@ -7,7 +7,7 @@ import {
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { Event } from '../event/event';
-import { Param } from '../field/field';
+import { PathParam } from '../request/params';
 import { Api, Get, Post } from './api';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from './api.types';
 
@@ -15,12 +15,7 @@ describe('API', () => {
   enableBuildEnvVariable();
 
   class ExampleArgument {
-    @Param({
-      validation: {
-        required: true,
-      },
-      source: 'path',
-    })
+    @PathParam()
     propertyOne: string;
   }
 

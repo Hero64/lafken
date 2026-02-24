@@ -63,7 +63,6 @@ export class MethodFactory {
             name: payloadName,
           },
           properties: paramHelper.paramsBySource.body,
-          validation: {},
         },
       });
 

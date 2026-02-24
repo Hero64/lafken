@@ -4,7 +4,7 @@ import {
   HTTP_STATUS_CODE,
   type HTTP_STATUS_CODE_NUMBER,
   type Method,
-  type ResponseApiObjectField,
+  type ResponseObjectMetadata,
 } from '../../../../../../main';
 import type { ResponseHandler } from './response.types';
 import {
@@ -57,7 +57,7 @@ export class ResponseHelper {
     return this._handlerResponse;
   }
 
-  private setHandlerResponseByConfig(response: ResponseApiObjectField, method: Method) {
+  private setHandlerResponseByConfig(response: ResponseObjectMetadata, method: Method) {
     const { defaultCode = getSuccessStatusCode(method) } = response.payload;
     const responses: ResponseHandler[] = [];
 

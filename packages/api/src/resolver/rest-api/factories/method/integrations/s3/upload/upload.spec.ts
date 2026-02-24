@@ -17,30 +17,27 @@ import { describe, expect, it } from 'vitest';
 import {
   Api,
   type ApiLambdaMetadata,
+  ApiRequest,
   type ApiResourceMetadata,
   type BucketIntegrationOption,
   type BucketIntegrationResponse,
   Event,
   Get,
   IntegrationOptions,
-  Param,
-  Payload,
+  PathParam,
+  QueryParam,
 } from '../../../../../../../main';
 import { setupTestingRestApi } from '../../../../../../utils/testing.utils';
 
 describe('Bucket upload integration', () => {
   enableBuildEnvVariable();
 
-  @Payload()
+  @ApiRequest()
   class Upload {
-    @Param({
-      source: 'path',
-    })
+    @PathParam()
     bucket: string;
 
-    @Param({
-      source: 'query',
-    })
+    @QueryParam()
     object: string;
   }
 

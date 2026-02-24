@@ -22,16 +22,13 @@ export class StatusIntegration
               destinationName: 'status',
               name: 'status',
               type: 'String',
-              validation: {
-                required: true,
-              },
+              required: true,
             },
           ],
           payload: {
             id: 'StatusStateMachineResponse',
             name: 'StatusStateMachineResponse',
           },
-          validation: {},
         },
         template: `#set($status = $input.json('status')) { "status": $status }`,
       },

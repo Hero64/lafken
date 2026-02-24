@@ -1,7 +1,7 @@
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { uuid } from '@lafken/resolver';
 import { Fn, Token } from 'cdktn';
-import type { ApiFieldMetadata } from '../../../../main';
+import type { ResponseFieldMetadata } from '../../../../main';
 import type { RestApi } from '../../rest-api';
 import type { CreateModelResponse, GetModelProps, JsonSchema } from './model.types';
 
@@ -43,16 +43,20 @@ export class ModelFactory {
     return newModel;
   }
 
-  private createModel = (field: ApiFieldMetadata): CreateModelResponse => {
+  private createModel = (field: ResponseFieldMetadata): CreateModelResponse => {
     if (field.type === 'String') {
       return {
         schema: {
           type: 'string',
-          enum: field.validation?.enum,
-          minLength: field.validation?.minLength,
-          maxLength: field.validation?.maxLength,
-          format: field.validation?.format,
-          pattern: field.validation?.pattern,
+          deprecated: field.deprecated,
+          description: field.description,
+          nullable: field.nullable,
+          example: field.example,
+          enum: field.enum,
+          minLength: field.minLength,
+          maxLength: field.maxLength,
+          format: field.format,
+          pattern: field.pattern,
         },
       };
     }
@@ -61,10 +65,15 @@ export class ModelFactory {
       return {
         schema: {
           type: 'number',
-          minimum: field.validation?.minimum,
-          maximum: field.validation?.maximum,
-          exclusiveMinimum: field.validation?.exclusiveMinimum,
-          multipleOf: field.validation?.multipleOf,
+          deprecated: field.deprecated,
+          description: field.description,
+          example: field.example,
+          nullable: field.nullable,
+          minimum: field.min,
+          maximum: field.max,
+          exclusiveMinimum: field.exclusiveMin,
+          exclusiveMaximum: field.exclusiveMax,
+          multipleOf: field.multipleOf,
         },
       };
     }
@@ -72,6 +81,10 @@ export class ModelFactory {
     if (field.type === 'Boolean') {
       return {
         schema: {
+          deprecated: field.deprecated,
+          description: field.description,
+          example: field.example,
+          nullable: field.nullable,
           type: 'boolean',
         },
       };
@@ -101,15 +114,19 @@ export class ModelFactory {
           properties[property.name] = schema;
         }
 
-        if (property.validation.required) {
+        if (property.required) {
           requiredField.push(property.name);
         }
       }
 
       const schema: JsonSchema = {
         type: 'object',
-        required: requiredField,
+        required: requiredField.length > 0 ? requiredField : undefined,
         properties,
+        deprecated: field.deprecated,
+        description: field.description,
+        example: field.example,
+        nullable: field.nullable,
       };
 
       const newModel = new ApiGatewayModel(this.scope, field.payload.id, {
@@ -131,6 +148,10 @@ export class ModelFactory {
       schema: {
         type: 'array',
         items: this.createModel(field.items).schema,
+        deprecated: field.deprecated,
+        description: field.description,
+        example: field.example,
+        nullable: field.nullable,
       },
     };
   };
