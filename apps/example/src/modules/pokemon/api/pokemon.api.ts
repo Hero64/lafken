@@ -4,7 +4,7 @@ import {
   BasePokemonPayload,
   CreatePokemonPayload,
   UpdatePokemonPayload,
-} from './pokemon.params';
+} from './pokemon.request';
 import { GetAllResponse, PokemonResponse } from './pokemon.responses';
 
 @Api({
@@ -78,7 +78,7 @@ export class PokeApi {
   }
 
   @Delete({
-    path: '/{name}/{order}',
+    path: '/{name}',
   })
   async deletePokemon(@Event(BasePokemonPayload) e: BasePokemonPayload) {
     await pokemonRepository

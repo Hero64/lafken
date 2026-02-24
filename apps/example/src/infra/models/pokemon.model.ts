@@ -3,26 +3,26 @@ import { createRepository } from '@lafken/dynamo/service';
 
 @Model({
   name: 'pokemons',
-  indexes: [
-    {
-      type: 'local',
-      name: 'name_order_index',
-      sortKey: 'order',
-      projection: 'ALL',
-    },
-  ],
+  // indexes: [
+  //   {
+  //     type: 'local', // TODO: no se puede crear un indice local si no el sortkey
+  //     name: 'name_order_index',
+  //     sortKey: 'order',
+  //     // projection: 'ALL', TODO: all attributes must be indexed. Unused attributes: ["experience"
+  //   },
+  // ],
 })
 export class Pokemon {
   @PartitionKey(String)
   name: PrimaryPartition<string>;
 
-  @Field()
+  // @Field()
   order: number;
 
   @Field({ type: [String] })
   types: string[];
 
-  @Field()
+  // TODO: Solo se agrega si existe en la tabla
   experience: number;
 }
 

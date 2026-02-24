@@ -1,30 +1,30 @@
-import { Field, Response } from '@lafken/api/main';
+import { ApiResponse, ResField } from '@lafken/api/main';
 
-@Response({
+@ApiResponse({
   responses: {
     '400': true,
   },
 })
 export class PokemonResponse {
-  @Field()
+  @ResField()
   name: string;
 
-  @Field()
+  @ResField()
   order: number;
 
-  @Field({
+  @ResField({
     type: [String],
   })
   types: string[];
 
-  @Field()
+  @ResField()
   experience: number;
 }
 
-@Response({})
+@ApiResponse()
 export class GetAllResponse {
-  @Field({
-    source: 'body',
+  @ResField({
+    description: 'Get pokemon list',
     type: [PokemonResponse],
   })
   data: PokemonResponse[];
