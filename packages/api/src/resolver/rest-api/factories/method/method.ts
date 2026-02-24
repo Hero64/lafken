@@ -31,7 +31,7 @@ export class MethodFactory {
     const paramHelper = new ParamHelper(classResource, handler.name);
     const requestHelper = new RequestHelper(paramHelper);
     const responseHelper = new ResponseHelper(handler);
-    const templateHelper = new TemplateHelper();
+    const templateHelper = new TemplateHelper(this.scope);
     const proxyHelper = new ProxyHelper();
     const integrationHelper = new IntegrationHelper();
 

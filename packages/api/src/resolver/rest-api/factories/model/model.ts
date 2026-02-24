@@ -1,6 +1,6 @@
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { uuid } from '@lafken/resolver';
-import { Fn, Token } from 'cdktn';
+import { Annotations, Fn, Token } from 'cdktn';
 import type { ResponseFieldMetadata } from '../../../../main';
 import type { RestApi } from '../../rest-api';
 import type { CreateModelResponse, GetModelProps, JsonSchema } from './model.types';
@@ -43,8 +43,30 @@ export class ModelFactory {
     return newModel;
   }
 
+  private validateMinMax(
+    minKey: string,
+    maxKey: string,
+    name: string,
+    min?: number,
+    max?: number
+  ) {
+    if (min !== undefined && max !== undefined && min > max) {
+      Annotations.of(this.scope).addWarning(
+        `${minKey} (${min}) in "${name}" field should be less than ${maxKey} (${max})`
+      );
+    }
+  }
+
   private createModel = (field: ResponseFieldMetadata): CreateModelResponse => {
     if (field.type === 'String') {
+      this.validateMinMax(
+        'minLength',
+        'maxLength',
+        field.name,
+        field.minLength,
+        field.maxLength
+      );
+
       return {
         schema: {
           type: 'string',
@@ -62,6 +84,8 @@ export class ModelFactory {
     }
 
     if (field.type === 'Number') {
+      this.validateMinMax('min', 'max', field.name, field.min, field.max);
+
       return {
         schema: {
           type: 'number',

@@ -1,4 +1,6 @@
 import type { FieldTypes } from '@lafken/common';
+import { Annotations } from 'cdktn';
+import type { Construct } from 'constructs';
 import type { ProxyValueResolver } from '../proxy/proxy.types';
 import type {
   GenerateTemplateByObjectProps,
@@ -12,6 +14,8 @@ import {
 } from './template.utils';
 
 export class TemplateHelper {
+  constructor(private scope?: Construct) {}
+
   public generateTemplate(
     {
       field,
@@ -52,6 +56,17 @@ export class TemplateHelper {
       for (const property of field.properties) {
         const value = `${currentValue ? `${currentValue}.` : ''}${property.name}`;
         const key = `${quoteType}${property.destinationName}${quoteType}`;
+
+        if (
+          this.scope &&
+          field.source !== undefined &&
+          field.source !== property.source
+        ) {
+          Annotations.of(this.scope).addWarning(
+            `The field ${field.name} should not have a subfield(${property.name}) with a different source`
+          );
+        }
+
         const fieldTemplate = this.generateTemplate(
           {
             field: {
