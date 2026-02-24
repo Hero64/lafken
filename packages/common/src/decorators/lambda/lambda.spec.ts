@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { enableBuildEnvVariable, getResourceHandlerMetadata } from '../../utils';
 import { createFieldDecorator } from '../field';
-import { Callback, Context, createEventDecorator, createLambdaDecorator } from './lambda';
+import { Context, createEventDecorator, createLambdaDecorator } from './lambda';
 import {
   LambdaArgumentTypes,
   type LambdaMetadata,
@@ -104,11 +104,7 @@ describe('Lambda Decorators', () => {
 
     class Test {
       @Lambda()
-      test(
-        @Callback() _callback: () => void,
-        @Context() _context: any,
-        @Event(Field) _e: Field
-      ) {}
+      test(@Context() _context: any, @Event(Field) _e: Field) {}
     }
 
     const eventParamsByMethod = Reflect.getMetadata(
@@ -120,17 +116,12 @@ describe('Lambda Decorators', () => {
       expect(eventParamsByMethod.test).toContainEqual(LambdaArgumentTypes.event);
     });
 
-    it('should add callback argument', () => {
-      expect(eventParamsByMethod.test).toContainEqual(LambdaArgumentTypes.callback);
-    });
-
     it('should add context argument', () => {
       expect(eventParamsByMethod.test).toContainEqual(LambdaArgumentTypes.context);
     });
 
     it('should include arguments in order', () => {
       expect(eventParamsByMethod.test).toEqual([
-        LambdaArgumentTypes.callback,
         LambdaArgumentTypes.context,
         LambdaArgumentTypes.event,
       ]);

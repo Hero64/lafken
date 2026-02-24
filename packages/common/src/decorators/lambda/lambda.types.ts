@@ -107,7 +107,6 @@ export enum LambdaReflectKeys {
 
 export enum LambdaArgumentTypes {
   event = 'event',
-  callback = 'callback',
   context = 'context',
 }
 
@@ -119,13 +118,11 @@ export type LambdaArgumentsType = Record<
   ({
     event,
     context,
-    callback,
   }: {
     event: any;
     context: any;
     methodName: string;
     target: any;
-    callback: CallbackParam;
   }) => any
 >;
 

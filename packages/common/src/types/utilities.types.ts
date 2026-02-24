@@ -55,3 +55,9 @@ export type OnlyOneKey<T> = {
 }[keyof T];
 
 export type StripReadonly<T> = { -readonly [P in keyof T]: StripReadonly<T[P]> };
+
+export type Primitive = string | number | boolean[];
+
+export type OnlyTypeKeys<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}[keyof T];

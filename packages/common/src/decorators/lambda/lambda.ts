@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import { isBuildEnvironment } from '../../utils';
 import { type AllowedTypes, getEventFields } from '../field';
 import {
-  type CallbackParam,
   type CreateEventDecoratorProps,
   type CreateLambdaDecoratorProps,
   type LambdaArguments,
@@ -13,7 +12,6 @@ import {
 
 const argumentsByType: LambdaArgumentsType = {
   [LambdaArgumentTypes.event]: ({ event }) => event,
-  [LambdaArgumentTypes.callback]: ({ callback }) => callback,
   [LambdaArgumentTypes.context]: ({ context }) => context,
 };
 
@@ -64,9 +62,9 @@ export const createLambdaDecorator =
       ...argumentParser,
     };
 
-    descriptor.value = async (event: any, context: any, callback: CallbackParam) => {
+    descriptor.value = async (event: any, context: any) => {
       const methodArguments = (lambdaArguments?.[methodName] || []).map((argumentType) =>
-        mapArgumentMethod[argumentType]({ event, context, methodName, target, callback })
+        mapArgumentMethod[argumentType]({ event, context, methodName, target })
       );
 
       const response = await originalValue.apply(this, methodArguments);
@@ -104,10 +102,6 @@ export const createEventDecorator =
     const field = getEventFields(prefix, eventField);
     reflectEventMetadata(target, methodName, LambdaReflectKeys.event_param, field);
   };
-
-export const Callback = () => (target: any, methodName: string, _number: number) => {
-  reflectArgumentMethod(target, methodName, LambdaArgumentTypes.callback);
-};
 
 export const Context = () => (target: any, methodName: string, _number: number) => {
   reflectArgumentMethod(target, methodName, LambdaArgumentTypes.context);
