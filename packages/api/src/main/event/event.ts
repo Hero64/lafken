@@ -1,5 +1,5 @@
 import { createEventDecorator } from '@lafken/common';
-import { RESOURCE_TYPE } from '../api';
+import { PARAM_PREFIX } from '../request';
 
 export const Event = (target: Function) =>
-  createEventDecorator({ prefix: RESOURCE_TYPE })(target);
+  createEventDecorator({ prefix: PARAM_PREFIX })(target);

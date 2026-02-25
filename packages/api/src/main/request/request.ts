@@ -1,10 +1,10 @@
 import { createFieldName, createPayloadDecorator, FieldProperties } from '@lafken/common';
-import { RESOURCE_TYPE } from '../api';
+import { PARAM_PREFIX } from './params';
 
-export const apiPayloadKey = createFieldName(RESOURCE_TYPE, FieldProperties.payload);
+export const apiRequestKey = createFieldName(PARAM_PREFIX, FieldProperties.payload);
 
 export const ApiRequest = createPayloadDecorator({
-  prefix: RESOURCE_TYPE,
+  prefix: PARAM_PREFIX,
   createUniqueId: true,
 });
 

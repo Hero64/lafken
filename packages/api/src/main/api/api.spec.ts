@@ -8,6 +8,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { Event } from '../event/event';
 import { PathParam } from '../request/params';
+import { ApiResponse, ResField } from '../response';
 import { Api, Get, Post } from './api';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from './api.types';
 
@@ -91,6 +92,59 @@ describe('API', () => {
 
       expect(argumentClass).toBeDefined();
       expect(argumentClass.getLambdaWithEvent).toBeDefined();
+    });
+  });
+
+  describe('response', () => {
+    it('should response object fields', () => {
+      @ApiResponse({
+        defaultCode: 300,
+      })
+      class ExampleResponse {
+        @ResField()
+        foo: string;
+
+        @ResField()
+        bar: string;
+      }
+
+      @Api()
+      class ExampleResponseApi {
+        @Get({
+          response: ExampleResponse,
+        })
+        getExample() {}
+      }
+
+      const handlers = Reflect.getMetadata(
+        LambdaReflectKeys.handlers,
+        ExampleResponseApi.prototype
+      );
+
+      expect(handlers[0].response).toBeDefined();
+      expect(handlers[0].response.payload).toStrictEqual({
+        defaultCode: 300,
+        id: 'ExampleResponse',
+        name: 'ExampleResponse',
+      });
+    });
+    it('should accept primitive values as responses', () => {
+      @Api()
+      class ExampleResponseApi {
+        @Get({
+          response: Number,
+        })
+        getExample(): number {
+          return 1;
+        }
+      }
+
+      const handlers = Reflect.getMetadata(
+        LambdaReflectKeys.handlers,
+        ExampleResponseApi.prototype
+      );
+
+      expect(handlers[0].response.type).toBe('Number');
     });
   });
 });

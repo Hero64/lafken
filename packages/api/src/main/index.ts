@@ -5,3 +5,4 @@ export * from './integration/integration.types';
 export * from './request';
 export * from './response';
 export * from './status';
+export * from './type/type';

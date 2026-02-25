@@ -1,13 +1,16 @@
 import { createFieldDecorator } from '@lafken/common';
-import { RESOURCE_TYPE } from '../../api';
+
 import type { BodyParamProps } from '../../request';
+import { RESOURCE_TYPE } from '../../type/type';
 import type { ResponseFieldMetadata } from './field.types';
+
+export const RESPONSE_PREFIX = `${RESOURCE_TYPE}_RESPONSE` as const;
 
 export const ResField =
   <T, P extends keyof T>(props?: BodyParamProps<T[P]>) =>
   (target: T, destination: P): void => {
     createFieldDecorator<BodyParamProps<T[P]>, ResponseFieldMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: RESPONSE_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,

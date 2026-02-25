@@ -6,7 +6,7 @@ import {
   type OnlyTypeKeys,
   type Primitive,
 } from '@lafken/common';
-import { RESOURCE_TYPE } from '../../api';
+import { RESOURCE_TYPE } from '../../type/type';
 import type {
   ApiParamMetadata,
   BodyParamProps,
@@ -15,6 +15,8 @@ import type {
   PathParamProps,
   QueryParamProps,
 } from './params.types';
+
+export const PARAM_PREFIX = `${RESOURCE_TYPE}_REQUEST` as const;
 
 export const apiFieldKey = createFieldName(RESOURCE_TYPE, FieldProperties.field); // TODO: ver si es necesario crear uno ára cada cual
 
@@ -49,7 +51,7 @@ export const BodyParam =
   <T, P extends keyof T>(props?: BodyParamProps<T[P]>) =>
   (target: T, destination: P): void => {
     createFieldDecorator<BodyParamProps<T[P]>, ApiParamMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: PARAM_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,
@@ -87,7 +89,7 @@ export const QueryParam =
   <T>(props?: QueryParamProps) =>
   (target: T, destination: OnlyTypeKeys<T, Primitive | Primitive[]>): void => {
     createFieldDecorator<QueryParamProps, ApiParamMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: PARAM_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,
@@ -123,7 +125,7 @@ export const PathParam =
   <T>(props?: PathParamProps) =>
   (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
     createFieldDecorator<PathParamProps, ApiParamMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: PARAM_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,
@@ -161,7 +163,7 @@ export const HeaderParam =
   <T>(props?: HeaderParamProps) =>
   (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
     createFieldDecorator<HeaderParamProps, ApiParamMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: PARAM_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,
@@ -201,7 +203,7 @@ export const ContextParam =
   <T>(props?: ContextParamProps) =>
   (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
     createFieldDecorator<ContextParamProps, ApiParamMetadata>({
-      prefix: RESOURCE_TYPE,
+      prefix: PARAM_PREFIX,
       getMetadata: (props) => {
         return {
           ...props,

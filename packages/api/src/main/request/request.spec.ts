@@ -5,7 +5,7 @@ import {
   type PayloadMetadata,
 } from '@lafken/common';
 import { describe, expect, it } from 'vitest';
-import { ApiRequest, apiPayloadKey } from './request';
+import { ApiRequest, apiRequestKey } from './request';
 
 describe('ApiRequest', () => {
   enableBuildEnvVariable();
@@ -13,7 +13,7 @@ describe('ApiRequest', () => {
     @ApiRequest()
     class TestPayload {}
 
-    const resource: PayloadMetadata = getMetadataByKey(TestPayload, apiPayloadKey);
+    const resource: PayloadMetadata = getMetadataByKey(TestPayload, apiRequestKey);
 
     expect(resource).toBeDefined();
     expect(resource).toStrictEqual({

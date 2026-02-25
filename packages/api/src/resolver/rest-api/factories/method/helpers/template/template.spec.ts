@@ -204,7 +204,7 @@ describe('TemplateHelper', () => {
         } as any);
 
         expect(result).toBe(
-          "[#foreach($item0 in $input.path('$.tags')) $item0 #if($foreach.hasNext),#end #end]"
+          '[#foreach($item0 in $input.path(\'$.tags\')) "$item0" #if($foreach.hasNext),#end #end]'
         );
       });
 

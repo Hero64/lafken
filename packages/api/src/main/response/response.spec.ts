@@ -1,20 +1,9 @@
 import 'reflect-metadata';
-import {
-  enableBuildEnvVariable,
-  getMetadataByKey,
-  getMetadataPrototypeByKey,
-  LambdaReflectKeys,
-} from '@lafken/common';
+import { enableBuildEnvVariable, getMetadataByKey } from '@lafken/common';
 import { describe, expect, it } from 'vitest';
-import { Event } from '../event';
-import { ApiRequest, apiPayloadKey } from '../request';
-import {
-  type ApiObjectMetadata,
-  type ApiParamMetadata,
-  QueryParam,
-} from '../request/params';
+import type { ApiObjectMetadata } from '../request/params';
 import { ResField } from './field';
-import { ApiResponse, ResponseObject } from './response';
+import { ApiResponse, apiResponseKey, ResponseObject } from './response';
 import type { ResponseMetadata } from './response.types';
 
 describe('Response', () => {
@@ -25,7 +14,7 @@ describe('Response', () => {
     })
     class TestResponse {}
 
-    const resource: ResponseMetadata = getMetadataByKey(TestResponse, apiPayloadKey);
+    const resource: ResponseMetadata = getMetadataByKey(TestResponse, apiResponseKey);
 
     expect(resource).toBeDefined();
     expect(resource.name).toBe('TestResponse');
@@ -56,7 +45,7 @@ describe('Response', () => {
     })
     class TestResponse {}
 
-    const resource: ResponseMetadata = Reflect.getMetadata(apiPayloadKey, TestResponse);
+    const resource: ResponseMetadata = Reflect.getMetadata(apiResponseKey, TestResponse);
 
     expect(resource).toBeDefined();
     expect(resource.name).toBe('TestResponse');
@@ -65,41 +54,5 @@ describe('Response', () => {
     expect(resource.responses?.[500]).toBeDefined();
     expect((resource.responses?.[500] as ApiObjectMetadata).properties).toBeDefined();
     expect(resource.responses?.[404]).toBeDefined();
-  });
-
-  describe('Event', () => {
-    it('should exist event metadata', () => {
-      @ApiRequest()
-      class TestPayload {
-        @QueryParam()
-        name: string;
-      }
-
-      class TestApi {
-        test(@Event(TestPayload) _e: TestPayload) {}
-      }
-
-      const resource = getMetadataPrototypeByKey<Record<string, ApiParamMetadata[]>>(
-        TestApi,
-        LambdaReflectKeys.event_param
-      );
-
-      expect(resource.test).toBeDefined();
-      expect(resource.test).toMatchObject({
-        destinationName: 'event',
-        name: 'event',
-        payload: { id: 'TestPayload', name: 'TestPayload' },
-        properties: [
-          {
-            destinationName: 'name',
-            name: 'name',
-            source: 'query',
-            type: 'String',
-            required: true,
-          },
-        ],
-        type: 'Object',
-      });
-    });
   });
 });

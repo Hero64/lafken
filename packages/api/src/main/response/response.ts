@@ -1,15 +1,23 @@
-import { createPayloadDecorator, getEventFields } from '@lafken/common';
-import { RESOURCE_TYPE } from '../api';
-import { RequestObject } from '../request';
+import {
+  createFieldName,
+  createPayloadDecorator,
+  FieldProperties,
+  getEventFields,
+} from '@lafken/common';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
-import type { ResponseFieldMetadata } from './field';
+import { RESPONSE_PREFIX, type ResponseFieldMetadata } from './field';
 import type { ResponseMetadata, ResponseProps } from './response.types';
 
-export const ResponseObject = RequestObject;
+export const apiResponseKey = createFieldName(RESPONSE_PREFIX, FieldProperties.payload);
+
+export const ResponseObject = createPayloadDecorator({
+  prefix: RESPONSE_PREFIX,
+  createUniqueId: true,
+});
 
 export const ApiResponse = createPayloadDecorator<ResponseProps, ResponseMetadata>({
   createUniqueId: true,
-  prefix: RESOURCE_TYPE,
+  prefix: RESPONSE_PREFIX,
   getMetadata: (props) => {
     if (!props?.responses) {
       return {
@@ -25,7 +33,7 @@ export const ApiResponse = createPayloadDecorator<ResponseProps, ResponseMetadat
 
       if (props.responses[code] !== true) {
         responses[code] = getEventFields(
-          RESOURCE_TYPE,
+          RESPONSE_PREFIX,
           props.responses[code],
           'response'
         ) as ResponseFieldMetadata;
