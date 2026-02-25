@@ -1,5 +1,5 @@
 import type { ClassResource } from '@lafken/common';
-import type { DynamoIndex, ModelPartition } from '../../main/model';
+import type { DynamoIndex, TablePartition } from '../../main/table';
 import { client, getClientWithXRay } from '../client/client';
 import type { QueryBuilderProps } from '../query-builder/base/base.types';
 import { BulkCreateBuilder } from '../query-builder/bulk-create/bulk-create';
@@ -85,7 +85,7 @@ export const createRepository = <E extends ClassResource>(
         inputProps,
       });
     },
-    delete(key: ModelPartition<Item<E>>) {
+    delete(key: TablePartition<Item<E>>) {
       return new DeleteBuilder({
         ...queryBuilderProps,
         key,
@@ -97,7 +97,7 @@ export const createRepository = <E extends ClassResource>(
         items,
       });
     },
-    bulkDelete(keys: ModelPartition<Item<E>>[]) {
+    bulkDelete(keys: TablePartition<Item<E>>[]) {
       return new BulkDeleteBuilder({
         ...queryBuilderProps,
         keys,

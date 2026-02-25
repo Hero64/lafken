@@ -7,8 +7,8 @@ import type {
   OnlyNumberString,
 } from '@lafken/common';
 
-export enum ModelMetadataKeys {
-  model = 'dynamo:model',
+export enum TableMetadataKeys {
+  table = 'dynamo:table',
   partition_key = 'dynamo:partition_key',
   sort_key = 'dynamo:sort_key',
   fields = 'dynamo:fields',
@@ -80,7 +80,7 @@ export interface FilterCriteria<T> {
    *
    * Only records with the specified partition key values will be included.
    */
-  keys?: AttributeFilter<ModelPartition<T>>;
+  keys?: AttributeFilter<TablePartition<T>>;
   /**
    * Filter based on the new image of the item.
    *
@@ -163,7 +163,7 @@ export interface DynamoStream<T> {
   filters?: FilterCriteria<T>;
 }
 
-export interface ModelBase<T extends Function> {
+export interface TableBase<T extends Function> {
   /**
    * Table name.
    *
@@ -187,7 +187,7 @@ export interface ModelBase<T extends Function> {
    * services to react to changes in the table in near real-time.
    *
    * - `detailType` is always set to `'db:stream'`.
-   * - `source` is set to `dynamodb.<model_name>`, where `<model_name>` is
+   * - `source` is set to `dynamodb.<table_name>`, where `<table_name>` is
    *   the name of the decorated class.
    *
    * @example {
@@ -237,8 +237,8 @@ export interface ModelBase<T extends Function> {
   replica?: Replica[];
 }
 
-export interface ModelProvisioned<T extends Function>
-  extends ModelBase<T>,
+export interface TableProvisioned<T extends Function>
+  extends TableBase<T>,
     ReadWriteCapacity {
   billingMode: 'provisioned';
   /**
@@ -251,7 +251,7 @@ export interface ModelProvisioned<T extends Function>
   indexes?: (LocalIndex<T> | GlobalIndexWithReadWriteCapacity<T>)[];
 }
 
-export interface ModelPayPerRequest<T extends Function> extends ModelBase<T> {
+export interface TablePayPerRequest<T extends Function> extends TableBase<T> {
   billingMode?: 'pay_per_request';
   /**
    * Table indexes.
@@ -263,9 +263,9 @@ export interface ModelPayPerRequest<T extends Function> extends ModelBase<T> {
   indexes?: DynamoIndex<T>[];
 }
 
-export type DynamoModelProps<T extends Function> =
-  | ModelProvisioned<T>
-  | ModelPayPerRequest<T>;
+export type DynamoTableProps<T extends Function> =
+  | TableProvisioned<T>
+  | TablePayPerRequest<T>;
 
 export interface FieldProps {
   type?:
@@ -287,6 +287,6 @@ type Partition = { __special: unknown };
 
 export type PrimaryPartition<T = never> = T | (T & Partition);
 
-export type ModelPartition<T> = {
+export type TablePartition<T> = {
   [K in keyof T as [Extract<T[K], Partition>] extends [never] ? never : K]: T[K];
 };

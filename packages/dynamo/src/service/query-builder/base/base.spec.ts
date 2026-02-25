@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { QueryBuilderBase } from './base';
 import type { QueryBuilderProps } from './base.types';
 
-process.env.MOCK_DYNAMODB_ENDPOINT = 'test';
-
 const getQueryBuilderProps = (): QueryBuilderProps<any> => {
   return {
     client: new DynamoDBClient(),

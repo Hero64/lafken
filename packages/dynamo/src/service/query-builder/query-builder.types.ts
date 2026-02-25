@@ -12,7 +12,7 @@ import type {
   ModelPayPerRequest,
   ModelProvisioned,
   PrimaryPartition,
-} from '../../main/model';
+} from '../../main/table';
 
 interface RequiredName {
   name: string;

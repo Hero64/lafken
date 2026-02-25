@@ -12,11 +12,11 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   Field,
-  Model,
   PartitionKey,
   type PrimaryPartition,
   SortKey,
-} from '../../main/model';
+  Table,
+} from '../../main/table';
 import { client } from '../client/client';
 import { transaction } from '../transaction/transaction';
 import { createRepository } from './repository';
@@ -28,7 +28,7 @@ interface Address {
 }
 
 const dynamoClient = mockClient(client);
-@Model({
+@Table({
   name: 'users',
   tracing: false,
   indexes: [

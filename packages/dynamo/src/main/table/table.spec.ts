@@ -1,28 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import type { ModelMetadata } from '../../service';
-import { Field, Model, PartitionKey, SortKey } from './model';
-import { type FieldsMetadata, ModelMetadataKeys } from './model.types';
+import { Field, PartitionKey, SortKey, Table } from './table';
+import { type FieldsMetadata, TableMetadataKeys } from './table.types';
 
 describe('Model decorators', () => {
   it('should exist model resource metadata', () => {
-    @Model({
+    @Table({
       name: 'test-model',
     })
-    class Table {}
+    class Example {}
 
-    const metadata: ModelMetadata<typeof Table> = Reflect.getMetadata(
-      ModelMetadataKeys.model,
-      Table
+    const metadata: ModelMetadata<typeof Example> = Reflect.getMetadata(
+      TableMetadataKeys.table,
+      Example
     );
 
     expect(metadata).toStrictEqual({ name: 'test-model', indexes: [] });
   });
 
   it('should exist fields metadata', () => {
-    @Model({
+    @Table({
       name: 'test-model',
     })
-    class Table {
+    class Example {
       @Field()
       name: string;
 
@@ -31,8 +31,8 @@ describe('Model decorators', () => {
     }
 
     const fields: FieldsMetadata = Reflect.getMetadata(
-      ModelMetadataKeys.fields,
-      Table.prototype
+      TableMetadataKeys.fields,
+      Example.prototype
     );
 
     expect(fields).toStrictEqual({
@@ -42,34 +42,34 @@ describe('Model decorators', () => {
   });
 
   it('should exist partition key metadata', () => {
-    @Model({
+    @Table({
       name: 'test-model',
     })
-    class Table {
+    class Example {
       @PartitionKey(String)
       name: string;
     }
 
     const partitionKey: string = Reflect.getMetadata(
-      ModelMetadataKeys.partition_key,
-      Table.prototype
+      TableMetadataKeys.partition_key,
+      Example.prototype
     );
 
     expect(partitionKey).toEqual('name');
   });
 
   it('should exist sort key metadata', () => {
-    @Model({
+    @Table({
       name: 'test-model',
     })
-    class Table {
+    class Example {
       @SortKey(String)
       name: string;
     }
 
     const sortKey: string = Reflect.getMetadata(
-      ModelMetadataKeys.sort_key,
-      Table.prototype
+      TableMetadataKeys.sort_key,
+      Example.prototype
     );
 
     expect(sortKey).toEqual('name');
