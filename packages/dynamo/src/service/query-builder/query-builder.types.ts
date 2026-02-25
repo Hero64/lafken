@@ -8,10 +8,10 @@ import type {
 } from '@lafken/common';
 import type {
   FieldsMetadata,
-  ModelPartition,
-  ModelPayPerRequest,
-  ModelProvisioned,
   PrimaryPartition,
+  TablePartition,
+  TablePayPerRequest,
+  TableProvisioned,
 } from '../../main/table';
 
 interface RequiredName {
@@ -19,8 +19,8 @@ interface RequiredName {
 }
 
 export type ModelMetadata<T extends Function> =
-  | (ModelProvisioned<T> & RequiredName)
-  | (ModelPayPerRequest<T> & RequiredName);
+  | (TableProvisioned<T> & RequiredName)
+  | (TablePayPerRequest<T> & RequiredName);
 
 export type OperationExpression<E> = OnlyOne<{
   lessThan: E;
@@ -267,7 +267,7 @@ export interface UpdateProps<E extends Function> {
    *   }
    * }
    */
-  keyCondition: ModelPartition<Item<E>>;
+  keyCondition: TablePartition<Item<E>>;
   /**
    * Specifies the attribute values to be replaced on the item.
    * Unlike full updates, this allows replacing specific parts

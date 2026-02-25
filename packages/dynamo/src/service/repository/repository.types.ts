@@ -1,5 +1,5 @@
 import type { ClassResource } from '@lafken/common';
-import type { ModelPartition } from '../../main';
+import type { TablePartition } from '../../main';
 import type {
   FindProps,
   Item,
@@ -25,7 +25,7 @@ export type RepositoryReturn<E extends ClassResource> = {
   upsert(item: Item<E>, inputProps?: UpsertProps<E>): UpsertBuilder<E>;
   create(item: Item<E>): CreateBuilder<E>;
   update(inputProps: UpdateProps<E>): UpdateBuilder<E>;
-  delete(key: ModelPartition<Item<E>>): DeleteBuilder<E>;
+  delete(key: TablePartition<Item<E>>): DeleteBuilder<E>;
   bulkCreate(items: Item<E>[]): BulkCreateBuilder<E>;
-  bulkDelete(keys: ModelPartition<Item<E>>[]): BulkDeleteBuilder<E>;
+  bulkDelete(keys: TablePartition<Item<E>>[]): BulkDeleteBuilder<E>;
 };
