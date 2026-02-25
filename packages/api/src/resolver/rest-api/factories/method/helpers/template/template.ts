@@ -32,9 +32,13 @@ export class TemplateHelper {
         : currentValue;
 
     if (field.type === 'Array') {
-      const forVariableName = `$item${index}`;
+      let forVariableName = `$item${index}`;
       const start = `#foreach(${forVariableName} in ${value})`;
       const end = '#if($foreach.hasNext),#end #end';
+
+      if (field.items.type === 'String') {
+        forVariableName = `${quoteType}${forVariableName}${quoteType}`;
+      }
       const content =
         field.items.type === 'Object'
           ? this.generateTemplate(
