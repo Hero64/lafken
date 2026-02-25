@@ -5,10 +5,10 @@ import { Table } from './table/table';
 export class DynamoResolver implements ResolverType {
   public type = 'DYNAMODB';
 
-  constructor(private models: ClassResource[]) {}
+  constructor(private tables: ClassResource[]) {}
 
   public beforeCreate(scope: AppModule) {
-    for (const bucket of this.models) {
+    for (const bucket of this.tables) {
       new Table(scope, {
         classResource: bucket,
       });

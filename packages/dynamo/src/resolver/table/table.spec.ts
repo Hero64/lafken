@@ -5,7 +5,13 @@ import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { TerraformStack, Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
-import { Field, Model, PartitionKey, type PrimaryPartition, SortKey } from '../../main';
+import {
+  Field,
+  Table as Model,
+  PartitionKey,
+  type PrimaryPartition,
+  SortKey,
+} from '../../main';
 import { Table } from './table';
 
 const setupApp = () => {
@@ -97,6 +103,9 @@ describe('Dynamo table', () => {
       @PartitionKey(String)
       name: PrimaryPartition<string>;
 
+      @SortKey(String)
+      other: PrimaryPartition<string>;
+
       @Field()
       age: number;
     }
@@ -157,7 +166,6 @@ describe('Dynamo table', () => {
     expect(synthesized).toHaveResourceWithProperties(PipesPipe, {
       desired_state: 'RUNNING',
       name: 'Test-pipe',
-      role_arn: '${aws_iam_role.pipe-dynamo-Test-role.arn}',
       source: '${aws_dynamodb_table.Test-table.stream_arn}',
       source_parameters: {
         dynamodb_stream_parameters: {
@@ -175,5 +183,31 @@ describe('Dynamo table', () => {
         },
       },
     });
+  });
+
+  it('should validate local secondary index without sort key', () => {
+    @Model({
+      indexes: [
+        {
+          name: 'age_local_index',
+          type: 'local',
+          sortKey: 'age',
+        },
+      ],
+    })
+    class Test {
+      @PartitionKey(String)
+      name: PrimaryPartition<string>;
+
+      @Field()
+      age: number;
+    }
+    const { stack } = setupApp();
+
+    expect(() => {
+      new Table(stack, {
+        classResource: Test,
+      });
+    }).toThrow();
   });
 });

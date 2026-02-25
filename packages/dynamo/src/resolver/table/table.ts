@@ -21,7 +21,6 @@ import type { TableProps } from './table.types';
 const mapFieldType: Partial<Record<FieldTypes, string>> = {
   String: 'S',
   Number: 'N',
-  Boolean: 'BOOL',
 };
 
 export class Table extends lafkenResource.make(DynamodbTable) {
@@ -33,13 +32,28 @@ export class Table extends lafkenResource.make(DynamodbTable) {
       fields,
     } = getModelInformation(props.classResource);
 
-    const { globalIndexes, localIndexes } = Table.getIndexes(modelProps.indexes);
+    const { globalIndexes, localIndexes, indexAttributes } = Table.getIndexes(
+      scope,
+      modelProps.indexes,
+      sortKeyName
+    );
+
+    const availableAttributes = new Set([...(indexAttributes || new Set())]);
+
+    availableAttributes.add(partitionKeyName.toString());
+    if (sortKeyName) {
+      availableAttributes.add(sortKeyName.toString());
+    }
 
     super(scope, `${modelProps.name}-table`, {
       name: modelProps.name,
       rangeKey: sortKeyName,
       hashKey: partitionKeyName,
-      attribute: Table.getAttributes(fields, modelProps.ttl as string),
+      attribute: Table.getAttributes(
+        fields,
+        availableAttributes,
+        modelProps.ttl as string
+      ),
       globalSecondaryIndex: globalIndexes,
       localSecondaryIndex: localIndexes,
       streamEnabled: !!modelProps.stream?.enabled,
@@ -63,7 +77,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
         name: 'default',
       });
 
-      const role = new Role(scope, `pipe-dynamo-${modelProps.name}-role`, {
+      const role = new Role(this, `pipe-dynamo-${modelProps.name}-role`, {
         services: [
           {
             type: 'dynamodb',
@@ -87,7 +101,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
 
       const filters = this.createFilterCriteria(modelProps.stream, fields);
 
-      new PipesPipe(scope, `${modelProps.name}-pipe`, {
+      new PipesPipe(this, `${modelProps.name}-pipe`, {
         name: `${modelProps.name}-pipe`,
         roleArn: role.arn,
         source: this.streamArn,
@@ -110,19 +124,22 @@ export class Table extends lafkenResource.make(DynamodbTable) {
             detailType: 'db:stream',
             source: `dynamodb.${modelProps.name}`,
           },
-          // inputTemplate: '<aws.pipes.event.json>',
         },
       });
     }
   }
 
-  private static getAttributes(fields: FieldsMetadata, ttl?: string) {
+  private static getAttributes(
+    fields: FieldsMetadata,
+    indexAttributes: Set<string>,
+    ttl?: string
+  ) {
     const attributes: DynamodbTableAttribute[] = [];
 
     for (const key in fields) {
       const field = fields[key];
       const parsedType = mapFieldType[field.type];
-      if (!parsedType || field.name === ttl) {
+      if (!parsedType || !indexAttributes.has(field.name) || field.name === ttl) {
         continue;
       }
 
@@ -152,11 +169,15 @@ export class Table extends lafkenResource.make(DynamodbTable) {
   }
 
   private static getIndexes(
-    indexes: (DynamoIndex<any> & Partial<ReadWriteCapacity>)[] = []
+    scope: Construct,
+    indexes: (DynamoIndex<any> & Partial<ReadWriteCapacity>)[] = [],
+    sortKeyName?: string
   ) {
     if (indexes.length === 0) {
       return {};
     }
+    const indexAttributes = new Set<string>([]);
+
     const globalIndexes: DynamodbTableGlobalSecondaryIndex[] = [];
     const localIndexes: DynamodbTableLocalSecondaryIndex[] = [];
 
@@ -168,6 +189,12 @@ export class Table extends lafkenResource.make(DynamodbTable) {
       }
 
       if (index.type === 'local') {
+        if (!sortKeyName) {
+          throw new Error(
+            'It is not possible to add a local secondary index without an associated sort key.'
+          );
+        }
+        indexAttributes.add(index.sortKey.toString());
         localIndexes.push({
           name: index.name,
           rangeKey: index.sortKey.toString(),
@@ -175,6 +202,11 @@ export class Table extends lafkenResource.make(DynamodbTable) {
           nonKeyAttributes,
         });
         continue;
+      }
+
+      indexAttributes.add(index.partitionKey.toString());
+      if (index.sortKey) {
+        indexAttributes.add(index.sortKey.toString());
       }
 
       globalIndexes.push({
@@ -189,6 +221,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
     }
 
     return {
+      indexAttributes,
       localIndexes,
       globalIndexes,
     };
