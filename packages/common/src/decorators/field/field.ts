@@ -91,12 +91,16 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
     name: fieldProps?.name || destinationName,
   };
 
-  const primitiveType = getPrimitiveType(type);
+  let primitiveType = getPrimitiveType(type);
+
+  if (!primitiveType && fieldProps?.type) {
+    primitiveType = getPrimitiveType(fieldProps.type);
+  }
 
   const typeHasValue = mapTypeofValueToPrimitiveType[typeof fieldProps?.type];
 
   if (fieldProps?.type !== undefined) {
-    if (typeof fieldProps.type === 'function') {
+    if (typeof fieldProps.type === 'function' && !primitiveType) {
       return getObjectMetadata(metadata, fieldProps.type as ClassResource, prefix);
     }
 
