@@ -1,8 +1,8 @@
 import { ApiResolver } from '@lafken/api/resolver';
 import { BucketResolver } from '@lafken/bucket/resolver';
 import { DynamoResolver } from '@lafken/dynamo/resolver';
+import { EventRuleResolver } from '@lafken/event/resolver';
 import { createApp } from '@lafken/main';
-
 import { PokemonBackupsBucket } from './infra/buckets/pokemon-backups.bucket';
 import { Pokemon } from './infra/models/pokemon.model';
 import PokemonModule from './modules/pokemon/pokemon.module';
@@ -18,6 +18,7 @@ createApp({
   resolvers: [
     new BucketResolver([PokemonBackupsBucket]),
     new DynamoResolver([Pokemon]),
+    new EventRuleResolver(),
     new ApiResolver({
       restApi: {
         name: 'poke-api',
