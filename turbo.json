@@ -23,7 +23,7 @@
       "persistent": true
     },
     "test": {
-      "cache": true,
+      "cache": false,
       "inputs": ["$TURBO_DEFAULT$", "vitest.config.ts", "vitest.setup.ts"]
     }
   }
