@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { enableBuildEnvVariable, getMetadataByKey } from '@lafken/common';
 import { describe, expect, it } from 'vitest';
-import type { ApiObjectMetadata } from '../request/params';
+import type { ApiObjectMetadata } from '../request/param';
 import { ResField } from './field';
 import { ApiResponse, apiResponseKey, ResponseObject } from './response';
 import type { ResponseMetadata } from './response.types';

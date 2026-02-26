@@ -1,5 +1,5 @@
 import { createFieldName, createPayloadDecorator, FieldProperties } from '@lafken/common';
-import { PARAM_PREFIX } from './params';
+import { PARAM_PREFIX } from './param';
 
 export const apiRequestKey = createFieldName(PARAM_PREFIX, FieldProperties.payload);
 

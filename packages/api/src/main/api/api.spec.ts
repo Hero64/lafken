@@ -7,7 +7,7 @@ import {
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { Event } from '../event/event';
-import { PathParam } from '../request/params';
+import { PathParam } from '../request/param';
 import { ApiResponse, ResField } from '../response';
 import { Api, Get, Post } from './api';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from './api.types';

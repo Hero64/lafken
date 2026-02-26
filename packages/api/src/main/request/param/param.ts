@@ -1,11 +1,5 @@
 import 'reflect-metadata';
-import {
-  createFieldDecorator,
-  createFieldName,
-  FieldProperties,
-  type OnlyTypeKeys,
-  type Primitive,
-} from '@lafken/common';
+import { createFieldDecorator, type OnlyTypeKeys, type Primitive } from '@lafken/common';
 import { RESOURCE_TYPE } from '../../type/type';
 import type {
   ApiParamMetadata,
@@ -14,11 +8,9 @@ import type {
   HeaderParamProps,
   PathParamProps,
   QueryParamProps,
-} from './params.types';
+} from './param.types';
 
 export const PARAM_PREFIX = `${RESOURCE_TYPE}_REQUEST` as const;
-
-export const apiFieldKey = createFieldName(RESOURCE_TYPE, FieldProperties.field); // TODO: ver si es necesario crear uno ára cada cual
 
 /**
  * Property decorator that marks a class field as an HTTP **request body** parameter.

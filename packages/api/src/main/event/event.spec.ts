@@ -6,7 +6,7 @@ import {
 } from '@lafken/common';
 import { describe, expect, it } from 'vitest';
 import { ApiRequest } from '../request';
-import { type ApiParamMetadata, QueryParam } from '../request/params';
+import { type ApiParamMetadata, QueryParam } from '../request/param';
 import { Event } from './event';
 
 describe('Event', () => {
