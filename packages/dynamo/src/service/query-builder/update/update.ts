@@ -31,6 +31,7 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
       removeValues = {},
       replaceValues = {},
       setValues = {},
+      condition,
     } = this.queryOptions.inputProps;
 
     if (
@@ -58,6 +59,7 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
       UpdateExpression:
         `${setExpression ? `SET ${setExpression}` : ''} ${removeExpression ? `REMOVE ${removeExpression}` : ''}`.trim(),
       ...this.getAttributesAndNames(),
+      ConditionExpression: condition ? this.getFilterExpression(condition) : undefined,
     };
   }
 

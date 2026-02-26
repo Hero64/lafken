@@ -422,6 +422,40 @@ describe('Dynamo Service', () => {
         })
       ).toHaveLength(1);
     });
+
+    it('Should add condition expression', async () => {
+      const name = 'example1';
+      await userRepository
+        .update({
+          keyCondition: {
+            email: EMAIL,
+            name,
+          },
+          replaceValues: {
+            age: 55,
+          },
+          condition: {
+            name: {
+              exist: true,
+            },
+            age: {
+              exist: true,
+            },
+          },
+        })
+        .exec();
+
+      expect(
+        dynamoClient.commandCalls(UpdateItemCommand, {
+          TableName: 'users',
+          Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+          UpdateExpression: 'SET  #age = :age_1_0',
+          ExpressionAttributeNames: { '#age': 'age', '#name': 'name' },
+          ExpressionAttributeValues: { ':age_1_0': { N: '55' } },
+          ConditionExpression: '(attribute_exists(#name) and attribute_exists(#age))',
+        })
+      ).toHaveLength(1);
+    });
   });
 
   describe('REMOVE', () => {

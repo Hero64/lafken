@@ -247,7 +247,7 @@ export type DeepReplaceValue<T> = {
     : ExistValue<T[K]> | DeepReplaceValue<T[K]>;
 };
 
-export interface UpdateProps<E extends Function> {
+export interface UpdateProps<E extends Function> extends UpsertProps<E> {
   /**
    * Specifies the key condition used to execute the update query.
    * This defines the partition key and, optionally, the sort key
