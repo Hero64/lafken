@@ -57,7 +57,7 @@ export class PokeApi {
 
   @Put({
     path: '/{name}',
-    // response: Boolean, TODO: ver la posibilidad de retornar valores normales
+    response: Boolean,
   })
   async updatePokemon(@Event(UpdatePokemonPayload) e: UpdatePokemonPayload) {
     const updated = await pokemonRepository
