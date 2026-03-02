@@ -77,21 +77,17 @@ sayHello () {
   return  'hello'
 }
 ```
-### Event/Payload
-A decorated method can receive an event payload using the `@Event` decorator, which takes a class annotated with the `@Payload` decorator. The `@Payload`/`@Param` decorators allow you to specify where each property comes from—body, path, query, headers, or context—binding those values to the event and automatically generating a fully resolved Velocity `requestTemplate` internally.
+### Event
+A decorated method can receive an event payload using the `@Event` decorator, which takes a class annotated with the `@ApiRequest` decorator. The `@ApiRequest`/`@BodyParam`/`@PathParam`/`@QueryParam`/`@HeaderParam` decorators allow you to specify where each property comes from—body, path, query, headers, or context—binding those values to the event and automatically generating a fully resolved Velocity `requestTemplate` internally.
 ```typescript
-import { Post, Payload, Param, Event } from '@lafken/api/main';
+import { Post, ApiRequest, PathParam, BodyParam Event } from '@lafken/api/main';
 // ...
-@Payload()
+@ApiRequest()
 class HelloPayload {
-  @Param({
-    source: 'path',
-  })
+  @PathParam()
   id: number;
 
-  @Param({
-    source: 'body',
-  })
+  @BodyParam()
   name: string;
 }
 // ...
@@ -132,23 +128,23 @@ Integrations can also receive the `@IntegrationOptions` decorator, which provide
 ### Responses
 Although you can return values without explicitly defining a response type, you can also attach one or multiple custom responses to each HTTP method. This allows you to generate `responseModels` and `responseTemplates` for every case.
 
-To do this, decorate a class with the `@Response` decorator and pass that class to the method via the `response` property. By default, the payload of your response must match the structure defined in the class.  
+To do this, decorate a class with the `@ApiResponse` decorator and pass that class to the method via the `response` property. By default, the payload of your response must match the structure defined in the class.  
 However, you can specify additional responses by mapping an HTTP status code to a class (or to `true` if the response does not return a payload).
 
 ```typescript
-@Payload()
+@ApiResponse()
 export class Res404 {
-  @Field()
+  @ResField()
   foo: string;
 }
 
-@Payload()
+@ApiResponse()
 export class Res307 {
-  @Field()
+  @ResField()
   bar: string;
 }
 
-@Response({
+@ApiResponse({
   responses: {
     404: Res404,
     307: Res307,
@@ -156,10 +152,10 @@ export class Res307 {
   },
 })
 export class GreetingResponse {
-  @Field()
+  @ResField()
   fullName: string;
 
-  @Field()
+  @ResField()
   id: number;
 }
 
@@ -193,10 +189,10 @@ sayHello(): GreetingResponse {
 The `response` function allows you to return a response that will be interpreted by API Gateway.
 
 If you don’t explicitly specify a status code, a default one will be used: for example, a `POST` request will default to `201`, while most other methods default to `200`.  
-This behavior can be overridden by setting `defaultCode` in the `@Response` decorator:
+This behavior can be overridden by setting `defaultCode` in the `@ApiResponse` decorator:
 
 ```typescript
-@Response({
+@ApiResponse({
   defaultCode: 301,
   responses: {
     // ...

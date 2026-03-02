@@ -30,7 +30,7 @@ npm create lafken@latest
 Or install in an existing TypeScript project:
 
 ```bash
-npm install @lafken/main @lafken/api @lafken/resolver
+npm install @lafken/main @lafken/api @lafken/common
 ```
 
 ### System Requirements
@@ -66,13 +66,11 @@ Here's a complete serverless API:
 ### 1. Define Your Resource
 
 ```ts
-import { Api, Get, Payload, Param  } from '@lafken/api/main';
+import { Api, Get, ApiRequest, PathParam  } from '@lafken/api/main';
 
-@Payload()
-export class HelloEvent {
-  @Param({
-    source: 'path',
-  })
+@ApiRequest()
+export class HelloRequestEvent {
+  @PathParam()
   name: number;
 }
 
@@ -84,7 +82,7 @@ export class HelloApi {
   @Get({
     path: '/{name}'
   })
-  greet(@Event(HelloEvent) event: HelloEvent) {
+  greet(@Event(HelloRequestEvent) event: HelloRequestEvent) {
     return {
       message: `Hello, ${event.name}!`
     };
@@ -97,8 +95,8 @@ export class HelloApi {
 ```ts
 import { createModule } from '@lafken/main';
 
-export const apiModule = createModule({
-  name: 'api',
+export const helloModule = createModule({
+  name: 'hello-module',
   resources: [HelloApi],
 });
 ```
@@ -112,7 +110,7 @@ import { ApiResolver } from '@lafken/api/resolver';
 createApp({
   name: 'hello-app',
   resolvers: [new ApiResolver()],
-  modules: [apiModule],
+  modules: [helloModule],
 });
 ```
 
