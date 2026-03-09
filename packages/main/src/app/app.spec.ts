@@ -210,4 +210,27 @@ describe('App', () => {
 
     expect(extendCallback).toHaveBeenCalledWith(appStack);
   });
+
+  it('should create S3Backend when s3Backend config is provided', async () => {
+    const { appStack } = await createApp({
+      name: 'testing',
+      modules: [],
+      resolvers: [],
+      s3Backend: {
+        bucket: 'my-terraform-state',
+        key: 'testing/terraform.tfstate',
+        region: 'us-east-1',
+      },
+    });
+
+    const terraform = appStack.toTerraform();
+
+    expect(terraform.terraform.backend.s3).toEqual(
+      expect.objectContaining({
+        bucket: 'my-terraform-state',
+        key: 'testing/terraform.tfstate',
+        region: 'us-east-1',
+      })
+    );
+  });
 });

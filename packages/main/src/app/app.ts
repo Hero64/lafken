@@ -7,7 +7,7 @@ import {
   type ResolverType,
   Role,
 } from '@lafken/resolver';
-import { App, Aspects, TerraformStack } from 'cdktn';
+import { App, Aspects, S3Backend, TerraformStack } from 'cdktn';
 import PrettyError from 'pretty-error';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';
@@ -30,6 +30,10 @@ export class AppStack extends TerraformStack {
       contextCreator: props.name,
     });
     new AwsProvider(this, 'AWS', props.awsProviderConfig);
+
+    if (props.s3Backend) {
+      new S3Backend(this, props.s3Backend);
+    }
 
     this.createRole();
   }
@@ -106,6 +110,31 @@ export class AppStack extends TerraformStack {
   }
 }
 
+/**
+ * Creates and synthesizes a Lafken serverless application.
+ *
+ * Initializes the CDKTN application, sets up the AWS stack with the
+ * provided modules and resolvers, executes the full resolver lifecycle
+ * (beforeCreate → create → afterCreate), and synthesizes the resulting
+ * Terraform configuration.
+ *
+ * @param props - The application configuration including name, modules,
+ * resolvers, global settings, and optional extensions.
+ * @returns The CDKTN `App` instance and the `AppStack` created for the application.
+ *
+ * @example
+ * await createApp({
+ *   name: 'my-app',
+ *   modules: [
+ *     //... ,
+ *   ],
+ *   resolvers: [new ApiResolver({ restApi: { name: 'my-api' } })],
+ *   globalConfig: {
+ *     lambda: { runtime: 22, memory: 512 },
+ *     tags: { environment: 'production' },
+ *   },
+ * });
+ */
 export const createApp = async (props: CreateAppProps) => {
   const app = new App({
     skipValidation: true,

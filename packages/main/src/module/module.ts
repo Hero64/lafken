@@ -70,6 +70,30 @@ export class StackModule extends Construct {
   }
 }
 
+/**
+ * Creates a module factory for the Lafken application.
+ *
+ * Returns a function that, when invoked by `createApp`, instantiates a
+ * `StackModule` and processes all its declared resources through the
+ * registered resolvers. Each module groups related resources into a
+ * logical unit with its own scope, IAM role, tags, and optional
+ * Lambda configuration.
+ *
+ * @param props - The module configuration including name, resources, and
+ * optional global settings scoped to this module.
+ * @returns A factory function consumed by `createApp` to build the module
+ * within the application stack.
+ *
+ * @example
+ * createModule({
+ *   name: 'users',
+ *   resources: [UserApi, UserQueue],
+ *   globalConfig: {
+ *     lambda: { memory: 256, services: ['dynamodb'] },
+ *     tags: { team: 'backend' },
+ *   },
+ * })
+ */
 export const createModule =
   (props: CreateModuleProps) =>
   async (scope: ModuleConstruct, resolvers: Record<string, ModuleResolverType>) => {
