@@ -24,3 +24,10 @@ export const cleanTemplateString = (str: string) => {
     .filter(Boolean)
     .join(' ');
 };
+
+export const cleanAndCapitalize = (str: string) => {
+  return str
+    .split(/[^a-zA-Z0-9]+/)
+    .map((word) => capitalize(word))
+    .join('');
+};

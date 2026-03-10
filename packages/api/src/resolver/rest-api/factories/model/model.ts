@@ -1,4 +1,5 @@
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
+import { cleanAndCapitalize } from '@lafken/common';
 import { uuid } from '@lafken/resolver';
 import { Annotations, Fn, Token } from 'cdktn';
 import type { ResponseFieldMetadata } from '../../../../main';
@@ -31,7 +32,7 @@ export class ModelFactory {
     const modelName = defaultModelName || uuid();
 
     const newModel = new ApiGatewayModel(this.scope, defaultModelName || uuid(), {
-      name: modelName,
+      name: cleanAndCapitalize(modelName),
       restApiId: this.scope.id,
       contentType: 'application/json',
       schema: JSON.stringify(schema),
