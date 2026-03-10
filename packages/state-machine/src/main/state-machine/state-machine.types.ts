@@ -843,7 +843,7 @@ export interface LambdaStateProps<T = {}> extends StateProps<keyof T> {
    * by this state.
    */
   lambda?: Partial<LambdaProps>;
-  integrationService?: never;
+  integrationResource?: never;
 }
 
 /**
@@ -870,48 +870,30 @@ export interface LambdaStateProps<T = {}> extends StateProps<keyof T> {
  */
 export interface IntegrationStateProps<T = {}> extends StateProps<keyof T> {
   /**
-   * AWS service name to integrate with.
+   * AWS service integration resource identifier.
    *
-   * Specifies the name of the AWS service that the state will call directly.
-   * This corresponds to the service identifier used by Step Functions
-   * for optimized integrations (e.g., `'dynamodb'`, `'sqs'`, `'sns'`).
+   * Specifies the ARN pattern used to integrate with an AWS service directly
+   * from the state machine. The value can follow one of these formats:
+   * - `arn:aws:states:::aws-sdk:<service>:<action>` — For AWS SDK integrations.
+   * - A full ARN (`arn:aws:states:::...`) — For optimized service integrations.
    *
-   * @see {@link https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html | Supported Service Integrations}
-   *
-   * @example
-   * ```ts
-   * {
-   *   integrationService: 'dynamodb',
-   * }
-   * ```
-   */
-  integrationService: string;
-  /**
-   * AWS service API action to invoke.
-   *
-   * Specifies the API action to call on the target AWS service.
-   * This corresponds to the API operation name for the given service
-   * (e.g., `'putItem'` for DynamoDB, `'sendMessage'` for SQS).
+   * @see {@link https://docs.aws.amazon.com/step-functions/latest/dg/integrate-services.html | Integrating Services with Step Functions}
    *
    * @example
    * ```ts
    * {
-   *   action: 'putItem',
+   *   integrationResource: 'arn:aws:states:::aws-sdk:dynamodb:putItem',
+   * }
+   * ```
+   *
+   * @example
+   * ```ts
+   * {
+   *   integrationResource: 'arn:aws:states:::sqs:sendMessage',
    * }
    * ```
    */
-  action: string;
-  /**
-   * Integration invocation mode.
-   *
-   * Controls how the state machine interacts with the AWS service:
-   * - `'sync'` — Waits for the service to complete before moving to the next state.
-   * - `'async'` — Starts the service call and immediately moves to the next state.
-   * - `'token'` — Pauses execution until a task token callback is received.
-   *
-   * @default 'sync'
-   */
-  mode?: IntegrationMode;
+  integrationResource: string;
 }
 
 export type HandlerStateProps<T = {}> = LambdaStateProps<T> | IntegrationStateProps<T>;

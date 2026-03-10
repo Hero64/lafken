@@ -44,7 +44,6 @@ import type {
 } from './schema.types';
 import {
   LambdaStates,
-  mapIntegrationMode,
   mapSourceExecution,
   mapSourceState,
   mapSourceStateMachine,
@@ -342,7 +341,8 @@ export class Schema {
     handler: IntegrationStateProps<any> & LambdaMetadata
   ): Partial<StateTask> {
     const task: Partial<StateTask> = {
-      Resource: `arn:aws:states:::${handler.integrationService}:${handler.action}${handler.mode ? `.${mapIntegrationMode[handler.mode]}` : ''}`,
+      Resource: handler.integrationResource,
+      Output: handler.output,
     };
     const resource: Record<
       string,
@@ -388,6 +388,9 @@ export class Schema {
         Payload: this.getLambdaPayload(handler.name),
         FunctionName: lambdaHandler.functionName,
       },
+      Output:
+        handler.output ||
+        '{% $exists($states.result.Payload) ? $states.result.Payload : {} %}',
     };
   }
 
@@ -404,10 +407,7 @@ export class Schema {
       Next: this.getNextState(handler.next, handler.end),
       End: handler.end,
       Assign: handler.assign,
-      Output:
-        handler.output ||
-        '{% $exist($states.result.Payload) ? $states.result.Payload : {} %}',
-      ...(handler.integrationService !== undefined
+      ...(handler.integrationResource !== undefined
         ? this.getIntegrationTask(handler)
         : this.getLambdaTask(handler)),
     };
