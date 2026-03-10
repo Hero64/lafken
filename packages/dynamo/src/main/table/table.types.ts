@@ -7,6 +7,10 @@ import type {
   OnlyNumberString,
 } from '@lafken/common';
 
+/**
+ * Internal metadata keys used to store DynamoDB table configuration
+ * via `Reflect.defineMetadata`.
+ */
 export enum TableMetadataKeys {
   table = 'dynamo:table',
   partition_key = 'dynamo:partition_key',
@@ -14,8 +18,20 @@ export enum TableMetadataKeys {
   fields = 'dynamo:fields',
 }
 
+/**
+ * Base configuration shared by all DynamoDB secondary indexes.
+ *
+ * @typeParam T - The table class whose properties define the available attributes.
+ */
 interface IndexBase<T extends Function> {
+  /** Logical name of the index. */
   name: string;
+  /**
+   * Attributes projected into the index.
+   *
+   * Pass an array of property names to project only specific attributes,
+   * or `'ALL'` to include every attribute from the base table.
+   */
   projection?: (keyof T['prototype'])[] | 'ALL';
 }
 
@@ -31,37 +47,97 @@ type AttributeFilter<T> = {
     | null;
 };
 
+/**
+ * Configuration for a DynamoDB **Local Secondary Index** (LSI).
+ *
+ * A local index shares the same partition key as the base table but
+ * uses a different sort key, enabling alternative query patterns
+ * within the same partition.
+ *
+ * @typeParam T - The table class whose properties define the available attributes.
+ */
 export interface LocalIndex<T extends Function> extends IndexBase<T> {
+  /** Must be `'local'` to indicate a Local Secondary Index. */
   type: 'local';
+  /** The table property used as the sort key for this index. */
   sortKey: keyof OnlyNumberString<T['prototype']>;
 }
 
+/**
+ * Configuration for a DynamoDB **Global Secondary Index** (GSI).
+ *
+ * A global index has its own partition key (and optional sort key),
+ * allowing queries across the entire table with a completely different
+ * key schema.
+ *
+ * @typeParam T - The table class whose properties define the available attributes.
+ */
 export interface GlobalIndex<T extends Function> extends IndexBase<T> {
+  /** Set to `'global'` (or omit) to indicate a Global Secondary Index. */
   type?: 'global';
+  /**
+   * The table property (or composite of properties) used as the
+   * partition key for this index.
+   */
   partitionKey:
     | keyof OnlyNumberString<T['prototype']>
     | (keyof OnlyNumberString<T['prototype']>)[];
+  /**
+   * Optional table property (or composite of properties) used as the
+   * sort key for this index.
+   */
   sortKey?:
     | keyof OnlyNumberString<T['prototype']>
     | (keyof OnlyNumberString<T['prototype']>)[];
 }
 
+/**
+ * A Global Secondary Index with explicit read/write capacity units.
+ * Used when the table billing mode is `'provisioned'`.
+ */
 export type GlobalIndexWithReadWriteCapacity<T extends Function> = GlobalIndex<T> &
   ReadWriteCapacity;
 
+/**
+ * Provisioned throughput settings for a DynamoDB table or index.
+ */
 export interface ReadWriteCapacity {
+  /** Maximum number of strongly consistent reads per second. */
   readCapacity: number;
+  /** Maximum number of writes per second. */
   writeCapacity: number;
 }
 
+/**
+ * Union of all secondary index types allowed when the table uses
+ * pay-per-request billing.
+ */
 export type DynamoIndex<T extends Function> = LocalIndex<T> | GlobalIndex<T>;
 
+/**
+ * Supported DynamoDB Stream view types.
+ *
+ * Determines which item data is written to the stream record when a
+ * table item is modified.
+ */
 export type StreamTypes = 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY';
 
+/**
+ * Configuration for a DynamoDB Global Table replica in another AWS region.
+ */
 export interface Replica {
+  /** AWS region where the replica will be created (e.g. `'us-east-2'`). */
   regionName: string;
+  /**
+   * Read consistency mode for the replica.
+   *
+   * - `'STRONG'`    — Strongly consistent reads.
+   * - `'EVENTUAL'`  — Eventually consistent reads (default DynamoDB behaviour).
+   */
   consistenceMode?: 'STRONG' | 'EVENTUAL';
+  /** When `true`, the replica cannot be deleted accidentally. */
   deletionProtectionEnabled?: boolean;
+  /** When `true`, tags from the primary table are propagated to the replica. */
   propagateTags?: boolean;
 }
 

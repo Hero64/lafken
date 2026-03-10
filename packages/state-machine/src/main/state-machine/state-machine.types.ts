@@ -846,9 +846,71 @@ export interface LambdaStateProps<T = {}> extends StateProps<keyof T> {
   integrationService?: never;
 }
 
+/**
+ * Configuration for an AWS service integration state.
+ *
+ * Defines a state that directly integrates with an AWS service
+ * instead of invoking a Lambda function. This allows the state machine
+ * to call AWS APIs natively without intermediate compute.
+ *
+ * @see {@link https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html | AWS Step Functions Service Integrations}
+ *
+ * @typeParam T - The class type used to infer available state names for transitions.
+ *
+ * @example
+ * ```ts
+ * @State({
+ *   integrationService: 'dynamodb',
+ *   action: 'putItem',
+ *   mode: 'sync',
+ *   end: true,
+ * })
+ * putItem() {}
+ * ```
+ */
 export interface IntegrationStateProps<T = {}> extends StateProps<keyof T> {
+  /**
+   * AWS service name to integrate with.
+   *
+   * Specifies the name of the AWS service that the state will call directly.
+   * This corresponds to the service identifier used by Step Functions
+   * for optimized integrations (e.g., `'dynamodb'`, `'sqs'`, `'sns'`).
+   *
+   * @see {@link https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html | Supported Service Integrations}
+   *
+   * @example
+   * ```ts
+   * {
+   *   integrationService: 'dynamodb',
+   * }
+   * ```
+   */
   integrationService: string;
+  /**
+   * AWS service API action to invoke.
+   *
+   * Specifies the API action to call on the target AWS service.
+   * This corresponds to the API operation name for the given service
+   * (e.g., `'putItem'` for DynamoDB, `'sendMessage'` for SQS).
+   *
+   * @example
+   * ```ts
+   * {
+   *   action: 'putItem',
+   * }
+   * ```
+   */
   action: string;
+  /**
+   * Integration invocation mode.
+   *
+   * Controls how the state machine interacts with the AWS service:
+   * - `'sync'` — Waits for the service to complete before moving to the next state.
+   * - `'async'` — Starts the service call and immediately moves to the next state.
+   * - `'token'` — Pauses execution until a task token callback is received.
+   *
+   * @default 'sync'
+   */
   mode?: IntegrationMode;
 }
 

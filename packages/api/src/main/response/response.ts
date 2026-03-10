@@ -10,11 +10,89 @@ import type { ResponseMetadata, ResponseProps } from './response.types';
 
 export const apiResponseKey = createFieldName(RESPONSE_PREFIX, FieldProperties.payload);
 
+/**
+ * Class decorator that declares a nested sub-object belonging to an
+ * `@ApiResponse` payload.
+ *
+ * Use it to mark auxiliary classes that represent a subset of fields
+ * which are then referenced as a property inside a top-level
+ * `@ApiResponse` class. It registers the class with the same payload
+ * metadata so its field decorators are correctly resolved during
+ * response mapping.
+ *
+ * @param props - Optional payload configuration (e.g. a custom `name`).
+ *
+ * @example
+ * ```ts
+ * @ResponseObject()
+ * export class Address {
+ *   @ResField()
+ *   street: string;
+ *
+ *   @ResField()
+ *   city: string;
+ * }
+ *
+ * @ApiResponse()
+ * export class UserResponse {
+ *   @ResField()
+ *   name: string;
+ *
+ *   @ResField({ type: Address })
+ *   address: Address;
+ * }
+ * ```
+ */
 export const ResponseObject = createPayloadDecorator({
   prefix: RESPONSE_PREFIX,
   createUniqueId: true,
 });
 
+/**
+ * Class decorator that declares a class as an API response payload.
+ *
+ * The decorated class defines the shape of the data returned by an API
+ * handler. Use `@ResField` on its properties to describe the fields
+ * included in the response body. You can also configure multiple HTTP
+ * status codes with different payloads via the `responses` option.
+ *
+ * Once decorated, the class can be referenced in the `response` option
+ * of an HTTP method decorator (e.g. `@Get`, `@Post`) so the framework
+ * generates the correct API Gateway response model.
+ *
+ * @param props - Optional configuration (responses, defaultCode, name).
+ *
+ * @example
+ * ```ts
+ * @ApiResponse()
+ * export class UserResponse {
+ *   @ResField()
+ *   name: string;
+ *
+ *   @ResField()
+ *   email: string;
+ * }
+ *
+ * @Api({ path: '/users' })
+ * export class UserApi {
+ *   @Get({ path: '/{id}', response: UserResponse })
+ *   getUser() { return { name: 'Alice', email: 'alice@test.com' }; }
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Multiple status codes with different payloads
+ * @ApiResponse({
+ *   defaultCode: 200,
+ *   responses: {
+ *     201: UserResponse,
+ *     204: true,
+ *   },
+ * })
+ * export class GetUserResponse {}
+ * ```
+ */
 export const ApiResponse = createPayloadDecorator<ResponseProps, ResponseMetadata>({
   createUniqueId: true,
   prefix: RESPONSE_PREFIX,

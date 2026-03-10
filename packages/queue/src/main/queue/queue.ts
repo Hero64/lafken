@@ -12,6 +12,23 @@ import type { FifoProps, QueueLambdaMetadata, StandardProps } from './queue.type
 
 export const RESOURCE_TYPE = 'QUEUE' as const;
 
+/**
+ * Class decorator that registers a class as an SQS queue resource.
+ *
+ * The decorated class groups one or more consumer handlers (`@Standard`
+ * or `@Fifo`) that process messages from SQS queues.
+ *
+ * @param props - Optional resource configuration (e.g. a custom `name`).
+ *
+ * @example
+ * ```ts
+ * @Queue()
+ * export class NotificationQueue {
+ *   @Standard({ batchSize: 5 })
+ *   process(@Event(NotificationMessage) msg: NotificationMessage) { }
+ * }
+ * ```
+ */
 export const Queue = createResourceDecorator({
   type: RESOURCE_TYPE,
   callerFileIndex: 5,
@@ -71,6 +88,27 @@ const argumentParser: Partial<LambdaArgumentsType> = {
   },
 };
 
+/**
+ * Method decorator that registers a handler as a **standard** SQS queue
+ * consumer.
+ *
+ * The decorated method becomes a Lambda function triggered by messages
+ * from a standard (non-FIFO) SQS queue. Configure delivery delay,
+ * batch size, visibility timeout, and other queue settings through
+ * the decorator props.
+ *
+ * @param props - Standard queue configuration (deliveryDelay, batchSize,
+ *                visibilityTimeout, retentionPeriod, lambda, etc.).
+ *
+ * @example
+ * ```ts
+ * @Queue()
+ * export class EmailQueue {
+ *   @Standard({ batchSize: 10, visibilityTimeout: 60 })
+ *   send(@Event(EmailPayload) msg: EmailPayload) { }
+ * }
+ * ```
+ */
 export const Standard = createLambdaDecorator<StandardProps, QueueLambdaMetadata>({
   getLambdaMetadata: (props, methodName) => ({
     ...props,
@@ -81,6 +119,27 @@ export const Standard = createLambdaDecorator<StandardProps, QueueLambdaMetadata
   argumentParser,
 });
 
+/**
+ * Method decorator that registers a handler as a **FIFO** SQS queue
+ * consumer.
+ *
+ * The decorated method becomes a Lambda function triggered by messages
+ * from a FIFO queue, which guarantees exactly-once processing and
+ * strict ordering. In addition to all standard queue options, FIFO
+ * queues support `contentBasedDeduplication`.
+ *
+ * @param props - FIFO queue configuration (contentBasedDeduplication,
+ *                batchSize, visibilityTimeout, lambda, etc.).
+ *
+ * @example
+ * ```ts
+ * @Queue()
+ * export class PaymentQueue {
+ *   @Fifo({ contentBasedDeduplication: true, batchSize: 1 })
+ *   process(@Event(PaymentMessage) msg: PaymentMessage) { }
+ * }
+ * ```
+ */
 export const Fifo = createLambdaDecorator<FifoProps, QueueLambdaMetadata>({
   getLambdaMetadata: (props, methodName) => ({
     ...props,

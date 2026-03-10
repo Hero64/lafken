@@ -2,6 +2,7 @@ import type {
   AllowedTypes,
   ArrayField,
   BooleanField,
+  GetResourceProps,
   NumberField,
   ObjectField,
   StringField,
@@ -118,3 +119,5 @@ export type StateMachineParamMetadata =
   | StateMachineBooleanParam
   | StateMachineObjectParam
   | StateMachineArrayParam;
+
+export type IntegrationOptionsParams = GetResourceProps;
