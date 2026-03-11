@@ -161,6 +161,8 @@ export interface CustomAuthorizerProps extends ResourceProps {
    * Specifies the HTTP header that the authorizer will use to extract
    * the token for authentication. Typically, this is the `Authorization`
    * header, but it can be customized if needed.
+   *
+   * @default 'Authorization'
    */
   header?: string;
   /**
