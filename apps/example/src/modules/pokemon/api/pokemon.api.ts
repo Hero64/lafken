@@ -9,6 +9,7 @@ import { GetAllResponse, PokemonResponse } from './pokemon.responses';
 
 @Api({
   path: '/pokemon',
+  auth: false,
 })
 export class PokeApi {
   @Get({
@@ -62,7 +63,6 @@ export class PokeApi {
   async updatePokemon(@Event(UpdatePokemonPayload) e: UpdatePokemonPayload) {
     const updated = await pokemonRepository
       .update({
-        // TODO: agregar only if exist
         keyCondition: {
           name: e.name,
         },
@@ -86,5 +86,15 @@ export class PokeApi {
         name: e.name,
       })
       .exec();
+  }
+
+  @Get({
+    path: '/what-is-this',
+    auth: {
+      authorizerName: 'pokemon-custom-auth',
+    },
+  })
+  async whatIsThisPokemon() {
+    console.log("It's pikachu!!!");
   }
 }

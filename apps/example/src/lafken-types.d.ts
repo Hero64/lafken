@@ -18,8 +18,7 @@ declare module '@lafken/common' {
   }
 
   interface ApiAuthorizerAvailable {
-    'api-key-auth': true;
-    'cognito-auth': true;
+    'pokemon-custom-auth': true;
   }
 
   interface DynamoTableAvailable {
