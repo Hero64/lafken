@@ -1,6 +1,6 @@
 # @lafken/schedule
 
-`@lafken/schedule` simplifies the creation and management of Amazon EventBridge scheduled rules (Cron jobs) and their integration with AWS Lambda. It provides decorators to define scheduled tasks using standard cron expressions or structured time objects.
+Define Amazon EventBridge scheduled rules using TypeScript decorators. `@lafken/schedule` lets you declare cron-based tasks directly on class methods — each one becomes a Lambda function invoked automatically by EventBridge at the specified times.
 
 ## Installation
 
@@ -8,82 +8,144 @@
 npm install @lafken/schedule
 ```
 
-## Configuration
+## Getting Started
 
-Add the `ScheduleResolver` from the `@lafken/schedule/resolver` library to your application configuration.
+Define a schedule class with `@Schedule`, add `@Cron` methods, and register it through `ScheduleResolver`:
 
 ```typescript
+import { createApp, createModule } from '@lafken/main';
 import { ScheduleResolver } from '@lafken/schedule/resolver';
+import { Schedule, Cron } from '@lafken/schedule/main';
 
-createApp({
-  name: 'awesome-app',
-  resolvers: [
-    new ScheduleResolver(),
-  ],
-  ...
-});
-
-// ...
-
+// 1. Define scheduled tasks
 @Schedule()
-class GreetingSchedule {
-  // ...
+export class MaintenanceJobs {
+  @Cron({ schedule: 'cron(0 3 * * ? *)' })
+  cleanupExpiredSessions() {
+    // Runs every day at 3:00 AM UTC
+  }
+
+  @Cron({ schedule: { hour: 0, minute: 0, weekDay: 'SUN' } })
+  generateWeeklyReport() {
+    // Runs every Sunday at midnight UTC
+  }
 }
 
-const greetingModule = createModule({
-  name: 'greeting',
-  resources: [
-    GreetingSchedule
-  ]
+// 2. Register in a module
+const maintenanceModule = createModule({
+  name: 'maintenance',
+  resources: [MaintenanceJobs],
 });
 
+// 3. Add the resolver to the app
+createApp({
+  name: 'my-app',
+  resolvers: [new ScheduleResolver()],
+  modules: [maintenanceModule],
+});
 ```
+
+Each `@Cron` method becomes an independent Lambda function with its own EventBridge rule.
 
 ## Features
 
-### Defining a Schedule Resource
+### Schedule Class
 
-Use the `@Schedule` decorator to define a class that contains scheduled tasks.
+Use the `@Schedule` decorator to group related cron tasks in a single class. The class itself holds no schedule logic — it acts as a container for `@Cron` handlers:
 
 ```typescript
-import { Schedule, Cron } from '@lafken/schedule';
+import { Schedule, Cron } from '@lafken/schedule/main';
 
 @Schedule()
-export class DataSyncService {
-  // ... cron handlers
+export class DataPipeline {
+  @Cron({ schedule: 'cron(0 6 * * ? *)' })
+  ingestData() { }
+
+  @Cron({ schedule: 'cron(30 6 * * ? *)' })
+  transformData() { }
 }
 ```
 
-### Defining Cron Tasks
+### Cron Expression (String)
 
-Use the `@Cron` decorator to define a method as a scheduled task. You can configure the schedule using a standard cron string or a structured object.
+Pass a standard AWS cron expression as a string. The format follows:
 
-#### Using Cron Strings
-
-You can use standard AWS cron expressions: `cron(Minutes Hours Day-of-month Month Day-of-week Year)`.
+```
+cron(Minutes Hours Day-of-month Month Day-of-week Year)
+```
 
 ```typescript
-@Cron({
-  schedule: 'cron(0 12 * * ? *)', // Run every day at 12:00 UTC
-})
-dailySync() {
-  console.log('Running daily sync...');
+@Cron({ schedule: 'cron(0 12 * * ? *)' })
+sendDailyDigest() {
+  // Every day at 12:00 PM UTC
+}
+
+@Cron({ schedule: 'cron(0 9 1 * ? *)' })
+generateMonthlyInvoice() {
+  // First day of every month at 9:00 AM UTC
 }
 ```
 
-#### Using Structured Schedule Objects
+> [!NOTE]
+> AWS cron expressions require either the day-of-month or day-of-week field to be `?`. You cannot specify both simultaneously. When using a cron string, include the full `cron(...)` wrapper.
 
-You can also define the schedule using a readable object format.
+### Cron Expression (Object)
+
+For a more readable alternative, use the `ScheduleTime` object format. Each field defaults to `'*'` when omitted:
 
 ```typescript
 @Cron({
   schedule: {
-    minute: '0',
-    hour: '8',
+    minute: 0,
+    hour: 8,
     weekDay: 'MON-FRI',
   },
 })
-weekdayStart() {
-  console.log('Starting weekday operations...');
+startBusinessHours() {
+  // Every weekday at 8:00 AM UTC
+}
+
+@Cron({
+  schedule: {
+    minute: 30,
+    hour: 22,
+    day: 15,
+  },
+})
+midMonthAudit() {
+  // 15th of every month at 10:30 PM UTC
 }
 ```
+
+#### ScheduleTime Fields
+
+| Field     | Type                        | Default | Description          |
+| --------- | --------------------------- | ------- | -------------------- |
+| `minute`  | `number \| '*' \| '?'`     | `'*'`   | Minute (0–59)        |
+| `hour`    | `number \| '*' \| '?'`     | `'*'`   | Hour (0–23)          |
+| `day`     | `number \| '*' \| '?'`     | `'*'`   | Day of month (1–31)  |
+| `month`   | `number \| '*' \| '?'`     | `'*'`   | Month (1–12)         |
+| `weekDay` | `number \| string \| '?'`  | `'*'`   | Day of week (SUN–SAT or 1–7) |
+| `year`    | `number \| '*' \| '?'`     | `'*'`   | Year                 |
+
+When `day` is set to a specific value, `weekDay` is automatically set to `'?'` and vice versa, following the AWS cron constraint.
+
+### Retry Policy
+
+Configure how EventBridge handles failed deliveries using `retryAttempts` and `maxEventAge`:
+
+```typescript
+@Cron({
+  schedule: 'cron(0 0 * * ? *)',
+  retryAttempts: 3,
+  maxEventAge: 3600,
+})
+criticalNightlyJob() {
+  // Retries up to 3 times, discards events older than 1 hour
+}
+```
+
+| Option          | Type     | Description                                                |
+| --------------- | -------- | ---------------------------------------------------------- |
+| `retryAttempts` | `number` | Maximum retry attempts if the target invocation fails      |
+| `maxEventAge`   | `number` | Maximum event age in seconds before the event is discarded |

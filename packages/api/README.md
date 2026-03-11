@@ -1,8 +1,6 @@
 # @lafken/api
 
-`@lafken/api` helps you build AWS REST APIs in the simplest possible way.
-It provides decorators and helper functions so you can declare endpoints, events, and integrations with minimal code — while Lafken handles the AWS infrastructure for you.
-
+Build AWS REST APIs using TypeScript decorators. `@lafken/api` lets you declare endpoints, request/response models, authorizers, and AWS service integrations directly in your classes — Lafken generates all the API Gateway and Lambda infrastructure for you.
 
 ## Installation
 
@@ -10,337 +8,632 @@ It provides decorators and helper functions so you can declare endpoints, events
 npm install @lafken/api
 ```
 
-## Configuration
+## Getting Started
 
-The first step is to add a resolver to your application. To do this, import ApiResolver from @lafken/api/resolver and include it in the resolvers array by instantiating the class: new ApiResolver({}).
-
-If you don’t provide any configuration, a default API will be created using minimal settings. By passing properties to the resolver, you can customize the API name, CORS options, authorizers, supported media types, and more. You can also extend the API’s capabilities using CDKTN.
+Register the `ApiResolver` in your application and define your first API resource:
 
 ```typescript
+import { createApp, createModule } from '@lafken/main';
 import { ApiResolver } from '@lafken/api/resolver';
+import { Api, Get, Post, Event, ApiRequest, BodyParam } from '@lafken/api/main';
 
+// 1. Define request payload
+@ApiRequest()
+class CreateTaskPayload {
+  @BodyParam({ minLength: 1 })
+  title: string;
+}
+
+// 2. Define the API resource
+@Api({ path: '/tasks' })
+class TaskApi {
+  @Get()
+  list() {
+    return [{ id: 1, title: 'Review PR' }];
+  }
+
+  @Post()
+  create(@Event(CreateTaskPayload) payload: CreateTaskPayload) {
+    return { id: 2, title: payload.title };
+  }
+}
+
+// 3. Register it in a module
+const taskModule = createModule({
+  name: 'tasks',
+  resources: [TaskApi],
+});
+
+// 4. Add the resolver to your app
 createApp({
-  name: 'awesome-app',
+  name: 'my-app',
   resolvers: [
     new ApiResolver({
       restApi: {
-        name: 'awesome-rest-api',
-        cors: {
-          allowOrigins: true,
-        },
-        stage: {
-          stageName: 'dev',
-        },
+        name: 'my-rest-api',
+        cors: { allowOrigins: true },
+        stage: { stageName: 'dev' },
       },
     }),
   ],
-  ...
+  modules: [taskModule],
 });
 ```
 
-ApiResolver supports multiple configuration options and allows you to create multiple APIs within the same application.
-
-Next, to initialize the resolver, you need to import the classes decorated with the @Api decorator into your modules. This will automatically create the required AWS resources.
-
-```typescript
-@Api({
-  path: '/greeting'
-})
-class GreetingApi {
-  @Get()
-  sayHello() {
-    return 'Hello'
-  }
-}
-
-const greetingModule = createModule({
-  name: 'greeting',
-  resources: [
-    GreetingApi
-  ]
-});
-
-```
+If no configuration is passed to `ApiResolver`, a default API Gateway is created with minimal settings. You can also create multiple APIs within the same application by passing multiple configuration objects.
 
 ## Features
 
-### HTTP Resources
-Create HTTP resources using the `@Get`, `@Post`, `@Put`, `@Patch`, `@Delete`, and `@Any` decorators. These endpoints can directly invoke Lambda functions or integrate with AWS services.
+### HTTP Methods
+
+Use `@Get`, `@Post`, `@Put`, `@Patch`, `@Delete`, `@Head`, and `@Any` to define endpoints. Each decorator creates a Lambda-backed method on the API Gateway resource defined by `@Api`.
+
+The method path is appended to the base path set in `@Api`:
 
 ```typescript
-import { Post } from '@lafken/api/main';
-//...
-@Post({
-  path: '{name}'
-})
-sayHello () {
-  return  'hello'
+import { Api, Get, Post, Put, Delete } from '@lafken/api/main';
+
+@Api({ path: '/articles' })
+class ArticleApi {
+  @Get()
+  listAll() {
+    return [{ id: 1, title: 'Getting Started' }];
+  }
+
+  @Get({ path: '{id}' })
+  getById() {
+    return { id: 1, title: 'Getting Started' };
+  }
+
+  @Post()
+  create() {
+    return { id: 2, title: 'New Article' };
+  }
+
+  @Put({ path: '{id}' })
+  update() {
+    return { updated: true };
+  }
+
+  @Delete({ path: '{id}' })
+  remove() {
+    return { deleted: true };
+  }
 }
 ```
-### Event
-A decorated method can receive an event payload using the `@Event` decorator, which takes a class annotated with the `@ApiRequest` decorator. The `@ApiRequest`/`@BodyParam`/`@PathParam`/`@QueryParam`/`@HeaderParam` decorators allow you to specify where each property comes from—body, path, query, headers, or context—binding those values to the event and automatically generating a fully resolved Velocity `requestTemplate` internally.
+
+### Request Events
+
+Handler methods receive structured input through the `@Event` decorator combined with an `@ApiRequest` class. Field decorators specify where each value is extracted from in the HTTP request:
+
+| Decorator        | Source                         | Always Required |
+| ---------------- | ------------------------------ | --------------- |
+| `@BodyParam`     | Request body                   | Yes (default)   |
+| `@PathParam`     | URL path parameter             | Yes (always)    |
+| `@QueryParam`    | Query string parameter         | Yes (default)   |
+| `@HeaderParam`   | HTTP header                    | Yes (default)   |
+| `@ContextParam`  | API Gateway request context    | Yes (always)    |
+
+These decorators generate a fully resolved Velocity `requestTemplate` internally, mapping each field to the correct source.
+
 ```typescript
-import { Post, ApiRequest, PathParam, BodyParam Event } from '@lafken/api/main';
-// ...
+import { Api, Post, Event, ApiRequest, PathParam, BodyParam, QueryParam } from '@lafken/api/main';
+
 @ApiRequest()
-class HelloPayload {
+class CreateCommentPayload {
   @PathParam()
-  id: number;
+  articleId: number;
+
+  @BodyParam({ minLength: 1, maxLength: 500 })
+  content: string;
+
+  @QueryParam({ required: false })
+  notify: string;
+}
+
+@Api({ path: '/articles' })
+class ArticleApi {
+  @Post({ path: '{articleId}/comments' })
+  addComment(@Event(CreateCommentPayload) payload: CreateCommentPayload) {
+    return { articleId: payload.articleId, content: payload.content };
+  }
+}
+```
+
+#### Body Parameter Validation
+
+`@BodyParam` supports type-specific validation constraints that map to OpenAPI schema attributes:
+
+```typescript
+@ApiRequest()
+class SignupPayload {
+  @BodyParam({ minLength: 3, maxLength: 50 })
+  username: string;
+
+  @BodyParam({ format: 'email' })
+  email: string;
+
+  @BodyParam({ min: 18, max: 120 })
+  age: number;
+
+  @BodyParam({ minItems: 1, uniqueItems: true })
+  roles: string[];
+}
+```
+
+#### Nested Request Objects
+
+Use `@RequestObject` (an alias for `@ApiRequest`) to define nested structures within a request payload:
+
+```typescript
+import { ApiRequest, RequestObject, BodyParam } from '@lafken/api/main';
+
+@RequestObject()
+class Address {
+  @BodyParam()
+  street: string;
 
   @BodyParam()
+  city: string;
+}
+
+@ApiRequest()
+class CreateContactPayload {
+  @BodyParam({ minLength: 1 })
   name: string;
-}
-// ...
-@Post({
-  path: '{id}',
-})
-sayHello(@Event(HelloPayload) e: HelloPayload) {
-  return `hello ${e.name}`;
+
+  @BodyParam({ type: Address })
+  address: Address;
 }
 ```
-### AWS integrations
-You can integrate an HTTP method directly with an AWS service without using a Lambda function. Each method decorator (`@Get`, `@Post`, `@Put`, etc.) can include an `integration` property, which accepts one of the following values: `bucket`, `dynamodb`, `queue`, or `state-machine`, along with an `action` that represents the operation to perform (which varies depending on the integration type).  
-The response format also depends on the type of integration.
+
+#### Context Parameters
+
+Access API Gateway context variables such as request IDs or client IPs using `@ContextParam`:
+
+```typescript
+@ApiRequest()
+class AuditedPayload {
+  @BodyParam()
+  action: string;
+
+  @ContextParam({ name: 'requestId' })
+  requestId: string;
+
+  @ContextParam({ name: 'identity.sourceIp' })
+  clientIp: string;
+}
+```
+
+### AWS Service Integrations
+
+HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and use `@IntegrationOptions` to reference other infrastructure resources via `getResourceValue`.
+
+Supported integrations:
+
+| Integration      | Actions                        |
+| ---------------- | ------------------------------ |
+| `bucket`         | `Download`, `Upload`, `Delete` |
+| `dynamodb`       | `Query`, `Put`, `Delete`       |
+| `queue`          | `SendMessage`                  |
+| `state-machine`  | `Start`, `Stop`, `Status`      |
+
+#### S3 Bucket Integration
+
 ```typescript
 import {
+  Api,
   Get,
+  Put,
   IntegrationOptions,
-  BucketIntegrationOption,
-  BucketIntegrationResponse
-} from '@lafken/api/main';
-//...
-@Get({
-  integration: 'bucket',
-  action: 'Download',
-})
-get(
-  @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
-): BucketIntegrationResponse {
-  return {
-    bucket: getResourceValue('lafken-example-documents', 'id'),
-    object: 'new.json',
-  };
-}
-```
-
-Integrations can also receive the `@IntegrationOptions` decorator, which provides helper functions for building the integration. The `getResourceValue` function allows you to reference values from resources created by other resolvers and pass them into the integration configuration.
-
-### Responses
-Although you can return values without explicitly defining a response type, you can also attach one or multiple custom responses to each HTTP method. This allows you to generate `responseModels` and `responseTemplates` for every case.
-
-To do this, decorate a class with the `@ApiResponse` decorator and pass that class to the method via the `response` property. By default, the payload of your response must match the structure defined in the class.  
-However, you can specify additional responses by mapping an HTTP status code to a class (or to `true` if the response does not return a payload).
-
-```typescript
-@ApiResponse()
-export class Res404 {
-  @ResField()
-  foo: string;
-}
-
-@ApiResponse()
-export class Res307 {
-  @ResField()
-  bar: string;
-}
-
-@ApiResponse({
-  responses: {
-    404: Res404,
-    307: Res307,
-    204: true,
-  },
-})
-export class GreetingResponse {
-  @ResField()
-  fullName: string;
-
-  @ResField()
-  id: number;
-}
-
-@Post({
-  response: GreetingResponse,
-})
-sayHello(): GreetingResponse {
-  if (/* logic for 404 response */) {
-    response<Res404>(404, {
-      foo: '404',
-    });
-  }
-
-  if (/* logic for 307 response */) {
-    response<Res307>(307, {
-      bar: '307',
-    });
-  }
-
-  if (/* logic for 204 response */) {
-    response(204);
-  }
-
-  return {
-    fullName: 'Lafken',
-    id: 1,
-  };
-}
-```
-
-The `response` function allows you to return a response that will be interpreted by API Gateway.
-
-If you don’t explicitly specify a status code, a default one will be used: for example, a `POST` request will default to `201`, while most other methods default to `200`.  
-This behavior can be overridden by setting `defaultCode` in the `@ApiResponse` decorator:
-
-```typescript
-@ApiResponse({
-  defaultCode: 301,
-  responses: {
-    // ...
-  },
-})
-```
-
-If the method does not define a `response` property, a default set of status codes will be generated automatically—typically the appropriate `20X` responses along with standard `400` and `500` error responses.
-
-### Authorizers
-
-To add authorization to your endpoints, Lafken supports three types of authorizers: `api-key`, `cognito`, and `custom`. These options allow you to apply different levels and styles of security to your application, depending on your needs.
-
-#### ApiKeyAuthorizer
-Allows you to specify the usage plans and API keys that will be applied to different endpoints in the application.
-
-To create an API key authorizer, you need to decorate a class with the `@ApiKeyAuthorizer` decorator, which accepts the necessary configuration properties.
-
-```typescript
-@ApiKeyAuthorizer({
-  name: 'api-key-auth',
-  defaultKeys: ['awesome-key'],
-})
-export class ApiKeyAuth {}
-```
-
-The `defaultKeys` property allows you to create default API keys that will be used by the application.
-
-#### CustomAuthorizer
-
-A custom authorizer allows you to implement your own authentication logic, providing greater flexibility when validating access. To create a custom authorizer, decorate a class with the `@CustomAuthorizer` decorator and provide the required configuration properties.  
-Additionally, the class must include a method decorated with `@AuthorizerHandler`, which acts as the entry point for validating requests.
-
-```typescript
-import {
-  type AuthorizationHandlerEvent,
-  AuthorizerHandler,
-  type AuthorizerResponse,
-  CustomAuthorizer,
+  type BucketIntegrationOption,
+  type BucketIntegrationResponse,
 } from '@lafken/api/main';
 
-@CustomAuthorizer({
-  name: 'AwesomeCustomAuthorizer',
-  header: 'Authorization',
-})
-export class AwesomeCustomAuthorizer {
-  @AuthorizerHandler()
-  handler(_e: AuthorizationHandlerEvent): AuthorizerResponse {
+@Api({ path: '/documents' })
+class DocumentApi {
+  @Get({
+    integration: 'bucket',
+    action: 'Download',
+  })
+  download(
+    @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
+  ): BucketIntegrationResponse {
     return {
-      allow: true,
-      principalId: 'example@example.com',
+      bucket: getResourceValue('project-documents', 'id'),
+      object: 'report.pdf',
+    };
+  }
+
+  @Put({
+    integration: 'bucket',
+    action: 'Upload',
+  })
+  upload(
+    @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
+  ): BucketIntegrationResponse {
+    return {
+      bucket: getResourceValue('project-documents', 'id'),
+      object: 'new-report.pdf',
     };
   }
 }
 ```
 
-The handler receives an `AuthorizationHandlerEvent`, which includes all information available in the `APIGatewayRequestAuthorizerEvent` (from Lambda types), along with an array of permissions that can be configured per HTTP method if needed.  
-The method must return an `AuthorizerResponse`, indicating whether the request is authorized (`allow: true`) and specifying the authorized principal.
+#### DynamoDB Integration
 
-#### CognitoAuthorizer
-Enables integration with a Cognito User Pool to authorize your HTTP methods. Before using it, you must first configure `@lafken/auth`.  
-To create a Cognito authorizer, decorate a class with the `@CognitoAuthorizer` decorator and provide the required properties
+```typescript
+import {
+  Api,
+  Get,
+  Post,
+  IntegrationOptions,
+  type DynamoIntegrationOption,
+  type DynamoQueryIntegrationResponse,
+  type DynamoPutIntegrationResponse,
+} from '@lafken/api/main';
+
+@Api({ path: '/products' })
+class ProductApi {
+  @Get({
+    integration: 'dynamodb',
+    action: 'Query',
+  })
+  search(
+    @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
+  ): DynamoQueryIntegrationResponse {
+    return {
+      tableName: getResourceValue('products-table', 'id'),
+      partitionKey: { category: 'electronics' },
+    };
+  }
+
+  @Post({
+    integration: 'dynamodb',
+    action: 'Put',
+  })
+  add(
+    @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
+  ): DynamoPutIntegrationResponse {
+    return {
+      tableName: getResourceValue('products-table', 'id'),
+      data: { name: 'Keyboard', price: 75 },
+    };
+  }
+}
+```
+
+#### SQS Queue Integration
+
+```typescript
+import {
+  Api,
+  Post,
+  IntegrationOptions,
+  type QueueIntegrationOption,
+  type QueueSendMessageIntegrationResponse,
+} from '@lafken/api/main';
+
+@Api({ path: '/notifications' })
+class NotificationApi {
+  @Post({
+    integration: 'queue',
+    action: 'SendMessage',
+  })
+  enqueue(
+    @IntegrationOptions() { getResourceValue }: QueueIntegrationOption,
+  ): QueueSendMessageIntegrationResponse {
+    return {
+      queueName: getResourceValue('notification-queue', 'id'),
+      body: { type: 'welcome', recipient: 'new-user' },
+    };
+  }
+}
+```
+
+#### State Machine Integration
+
+```typescript
+import {
+  Api,
+  Post,
+  Get,
+  IntegrationOptions,
+  type StateMachineIntegrationOption,
+  type StateMachineStartIntegrationResponse,
+  type StateMachineStatusIntegrationResponse,
+} from '@lafken/api/main';
+
+@Api({ path: '/workflows' })
+class WorkflowApi {
+  @Post({
+    integration: 'state-machine',
+    action: 'Start',
+  })
+  start(
+    @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
+  ): StateMachineStartIntegrationResponse {
+    return {
+      stateMachineArn: getResourceValue('processing-workflow', 'arn'),
+      input: { step: 'begin' },
+    };
+  }
+
+  @Get({
+    integration: 'state-machine',
+    action: 'Status',
+  })
+  status(
+    @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
+  ): StateMachineStatusIntegrationResponse {
+    return {
+      executionArn: getResourceValue('processing-workflow', 'arn'),
+    };
+  }
+}
+```
+
+### Responses
+
+You can return values directly from handler methods without defining a response type. However, for more control over status codes and response models, use the `@ApiResponse` and `@ResField` decorators.
+
+#### Basic Response Model
+
+Define a response class and pass it to the method decorator via the `response` property:
+
+```typescript
+import { Api, Get, ApiResponse, ResField } from '@lafken/api/main';
+
+@ApiResponse()
+class ArticleResponse {
+  @ResField()
+  title: string;
+
+  @ResField()
+  views: number;
+}
+
+@Api({ path: '/articles' })
+class ArticleApi {
+  @Get({ path: '{id}', response: ArticleResponse })
+  getById(): ArticleResponse {
+    return { title: 'Getting Started', views: 42 };
+  }
+}
+```
+
+#### Multiple Status Codes
+
+Map different HTTP status codes to distinct response classes. Use `true` for responses without a body:
+
+```typescript
+import { Api, Post, ApiResponse, ResField, response } from '@lafken/api/main';
+
+@ApiResponse()
+class ErrorResponse {
+  @ResField()
+  message: string;
+}
+
+@ApiResponse({
+  responses: {
+    400: ErrorResponse,
+    204: true,
+  },
+})
+class CreateArticleResponse {
+  @ResField()
+  id: number;
+
+  @ResField()
+  title: string;
+}
+
+@Api({ path: '/articles' })
+class ArticleApi {
+  @Post({ response: CreateArticleResponse })
+  create(): CreateArticleResponse {
+    const isInvalid = false;
+
+    if (isInvalid) {
+      response<ErrorResponse>(400, { message: 'Title is required' });
+    }
+
+    return { id: 1, title: 'New Article' };
+  }
+}
+```
+
+The `response()` function returns a response with a specific status code that API Gateway interprets correctly.
+
+#### Default Status Codes
+
+If no `response` property is set, default status codes are generated automatically (`20X` for success, `400` and `500` for errors). The default success code depends on the HTTP method:
+
+- `POST` defaults to `201`
+- All other methods default to `200`
+
+Override the default code with `defaultCode`:
+
+```typescript
+@ApiResponse({
+  defaultCode: 202,
+})
+class AsyncResponse {
+  @ResField()
+  jobId: string;
+}
+```
+
+#### Nested Response Objects
+
+Use `@ResponseObject` to define nested structures within a response:
+
+```typescript
+import { ApiResponse, ResponseObject, ResField } from '@lafken/api/main';
+
+@ResponseObject()
+class AuthorInfo {
+  @ResField()
+  name: string;
+
+  @ResField()
+  email: string;
+}
+
+@ApiResponse()
+class ArticleDetailResponse {
+  @ResField()
+  title: string;
+
+  @ResField({ type: AuthorInfo })
+  author: AuthorInfo;
+}
+```
+
+### Authorizers
+
+Lafken supports three authorization strategies: **API Key**, **Custom Lambda**, and **Cognito**. Each is defined as a decorated class and registered in the `ApiResolver`.
+
+#### API Key Authorizer
+
+Protects endpoints by requiring a valid API key. Optionally configure quota limits and throttling:
+
+```typescript
+import { ApiKeyAuthorizer } from '@lafken/api/main';
+
+@ApiKeyAuthorizer({
+  name: 'platform-api-key',
+  defaultKeys: ['default-key'],
+  quota: { limit: 10000, period: 'month' },
+  throttle: { burstLimit: 50, rateLimit: 100 },
+})
+export class PlatformApiKey {}
+```
+
+#### Custom Authorizer
+
+Implement your own authentication logic with a Lambda-backed authorizer. The class must include a method decorated with `@AuthorizerHandler`:
+
+```typescript
+import {
+  CustomAuthorizer,
+  AuthorizerHandler,
+  type AuthorizationHandlerEvent,
+  type AuthorizerResponse,
+} from '@lafken/api/main';
+
+@CustomAuthorizer({
+  name: 'token-auth',
+  header: 'Authorization',
+  authorizerResultTtlInSeconds: 300,
+})
+export class TokenAuthorizer {
+  @AuthorizerHandler()
+  validate(event: AuthorizationHandlerEvent): AuthorizerResponse {
+    const isValid = event.headers?.Authorization === 'Bearer valid-token';
+
+    return {
+      principalId: 'user@example.com',
+      allow: isValid,
+    };
+  }
+}
+```
+
+The handler receives an `AuthorizationHandlerEvent` — the standard `APIGatewayRequestAuthorizerEvent` enriched with a `permissions` array containing the scopes configured for the invoked method. It must return an `AuthorizerResponse` with `allow` and `principalId`.
+
+#### Cognito Authorizer
+
+Integrates with an Amazon Cognito User Pool for token-based authorization. Requires `@lafken/auth` to be configured first:
 
 ```typescript
 import { CognitoAuthorizer } from '@lafken/api/main';
 
 @CognitoAuthorizer({
-  userPool: 'example-user-pool',
+  userPool: 'main-user-pool',
   name: 'cognito-auth',
+  header: 'Authorization',
+  authorizerResultTtlInSeconds: 300,
 })
-export class CognitoAuth {}
+export class MainCognitoAuth {}
 ```
 
-#### Adding an Authorizer to an API
-Once one or more authorizer classes have been created, you need to pass them to the `AuthResolver` so they can be used internally by the API.
+#### Registering Authorizers
+
+Pass authorizer classes to the `ApiResolver` and optionally set a default authorizer for all methods:
 
 ```typescript
 new ApiResolver({
   restApi: {
-    name: 'awesome-rest-api',
+    name: 'my-rest-api',
     auth: {
-      authorizers: [
-        AwesomeApiKey,
-        AwesomeCustomAuth,
-      ],
-      defaultAuthorizerName: 'AwesomeCustomAuth',
+      authorizers: [PlatformApiKey, TokenAuthorizer],
+      defaultAuthorizerName: 'token-auth',
     },
   },
-}),
+});
 ```
 
-The `defaultAuthorizerName` property specifies the authorizer that will be applied to all methods by default. This setting can be overridden at both the resource level and the individual method level if needed.
+#### Applying Authorizers
 
-#### Using an Authorizer
-To use an authorizer other than the default, both the `@Api` decorator and the HTTP method decorators (`@Post`, `@Get`, `@Put`, etc.) support an `auth` property.  
-This property allows you to specify an `authorizerName`, which must match the name configured for the authorizer you want to use.
+The `auth` property is available on both `@Api` (class-level) and method decorators (`@Get`, `@Post`, etc.). Method-level settings override class-level ones.
 
-To apply an authorizer to every method within a class, you can set the `auth` property directly on the `@Api` decorator.
-```
+Apply to all methods in a class:
+
+```typescript
 @Api({
-  auth: {
-    authorizerName: 'AwesomeApiKey',
-  },
+  path: '/admin',
+  auth: { authorizerName: 'platform-api-key' },
 })
-// ...
-```
-To apply an authorizer only to a specific method, define the `auth` property directly inside that method’s decorator. This overrides both the API-level and class-level authorizer settings.
-```typescript
-@Get({
-  auth: {
-    authorizerName: 'AwesomeCustomAuth',
-  },
-})
-// ...
+class AdminApi { /* ... */ }
 ```
 
-To disable authorization for a specific method or API, simply set the `auth` property to `false`
-
-#### Adding Scopes to an Authorizer
-Both the Cognito authorizer and the custom authorizer support scopes, which are simply an array of strings passed to the authorizer.  
-For custom authorizers, these scopes are delivered to the handler through the `permissions` property.
+Apply to a specific method:
 
 ```typescript
 @Get({
-  auth: {
-    authorizerName: 'AwesomeCustomAuth',
-    scopes: ['user:delete', 'user:read'],
-  },
+  path: '{id}',
+  auth: { authorizerName: 'token-auth' },
 })
-//...
+getById() { /* ... */ }
 ```
 
-These scopes allow you to define fine-grained authorization rules for each method.
+Disable authorization for a specific method or entire class:
 
-### Extending API Capabilities
+```typescript
+@Get({ auth: false })
+healthCheck() {
+  return { status: 'ok' };
+}
+```
 
-The `ApiResolver` allows you to enhance and customize the generated API by providing an `extend` function.  
-This function receives the created API instance, enabling you to modify or augment its configuration using CDKTN, for example, adding a custom domain or adjusting internal settings.
+#### Scopes
+
+Both Custom and Cognito authorizers support scopes — an array of strings delivered to the authorizer handler via the `permissions` property:
+
+```typescript
+@Delete({
+  path: '{id}',
+  auth: {
+    authorizerName: 'token-auth',
+    scopes: ['article:delete'],
+  },
+})
+remove() { /* ... */ }
+```
+
+### Extending the API
+
+The `ApiResolver` accepts an `extend` function that receives the generated API instance and the app scope. Use it to apply advanced CDKTN configuration such as custom domains or additional settings:
 
 ```typescript
 new ApiResolver({
   restApi: {
-    name: 'awesome-rest-api',
+    name: 'my-rest-api',
   },
   extend: ({ api, scope }) => {
-    // add a custom domain
+    // Add a custom domain, WAF, or any CDKTN construct
   },
-}),
+});
 ```
-
-This mechanism provides maximum flexibility, allowing you to integrate advanced AWS resources or apply custom infrastructure logic directly on top of the generated API.

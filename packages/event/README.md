@@ -1,6 +1,6 @@
 # @lafken/event
 
-`@lafken/event` helps you create listeners for EventBridge events and trigger Lambda functions to process those events. It provides decorators that simplify configuring event listeners—whether for custom events or built-in sources like S3 and DynamoDB.
+Listen and react to Amazon EventBridge events using TypeScript decorators. `@lafken/event` lets you define event rules with pattern-based filtering and automatically connects them to Lambda functions. Supports custom events, S3 notifications, and DynamoDB stream events.
 
 ## Installation
 
@@ -8,88 +8,104 @@
 npm install @lafken/event
 ```
 
-## Configuration
+## Getting Started
 
-Add the EventRuleResolver from the @lafken/event/resolver library.
-In its configuration, you can define one or more event buses. If no event bus is provided, the default EventBridge bus will be used for communication.
-
-```typescript
-import { ApiResolver } from '@lafken/event/resolver';
-
-createApp({
-  name: 'awesome-app',
-  resolvers: [
-    new EventRuleResolver({
-      busName: 'awesome-event-bus',
-      extend: ({ eventBus }) => {
-        // ... extend the event bus
-      },
-    }),
-  ],
-  ...
-});
-```
-
-This setup allows you to customize how events are routed and processed within your application.
-
-Next, you need to configure the module by importing the class resources decorated with the @EventRule decorator. These classes must contain methods decorated with @Rule, which will create the event listener and attach the corresponding Lambda function for execution.
+Define an event rule class with `@EventRule`, add `@Rule` methods with event patterns, and register everything through `EventRuleResolver`:
 
 ```typescript
-@EventRule({
-  minify: false,
-})
-export class GreetingEvent {
+import { createApp, createModule } from '@lafken/main';
+import { EventRuleResolver } from '@lafken/event/resolver';
+import { EventRule, Rule, Event } from '@lafken/event/main';
+
+// 1. Define event handlers
+@EventRule()
+export class OrderEvents {
   @Rule({
-    bus: 'awesome-event-bus',
     pattern: {
-      source: 'simple-source',
+      source: 'orders',
+      detailType: ['order.created'],
     },
   })
-  simpleEvent(@Event() e: any) {
-    // ...
+  onOrderCreated(@Event() event: any) {
+    console.log('New order:', event);
   }
 }
 
-const greetingModule = createModule({
-  name: 'greeting',
-  resources: [
-    GreetingEvent
-  ]
+// 2. Register in a module
+const orderModule = createModule({
+  name: 'order',
+  resources: [OrderEvents],
+});
+
+// 3. Add the resolver to the app
+createApp({
+  name: 'my-app',
+  resolvers: [new EventRuleResolver({ busName: 'my-event-bus' })],
+  modules: [orderModule],
 });
 ```
 
+Each `@Rule` method becomes an independent Lambda function triggered by matching EventBridge events. The event payload is automatically passed through `$.detail`.
+
 ## Features
 
-### Receiving and Filtering Events
-The @Rule decorator allows you to define an event pattern by specifying the event source and applying filters on detail and detailType.
+### Event Rule Class
+
+Use the `@EventRule` decorator to group related event handlers in a single class:
+
+```typescript
+import { EventRule, Rule, Event } from '@lafken/event/main';
+
+@EventRule()
+export class InventoryEvents {
+  @Rule({
+    pattern: {
+      source: 'inventory',
+      detailType: ['stock.updated'],
+    },
+  })
+  onStockUpdate(@Event() event: any) { }
+
+  @Rule({
+    pattern: {
+      source: 'inventory',
+      detailType: ['stock.depleted'],
+    },
+  })
+  onStockDepleted(@Event() event: any) { }
+}
+```
+
+### Custom Events
+
+Define rules that match custom events by specifying `source`, `detailType`, and `detail` filters:
 
 ```typescript
 @Rule({
   pattern: {
-    source: 'simple-source',
+    source: 'payments',
+    detailType: ['payment.completed', 'payment.refunded'],
     detail: {
-      name: ['foo', 'bar'],
+      currency: ['USD', 'EUR'],
     },
-    detailType: ['CREATE', 'UPDATE'],
   },
 })
-// ...
-```
-
-### Receiving Events
-To access the payload sent by an event, you must use the @Event decorator. This decorator automatically maps the event’s inputPath to $.detail, allowing you to receive the event data directly as a parameter.
-
-```typescript
-@Rule(/* ... */)
-sayHelloFromEvent(@Event() event: any) {
-  console.log('simple source', event);
+onPaymentEvent(@Event() event: any) {
+  // Triggered only for USD or EUR payments
 }
 ```
-### S3 integrations
-Event rules also support integration with Amazon S3 through EventBridge-enabled bucket notifications.
-When this integration is enabled, S3 events are delivered to EventBridge, allowing fine-grained filtering based on event metadata such as the bucket name, object key, and event type.
 
-To enable S3 integration within an event rule, set the integration property to 's3' and define a pattern that matches the desired S3 event structure.
+#### Pattern Fields
+
+| Field        | Type       | Description                                          |
+| ------------ | ---------- | ---------------------------------------------------- |
+| `source`     | `string`   | Event source identifier (required)                   |
+| `detailType` | `string[]` | Event type names to match                            |
+| `detail`     | `object`   | Attribute-level filtering on the event payload       |
+
+### S3 Integration
+
+Listen for S3 bucket notifications delivered through EventBridge. Set `integration: 's3'` and define a pattern matching the S3 event structure:
 
 ```typescript
 @Rule({
@@ -98,65 +114,175 @@ To enable S3 integration within an event rule, set the integration property to '
     detailType: ['Object Created'],
     detail: {
       bucket: {
-        name: ['lafken-example-documents'],
+        name: ['uploads-bucket'],
       },
       object: {
-        key: [
-          {
-            prefix: 'test.json',
-          },
-        ],
+        key: [{ prefix: 'images/' }],
       },
     },
   },
 })
-s3(@Event() event: any) {
-  // Handler logic
+onImageUploaded(@Event() event: any) {
+  // Triggered when a new object is created under images/
 }
 ```
 
-### Dynamo Integration
-Event rules can also consume and process events emitted by Amazon DynamoDB Streams.
-To use this integration, you must first enable DynamoDB Streams on the target table. Once enabled, DynamoDB will emit change records (INSERT, MODIFY, REMOVE), which can be routed through EventBridge and processed by your rule.
+#### S3 Pattern Options
 
-After the stream is configured, you can define a rule with the integration: 'dynamodb' option and provide a pattern to filter the specific DynamoDB events you want to handle.
+| Field                 | Type                               | Description                                  |
+| --------------------- | ---------------------------------- | -------------------------------------------- |
+| `detailType`          | `S3DetailType[]`                   | `'Object Created'` or `'Object Deleted'`     |
+| `detail.bucket.name`  | `string[]`                         | Bucket names to match                        |
+| `detail.object.key`   | `(string \| S3ObjectKey)[]`        | Object keys or prefix/suffix patterns        |
+
+Object key filters support `prefix` and `suffix` matching:
+
+```typescript
+detail: {
+  object: {
+    key: [
+      { prefix: 'uploads/' },
+      { suffix: '.pdf' },
+      'exact-filename.txt',
+    ],
+  },
+}
+```
+
+### DynamoDB Integration
+
+Consume events from DynamoDB Streams routed through EventBridge. The target table must have streams enabled (see `@lafken/dynamo` stream configuration). Set `integration: 'dynamodb'` and use `source` to specify the table name:
 
 ```typescript
 @Rule({
   integration: 'dynamodb',
   pattern: {
-    source: 'clients',
+    source: 'customers',
     detail: {
       eventName: ['INSERT', 'MODIFY'],
-      keys: {
-        email: {
-          prefix: 'awesome',
-        },
+      newImage: {
+        status: ['active'],
       },
     },
   },
 })
-dynamo(@Event() e: any) {
-  // ...
+onCustomerChange(@Event() event: any) {
+  // Triggered on INSERT or MODIFY where status is 'active'
 }
 ```
 
-### Event bus
+#### DynamoDB Pattern Options
 
-It is possible to configure multiple Event Buses when initializing the EventRuleResolver. Each event bus can then be referenced from individual rules by specifying its name in the bus property of the @Rule decorator.
+| Field              | Type                                    | Description                                   |
+| ------------------ | --------------------------------------- | --------------------------------------------- |
+| `source`           | `string`                                | DynamoDB table name                           |
+| `detail.eventName` | `('INSERT' \| 'MODIFY' \| 'REMOVE')[]` | Stream event types to match                   |
+| `detail.keys`      | `DynamoAttributeFilters`                | Filter by primary key values                  |
+| `detail.newImage`  | `DynamoAttributeFilters`                | Filter by new item attributes (after change)  |
+| `detail.oldImage`  | `DynamoAttributeFilters`                | Filter by old item attributes (before change) |
 
-If no event bus is explicitly configured for a rule, the default EventBridge bus will be used automatically.
-
+Attribute filters support EventBridge content-based filtering patterns:
 
 ```typescript
-//...
-new EventRuleResolver({
-  busName: 'awesome-event-bus',
-  extend: ({ eventBus }) => {
-    // ... extend the event bus
+detail: {
+  keys: {
+    email: ['user@example.com'],
+    age: [{ numeric: ['>', 18] }],
   },
-}, {
-  busName: 'another-event-bus'
-}),
-// ...
+  newImage: {
+    name: [{ prefix: 'A' }],
+    role: [{ 'anything-but': 'admin' }],
+  },
+}
 ```
+
+#### Available Filter Patterns
+
+| Pattern               | Example                                   | Description                        |
+| --------------------- | ----------------------------------------- | ---------------------------------- |
+| Exact match           | `'value'`                                 | Matches exact string or number     |
+| `prefix`              | `{ prefix: 'usr_' }`                     | Starts with                        |
+| `suffix`              | `{ suffix: '.com' }`                     | Ends with                          |
+| `anything-but`        | `{ 'anything-but': 'admin' }`            | Matches everything except          |
+| `numeric`             | `{ numeric: ['>', 100] }`                | Numeric comparison                 |
+| `numeric` (range)     | `{ numeric: ['>=', 0, '<', 100] }`       | Numeric range                      |
+| `exists`              | `{ exists: true }`                        | Field exists or does not exist     |
+| `equals-ignore-case`  | `{ 'equals-ignore-case': 'active' }`     | Case-insensitive string match      |
+
+### Receiving Events
+
+Use the `@Event` parameter decorator to inject the EventBridge event payload into a handler method. The payload is automatically extracted from `$.detail`:
+
+```typescript
+@Rule({
+  pattern: {
+    source: 'notifications',
+    detailType: ['notification.sent'],
+  },
+})
+onNotification(@Event() event: any) {
+  // event contains the detail object, not the full EventBridge envelope
+  console.log(event.recipientId, event.channel);
+}
+```
+
+### Event Buses
+
+Configure one or more custom event buses when initializing `EventRuleResolver`. Each `@Rule` can target a specific bus via the `bus` option. If omitted, the default EventBridge bus is used:
+
+```typescript
+import { EventRuleResolver } from '@lafken/event/resolver';
+
+createApp({
+  name: 'my-app',
+  resolvers: [
+    new EventRuleResolver(
+      {
+        busName: 'orders-bus',
+        extend: ({ eventBus, scope }) => {
+          // Apply additional CDKTN configuration
+        },
+      },
+      {
+        busName: 'notifications-bus',
+      }
+    ),
+  ],
+});
+```
+
+Reference a specific bus from a rule:
+
+```typescript
+@Rule({
+  bus: 'orders-bus',
+  pattern: {
+    source: 'checkout',
+    detailType: ['checkout.completed'],
+  },
+})
+onCheckout(@Event() event: any) { }
+```
+
+### Retry Policy
+
+Configure how EventBridge handles failed target invocations using `retryAttempts` and `maxEventAge`:
+
+```typescript
+@Rule({
+  retryAttempts: 3,
+  maxEventAge: 7200,
+  pattern: {
+    source: 'billing',
+    detailType: ['invoice.generated'],
+  },
+})
+onInvoice(@Event() event: any) {
+  // Retries up to 3 times, discards events older than 2 hours
+}
+```
+
+| Option          | Type     | Description                                                |
+| --------------- | -------- | ---------------------------------------------------------- |
+| `retryAttempts` | `number` | Maximum retry attempts if the target invocation fails      |
+| `maxEventAge`   | `number` | Maximum event age in seconds before the event is discarded |
