@@ -207,7 +207,7 @@ describe('state-machine resolver', () => {
       expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
         name: 'TestSM',
         definition:
-          '{"StartAt":"task","States":{"task":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"End":true,"Output":"{% $exist($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
+          '{"StartAt":"task","States":{"task":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{"executionId":"{% $states.context.Execution.Id %}"},"FunctionName":"test-function"},"End":true,"Output":"{% $exists($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
       });
     });
 
