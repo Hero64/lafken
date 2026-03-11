@@ -1,5 +1,58 @@
 # @lafken/main
 
+## 0.8.0
+
+### Minor Changes
+
+- - Replace `Payload` decorator with `ApiRequest` and `RequestObject`
+  - Split `Param` decorator into typed decorators: `BodyParam`, `QueryParam`, `HeaderParam`, and `PathParam`
+  - Replace `Response` decorator with `ApiResponse` and `ResponseObject`
+  - Add validation support for body parameters
+
+  - Fix support for returning primitive response values
+
+  ***
+
+  - Add support for extending table functionality
+  - Rename `Model` decorator to `Table`
+  - Add ORM validations
+
+  - Export repository function type
+
+  ***
+
+  - Add support for extending bucket functionality
+
+  - Export repository function type
+
+  ***
+
+  - Add support for using a service ARN
+
+  - Fix service execution output
+  - Fix lambda existence validation
+
+  ***
+
+  - Fix empty asset creation
+
+  ***
+
+  - Remove callback support
+
+  - Fix field handling
+
+  ***
+
+  - Update READMEs and JSDoc documentation
+  - Add new examples
+
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.8.0
+  - @lafken/resolver@0.8.0
+
 ## 0.7.0
 
 ### Minor Changes
