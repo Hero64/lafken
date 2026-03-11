@@ -2,7 +2,6 @@ import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktn';
-
 import { createSha1 } from '../../../utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
@@ -80,7 +79,7 @@ class LambdaAssets {
       recursive: true,
     });
 
-    (async () => {
+    await (async () => {
       const { build } = await import('rolldown');
 
       await build({
@@ -100,7 +99,10 @@ class LambdaAssets {
           entryFileNames: 'index.js',
           chunkFileNames: '[name].js',
           minify: metadata.minify,
-          legalComments: 'none',
+          comments: {
+            legal: false,
+            jsdoc: false,
+          },
           codeSplitting: {
             groups: [
               {

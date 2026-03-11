@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "reflect-metadata": "^0.2.2",
-    "rolldown": "^1.0.0-rc.4"
+    "rolldown": "^1.0.0-rc.9"
   },
   "devDependencies": {
     "@cdktn/provider-aws": "^23.0.0",
