@@ -12,7 +12,7 @@
     "clean": "rm -rf cdktf.out dist .out"
   },
   "dependencies": {
-    "@cdktn/provider-aws": "^23.0.0",
+    "@cdktn/provider-aws": "^23.3.0",
     "@lafken/api": "workspace:*",
     "@lafken/auth": "workspace:*",
     "@lafken/bucket": "workspace:*",
@@ -24,8 +24,8 @@
     "@lafken/schedule": "workspace:*",
     "@lafken/state-machine": "workspace:*",
     "cdktn": "^0.22.0",
-    "constructs": "^10.4.5",
-    "dayjs": "1.11.19"
+    "constructs": "^10.5.1",
+    "dayjs": "1.11.20"
   },
   "devDependencies": {
     "cdktn-cli": "^0.22.0"
