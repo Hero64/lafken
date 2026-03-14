@@ -29,7 +29,8 @@
         "noShadowRestrictedNames": "off",
         "noEmptyInterface": "off",
         "noExportsInTest": "off",
-        "noTemplateCurlyInString": "off"
+        "noTemplateCurlyInString": "off",
+        "noThenProperty": "off"
       },
       "complexity": {
         "noBannedTypes": "off",
