@@ -1,5 +1,14 @@
 # @lafken/main
 
+## 0.8.1
+
+### Patch Changes
+
+- The `exec` method is removed when executing a query on DynamoDB
+- Updated dependencies
+  - @lafken/common@0.8.1
+  - @lafken/resolver@0.8.1
+
 ## 0.8.0
 
 ### Minor Changes
