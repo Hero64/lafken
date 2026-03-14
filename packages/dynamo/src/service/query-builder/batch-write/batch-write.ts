@@ -19,7 +19,11 @@ export class BatchWriteBuilder<E extends ClassResource> extends QueryBuilderBase
     return this.commands;
   }
 
-  public async exec() {
+  public then<T>(resolve: (value: void[]) => T, reject: (reason: any) => T): Promise<T> {
+    return this.exec().then(resolve, reject);
+  }
+
+  private async exec() {
     return Promise.all(this.commands.map((command) => this.execAndRetry(command)));
   }
 

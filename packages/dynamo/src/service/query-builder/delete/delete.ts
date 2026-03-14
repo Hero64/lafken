@@ -16,7 +16,11 @@ export class DeleteBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
     return this.command;
   }
 
-  public async exec() {
+  public then<T>(resolve: (value: boolean) => T, reject: (reason: any) => T): Promise<T> {
+    return this.exec().then(resolve, reject);
+  }
+
+  private async exec() {
     const command = new DeleteItemCommand(this.command);
 
     await this.queryOptions.client.send(command);

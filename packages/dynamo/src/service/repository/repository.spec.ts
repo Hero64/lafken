@@ -72,15 +72,13 @@ describe('Dynamo Service', () => {
     it('should exec query command with limit one', async () => {
       dynamoClient.on(QueryCommand).resolves({});
 
-      await userRepository
-        .findOne({
-          keyCondition: {
-            partition: {
-              email: EMAIL,
-            },
+      await userRepository.findOne({
+        keyCondition: {
+          partition: {
+            email: EMAIL,
           },
-        })
-        .exec();
+        },
+      });
 
       expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(1);
       expect(
@@ -97,18 +95,16 @@ describe('Dynamo Service', () => {
 
     it('Should find one user by partition and sort key', async () => {
       const name = 'example1';
-      await userRepository
-        .findOne({
-          keyCondition: {
-            partition: {
-              email: EMAIL,
-            },
-            sort: {
-              name,
-            },
+      await userRepository.findOne({
+        keyCondition: {
+          partition: {
+            email: EMAIL,
           },
-        })
-        .exec();
+          sort: {
+            name,
+          },
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(QueryCommand, {
@@ -126,15 +122,13 @@ describe('Dynamo Service', () => {
     });
 
     it('Should get all users with same partition key', async () => {
-      await userRepository
-        .findAll({
-          keyCondition: {
-            partition: {
-              email: EMAIL,
-            },
+      await userRepository.findAll({
+        keyCondition: {
+          partition: {
+            email: EMAIL,
           },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(QueryCommand, {
@@ -149,22 +143,20 @@ describe('Dynamo Service', () => {
 
     it('Should throws by bad partition key', async () => {
       const call = async () => {
-        await userRepository
-          .findAll({
-            keyCondition: {
-              partition: {
-                name: 'its not partition key',
-              },
+        await userRepository.findAll({
+          keyCondition: {
+            partition: {
+              name: 'its not partition key',
             },
-          })
-          .exec();
+          },
+        });
       };
 
       await expect(call()).rejects.toThrow('no index found for the selected attributes');
     });
 
     it('Should scan all users', async () => {
-      await userRepository.scan().exec();
+      await userRepository.scan();
 
       expect(dynamoClient.commandCalls(ScanCommand)).toHaveLength(1);
       expect(
@@ -175,15 +167,13 @@ describe('Dynamo Service', () => {
     });
 
     it('Should filter users', async () => {
-      await userRepository
-        .scan({
-          filter: {
-            age: {
-              lessThan: 25,
-            },
+      await userRepository.scan({
+        filter: {
+          age: {
+            lessThan: 25,
           },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(ScanCommand, {
@@ -196,34 +186,32 @@ describe('Dynamo Service', () => {
     });
 
     it('Should scan with complex query', async () => {
-      await userRepository
-        .scan({
-          filter: {
-            age: {
-              lessThan: 50,
+      await userRepository.scan({
+        filter: {
+          age: {
+            lessThan: 50,
+          },
+          OR: [
+            {
+              lastName: 'example1',
+              name: {
+                beginsWith: 'exa',
+              },
             },
-            OR: [
-              {
-                lastName: 'example1',
-                name: {
-                  beginsWith: 'exa',
-                },
-              },
-              {
-                lastName: 'example2',
-              },
-            ],
-            lastName: {
-              notContains: 'notemail.com',
+            {
+              lastName: 'example2',
             },
-            address: {
-              city: {
-                notExist: true,
-              },
+          ],
+          lastName: {
+            notContains: 'notemail.com',
+          },
+          address: {
+            city: {
+              notExist: true,
             },
           },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(ScanCommand, {
@@ -259,14 +247,12 @@ describe('Dynamo Service', () => {
     });
 
     it('Should create a new user', async () => {
-      await userRepository
-        .create({
-          email: 'example3@example.com',
-          age: 40,
-          name: 'example3',
-          lastName: 'example3',
-        })
-        .exec();
+      await userRepository.create({
+        email: 'example3@example.com',
+        age: 40,
+        name: 'example3',
+        lastName: 'example3',
+      });
 
       expect(
         dynamoClient.commandCalls(PutItemCommand, {
@@ -295,20 +281,18 @@ describe('Dynamo Service', () => {
     });
     it('Should replace values user', async () => {
       const name = 'example1';
-      await userRepository
-        .update({
-          keyCondition: {
-            email: EMAIL,
-            name,
+      await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name,
+        },
+        replaceValues: {
+          age: 55,
+          lastName: {
+            ifNotExistValue: 'changed_if_not_exist',
           },
-          replaceValues: {
-            age: 55,
-            lastName: {
-              ifNotExistValue: 'changed_if_not_exist',
-            },
-          },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(UpdateItemCommand, {
@@ -327,26 +311,24 @@ describe('Dynamo Service', () => {
 
     it('Should update only not existent value', async () => {
       const name = 'example1';
-      await userRepository
-        .update({
-          keyCondition: {
-            email: EMAIL,
-            name,
+      await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name,
+        },
+        replaceValues: {
+          age: {
+            ifNotExistValue: 100,
           },
-          replaceValues: {
-            age: {
-              ifNotExistValue: 100,
-            },
-            address: {
-              ifNotExistValue: {
-                city: 'York New',
-                direction: 'example',
-                number: 1,
-              },
+          address: {
+            ifNotExistValue: {
+              city: 'York New',
+              direction: 'example',
+              number: 1,
             },
           },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(UpdateItemCommand, {
@@ -374,19 +356,17 @@ describe('Dynamo Service', () => {
     });
 
     it('Should update only deep property', async () => {
-      await userRepository
-        .update({
-          keyCondition: {
-            email: 'example2@example.com',
-            name: 'example2',
+      await userRepository.update({
+        keyCondition: {
+          email: 'example2@example.com',
+          name: 'example2',
+        },
+        setValues: {
+          address: {
+            direction: 'new direction',
           },
-          setValues: {
-            address: {
-              direction: 'new direction',
-            },
-          },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(UpdateItemCommand, {
@@ -400,17 +380,15 @@ describe('Dynamo Service', () => {
     });
 
     it('Should remove address property', async () => {
-      await userRepository
-        .update({
-          keyCondition: {
-            email: 'example2@example.com',
-            name: 'example2',
-          },
-          removeValues: {
-            address: true,
-          },
-        })
-        .exec();
+      await userRepository.update({
+        keyCondition: {
+          email: 'example2@example.com',
+          name: 'example2',
+        },
+        removeValues: {
+          address: true,
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(UpdateItemCommand, {
@@ -425,25 +403,23 @@ describe('Dynamo Service', () => {
 
     it('Should add condition expression', async () => {
       const name = 'example1';
-      await userRepository
-        .update({
-          keyCondition: {
-            email: EMAIL,
-            name,
+      await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name,
+        },
+        replaceValues: {
+          age: 55,
+        },
+        condition: {
+          name: {
+            exist: true,
           },
-          replaceValues: {
-            age: 55,
+          age: {
+            exist: true,
           },
-          condition: {
-            name: {
-              exist: true,
-            },
-            age: {
-              exist: true,
-            },
-          },
-        })
-        .exec();
+        },
+      });
 
       expect(
         dynamoClient.commandCalls(UpdateItemCommand, {
@@ -466,12 +442,10 @@ describe('Dynamo Service', () => {
       dynamoClient.reset();
     });
     it('Should remove user', async () => {
-      await userRepository
-        .delete({
-          email: EMAIL,
-          name: 'example1',
-        })
-        .exec();
+      await userRepository.delete({
+        email: EMAIL,
+        name: 'example1',
+      });
       expect(
         dynamoClient.commandCalls(DeleteItemCommand, {
           TableName: 'users',
@@ -491,22 +465,20 @@ describe('Dynamo Service', () => {
     });
 
     it('Should create users by array', async () => {
-      await userRepository
-        .bulkCreate([
-          {
-            email: 'example4@example.com',
-            age: 40,
-            name: 'example4',
-            lastName: 'example4',
-          },
-          {
-            email: 'example5@example.com',
-            age: 40,
-            name: 'example5',
-            lastName: 'example5',
-          },
-        ])
-        .exec();
+      await userRepository.bulkCreate([
+        {
+          email: 'example4@example.com',
+          age: 40,
+          name: 'example4',
+          lastName: 'example4',
+        },
+        {
+          email: 'example5@example.com',
+          age: 40,
+          name: 'example5',
+          lastName: 'example5',
+        },
+      ]);
 
       expect(
         dynamoClient.commandCalls(BatchWriteItemCommand, {
@@ -564,18 +536,16 @@ describe('Dynamo Service', () => {
       dynamoClient.reset();
     });
     it('Should delete users by array', async () => {
-      await userRepository
-        .bulkDelete([
-          {
-            email: 'example1@example.com',
-            name: 'example1',
-          },
-          {
-            email: 'example2@example.com',
-            name: 'example2',
-          },
-        ])
-        .exec();
+      await userRepository.bulkDelete([
+        {
+          email: 'example1@example.com',
+          name: 'example1',
+        },
+        {
+          email: 'example2@example.com',
+          name: 'example2',
+        },
+      ]);
 
       expect(
         dynamoClient.commandCalls(BatchWriteItemCommand, {

@@ -8,7 +8,14 @@ export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
     this.find();
   }
 
-  public async exec(): Promise<InstanceType<E> | undefined> {
+  public then<T>(
+    resolve: (value: InstanceType<E> | undefined) => T,
+    reject: (reason: any) => T
+  ): Promise<T> {
+    return this.exec().then(resolve, reject);
+  }
+
+  private async exec(): Promise<InstanceType<E> | undefined> {
     const { data } = await this.runQuery(this.command);
 
     return (data as E[])?.[0] as InstanceType<E> | undefined;

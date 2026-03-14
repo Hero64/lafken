@@ -3,6 +3,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import type { ClassResource } from '@lafken/common';
 
 import { QueryBuilderBase } from '../base/base';
+import type { Item } from '../query-builder.types';
 import type { UpsertBuilderProps } from './upsert.types';
 
 export class UpsertBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
@@ -17,7 +18,11 @@ export class UpsertBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
     return this.command;
   }
 
-  public async exec() {
+  public then<T>(resolve: (value: Item<E>) => T, reject: (reason: any) => T): Promise<T> {
+    return this.exec().then(resolve, reject);
+  }
+
+  private async exec() {
     const command = new PutItemCommand(this.command);
 
     await this.queryOptions.client.send(command);

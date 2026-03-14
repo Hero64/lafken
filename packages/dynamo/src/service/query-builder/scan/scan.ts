@@ -17,7 +17,14 @@ export class ScanBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
     return this.command;
   }
 
-  public exec() {
+  public then<T>(
+    resolve: (value: QueryResponse<E>) => T,
+    reject: (reason: any) => T
+  ): Promise<T> {
+    return this.exec().then(resolve, reject);
+  }
+
+  private exec() {
     return this.runQuery(this.command);
   }
 
