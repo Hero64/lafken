@@ -16,7 +16,7 @@ export class PokeApi {
     response: GetAllResponse,
   })
   async getAllPokemons(): Promise<GetAllResponse> {
-    const { data } = await pokemonRepository.scan().exec();
+    const { data } = await pokemonRepository.scan();
 
     return {
       data,
@@ -30,15 +30,13 @@ export class PokeApi {
   async getPokemon(
     @Event(BasePokemonPayload) e: BasePokemonPayload
   ): Promise<PokemonResponse | undefined> {
-    const pokemon = await pokemonRepository
-      .findOne({
-        keyCondition: {
-          partition: {
-            name: e.name,
-          },
+    const pokemon = await pokemonRepository.findOne({
+      keyCondition: {
+        partition: {
+          name: e.name,
         },
-      })
-      .exec();
+      },
+    });
 
     if (!pokemon) {
       response(400);
@@ -51,7 +49,7 @@ export class PokeApi {
     response: PokemonResponse,
   })
   async createPokemon(@Event(CreatePokemonPayload) e: CreatePokemonPayload) {
-    const pokemon = await pokemonRepository.create(e).exec();
+    const pokemon = await pokemonRepository.create(e);
 
     return pokemon;
   }
@@ -61,18 +59,16 @@ export class PokeApi {
     response: Boolean,
   })
   async updatePokemon(@Event(UpdatePokemonPayload) e: UpdatePokemonPayload) {
-    const updated = await pokemonRepository
-      .update({
-        keyCondition: {
-          name: e.name,
-        },
-        replaceValues: {
-          experience: e.experience,
-          types: e.types,
-          order: e.order,
-        },
-      })
-      .exec();
+    const updated = await pokemonRepository.update({
+      keyCondition: {
+        name: e.name,
+      },
+      replaceValues: {
+        experience: e.experience,
+        types: e.types,
+        order: e.order,
+      },
+    });
 
     return updated;
   }
@@ -81,11 +77,9 @@ export class PokeApi {
     path: '/{name}',
   })
   async deletePokemon(@Event(BasePokemonPayload) e: BasePokemonPayload) {
-    await pokemonRepository
-      .delete({
-        name: e.name,
-      })
-      .exec();
+    await pokemonRepository.delete({
+      name: e.name,
+    });
   }
 
   @Get({
