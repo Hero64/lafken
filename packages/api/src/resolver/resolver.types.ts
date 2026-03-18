@@ -1,5 +1,10 @@
 import type { ApiGatewayStageConfig } from '@cdktn/provider-aws/lib/api-gateway-stage';
-import type { ApiAuthorizerNames, ApiRestNames, ClassResource } from '@lafken/common';
+import type {
+  ApiAuthorizerNames,
+  ApiRestNames,
+  ClassResource,
+  ResourceOutputType,
+} from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
 
 import type { RestApi } from './rest-api/rest-api';
@@ -130,6 +135,8 @@ export interface Stage
     | 'clientCertificateId'
   > {}
 
+export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
+
 export interface RestApiProps {
   /**
    * Defines the name of the API Gateway REST API.
@@ -219,6 +226,28 @@ export interface RestApiProps {
     authorizers: ClassResource[];
     defaultAuthorizerName: ApiAuthorizerNames;
   };
+  /**
+   * Defines which API Gateway REST API attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_api_gateway_rest_api`
+   * attribute reference:
+   * - `arn`: The REST API ARN.
+   * - `id`: The REST API ID.
+   * - `executionArn`: Execution ARN (`execution_arn` in Terraform docs),
+   *   useful for composing Lambda permission `sourceArn` values.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   output: [
+   *     { type: 'ssm', name: '/my-api/execution-arn', value: 'executionArn' },
+   *     { type: 'output', name: 'api_arn', value: 'arn' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<ApiOutputAttributes>;
 }
 
 export interface RestApiOptions {

@@ -5,6 +5,7 @@ import type {
   FieldTypes,
   OnlyNumber,
   OnlyNumberString,
+  ResourceOutputType,
 } from '@lafken/common';
 
 /**
@@ -17,6 +18,8 @@ export enum TableMetadataKeys {
   sort_key = 'dynamo:sort_key',
   fields = 'dynamo:fields',
 }
+
+export type TableOutputAttributes = 'arn' | 'id' | 'streamArn' | 'streamLabel';
 
 /**
  * Base configuration shared by all DynamoDB secondary indexes.
@@ -311,6 +314,29 @@ export interface TableBase<T extends Function> {
    * }
    */
   replica?: Replica[];
+
+  /**
+   * Defines which DynamoDB table attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_dynamodb_table`
+   * exported attributes and currently include:
+   * - `arn`: ARN of the table.
+   * - `id`: Name of the table.
+   * - `streamArn`: ARN of the table stream. Only available when stream is enabled.
+   * - `streamLabel`: ISO 8601 timestamp for the table stream. Only available when stream is enabled.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   outputs: [
+   *     { type: 'ssm', name: '/my-table/arn', value: 'arn' },
+   *     { type: 'output', name: 'table_stream_arn', value: 'streamArn' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<TableOutputAttributes>;
 }
 
 export interface TableProvisioned<T extends Function>

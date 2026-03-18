@@ -1,6 +1,15 @@
-import type { LambdaMetadata } from '@lafken/common';
+import type { LambdaMetadata, ResourceOutputType } from '@lafken/common';
 
 type ScheduleExpressions = number | '*' | '?' | (string & {});
+
+/**
+ * Attributes that can be exported from an EventBridge schedule rule resource.
+ *
+ * Based on Terraform `aws_cloudwatch_event_rule` attribute reference:
+ * - `arn`: The Amazon Resource Name (ARN) of the rule.
+ * - `id`: The name of the rule.
+ */
+export type ScheduleOutputAttributes = 'arn' | 'id';
 
 export interface ScheduleTime {
   day?: ScheduleExpressions;
@@ -39,6 +48,26 @@ export interface EventCronProps {
    *   - Each field can be a number, '*', '?', a range `${number}-${number}`
    */
   schedule: string | ScheduleTime;
+  /**
+   * Defines which EventBridge schedule rule attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_cloudwatch_event_rule`
+   * attribute reference:
+   * - `arn`: The Amazon Resource Name (ARN) of the rule.
+   * - `id`: The name of the rule.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   outputs: [
+   *     { type: 'ssm', name: '/my-app/schedule-arn', value: 'arn' },
+   *     { type: 'output', name: 'schedule_id', value: 'id' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<ScheduleOutputAttributes>;
 }
 
 export interface EventCronMetadata extends LambdaMetadata, EventCronProps {}

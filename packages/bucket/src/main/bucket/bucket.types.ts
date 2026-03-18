@@ -1,4 +1,4 @@
-import type { BucketNames, OnlyOne } from '@lafken/common';
+import type { BucketNames, OnlyOne, ResourceOutputType } from '@lafken/common';
 import 'reflect-metadata';
 
 export enum BucketMetadataKeys {
@@ -12,6 +12,12 @@ export type TransitionStorage =
   | 'intelligent_tiering'
   | 'deep_archive'
   | 'glacier_ir';
+
+export type BucketOutputAttributes =
+  | 'id'
+  | 'arn'
+  | 'bucketDomainName'
+  | 'bucketRegionalDomainName';
 
 export interface Transition {
   /**
@@ -204,6 +210,28 @@ export interface BucketProps {
    * Specifies a set of tags that will be applied to s3 bucket.
    */
   tags?: Record<string, string>;
+  /**
+   * Defines which S3 Bucket attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_s3_bucket`
+   * exported attributes and currently include:
+   * - `id`: Name of the bucket.
+   * - `arn`: ARN of the bucket (`arn:aws:s3:::bucketname`).
+   * - `bucketDomainName`: Bucket domain name (`bucketname.s3.amazonaws.com`).
+   * - `bucketRegionalDomainName`: Region-specific bucket domain name.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   outputs: [
+   *     { type: 'ssm', name: '/my-bucket/arn', value: 'arn' },
+   *     { type: 'output', name: 'bucket_regional_domain', value: 'bucketRegionalDomainName' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<BucketOutputAttributes>;
 }
 
 export interface BucketMetadataProps extends Omit<BucketProps, 'name'> {

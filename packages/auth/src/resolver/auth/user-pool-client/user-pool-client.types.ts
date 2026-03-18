@@ -1,3 +1,4 @@
+import type { ResourceOutputType } from '@lafken/common';
 import type { CustomAttributesMetadata, StandardAttributeMetadata } from '../../../main';
 
 export type AuthFlow =
@@ -17,6 +18,8 @@ export type OAuthScopes =
   | 'phone'
   | 'profile'
   | (string & {});
+
+export type UserPoolClientOutputAttributes = 'clientSecret' | 'id';
 
 export interface ValidityUnit {
   type: 'seconds' | 'minutes' | 'hours' | 'days';
@@ -138,6 +141,26 @@ export interface UserClient<T extends Function> {
    * without immediately invalidating active sessions.
    */
   refreshTokenRotationGracePeriod?: number;
+  /**
+   * Defines which Cognito User Pool Client attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_cognito_user_pool_client`
+   * exported attributes and currently include:
+   * - `clientSecret`: Client secret of the user pool client.
+   * - `id`: ID of the user pool client.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   output: [
+   *     { type: 'ssm', name: '/my-user-pool-client/id', value: 'id' },
+   *     { type: 'output', name: 'user_pool_client_secret', value: 'clientSecret' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<UserPoolClientOutputAttributes>;
 }
 
 export interface UserPoolClientProps extends UserClient<any> {

@@ -16,7 +16,7 @@ import {
   getResourceMetadata,
   type StripReadonly,
 } from '@lafken/common';
-import { lafkenResource } from '@lafken/resolver';
+import { lafkenResource, ResourceOutput } from '@lafken/resolver';
 import { Token } from 'cdktn';
 import type { Construct } from 'constructs';
 import {
@@ -40,6 +40,7 @@ import type {
   Mfa,
   PasswordPolicy,
   SignInAliases,
+  UserPoolOutputAttributes,
   UserPoolProps,
   UserVerification,
 } from './user-pool.types';
@@ -89,6 +90,7 @@ export class UserPool extends lafkenResource.make(CognitoUserPool) {
 
     this.isGlobal('auth', id);
     this.assignIdentityProviders(props.identityProviders);
+    new ResourceOutput<UserPoolOutputAttributes>(this, props.outputs);
   }
 
   private assignIdentityProviders(identityProviders?: IdentityProviderType<any>[]) {

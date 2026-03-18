@@ -11,9 +11,10 @@ import {
   type AppStack,
   lambdaAssets,
   type ResolverType,
+  ResourceOutput,
 } from '@lafken/resolver';
 import { type EventRuleMetadata, RESOURCE_TYPE } from '../main';
-import type { EventRuleResolverProps } from './resolver.types';
+import type { BusOutputAttributes, EventRuleResolverProps } from './resolver.types';
 import { Rule } from './rule/rule';
 
 export class EventRuleResolver implements ResolverType {
@@ -45,6 +46,11 @@ export class EventRuleResolver implements ResolverType {
         {
           name: eventBusProps.busName,
         }
+      );
+
+      new ResourceOutput<BusOutputAttributes>(
+        this.eventBuses[eventBusProps.busName],
+        eventBusProps.outputs
       );
     }
   }

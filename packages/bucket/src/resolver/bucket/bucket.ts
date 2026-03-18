@@ -5,8 +5,9 @@ import { S3BucketLifecycleConfiguration } from '@cdktn/provider-aws/lib/s3-bucke
 import { S3BucketNotification } from '@cdktn/provider-aws/lib/s3-bucket-notification';
 import { S3BucketVersioningA } from '@cdktn/provider-aws/lib/s3-bucket-versioning';
 import { cleanString } from '@lafken/common';
-import { lafkenResource } from '@lafken/resolver';
+import { lafkenResource, ResourceOutput } from '@lafken/resolver';
 import type { Construct } from 'constructs';
+import type { BucketOutputAttributes } from '../../main';
 import { getBucketInformation } from '../../service';
 import type { BucketProps } from './bucket.types';
 
@@ -106,5 +107,7 @@ export class Bucket extends lafkenResource.make(S3Bucket) {
         }),
       });
     }
+
+    new ResourceOutput<BucketOutputAttributes>(this, props.outputs);
   }
 }

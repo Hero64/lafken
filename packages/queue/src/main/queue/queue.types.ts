@@ -1,4 +1,19 @@
-import type { LambdaMetadata, LambdaProps, QueueNames } from '@lafken/common';
+import type {
+  LambdaMetadata,
+  LambdaProps,
+  QueueNames,
+  ResourceOutputType,
+} from '@lafken/common';
+
+/**
+ * Attributes that can be exported from an SQS queue resource.
+ *
+ * Based on Terraform `aws_sqs_queue` attribute reference:
+ * - `arn`: ARN of the SQS queue.
+ * - `id`: URL for the created Amazon SQS queue.
+ * - `url`: Same as `id`: the URL for the created Amazon SQS queue.
+ */
+export type QueueOutputAttributes = 'arn' | 'id' | 'url';
 
 export interface StandardProps {
   /**
@@ -60,6 +75,27 @@ export interface StandardProps {
    * If not specified, a default name based on the resource or class is used.
    */
   queueName?: QueueNames;
+  /**
+   * Defines which SQS queue attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_sqs_queue`
+   * attribute reference:
+   * - `arn`: ARN of the SQS queue.
+   * - `id`: URL for the created Amazon SQS queue.
+   * - `url`: Same as `id`: the URL for the created Amazon SQS queue.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   outputs: [
+   *     { type: 'ssm', name: '/my-app/queue-arn', value: 'arn' },
+   *     { type: 'output', name: 'queue_url', value: 'url' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<QueueOutputAttributes>;
 }
 
 export interface FifoProps extends StandardProps {

@@ -1,4 +1,4 @@
-import type { ClassResource } from '@lafken/common';
+import type { ClassResource, ResourceOutputType } from '@lafken/common';
 
 export type SignInAliases = 'email' | 'phone' | 'preferred_username';
 export type CognitoPlan = 'lite' | 'essentials' | 'plus';
@@ -71,6 +71,8 @@ export type GoogleProviderAttributes =
   | 'updated_at';
 
 export type AutoVerifyAttributes = Exclude<SignInAliases, 'preferred_username'>;
+
+export type UserPoolOutputAttributes = 'arn' | 'domain' | 'endpoint' | 'id';
 
 export interface PasswordPolicy {
   minLength?: number;
@@ -289,6 +291,28 @@ export interface UserPool<T extends ClassResource> {
    * such as Google, Facebook, Amazon, Apple or OpenID .
    */
   identityProviders?: IdentityProvider<T>[];
+  /**
+   * Defines which Cognito User Pool attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_cognito_user_pool`
+   * exported attributes and currently include:
+   * - `arn`: ARN of the user pool.
+   * - `domain`: Domain prefix associated with the user pool.
+   * - `endpoint`: Endpoint name of the user pool.
+   * - `id`: ID of the user pool.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   output: [
+   *     { type: 'ssm', name: '/my-user-pool/id', value: 'id' },
+   *     { type: 'output', name: 'user_pool_arn', value: 'arn' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<UserPoolOutputAttributes>;
 }
 
 export interface UserPoolProps extends UserPool<any> {

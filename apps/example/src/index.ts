@@ -29,6 +29,13 @@ createApp({
           authorizers: [TrainerAuthorizer],
           defaultAuthorizerName: 'pokemon-custom-auth',
         },
+        outputs: [
+          {
+            name: 'example/api/arn',
+            type: 'ssm',
+            value: 'arn',
+          },
+        ],
       },
     }),
   ],

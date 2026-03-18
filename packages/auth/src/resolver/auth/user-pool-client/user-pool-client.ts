@@ -3,6 +3,7 @@ import {
   type CognitoUserPoolClientConfig,
   type CognitoUserPoolClientRefreshTokenRotation,
 } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
+import { ResourceOutput } from '@lafken/resolver';
 import { Construct } from 'constructs';
 import type { AuthAttributes } from '../../../main';
 import { mapUserAttributes } from '../auth.utils';
@@ -10,6 +11,7 @@ import type {
   AuthFlow,
   OAuthConfig,
   UserClient,
+  UserPoolClientOutputAttributes,
   UserPoolClientProps,
   ValidityUnit,
 } from './user-pool-client.types';
@@ -39,6 +41,11 @@ export class UserPoolClient extends Construct {
       readAttributes: this.getAttributes(props.readAttributes as string[]),
       writeAttributes: this.getAttributes(props.writeAttributes as string[]),
     });
+
+    new ResourceOutput<UserPoolClientOutputAttributes>(
+      this.cognitoUserPoolClient,
+      props.outputs
+    );
   }
 
   private getRefreshTokenRotation(

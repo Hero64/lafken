@@ -7,13 +7,14 @@ import {
 } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
 import type { FieldTypes } from '@lafken/common';
-import { lafkenResource, Role } from '@lafken/resolver';
+import { lafkenResource, ResourceOutput, Role } from '@lafken/resolver';
 import type { Construct } from 'constructs';
 import type {
   DynamoIndex,
   DynamoStream,
   FieldsMetadata,
   ReadWriteCapacity,
+  TableOutputAttributes,
 } from '../../main';
 import { getModelInformation, type ModelMetadata } from '../../service';
 import type { TableProps } from './table.types';
@@ -127,6 +128,8 @@ export class Table extends lafkenResource.make(DynamodbTable) {
         },
       });
     }
+
+    new ResourceOutput<TableOutputAttributes>(this, modelProps.outputs);
   }
 
   private static getAttributes(

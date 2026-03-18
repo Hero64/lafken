@@ -4,6 +4,7 @@ import type {
   LambdaMetadata,
   LambdaProps,
   ResourceMetadata,
+  ResourceOutputType,
   ResourceProps,
   ServicesValues,
   StateMachineNames,
@@ -26,6 +27,16 @@ export type ResultTransformation = 'NONE' | 'COMPACT' | 'FLATTEN';
 export type IntegrationMode = 'sync' | 'async' | 'token';
 
 type ObjectOrJsonAta = Record<string, any> | JsonAtaString;
+
+/**
+ * Attributes that can be exported from a Step Functions state machine resource.
+ *
+ * Based on Terraform `aws_sfn_state_machine` attribute reference:
+ * - `arn`: The ARN of the state machine.
+ * - `id`: The ARN of the state machine.
+ * - `stateMachineVersionArn`: The ARN of the state machine version.
+ */
+export type StateMachineOutputAttributes = 'id' | 'arn' | 'stateMachineVersionArn';
 
 export interface StateMachineBaseProps<T> {
   /**
@@ -68,10 +79,28 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    * or express state machine.
    */
   executionType?: ProcessorExecutionType;
-  /**
-   *
-   */
   services?: ServicesValues;
+  /**
+   * Defines which Step Functions state machine attributes should be exported.
+   *
+   * Supported attributes are based on Terraform `aws_sfn_state_machine`
+   * attribute reference:
+   * - `arn`: The ARN of the state machine.
+   * - `id`: The ARN of the state machine.
+   * - `stateMachineVersionArn`: The ARN of the state machine version.
+   *
+   * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
+   * or Terraform outputs (`type: 'output'`).
+   *
+   * @example
+   * {
+   *   outputs: [
+   *     { type: 'ssm', name: '/my-app/state-machine-arn', value: 'arn' },
+   *     { type: 'output', name: 'state_machine_version_arn', value: 'stateMachineVersionArn' }
+   *   ]
+   * }
+   */
+  outputs?: ResourceOutputType<StateMachineOutputAttributes>;
 }
 
 interface WaitStateBase<T> {

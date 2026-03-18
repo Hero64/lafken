@@ -1,6 +1,7 @@
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import type { S3Permissions, Services } from '@lafken/common';
-import { type AppModule, lafkenResource, Role } from '@lafken/resolver';
+import { type AppModule, lafkenResource, ResourceOutput, Role } from '@lafken/resolver';
+import type { StateMachineOutputAttributes } from '../../main';
 import { Schema } from './schema/schema';
 import type { DefinitionSchema, PermissionType } from './schema/schema.types';
 import type { StateMachineProps } from './state-machine.types';
@@ -20,6 +21,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     });
 
     this.isGlobal(scope.id, id);
+    new ResourceOutput<StateMachineOutputAttributes>(this, resourceMetadata.outputs);
   }
 
   public async attachDefinition() {

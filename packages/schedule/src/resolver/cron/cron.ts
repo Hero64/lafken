@@ -1,7 +1,12 @@
 import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
 import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
-import { type AppModule, LambdaHandler, lafkenResource } from '@lafken/resolver';
-import type { ScheduleTime } from '../../main';
+import {
+  type AppModule,
+  LambdaHandler,
+  lafkenResource,
+  ResourceOutput,
+} from '@lafken/resolver';
+import type { ScheduleOutputAttributes, ScheduleTime } from '../../main';
 import type { CronProps } from './cron.types';
 
 export class Cron extends lafkenResource.make(CloudwatchEventRule) {
@@ -18,6 +23,8 @@ export class Cron extends lafkenResource.make(CloudwatchEventRule) {
 
     this.isGlobal(scope.id, id);
     this.addEventTarget(id);
+
+    new ResourceOutput<ScheduleOutputAttributes>(this, handler.outputs);
   }
 
   public addEventTarget(id: string) {

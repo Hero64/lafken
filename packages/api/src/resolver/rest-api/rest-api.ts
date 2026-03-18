@@ -1,9 +1,9 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
-import { lafkenResource } from '@lafken/resolver';
+import { lafkenResource, ResourceOutput } from '@lafken/resolver';
 import type { Construct } from 'constructs';
-import type { RestApiProps } from '../resolver.types';
+import type { ApiOutputAttributes, RestApiProps } from '../resolver.types';
 import { AuthorizerFactory } from './factories/authorizer/authorizer';
 import { MethodFactory } from './factories/method/method';
 import type { CreateMethodProps } from './factories/method/method.types';
@@ -48,6 +48,7 @@ export class RestApi extends lafkenResource.make(ApiGatewayRestApi) {
     this.modelFactory = new ModelFactory(this);
     this.responseFactory = new ResponseFactory(this);
     this.methodFactory = new MethodFactory(this);
+    new ResourceOutput<ApiOutputAttributes>(this, props.outputs);
   }
 
   public async addMethod(module: Construct, props: CreateMethodProps) {

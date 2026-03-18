@@ -5,8 +5,17 @@ import {
   getMetadataPrototypeByKey,
   LambdaReflectKeys,
 } from '@lafken/common';
-import { type AppModule, LambdaHandler, lafkenResource } from '@lafken/resolver';
-import type { QueueObjectParam, QueueParamMetadata } from '../../main';
+import {
+  type AppModule,
+  LambdaHandler,
+  lafkenResource,
+  ResourceOutput,
+} from '@lafken/resolver';
+import type {
+  QueueObjectParam,
+  QueueOutputAttributes,
+  QueueParamMetadata,
+} from '../../main';
 import type { QueueProps } from './queue.types';
 
 const attributeAllowedTypes = new Set<FieldTypes>(['String', 'Number']);
@@ -34,6 +43,7 @@ export class Queue extends lafkenResource.make(SqsQueue) {
     this.isGlobal(scope.id, handler.queueName);
     this.validateEventParams();
     this.addEventSource(id);
+    new ResourceOutput<QueueOutputAttributes>(this, handler.outputs);
   }
 
   private addEventSource(id: string) {
