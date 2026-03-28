@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { ApiGatewayApiKey } from '@cdktn/provider-aws/lib/api-gateway-api-key';
 import { ApiGatewayAuthorizer } from '@cdktn/provider-aws/lib/api-gateway-authorizer';
 import type { ApiGatewayMethodConfig } from '@cdktn/provider-aws/lib/api-gateway-method';
-import type { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { ApiGatewayUsagePlan } from '@cdktn/provider-aws/lib/api-gateway-usage-plan';
 import { ApiGatewayUsagePlanKey } from '@cdktn/provider-aws/lib/api-gateway-usage-plan-key';
 import type { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
@@ -27,6 +26,7 @@ import type {
   AuthorizerDataApiKey,
   AuthorizerDataCognito,
   AuthorizerDataCustom,
+  AuthorizerFactoryProps,
   AuthPermissions,
   GetAuthorizerProps,
 } from './authorizer.types';
@@ -41,8 +41,10 @@ export class AuthorizerFactory {
   constructor(
     private scope: RestApi,
     authorizerResources: ClassResource[],
-    defaultAuthorizer?: string
+    private props: AuthorizerFactoryProps
   ) {
+    const { defaultAuthorizer } = props;
+
     if (defaultAuthorizer) {
       this.defaultAuthorizer = {
         authorizerName: defaultAuthorizer,
@@ -119,17 +121,6 @@ export class AuthorizerFactory {
       default: {
         throw new Error('authorizer type  not defined');
       }
-    }
-  }
-
-  public assignStage(stage: ApiGatewayStage) {
-    for (const usagePlan of this.usagePlans) {
-      usagePlan.addOverride('api_stages', [
-        {
-          api_id: this.scope.id,
-          stage: stage.stageName,
-        },
-      ]);
     }
   }
 
@@ -256,9 +247,18 @@ export class AuthorizerFactory {
   }
 
   private createApiKeyAuthorizer({ metadata }: AuthorizerDataApiKey) {
+    const { createUsagePlan = true } = metadata;
+
+    if (!createUsagePlan) {
+      this.authorizerIds[metadata.name] = '';
+    }
+
     const usagePlan = new ApiGatewayUsagePlan(this.scope, `${metadata.name}-usage-plan`, {
       name: metadata.name,
-      apiStages: [],
+      apiStages: this.props.stageNames.map((stageName) => ({
+        apiId: this.scope.id,
+        stage: stageName,
+      })),
       quotaSettings: metadata.quota
         ? {
             limit: metadata.quota.limit,

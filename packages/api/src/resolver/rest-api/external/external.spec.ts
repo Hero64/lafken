@@ -28,24 +28,6 @@ describe('ExternalRestApi', () => {
     expect(synthesized).toHaveDataSource(DataAwsApiGatewayRestApi);
   });
 
-  it('should create a rest api stage', () => {
-    const { stack, restApi } = setupExternalTestingRestApi({
-      stage: {
-        stageName: 'test',
-        xrayTracingEnabled: true,
-      },
-    });
-
-    restApi.createStageDeployment();
-
-    const synthesized = Testing.synth(stack);
-
-    expect(synthesized).toHaveResourceWithProperties(ApiGatewayStage, {
-      stage_name: 'test',
-      xray_tracing_enabled: true,
-    });
-  });
-
   it('should create a new method', async () => {
     @Api()
     class TestingApi {
@@ -62,7 +44,14 @@ describe('ExternalRestApi', () => {
       }
     }
 
-    const { stack, restApi, app } = setupExternalTestingRestApi({});
+    const { stack, restApi, app } = setupExternalTestingRestApi({
+      stages: [
+        {
+          stageName: 'test',
+          xrayTracingEnabled: true,
+        },
+      ],
+    });
 
     const method = getResourceHandlerMetadata<ApiLambdaMetadata>(TestingApi);
     const metadata = getResourceMetadata<ApiResourceMetadata>(TestingApi);
@@ -73,6 +62,8 @@ describe('ExternalRestApi', () => {
       resourceMetadata: metadata,
     });
 
+    restApi.createStageDeployment();
+
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayResource, {
@@ -82,6 +73,10 @@ describe('ExternalRestApi', () => {
       path_part: 'method',
     });
     expect(synthesized).toHaveResource(ApiGatewayMethod);
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayStage, {
+      stage_name: 'test',
+      xray_tracing_enabled: true,
+    });
   });
 
   it('should enable cors in method', async () => {

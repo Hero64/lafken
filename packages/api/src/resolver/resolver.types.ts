@@ -141,7 +141,7 @@ export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
 export interface BaseApiProps {
   name: ApiRestNames;
   cors?: CorsOptions;
-  stage?: Stage;
+  stages?: Stage[];
   auth?: {
     authorizers: ClassResource[];
     defaultAuthorizerName: ApiAuthorizerNames;

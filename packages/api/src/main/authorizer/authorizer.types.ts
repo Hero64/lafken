@@ -140,6 +140,14 @@ export interface ApiKeyAuthorizerProps {
    * allowing immediate access to the API without manual key creation.
    */
   defaultKeys?: string[];
+  /**
+   * Create usage plan.
+   *
+   * Specifies whether a usage plan should be created for this custom authorizer.
+   * When enabled, a usage plan will be provisioned to manage and control
+   * access to the API, allowing you to define throttle and quota settings.
+   */
+  createUsagePlan?: boolean;
 }
 
 export interface ApiKeyAuthorizerMetadata

@@ -1,7 +1,7 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import type { Construct } from 'constructs';
-import type { BaseApiProps, RestApi } from '../../resolver.types';
+import type { BaseApiProps, RestApi, Stage } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
 import { MethodFactory } from '../factories/method/method';
 import type { CreateMethodProps } from '../factories/method/method.types';
@@ -14,7 +14,6 @@ type Constructor = new (...args: any[]) => Construct;
 
 export function RestApiBase<TBase extends Constructor>(Base: TBase) {
   class RestApiWithFactories extends Base {
-    public stageName!: string;
     public resourceFactory!: ResourceFactory;
     public validatorFactory!: ValidatorFactory;
     public authorizerFactory!: AuthorizerFactory;
@@ -22,17 +21,30 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public responseFactory!: ResponseFactory;
     #methodFactory!: MethodFactory;
     #baseProps!: BaseApiProps;
+    #stages!: Stage[];
 
     public initFactories(props: BaseApiProps) {
       this.#baseProps = props;
-      this.stageName = props.stage?.stageName || 'api';
+
+      this.#stages =
+        (props.stages || []).length > 0
+          ? (props.stages as Stage[])
+          : [
+              {
+                stageName: 'api',
+              },
+            ];
+
       const self = this as unknown as RestApi;
       this.resourceFactory = new ResourceFactory(self);
       this.validatorFactory = new ValidatorFactory(self);
       this.authorizerFactory = new AuthorizerFactory(
         self,
         props.auth?.authorizers || [],
-        props.auth?.defaultAuthorizerName
+        {
+          defaultAuthorizer: props.auth?.defaultAuthorizerName,
+          stageNames: this.#stages.map((stage) => stage.stageName),
+        }
       );
       this.modelFactory = new ModelFactory(self);
       this.responseFactory = new ResponseFactory(self);
@@ -57,30 +69,32 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         ...this.responseFactory.resources,
       ];
 
-      const deployment = new ApiGatewayDeployment(
-        self,
-        `${this.#baseProps.name}-deployment`,
-        {
-          restApiId: self.id,
-          dependsOn: apiResources,
-          triggers: {
-            redeployment: Date.now().toString(),
-          },
-          lifecycle: {
-            createBeforeDestroy: true,
-          },
+      if (this.#methodFactory.resources.length > 0) {
+        const deployment = new ApiGatewayDeployment(
+          self,
+          `${this.#baseProps.name}-deployment`,
+          {
+            restApiId: self.id,
+            dependsOn: apiResources,
+            triggers: {
+              redeployment: Date.now().toString(),
+            },
+            lifecycle: {
+              createBeforeDestroy: true,
+            },
+          }
+        );
+
+        for (const stageProps of this.#stages) {
+          new ApiGatewayStage(self, `${this.#baseProps.name}-stage`, {
+            ...(stageProps || {}),
+            deploymentId: deployment.id,
+            restApiId: self.id,
+            stageName: stageProps.stageName,
+            dependsOn: [deployment],
+          });
         }
-      );
-
-      const stage = new ApiGatewayStage(self, `${this.#baseProps.name}-stage`, {
-        ...(this.#baseProps.stage || {}),
-        deploymentId: deployment.id,
-        restApiId: self.id,
-        stageName: this.stageName,
-        dependsOn: [deployment],
-      });
-
-      this.authorizerFactory.assignStage(stage);
+      }
     }
   }
 

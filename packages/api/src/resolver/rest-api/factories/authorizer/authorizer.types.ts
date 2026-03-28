@@ -43,3 +43,8 @@ export interface GetAuthorizerProps {
   method: Method;
   authorizer?: MethodAuthorizer | false;
 }
+
+export interface AuthorizerFactoryProps {
+  stageNames: string[];
+  defaultAuthorizer?: string;
+}

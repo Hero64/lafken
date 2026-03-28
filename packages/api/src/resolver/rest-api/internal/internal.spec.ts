@@ -1,7 +1,6 @@
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
-import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -39,24 +38,6 @@ describe('InternalRestApi', () => {
       binary_media_types: ['application/json', 'application/pdf'],
       disable_execute_api_endpoint: true,
       minimum_compression_size: '1000',
-    });
-  });
-
-  it('should create a rest api stage', () => {
-    const { stack, restApi } = setupInternalTestingRestApi({
-      stage: {
-        stageName: 'test',
-        xrayTracingEnabled: true,
-      },
-    });
-
-    restApi.createStageDeployment();
-
-    const synthesized = Testing.synth(stack);
-
-    expect(synthesized).toHaveResourceWithProperties(ApiGatewayStage, {
-      stage_name: 'test',
-      xray_tracing_enabled: true,
     });
   });
 
