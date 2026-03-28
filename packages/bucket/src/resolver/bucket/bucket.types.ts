@@ -1,8 +1,13 @@
 import type { ClassResource } from '@lafken/common';
-import type { BucketProps as BucketMainProps } from '../../main';
+import type { InternalBucketProps as MainInternalBucketProps } from '../../main';
 
-export interface BucketGlobalConfig extends Omit<BucketMainProps, 'name' | 'tracing'> {}
+export interface BucketGlobalConfig
+  extends Omit<MainInternalBucketProps, 'name' | 'tracing'> {}
 
-export interface BucketProps extends BucketGlobalConfig {
+export interface InternalBucketProps extends BucketGlobalConfig {
+  classResource: ClassResource;
+}
+
+export interface ExternalBucketProps {
   classResource: ClassResource;
 }

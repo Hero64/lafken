@@ -118,13 +118,7 @@ export interface KeyLifeCycleRule {
   transitions?: Transition[];
 }
 
-export interface BucketProps {
-  /**
-   * Bucket resource name.
-   *
-   * Defines the logical name of the bucket resource.
-   * If not specified, the name of the decorated class will be used.
-   */
+export interface BaseBucketProps {
   name?: BucketNames;
   /**
    * Enable X-Ray tracing.
@@ -133,6 +127,16 @@ export interface BucketProps {
    * operations. This allows you to trace and analyze requests as they
    * pass through AWS services, useful for debugging and performance
    * monitoring.
+   */
+}
+
+export interface InternalBucketProps extends BaseBucketProps {
+  externalBucketName?: never;
+  /**
+   * Bucket resource name.
+   *
+   * Defines the logical name of the bucket resource.
+   * If not specified, the name of the decorated class will be used.
    */
   tracing?: boolean;
   /**
@@ -234,6 +238,18 @@ export interface BucketProps {
   outputs?: ResourceOutputType<BucketOutputAttributes>;
 }
 
-export interface BucketMetadataProps extends Omit<BucketProps, 'name'> {
+export interface ExternalBucketProps extends BaseBucketProps {
+  externalBucketName: string;
+}
+
+export type BucketProps = InternalBucketProps | ExternalBucketProps;
+
+export interface InternalBucketMetadataProps extends Omit<InternalBucketProps, 'name'> {
   name: string;
 }
+
+export interface ExternalBucketMetadataProps extends Omit<ExternalBucketProps, 'name'> {
+  name: string;
+}
+
+export type BucketMetadata = InternalBucketMetadataProps | ExternalBucketMetadataProps;

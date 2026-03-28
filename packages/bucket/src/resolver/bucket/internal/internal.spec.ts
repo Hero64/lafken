@@ -8,19 +8,25 @@ import { enableBuildEnvVariable } from '@lafken/common';
 import { setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
-import { Bucket as BucketDecorator } from '../../main';
-import { Bucket } from './bucket';
+import {
+  Bucket as BucketDecorator,
+  BucketMetadataKeys,
+  type InternalBucketMetadataProps,
+} from '../../../main';
+import { InternalBucket } from './internal';
 
-describe('Bucket', () => {
+describe('InternalBucket', () => {
   enableBuildEnvVariable();
   it('should create a simple bucket', () => {
     @BucketDecorator()
     class TestBucket {}
 
     const { stack } = setupTestingStack();
-    new Bucket(stack, {
-      classResource: TestBucket,
-    });
+    const bucketProps: InternalBucketMetadataProps = Reflect.getMetadata(
+      BucketMetadataKeys.bucket,
+      TestBucket
+    );
+    new InternalBucket(stack, bucketProps);
 
     const synthesized = Testing.synth(stack);
 
@@ -60,9 +66,12 @@ describe('Bucket', () => {
     class TestBucketWithConfig {}
 
     const { stack } = setupTestingStack();
-    new Bucket(stack, {
-      classResource: TestBucketWithConfig,
-    });
+
+    const bucketProps: InternalBucketMetadataProps = Reflect.getMetadata(
+      BucketMetadataKeys.bucket,
+      TestBucketWithConfig
+    );
+    new InternalBucket(stack, bucketProps);
 
     const synthesized = Testing.synth(stack);
 
@@ -119,13 +128,10 @@ describe('Bucket', () => {
   });
 
   it('should create bucket with global config', () => {
-    @BucketDecorator()
-    class TestBucketWithConfig {}
-
     const { stack } = setupTestingStack();
 
-    new Bucket(stack, {
-      classResource: TestBucketWithConfig,
+    new InternalBucket(stack, {
+      name: 'TestBucketWithConfig',
       eventBridgeEnabled: true,
       forceDestroy: true,
       acl: 'private',

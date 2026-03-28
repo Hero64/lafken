@@ -7,12 +7,10 @@ import { S3BucketVersioningA } from '@cdktn/provider-aws/lib/s3-bucket-versionin
 import { cleanString } from '@lafken/common';
 import { lafkenResource, ResourceOutput } from '@lafken/resolver';
 import type { Construct } from 'constructs';
-import type { BucketOutputAttributes } from '../../main';
-import { getBucketInformation } from '../../service';
-import type { BucketProps } from './bucket.types';
+import type { BucketOutputAttributes, InternalBucketMetadataProps } from '../../../main';
 
-export class Bucket extends lafkenResource.make(S3Bucket) {
-  constructor(scope: Construct, props: BucketProps) {
+export class InternalBucket extends lafkenResource.make(S3Bucket) {
+  constructor(scope: Construct, props: InternalBucketMetadataProps) {
     const {
       name,
       eventBridgeEnabled,
@@ -22,7 +20,7 @@ export class Bucket extends lafkenResource.make(S3Bucket) {
       versioned,
       lifeCycleRules,
       tags,
-    } = getBucketInformation(props.classResource);
+    } = props;
 
     super(scope, `${name}-bucket`, {
       bucket: name,
