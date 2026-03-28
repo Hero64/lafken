@@ -21,7 +21,7 @@ import {
 } from '../../../../../../../main';
 import {
   initializeMethod,
-  setupTestingRestApi,
+  setupInternalTestingRestApi,
 } from '../../../../../../utils/testing.utils';
 
 describe('Dynamo query integration', () => {
@@ -88,7 +88,7 @@ describe('Dynamo query integration', () => {
   }
 
   it('should create dynamodb integration', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, DynamoIntegrationApi, 'query');
 
@@ -138,7 +138,7 @@ describe('Dynamo query integration', () => {
   });
 
   it('should create dynamodb integration with global resource', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const Table = lafkenResource.make(DynamodbTable);
 
@@ -162,7 +162,7 @@ describe('Dynamo query integration', () => {
   });
 
   it('should create dynamo integration with event props', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, DynamoIntegrationApi, 'queryEvent');
 

@@ -15,20 +15,20 @@ import {
   type ApiResourceMetadata,
   type BucketIntegrationResponse,
   Get,
-} from '../../main';
-import { setupTestingRestApi } from '../utils/testing.utils';
+} from '../../../main';
+import { setupInternalTestingRestApi } from '../../utils/testing.utils';
 
-describe('RestApi', () => {
+describe('InternalRestApi', () => {
   enableBuildEnvVariable();
   it('should create a simple rest api', () => {
-    const { stack } = setupTestingRestApi();
+    const { stack } = setupInternalTestingRestApi();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResource(ApiGatewayRestApi);
   });
 
   it('should create a rest api with custom properties', () => {
-    const { stack } = setupTestingRestApi({
+    const { stack } = setupInternalTestingRestApi({
       supportedMediaTypes: ['application/json', 'application/pdf'],
       disableExecuteApiEndpoint: true,
       minCompressionSize: 1000,
@@ -43,7 +43,7 @@ describe('RestApi', () => {
   });
 
   it('should create a rest api stage', () => {
-    const { stack, restApi } = setupTestingRestApi({
+    const { stack, restApi } = setupInternalTestingRestApi({
       stage: {
         stageName: 'test',
         xrayTracingEnabled: true,
@@ -76,7 +76,7 @@ describe('RestApi', () => {
       }
     }
 
-    const { stack, restApi, app } = setupTestingRestApi();
+    const { stack, restApi, app } = setupInternalTestingRestApi();
 
     const method = getResourceHandlerMetadata<ApiLambdaMetadata>(TestingApi);
     const metadata = getResourceMetadata<ApiResourceMetadata>(TestingApi);
@@ -114,7 +114,7 @@ describe('RestApi', () => {
       }
     }
 
-    const { stack, restApi, app } = setupTestingRestApi({
+    const { stack, restApi, app } = setupInternalTestingRestApi({
       cors: {
         allowOrigins: true,
       },

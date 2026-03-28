@@ -27,7 +27,7 @@ import {
   PathParam,
   QueryParam,
 } from '../../../../../../../main';
-import { setupTestingRestApi } from '../../../../../../utils/testing.utils';
+import { setupInternalTestingRestApi } from '../../../../../../utils/testing.utils';
 
 describe('Bucket upload integration', () => {
   enableBuildEnvVariable();
@@ -83,7 +83,7 @@ describe('Bucket upload integration', () => {
   }
 
   it('should create s3 integration', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(BucketIntegrationApi);
     const resourceMetadata =
@@ -146,7 +146,7 @@ describe('Bucket upload integration', () => {
   });
 
   it('should create s3 integration with global resource', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(BucketIntegrationApi);
     const resourceMetadata =
@@ -177,7 +177,7 @@ describe('Bucket upload integration', () => {
   });
 
   it('should create s3 integration with event prop', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(BucketIntegrationApi);
     const resourceMetadata =

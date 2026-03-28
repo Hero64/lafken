@@ -20,7 +20,7 @@ import {
 } from '../../../../../../../main';
 import {
   initializeMethod,
-  setupTestingRestApi,
+  setupInternalTestingRestApi,
 } from '../../../../../../utils/testing.utils';
 
 describe('State machine status integration', () => {
@@ -71,7 +71,7 @@ describe('State machine status integration', () => {
   }
 
   it('should create state machine integration', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, StateMachineIntegrationApi, 'status');
 
@@ -120,7 +120,7 @@ describe('State machine status integration', () => {
   });
 
   it('should create state machine integration with global resource', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const StateMachine = lafkenResource.make(SfnStateMachine);
 
@@ -150,7 +150,7 @@ describe('State machine status integration', () => {
   });
 
   it('should create state machine integration with event props', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, StateMachineIntegrationApi, 'statusEvent');
 

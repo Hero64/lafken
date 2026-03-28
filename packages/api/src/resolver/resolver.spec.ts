@@ -7,7 +7,7 @@ import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
 import { Api, Get } from '../main';
 import { ApiResolver } from './resolver';
-import { RestApi } from './rest-api/rest-api';
+import { InternalRestApi } from './rest-api/internal/internal';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@lafken/resolver')>();
@@ -30,7 +30,7 @@ describe('Api Resolver', () => {
     await resolver.beforeCreate(module as AppStack);
     const synthesized = Testing.synth(stack);
 
-    expect(synthesized).toHaveResourceWithProperties(RestApi, {
+    expect(synthesized).toHaveResourceWithProperties(InternalRestApi, {
       name: 'test-general',
     });
   });
@@ -47,7 +47,7 @@ describe('Api Resolver', () => {
     await resolver.beforeCreate(module as AppStack);
     const synthesized = Testing.synth(stack);
 
-    expect(synthesized).toHaveResourceWithProperties(RestApi, {
+    expect(synthesized).toHaveResourceWithProperties(InternalRestApi, {
       name: 'testing',
     });
   });
@@ -64,7 +64,7 @@ describe('Api Resolver', () => {
     await resolver.beforeCreate(module as AppStack);
     const synthesized = Testing.synth(stack);
 
-    expect(synthesized).toHaveResourceWithProperties(RestApi, {
+    expect(synthesized).toHaveResourceWithProperties(InternalRestApi, {
       name: 'testing',
     });
   });

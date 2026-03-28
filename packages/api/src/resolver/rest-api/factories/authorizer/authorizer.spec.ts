@@ -14,7 +14,7 @@ import {
   CustomAuthorizer,
   Method,
 } from '../../../../main';
-import { setupTestingRestApi } from '../../../utils/testing.utils';
+import { setupInternalTestingRestApi } from '../../../utils/testing.utils';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@lafken/resolver')>();
@@ -31,7 +31,7 @@ describe('authorizer factory', () => {
   enableBuildEnvVariable();
 
   it('should get a none authorizer properties', () => {
-    const { restApi } = setupTestingRestApi();
+    const { restApi } = setupInternalTestingRestApi();
     const properties = restApi.authorizerFactory.getAuthorizerProps({
       fullPath: '/',
       method: Method.GET,
@@ -49,7 +49,7 @@ describe('authorizer factory', () => {
     })
     class ApiKeyAuthTest {}
 
-    const { restApi, stack } = setupTestingRestApi({
+    const { restApi, stack } = setupInternalTestingRestApi({
       auth: {
         authorizers: [ApiKeyAuthTest],
         defaultAuthorizerName: 'api-key-auth',
@@ -88,7 +88,7 @@ describe('authorizer factory', () => {
       handler() {}
     }
 
-    const { restApi, stack } = setupTestingRestApi({
+    const { restApi, stack } = setupInternalTestingRestApi({
       auth: {
         authorizers: [CustomAuthTest],
         defaultAuthorizerName: 'custom-auth',
@@ -123,7 +123,7 @@ describe('authorizer factory', () => {
     })
     class CognitoAuthTest {}
 
-    const { restApi, stack } = setupTestingRestApi({
+    const { restApi, stack } = setupInternalTestingRestApi({
       auth: {
         authorizers: [CognitoAuthTest],
         defaultAuthorizerName: 'cognito-auth',
@@ -167,7 +167,7 @@ describe('authorizer factory', () => {
       handler() {}
     }
 
-    const { restApi } = setupTestingRestApi({
+    const { restApi } = setupInternalTestingRestApi({
       auth: {
         authorizers: [CustomAuthTest],
         defaultAuthorizerName: 'authorizer-permission',

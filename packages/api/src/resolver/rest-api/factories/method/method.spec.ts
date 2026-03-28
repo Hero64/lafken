@@ -13,7 +13,10 @@ import {
   type QueueSendMessageIntegrationResponse,
   type StateMachineStartIntegrationResponse,
 } from '../../../../main';
-import { initializeMethod, setupTestingRestApi } from '../../../utils/testing.utils';
+import {
+  initializeMethod,
+  setupInternalTestingRestApi,
+} from '../../../utils/testing.utils';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@lafken/resolver')>();
@@ -86,7 +89,7 @@ describe('Api Method', () => {
   }
 
   it('should create a lambda integration method', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'lambdaIntegration');
 
     const synthesized = Testing.synth(stack);
@@ -115,7 +118,7 @@ describe('Api Method', () => {
   });
 
   it('should create a s3 integration method', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'bucketIntegration');
 
     const synthesized = Testing.synth(stack);
@@ -131,7 +134,7 @@ describe('Api Method', () => {
   });
 
   it('should create a step function integration method', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'stateMachineIntegration');
 
     const synthesized = Testing.synth(stack);
@@ -151,7 +154,7 @@ describe('Api Method', () => {
     });
   });
   it('should create a queue integration method', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'queueIntegration');
 
     const synthesized = Testing.synth(stack);
@@ -175,7 +178,7 @@ describe('Api Method', () => {
   });
 
   it('should create a dynamo integration method', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'dynamoIntegration');
 
     const synthesized = Testing.synth(stack);

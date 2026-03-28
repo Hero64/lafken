@@ -3,7 +3,7 @@ import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gatew
 import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import type { TerraformResource } from 'cdktn';
-import type { RestApi } from '../../rest-api';
+import type { RestApi } from '../../../resolver.types';
 import type { ResponseHandler } from '../method/helpers/response/response.types';
 
 export class ResponseFactory {

@@ -21,7 +21,7 @@ import {
 } from '../../../../../../../main';
 import {
   initializeMethod,
-  setupTestingRestApi,
+  setupInternalTestingRestApi,
 } from '../../../../../../utils/testing.utils';
 
 describe('Queue send message integration', () => {
@@ -74,7 +74,7 @@ describe('Queue send message integration', () => {
   }
 
   it('should create queue integration', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'sendMessage');
 
@@ -123,7 +123,7 @@ describe('Queue send message integration', () => {
   });
 
   it('should create queue integration with global resource', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const Queue = lafkenResource.make(SqsQueue);
 
@@ -146,7 +146,7 @@ describe('Queue send message integration', () => {
   });
 
   it('should create queue integration with event props', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'sendMessageWithEvent');
 

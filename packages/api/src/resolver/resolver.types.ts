@@ -6,9 +6,10 @@ import type {
   ResourceOutputType,
 } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
+import type { ExternalRestApi } from './rest-api/external/external';
+import type { InternalRestApi } from './rest-api/internal/internal';
 
-import type { RestApi } from './rest-api/rest-api';
-
+export type RestApi = InternalRestApi | ExternalRestApi;
 interface ExtendProps {
   scope: AppStack;
   api: RestApi;
@@ -137,11 +138,18 @@ export interface Stage
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
 
-export interface RestApiProps {
-  /**
-   * Defines the name of the API Gateway REST API.
-   */
+export interface BaseApiProps {
   name: ApiRestNames;
+  cors?: CorsOptions;
+  stage?: Stage;
+  auth?: {
+    authorizers: ClassResource[];
+    defaultAuthorizerName: ApiAuthorizerNames;
+  };
+}
+
+export interface RestApiProps extends BaseApiProps {
+  externalName?: never;
   /**
    * Defines the source from which the API Gateway retrieves the API key
    * for request validation.
@@ -160,28 +168,7 @@ export interface RestApiProps {
    * }
    */
   supportedMediaTypes?: MediaTypes[];
-  /**
-   * Defines the Cross-Origin Resource Sharing (CORS) configuration for the API Gateway.
-   * CORS allows or restricts resources on a web server to be requested from another domain
-   * outside the one from which the resource originated.
-   *
-   * When enabled, this will automatically configure the necessary CORS headers and OPTIONS
-   * method responses for all endpoints in the API.
-   *
-   * @example
-   * ```
-   * {
-   *   cors: {
-   *     allowOrigins: ['https://example.com', 'https://app.example.com'],
-   *     allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-   *     allowHeaders: ['Content-Type', 'Authorization'],
-   *     allowCredentials: true,
-   *     maxAge: 3600
-   *   }
-   * }
-   * ```
-   */
-  cors?: CorsOptions;
+
   /**
    * Defines whether the default `execute-api` endpoint of API Gateway should be disabled.
    * By default, every API Gateway has an automatically generated endpoint of the form:
@@ -197,35 +184,7 @@ export interface RestApiProps {
    * to optimize bandwidth and improve performance.
    */
   minCompressionSize?: number;
-  /**
-   * Defines the stage configuration for the API Gateway REST API.
-   * The stage represents a deployment environment for the API, such as `dev`, `staging`, or `prod`.
-   *
-   * You can configure:
-   * - Stage name
-   * - Tracing options
-   * - Throttling and caching
-   */
-  stage?: Stage;
-  /**
-   * Defines the authorization configuration for the API Gateway.
-   * - `authorizers`: An array of authorizer resources to be used by the API.
-   * - `defaultAuthorizerName`: The name of the default authorizer applied to all methods.
-   *
-   * Individual methods can override the default authorizer if needed.
-   * This allows setting a global authorization strategy while providing flexibility
-   * for specific endpoints.
-   *
-   * @example
-   * {
-   *   auth: [AuthorizerClass],
-   *   defaultAuthorizerName: ["<name of authorizer class>"]
-   * }
-   */
-  auth?: {
-    authorizers: ClassResource[];
-    defaultAuthorizerName: ApiAuthorizerNames;
-  };
+
   /**
    * Defines which API Gateway REST API attributes should be exported.
    *
@@ -250,12 +209,11 @@ export interface RestApiProps {
   outputs?: ResourceOutputType<ApiOutputAttributes>;
 }
 
-export interface RestApiOptions {
-  /**
-   * Defines the properties of the REST API for API Gateway.
-   */
-  restApi: RestApiProps;
+export interface ExternalApiProps extends BaseApiProps {
+  externalName: string;
+}
 
+export interface RestApiOptionBase {
   /**
    * Allows extending the API Gateway with custom configurations or resources.
    * @example
@@ -267,3 +225,17 @@ export interface RestApiOptions {
    */
   extend?: (props: ExtendProps) => void;
 }
+export interface InternalRestApiOptions extends RestApiOptionBase {
+  /**
+   * Defines the properties of the REST API for API Gateway.
+   */
+  restApi: RestApiProps;
+}
+export interface ExternalRestApiOptions extends RestApiOptionBase {
+  /**
+   * Defines the properties of the REST API for API Gateway.
+   */
+  restApi: ExternalApiProps;
+}
+
+export type RestApiOptions = InternalRestApiOptions | ExternalRestApiOptions;

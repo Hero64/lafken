@@ -6,10 +6,11 @@ import {
 import { lafkenResource } from '@lafken/resolver';
 import { TerraformStack, Testing } from 'cdktn';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from '../../main';
-import type { RestApiProps } from '../resolver.types';
-import { RestApi } from '../rest-api/rest-api';
+import type { ExternalApiProps, RestApiProps } from '../resolver.types';
+import { ExternalRestApi } from '../rest-api/external/external';
+import { InternalRestApi } from '../rest-api/internal/internal';
 
-export const setupTestingRestApi = (props: Omit<RestApiProps, 'name'> = {}) => {
+export const setupApp = () => {
   const app = Testing.app();
 
   const AppStack = lafkenResource.make(TerraformStack);
@@ -17,7 +18,16 @@ export const setupTestingRestApi = (props: Omit<RestApiProps, 'name'> = {}) => {
   const stack = new AppStack(app, 'testing-stack');
   stack.isGlobal('app', 'testing-stack');
 
-  const restApi = new RestApi(stack, 'testing-api', {
+  return {
+    app,
+    stack,
+  };
+};
+
+export const setupInternalTestingRestApi = (props: Omit<RestApiProps, 'name'> = {}) => {
+  const { app, stack } = setupApp();
+
+  const restApi = new InternalRestApi(stack, 'testing-api', {
     ...props,
     name: 'testing-rest-api',
   });
@@ -29,8 +39,26 @@ export const setupTestingRestApi = (props: Omit<RestApiProps, 'name'> = {}) => {
   };
 };
 
+export const setupExternalTestingRestApi = (
+  props: Omit<ExternalApiProps, 'name' | 'externalName'> = {}
+) => {
+  const { app, stack } = setupApp();
+
+  const restApi = new ExternalRestApi(stack, 'testing-api', {
+    ...props,
+    name: 'testing-rest-api',
+    externalName: 'testing-rest-api',
+  });
+
+  return {
+    app,
+    stack,
+    restApi,
+  };
+};
+
 export const initializeMethod = async (
-  restApi: RestApi,
+  restApi: InternalRestApi,
   stack: TerraformStack,
   classResource: ClassResource,
   handlerName: string

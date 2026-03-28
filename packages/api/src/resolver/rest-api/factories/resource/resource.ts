@@ -1,7 +1,6 @@
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { cleanString } from '@lafken/common';
-
-import type { RestApi } from '../../rest-api';
+import type { RestApi } from '../../../resolver.types';
 
 export class ResourceFactory {
   private apiResources: Record<string, ApiGatewayResource> = {};

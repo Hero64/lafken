@@ -3,7 +3,7 @@ import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-metho
 import type { ClassResource } from '@lafken/common';
 import type { Construct } from 'constructs';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from '../../../../../main';
-import type { RestApi } from '../../../rest-api';
+import type { RestApi } from '../../../../resolver.types';
 import type { IntegrationHelper } from '../helpers/integration/integration';
 import type { ParamHelper } from '../helpers/param/param';
 import type { ProxyHelper } from '../helpers/proxy/proxy';

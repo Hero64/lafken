@@ -3,7 +3,7 @@ import { cleanAndCapitalize } from '@lafken/common';
 import { uuid } from '@lafken/resolver';
 import { Annotations, Fn, Token } from 'cdktn';
 import type { ResponseFieldMetadata } from '../../../../main';
-import type { RestApi } from '../../rest-api';
+import type { RestApi } from '../../../resolver.types';
 import type { CreateModelResponse, GetModelProps, JsonSchema } from './model.types';
 
 export const schemaTypeMap: Record<string, string> = {

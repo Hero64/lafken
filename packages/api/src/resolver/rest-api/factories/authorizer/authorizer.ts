@@ -21,7 +21,7 @@ import {
   type MethodAuthorizer,
   PERMISSION_DEFINITION_FILE,
 } from '../../../../main';
-import type { RestApi } from '../../rest-api';
+import type { RestApi } from '../../../resolver.types';
 import type {
   AuthorizerData,
   AuthorizerDataApiKey,

@@ -1,5 +1,5 @@
 import { ApiGatewayRequestValidator } from '@cdktn/provider-aws/lib/api-gateway-request-validator';
-import type { RestApi } from '../../rest-api';
+import type { RestApi } from '../../../resolver.types';
 import type { GetValidatorProps } from './validator.types';
 
 export class ValidatorFactory {

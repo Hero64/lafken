@@ -5,12 +5,12 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { enableBuildEnvVariable } from '@lafken/common';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
-import { setupTestingRestApi } from '../../../utils/testing.utils';
+import { setupInternalTestingRestApi } from '../../../utils/testing.utils';
 
 describe('Response factory', () => {
   enableBuildEnvVariable();
   it('should create a resource', () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const method = new ApiGatewayMethod(stack, 'test-method', {
       authorization: 'NONE',
@@ -46,7 +46,7 @@ describe('Response factory', () => {
   });
 
   it('should create multiple resources', () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const method = new ApiGatewayMethod(stack, 'test-method', {
       authorization: 'NONE',
@@ -96,7 +96,7 @@ describe('Response factory', () => {
   });
 
   it('should create multiple with properties', () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     const method = new ApiGatewayMethod(stack, 'test-method', {
       authorization: 'NONE',

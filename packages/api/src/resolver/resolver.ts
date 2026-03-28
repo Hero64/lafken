@@ -10,8 +10,9 @@ import {
   type ResolverType,
 } from '@lafken/resolver';
 import { type ApiLambdaMetadata, type ApiResourceMetadata, RESOURCE_TYPE } from '../main';
-import type { RestApiOptions } from './resolver.types';
-import { RestApi } from './rest-api/rest-api';
+import type { RestApi, RestApiOptions } from './resolver.types';
+import { ExternalRestApi } from './rest-api/external/external';
+import { InternalRestApi } from './rest-api/internal/internal';
 
 export class ApiResolver implements ResolverType {
   public type = RESOURCE_TYPE;
@@ -25,15 +26,26 @@ export class ApiResolver implements ResolverType {
   public async beforeCreate(scope: AppStack) {
     if (this.options.length === 0) {
       const id = `${scope.id}-general`;
-      this.apis[id] = new RestApi(scope, id, {
+      this.apis[id] = new InternalRestApi(scope, id, {
         name: id,
       });
       return;
     }
 
     for (const option of this.options) {
-      const restApi = new RestApi(scope, option.restApi.name, option.restApi);
-      this.apis[option.restApi.name] = restApi;
+      if (option.restApi.externalName === undefined) {
+        this.apis[option.restApi.name] = new InternalRestApi(
+          scope,
+          option.restApi.name,
+          option.restApi
+        );
+      } else {
+        this.apis[option.restApi.name] = new ExternalRestApi(
+          scope,
+          option.restApi.name,
+          option.restApi
+        );
+      }
     }
   }
 
@@ -52,7 +64,7 @@ export class ApiResolver implements ResolverType {
 
     const apiNames = Object.keys(this.apis);
 
-    let api: RestApi = this.apis[apiNames[0]];
+    let api = this.apis[apiNames[0]];
 
     if (apiNames.length > 1) {
       api = this.apis[metadata.apiGatewayName];
@@ -76,7 +88,6 @@ export class ApiResolver implements ResolverType {
   public async afterCreate(scope: AppStack) {
     if (this.options.length === 0) {
       const defaultApi = Object.values(this.apis)[0];
-
       defaultApi.createStageDeployment();
       return;
     }

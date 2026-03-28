@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Api, ApiRequest, BodyParam, Event, Get } from '../../../../../../main';
 import {
   initializeMethod,
-  setupTestingRestApi,
+  setupInternalTestingRestApi,
 } from '../../../../../utils/testing.utils';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
@@ -50,7 +50,7 @@ describe('lambda integration', () => {
     lambdaHandler3(@Event(Data) _e: Data) {}
   }
   it('should create a lambda integration with default options', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'lambdaHandler1');
     const synthesized = Testing.synth(stack);
@@ -75,7 +75,7 @@ describe('lambda integration', () => {
   });
 
   it('should create a lambda integration with custom options', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'lambdaHandler2');
     const synthesized = Testing.synth(stack);
@@ -101,7 +101,7 @@ describe('lambda integration', () => {
   });
 
   it('should create a lambda integration with event', async () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'lambdaHandler3');
     const synthesized = Testing.synth(stack);

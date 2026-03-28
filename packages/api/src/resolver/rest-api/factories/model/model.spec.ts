@@ -2,12 +2,12 @@ import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
-import { setupTestingRestApi } from '../../../utils/testing.utils';
+import { setupInternalTestingRestApi } from '../../../utils/testing.utils';
 
 describe('Model factory', () => {
   enableBuildEnvVariable();
   it('should create a new model', () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     restApi.modelFactory.getModel({
       field: {
@@ -44,7 +44,7 @@ describe('Model factory', () => {
   });
 
   it('should return an existent model', () => {
-    const { restApi } = setupTestingRestApi();
+    const { restApi } = setupInternalTestingRestApi();
 
     const modelA = restApi.modelFactory.getModel({
       field: {
@@ -99,7 +99,7 @@ describe('Model factory', () => {
   });
 
   it('should create a sub-models', () => {
-    const { restApi, stack } = setupTestingRestApi();
+    const { restApi, stack } = setupInternalTestingRestApi();
 
     restApi.modelFactory.getModel({
       field: {
