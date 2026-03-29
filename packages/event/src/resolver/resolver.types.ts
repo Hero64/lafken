@@ -71,6 +71,12 @@ export interface InternalEventRuleResolverProps extends EventRuleResolverBasePro
 }
 
 export interface ExternalEventRuleResolverProps extends EventRuleResolverBaseProps {
+  /**
+   * Marks the EventBridge event bus as an external resource.
+   *
+   * When set to `true`, the event bus is not created by the framework.
+   * Instead, it references an existing EventBridge event bus using the provided `busName`.
+   */
   isExternal: true;
   /**
    * Allows extending the event bus with custom configurations or resources.

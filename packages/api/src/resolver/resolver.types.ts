@@ -210,6 +210,12 @@ export interface RestApiProps extends BaseApiProps {
 }
 
 export interface ExternalApiProps extends BaseApiProps {
+  /**
+   * Marks the REST API as an external resource.
+   *
+   * When set to `true`, the API Gateway is not created by the framework.
+   * Instead, it references an existing API Gateway REST API using the provided `name`.
+   */
   isExternal: true;
 }
 

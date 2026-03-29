@@ -168,8 +168,8 @@ export interface ExternalUserClientProps {
   /**
    * Marks the User Pool as an external resource.
    *
-   * When set to `true`, the User Pool is not created by the framework.
-   * Instead, it references an existing Cognito User Pool using the provided `userPoolId`.
+   * When set to `true`, the User Pool Client is not created by the framework.
+   * Instead, it references an existing Cognito User Pool Client using the provided `userPoolId`.
    */
   isExternal: true;
   /**

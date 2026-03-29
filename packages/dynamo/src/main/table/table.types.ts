@@ -372,6 +372,12 @@ export type InternalTableProps<T extends Function> =
 
 export interface ExternalTableProps<T extends Function>
   extends Omit<InternalTableProps<T>, 'outputs' | 'replica' | 'stream' | 'isExternal'> {
+  /**
+   * Marks the DynamoDB table as an external resource.
+   *
+   * When set to `true`, the table is not created by the framework.
+   * Instead, it references an existing DynamoDB table using the provided `name`.
+   */
   isExternal: true;
 }
 
