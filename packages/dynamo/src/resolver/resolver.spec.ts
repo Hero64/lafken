@@ -1,3 +1,4 @@
+import { DataAwsDynamodbTable } from '@cdktn/provider-aws/lib/data-aws-dynamodb-table';
 import { DynamodbTable } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
 import { enableBuildEnvVariable } from '@lafken/common';
@@ -214,6 +215,45 @@ describe('dynamo resolver', () => {
       const synthesized = Testing.synth(stack);
       expect(synthesized).toHaveResourceWithProperties(DynamodbTable, {
         name: 'TestExtend',
+      });
+    });
+
+    it('should create an external dynamo table', async () => {
+      @Model({ isExternal: true })
+      class ExternalTest {}
+
+      const { stack } = setupTestingStack();
+      const resolver = new DynamoResolver([ExternalTest]);
+
+      await resolver.beforeCreate(stack as unknown as AppModule);
+
+      const synthesized = Testing.synth(stack);
+      expect(synthesized).toHaveDataSourceWithProperties(DataAwsDynamodbTable, {
+        name: 'ExternalTest',
+      });
+    });
+
+    it('should create both internal and external dynamo tables', async () => {
+      @Model()
+      class InternalTest {
+        @PartitionKey(String)
+        name: PrimaryPartition<string>;
+      }
+
+      @Model({ isExternal: true })
+      class ExternalTest {}
+
+      const { stack } = setupTestingStack();
+      const resolver = new DynamoResolver([InternalTest, ExternalTest]);
+
+      await resolver.beforeCreate(stack as unknown as AppModule);
+
+      const synthesized = Testing.synth(stack);
+      expect(synthesized).toHaveResourceWithProperties(DynamodbTable, {
+        name: 'InternalTest',
+      });
+      expect(synthesized).toHaveDataSourceWithProperties(DataAwsDynamodbTable, {
+        name: 'ExternalTest',
       });
     });
   });

@@ -11,8 +11,8 @@ import {
   PartitionKey,
   type PrimaryPartition,
   SortKey,
-} from '../../main';
-import { Table } from './table';
+} from '../../../main';
+import { InternalTable } from './internal';
 
 const setupApp = () => {
   const app = Testing.app();
@@ -24,7 +24,7 @@ const setupApp = () => {
   };
 };
 
-describe('Dynamo table', () => {
+describe('InternalTable', () => {
   enableBuildEnvVariable();
 
   it('should create a simple dynamo table', () => {
@@ -39,7 +39,7 @@ describe('Dynamo table', () => {
 
     const { stack } = setupApp();
 
-    new Table(stack, {
+    new InternalTable(stack, {
       classResource: Test,
     });
 
@@ -63,7 +63,7 @@ describe('Dynamo table', () => {
 
     const { stack } = setupApp();
 
-    new Table(stack, {
+    new InternalTable(stack, {
       classResource: Test,
     });
 
@@ -112,7 +112,7 @@ describe('Dynamo table', () => {
 
     const { stack } = setupApp();
 
-    new Table(stack, {
+    new InternalTable(stack, {
       classResource: Test,
     });
 
@@ -151,7 +151,7 @@ describe('Dynamo table', () => {
 
     const { stack } = setupApp();
 
-    new Table(stack, {
+    new InternalTable(stack, {
       classResource: Test,
     });
 
@@ -205,7 +205,7 @@ describe('Dynamo table', () => {
     const { stack } = setupApp();
 
     expect(() => {
-      new Table(stack, {
+      new InternalTable(stack, {
         classResource: Test,
       });
     }).toThrow();

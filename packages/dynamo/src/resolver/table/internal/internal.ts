@@ -15,17 +15,17 @@ import type {
   FieldsMetadata,
   ReadWriteCapacity,
   TableOutputAttributes,
-} from '../../main';
-import { getModelInformation, type ModelMetadata } from '../../service';
-import type { TableProps } from './table.types';
+} from '../../../main';
+import { getModelInformation, type ModelMetadata } from '../../../service';
+import type { InternalTableProps } from '../table.types';
 
 const mapFieldType: Partial<Record<FieldTypes, string>> = {
   String: 'S',
   Number: 'N',
 };
 
-export class Table extends lafkenResource.make(DynamodbTable) {
-  constructor(scope: Construct, props: TableProps) {
+export class InternalTable extends lafkenResource.make(DynamodbTable) {
+  constructor(scope: Construct, props: InternalTableProps) {
     const {
       modelProps,
       partitionKey: partitionKeyName,
@@ -33,7 +33,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
       fields,
     } = getModelInformation(props.classResource);
 
-    const { globalIndexes, localIndexes, indexAttributes } = Table.getIndexes(
+    const { globalIndexes, localIndexes, indexAttributes } = InternalTable.getIndexes(
       scope,
       modelProps.indexes,
       sortKeyName
@@ -50,7 +50,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
       name: modelProps.name,
       rangeKey: sortKeyName,
       hashKey: partitionKeyName,
-      attribute: Table.getAttributes(
+      attribute: InternalTable.getAttributes(
         fields,
         availableAttributes,
         modelProps.ttl as string
@@ -67,7 +67,7 @@ export class Table extends lafkenResource.make(DynamodbTable) {
             enabled: true,
           }
         : undefined,
-      ...Table.getBillingModeProps(modelProps),
+      ...InternalTable.getBillingModeProps(modelProps),
       replica: modelProps.replica,
     });
 

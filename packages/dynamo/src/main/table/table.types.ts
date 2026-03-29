@@ -243,6 +243,7 @@ export interface DynamoStream<T> {
 }
 
 export interface TableBase<T extends Function> {
+  isExternal?: never;
   /**
    * Table name.
    *
@@ -365,9 +366,28 @@ export interface TablePayPerRequest<T extends Function> extends TableBase<T> {
   indexes?: DynamoIndex<T>[];
 }
 
-export type DynamoTableProps<T extends Function> =
+export type InternalTableProps<T extends Function> =
   | TableProvisioned<T>
   | TablePayPerRequest<T>;
+
+export interface ExternalTableProps<T extends Function>
+  extends Omit<InternalTableProps<T>, 'outputs' | 'replica' | 'stream' | 'isExternal'> {
+  isExternal: true;
+}
+
+export type DynamoTableProps<T extends Function> =
+  | InternalTableProps<T>
+  | ExternalTableProps<T>;
+
+export interface InternalTableMetadata extends Omit<InternalTableProps<any>, 'name'> {
+  name: string;
+}
+
+export interface ExternalTableMetadata extends Omit<ExternalTableProps<any>, 'name'> {
+  name: string;
+}
+
+export type TableMetadata = InternalTableMetadata | ExternalTableMetadata;
 
 export interface FieldProps {
   type?:

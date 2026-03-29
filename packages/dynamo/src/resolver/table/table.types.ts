@@ -1,5 +1,5 @@
 import type { ClassResource } from '@lafken/common';
 
-export interface TableProps {
+export interface InternalTableProps {
   classResource: ClassResource;
 }

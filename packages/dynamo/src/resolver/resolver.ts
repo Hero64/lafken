@@ -1,13 +1,16 @@
+import type { DataAwsDynamodbTable } from '@cdktn/provider-aws/lib/data-aws-dynamodb-table';
 import type { DynamodbTable } from '@cdktn/provider-aws/lib/dynamodb-table';
 import type { ClassResource } from '@lafken/common';
 import type { AppModule, AppStack, ResolverType } from '@lafken/resolver';
+import { type TableMetadata, TableMetadataKeys } from '../main';
 import type { ClassResourceExtends } from './resolver.types';
-import { Table } from './table/table';
+import { ExternalTable } from './table/external/external';
+import { InternalTable } from './table/internal/internal';
 
 export class DynamoResolver implements ResolverType {
   public type = 'DYNAMODB';
   private extensibleTables: (Omit<ClassResourceExtends, 'table'> & {
-    table: DynamodbTable;
+    table: DynamodbTable | DataAwsDynamodbTable;
   })[] = [];
 
   constructor(private tables: (ClassResource | ClassResourceExtends)[]) {}
@@ -17,9 +20,20 @@ export class DynamoResolver implements ResolverType {
       const isExtensibleResource = 'table' in table;
       const tableResource = isExtensibleResource ? table.table : table;
 
-      const dynamoTable = new Table(scope, {
-        classResource: tableResource,
-      });
+      const tableProps: TableMetadata = Reflect.getMetadata(
+        TableMetadataKeys.table,
+        tableResource
+      );
+
+      let dynamoTable: InternalTable | ExternalTable;
+
+      if (tableProps.isExternal !== undefined) {
+        dynamoTable = new ExternalTable(scope, tableProps);
+      } else {
+        dynamoTable = new InternalTable(scope, {
+          classResource: tableResource,
+        });
+      }
 
       if (isExtensibleResource) {
         this.extensibleTables.push({
