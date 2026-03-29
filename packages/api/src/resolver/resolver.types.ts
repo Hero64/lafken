@@ -149,7 +149,7 @@ export interface BaseApiProps {
 }
 
 export interface RestApiProps extends BaseApiProps {
-  externalName?: never;
+  isExternal?: never;
   /**
    * Defines the source from which the API Gateway retrieves the API key
    * for request validation.
@@ -210,7 +210,7 @@ export interface RestApiProps extends BaseApiProps {
 }
 
 export interface ExternalApiProps extends BaseApiProps {
-  externalName: string;
+  isExternal: true;
 }
 
 export interface RestApiOptionBase {

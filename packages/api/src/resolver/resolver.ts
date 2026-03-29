@@ -33,14 +33,14 @@ export class ApiResolver implements ResolverType {
     }
 
     for (const option of this.options) {
-      if (option.restApi.externalName === undefined) {
-        this.apis[option.restApi.name] = new InternalRestApi(
+      if (option.restApi.isExternal) {
+        this.apis[option.restApi.name] = new ExternalRestApi(
           scope,
           option.restApi.name,
           option.restApi
         );
       } else {
-        this.apis[option.restApi.name] = new ExternalRestApi(
+        this.apis[option.restApi.name] = new InternalRestApi(
           scope,
           option.restApi.name,
           option.restApi

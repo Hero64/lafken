@@ -9,7 +9,7 @@ export class ExternalRestApi extends RestApiBase(
 ) {
   constructor(scope: Construct, id: string, props: ExternalApiProps) {
     super(scope, `${id}-api`, {
-      name: props.externalName,
+      name: props.name,
     });
 
     this.isGlobal('api', id);

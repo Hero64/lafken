@@ -40,14 +40,14 @@ export const setupInternalTestingRestApi = (props: Omit<RestApiProps, 'name'> = 
 };
 
 export const setupExternalTestingRestApi = (
-  props: Omit<ExternalApiProps, 'name' | 'externalName'> = {}
+  props: Omit<ExternalApiProps, 'name' | 'isExternal'> = {}
 ) => {
   const { app, stack } = setupApp();
 
   const restApi = new ExternalRestApi(stack, 'testing-api', {
     ...props,
     name: 'testing-rest-api',
-    externalName: 'testing-rest-api',
+    isExternal: true,
   });
 
   return {
