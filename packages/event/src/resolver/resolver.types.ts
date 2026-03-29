@@ -1,10 +1,11 @@
 import type { CloudwatchEventBus } from '@cdktn/provider-aws/lib/cloudwatch-event-bus';
+import type { DataAwsCloudwatchEventBus } from '@cdktn/provider-aws/lib/data-aws-cloudwatch-event-bus';
 import type { EventBusNames, ResourceOutputType } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
 
 export type BusOutputAttributes = 'arn' | 'id';
 
-interface ExtendProps {
+interface ExtendProps<T> {
   /**
    * The CDKTN application stack scope.
    */
@@ -14,10 +15,15 @@ interface ExtendProps {
    * Use this to apply additional CDKTN configuration beyond what
    * `EventRuleResolverProps` exposes directly.
    */
-  eventBus: CloudwatchEventBus;
+  eventBus: T;
 }
 
-export interface EventRuleResolverProps {
+export interface EventBusList {
+  eventBus: CloudwatchEventBus | DataAwsCloudwatchEventBus;
+  extend?: (props: ExtendProps<CloudwatchEventBus | DataAwsCloudwatchEventBus>) => void;
+}
+
+export interface EventRuleResolverBaseProps {
   /**
    * Defines the name of the custom EventBridge event bus to create.
    *
@@ -26,6 +32,10 @@ export interface EventRuleResolverProps {
    * is always provisioned automatically.
    */
   busName: EventBusNames;
+}
+
+export interface InternalEventRuleResolverProps extends EventRuleResolverBaseProps {
+  isExternal?: never;
   /**
    * Defines which EventBridge event bus attributes should be exported.
    *
@@ -46,6 +56,7 @@ export interface EventRuleResolverProps {
    * }
    */
   outputs?: ResourceOutputType<BusOutputAttributes>;
+
   /**
    * Allows extending the event bus with custom configurations or resources.
    *
@@ -56,5 +67,24 @@ export interface EventRuleResolverProps {
    *   },
    * }
    */
-  extend?: (props: ExtendProps) => void;
+  extend?: (props: ExtendProps<CloudwatchEventBus>) => void;
 }
+
+export interface ExternalEventRuleResolverProps extends EventRuleResolverBaseProps {
+  isExternal: true;
+  /**
+   * Allows extending the event bus with custom configurations or resources.
+   *
+   * @example
+   * {
+   *   extend: ({ eventBus, scope }) => {
+   *     // Apply additional CDKTN configuration
+   *   },
+   * }
+   */
+  extend?: (props: ExtendProps<DataAwsCloudwatchEventBus>) => void;
+}
+
+export type EventRuleResolverProps =
+  | InternalEventRuleResolverProps
+  | ExternalEventRuleResolverProps;

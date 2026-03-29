@@ -9,17 +9,25 @@ import {
 import {
   type AppModule,
   type AppStack,
+  lafkenResource,
   lambdaAssets,
   type ResolverType,
   ResourceOutput,
 } from '@lafken/resolver';
 import { type EventRuleMetadata, RESOURCE_TYPE } from '../main';
-import type { BusOutputAttributes, EventRuleResolverProps } from './resolver.types';
+import type {
+  BusOutputAttributes,
+  EventBusList,
+  EventRuleResolverProps,
+} from './resolver.types';
 import { Rule } from './rule/rule';
+
+const LafkenEventBus = lafkenResource.make(CloudwatchEventBus);
+const LafkenDataEventBus = lafkenResource.make(DataAwsCloudwatchEventBus);
 
 export class EventRuleResolver implements ResolverType {
   public type = RESOURCE_TYPE;
-  private eventBuses: Record<string, CloudwatchEventBus> = {};
+  private eventBuses: Record<string, EventBusList> = {};
   private props: EventRuleResolverProps[] = [];
 
   constructor(...props: EventRuleResolverProps[]) {
@@ -33,25 +41,35 @@ export class EventRuleResolver implements ResolverType {
       name: 'default',
     });
 
-    this.eventBuses.default = defaultBus as unknown as CloudwatchEventBus;
+    this.eventBuses.default = {
+      eventBus: defaultBus,
+    };
 
     for (const eventBusProps of this.props) {
       if (eventBusProps.busName === 'default') {
         throw new Error('Event bus default already exist');
       }
+      let eventBus:
+        | InstanceType<typeof LafkenEventBus>
+        | InstanceType<typeof LafkenDataEventBus>;
 
-      this.eventBuses[eventBusProps.busName] = new CloudwatchEventBus(
-        scope,
-        `${eventBusProps.busName}-bus`,
-        {
+      if (eventBusProps.isExternal) {
+        eventBus = new LafkenDataEventBus(scope, `${eventBusProps.busName}-bus`, {
           name: eventBusProps.busName,
-        }
-      );
+        });
+      } else {
+        eventBus = new LafkenEventBus(scope, `${eventBusProps.busName}-bus`, {
+          name: eventBusProps.busName,
+        });
+        new ResourceOutput<BusOutputAttributes>(eventBus, eventBusProps.outputs);
+      }
 
-      new ResourceOutput<BusOutputAttributes>(
-        this.eventBuses[eventBusProps.busName],
-        eventBusProps.outputs
-      );
+      eventBus.isGlobal('event-bus', eventBusProps.busName);
+
+      this.eventBuses[eventBusProps.busName] = {
+        eventBus: eventBus,
+        extend: eventBusProps.extend as EventBusList['extend'],
+      };
     }
   }
 
@@ -70,9 +88,22 @@ export class EventRuleResolver implements ResolverType {
       const id = `${handler.name}-${metadata.name}`;
       const bus = this.eventBuses[handler.bus || 'default'];
       new Rule(module, id, {
-        bus,
+        bus: bus.eventBus,
         handler,
         resourceMetadata: metadata,
+      });
+    }
+  }
+
+  public afterCreate(scope: AppStack) {
+    for (const key in this.eventBuses) {
+      const { extend, eventBus } = this.eventBuses[key];
+      if (!extend) {
+        continue;
+      }
+      extend({
+        scope,
+        eventBus,
       });
     }
   }

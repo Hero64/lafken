@@ -311,4 +311,84 @@ describe('event resolver', () => {
       );
     });
   });
+
+  describe('afterCreate', () => {
+    it('should call extend callback for internal event bus', async () => {
+      const extendFn = vi.fn();
+
+      const { stack } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver({
+        busName: 'orders-bus',
+        extend: extendFn,
+      });
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+      await resolver.afterCreate(stack as unknown as AppStack);
+
+      expect(extendFn).toHaveBeenCalledTimes(1);
+      expect(extendFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scope: stack,
+          eventBus: expect.anything(),
+        })
+      );
+    });
+
+    it('should call extend callback for external event bus', async () => {
+      const extendFn = vi.fn();
+
+      const { stack } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver({
+        busName: 'external-bus',
+        isExternal: true,
+        extend: extendFn,
+      });
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+      await resolver.afterCreate(stack as unknown as AppStack);
+
+      expect(extendFn).toHaveBeenCalledTimes(1);
+      expect(extendFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scope: stack,
+          eventBus: expect.anything(),
+        })
+      );
+    });
+
+    it('should call extend for multiple buses', async () => {
+      const extendA = vi.fn();
+      const extendB = vi.fn();
+
+      const { stack } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver(
+        { busName: 'bus-a', extend: extendA },
+        { busName: 'bus-b', isExternal: true, extend: extendB }
+      );
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+      await resolver.afterCreate(stack as unknown as AppStack);
+
+      expect(extendA).toHaveBeenCalledTimes(1);
+      expect(extendB).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not fail when there are no extend callbacks', async () => {
+      const { stack } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver({ busName: 'simple-bus' });
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+
+      expect(() => resolver.afterCreate(stack as unknown as AppStack)).not.toThrow();
+    });
+
+    it('should not fail when there are no custom buses', async () => {
+      const { stack } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver();
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+
+      expect(() => resolver.afterCreate(stack as unknown as AppStack)).not.toThrow();
+    });
+  });
 });
