@@ -1,11 +1,13 @@
 import { Construct } from 'constructs';
 import type { AuthOptions } from '../resolver.types';
-import { UserPool } from './user-pool/user-pool';
-import { UserPoolClient } from './user-pool-client/user-pool-client';
+import { ExternalUserPool } from './user-pool/external/external';
+import { InternalUserPool } from './user-pool/internal/internal';
+import { ExternalUserPoolClient } from './user-pool-client/external/external';
+import { InternalUserPoolClient } from './user-pool-client/internal/internal';
 
 export class Auth extends Construct {
-  private userPool: UserPool;
-  private userPoolClient: UserPoolClient;
+  private userPool: InternalUserPool | ExternalUserPool;
+  private userPoolClient: InternalUserPoolClient | ExternalUserPoolClient;
 
   constructor(
     scope: Construct,
@@ -16,16 +18,25 @@ export class Auth extends Construct {
   }
 
   public async create() {
-    this.userPool = new UserPool(this, this.id, {
-      ...(this.props.userPool || {}),
-      extensions: this.props.extensions,
-    });
+    if (this.props.userPool?.isExternal) {
+      this.userPool = new ExternalUserPool(this, this.id, this.props.userPool);
+    } else {
+      this.userPool = new InternalUserPool(this, this.id, this.props.userPool || {});
+    }
 
-    this.userPoolClient = new UserPoolClient(this, this.id, {
-      ...this.props.userClient,
-      userPoolId: this.userPool.id,
-      attributeByName: this.userPool.attributeByName,
-    });
+    if (this.props.userClient?.isExternal) {
+      this.userPoolClient = new ExternalUserPoolClient(this, this.id, {
+        userPoolId: this.userPool.id,
+        ...this.props.userClient,
+      });
+    } else {
+      this.userPoolClient = new InternalUserPoolClient(this, this.id, {
+        userPoolId: this.userPool.id,
+        ...this.props.userClient,
+        attributeByName:
+          this.userPool instanceof InternalUserPool ? this.userPool.attributeByName : {},
+      });
+    }
   }
 
   public async callExtends() {

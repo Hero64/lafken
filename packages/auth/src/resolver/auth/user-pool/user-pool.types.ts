@@ -189,7 +189,8 @@ export type IdentityProvider<T extends ClassResource> =
   | GoogleIdentityProvider<T>
   | OidcIdentityProvider<T>;
 
-export interface UserPool<T extends ClassResource> {
+export interface InternalUserPoolProps<T extends ClassResource> {
+  isExternal?: never;
   /**
    * Defines the attributes for the Cognito User Pool.
    * Accepts a class decorated with `@Attributes`, where each property can be:
@@ -292,6 +293,23 @@ export interface UserPool<T extends ClassResource> {
    */
   identityProviders?: IdentityProvider<T>[];
   /**
+   * Defines the list of extensions (triggers) to attach to the Cognito User Pool.
+   *
+   * This property allows you to add custom logic to different actions performed
+   * by the User Pool, such as `preSignUp`, `postConfirmation`, `preAuthentication`, etc.
+   *
+   * Each extension should be a class decorated with `@AuthExtension`, and its methods
+   * must be decorated with `@Trigger`. The `type` of each trigger must be unique
+   * to prevent conflicts.
+   *
+   * @example
+   * // first create an extension class with @AuthExtension decorator
+   * {
+   *   extensions: [PreSignUpClass, PostTokenClass]
+   * }
+   */
+  extensions?: ClassResource[];
+  /**
    * Defines which Cognito User Pool attributes should be exported.
    *
    * Supported attributes are based on Terraform `aws_cognito_user_pool`
@@ -315,6 +333,23 @@ export interface UserPool<T extends ClassResource> {
   outputs?: ResourceOutputType<UserPoolOutputAttributes>;
 }
 
-export interface UserPoolProps extends UserPool<any> {
-  extensions?: ClassResource[];
+export interface ExternalUserPoolProps {
+  /**
+   * Marks the User Pool as an external resource.
+   *
+   * When set to `true`, the User Pool is not created by the framework.
+   * Instead, it references an existing Cognito User Pool using the provided `userPoolId`.
+   */
+  isExternal: true;
+  /**
+   * The ID of the existing Cognito User Pool to reference.
+   *
+   * This value is used to look up and integrate with a User Pool
+   * that was created outside of the framework.
+   */
+  userPoolId: string;
 }
+
+export type UserPoolProps<T extends ClassResource> =
+  | InternalUserPoolProps<T>
+  | ExternalUserPoolProps;

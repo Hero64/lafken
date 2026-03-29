@@ -1,14 +1,16 @@
 import type { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
 import type { CognitoUserPoolClient } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
+import type { DataAwsCognitoUserPool } from '@cdktn/provider-aws/lib/data-aws-cognito-user-pool';
+import type { DataAwsCognitoUserPoolClient } from '@cdktn/provider-aws/lib/data-aws-cognito-user-pool-client';
 import type { AuthNames, ClassResource } from '@lafken/common';
 import type { Construct } from 'constructs';
-import type { UserPool } from './auth/user-pool/user-pool.types';
-import type { UserClient } from './auth/user-pool-client/user-pool-client.types';
+import type { UserPoolProps } from './auth/user-pool/user-pool.types';
+import type { UserClientProps } from './auth/user-pool-client/user-pool-client.types';
 
 export interface ExtendProps {
   scope: Construct;
-  userPool: CognitoUserPool;
-  userPoolClient: CognitoUserPoolClient;
+  userPool: CognitoUserPool | DataAwsCognitoUserPool;
+  userPoolClient: CognitoUserPoolClient | DataAwsCognitoUserPoolClient;
 }
 
 export interface AuthOptions<T extends ClassResource> {
@@ -31,7 +33,7 @@ export interface AuthOptions<T extends ClassResource> {
    *   }
    * }
    */
-  userPool?: UserPool<T>;
+  userPool?: UserPoolProps<T>;
   /**
    * Defines a custom configuration for the Cognito User Pool Client.
    * This allows specifying properties such as:
@@ -47,24 +49,8 @@ export interface AuthOptions<T extends ClassResource> {
    *   }
    * }
    */
-  userClient?: UserClient<T>;
-  /**
-   * Defines the list of extensions (triggers) to attach to the Cognito User Pool.
-   *
-   * This property allows you to add custom logic to different actions performed
-   * by the User Pool, such as `preSignUp`, `postConfirmation`, `preAuthentication`, etc.
-   *
-   * Each extension should be a class decorated with `@AuthExtension`, and its methods
-   * must be decorated with `@Trigger`. The `type` of each trigger must be unique
-   * to prevent conflicts.
-   *
-   * @example
-   * // first create an extension class with @AuthExtension decorator
-   * {
-   *   extensions: [PreSignUpClass, PostTokenClass]
-   * }
-   */
-  extensions?: ClassResource[];
+  userClient?: UserClientProps<T>;
+
   /**
    * Allows extending the Cognito User Pool with custom configurations or resources.
    *

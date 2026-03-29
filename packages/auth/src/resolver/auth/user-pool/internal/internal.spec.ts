@@ -3,8 +3,8 @@ import { enableBuildEnvVariable } from '@lafken/common';
 import { setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
-import { Attributes, Custom, Standard } from '../../../main';
-import { UserPool } from './user-pool';
+import { Attributes, Custom, Standard } from '../../../../main';
+import { InternalUserPool } from './internal';
 
 describe('Auth user pool', () => {
   enableBuildEnvVariable();
@@ -12,7 +12,7 @@ describe('Auth user pool', () => {
   it('should create a simple user pool', async () => {
     const { stack } = setupTestingStack();
 
-    new UserPool(stack, 'test', {});
+    new InternalUserPool(stack, 'test', {});
 
     const synthesized = Testing.synth(stack);
 
@@ -39,7 +39,7 @@ describe('Auth user pool', () => {
 
     const { stack } = setupTestingStack();
 
-    new UserPool(stack, 'test', {
+    new InternalUserPool(stack, 'test', {
       attributes: AuthAttributes,
       accountRecovery: ['verified_email', 'verified_phone_number'],
       autoVerifyAttributes: ['email', 'phone'],

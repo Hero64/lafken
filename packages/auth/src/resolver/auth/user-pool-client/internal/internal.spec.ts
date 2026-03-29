@@ -10,8 +10,8 @@ import {
   type CustomAttributesMetadata,
   Standard,
   type StandardAttributeMetadata,
-} from '../../../main';
-import { UserPoolClient } from './user-pool-client';
+} from '../../../../main';
+import { InternalUserPoolClient } from './internal';
 
 describe('Auth user pool client', () => {
   enableBuildEnvVariable();
@@ -19,7 +19,7 @@ describe('Auth user pool client', () => {
   it('should create a simple user pool client', () => {
     const { stack } = setupTestingStack();
 
-    new UserPoolClient(stack, 'testing', {
+    new InternalUserPoolClient(stack, 'testing', {
       userPoolId: 'test-id',
       attributeByName: {},
     });
@@ -62,7 +62,7 @@ describe('Auth user pool client', () => {
       {} as Record<string, CustomAttributesMetadata | StandardAttributeMetadata>
     );
 
-    new UserPoolClient(stack, 'testing', {
+    new InternalUserPoolClient(stack, 'testing', {
       userPoolId: 'test-id',
       authFlows: ['allow_custom_auth'],
       enableTokenRevocation: true,

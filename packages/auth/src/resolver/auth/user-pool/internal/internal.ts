@@ -24,61 +24,67 @@ import {
   authFieldKey,
   type CustomAttributesMetadata,
   type StandardAttributeMetadata,
-} from '../../../main';
-import { RESOURCE_TYPE } from '../../../main/extension/extension';
-import type { TriggerMetadata } from '../../../main/extension/extension.types';
-import { mapUserAttributes } from '../auth.utils';
-import { Extension } from './extension/extension';
-import { IdentityProvider } from './identity-provider/identity-provider';
+} from '../../../../main';
+import { RESOURCE_TYPE } from '../../../../main/extension/extension';
+import type { TriggerMetadata } from '../../../../main/extension/extension.types';
+import { mapUserAttributes } from '../../auth.utils';
+import { Extension } from '../extension/extension';
+import { IdentityProvider } from '../identity-provider/identity-provider';
 import type {
   AccountRecovery,
   AutoVerifyAttributes,
   CognitoPlan,
   EmailConfig,
   IdentityProvider as IdentityProviderType,
+  InternalUserPoolProps,
   InvitationMessage,
   Mfa,
   PasswordPolicy,
   SignInAliases,
   UserPoolOutputAttributes,
-  UserPoolProps,
   UserVerification,
-} from './user-pool.types';
+} from '../user-pool.types';
 
-export class UserPool extends lafkenResource.make(CognitoUserPool) {
+export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
   public attributeByName: Record<
     string,
     CustomAttributesMetadata | StandardAttributeMetadata
   > = {};
-  constructor(scope: Construct, id: string, props: UserPoolProps) {
-    const attributes = UserPool.getUserAttributes(props.attributes);
+  constructor(scope: Construct, id: string, props: InternalUserPoolProps<any>) {
+    const attributes = InternalUserPool.getUserAttributes(props.attributes);
 
     super(scope, `${id}-user-pool`, {
-      ...UserPool.getMfaConfig(props.mfa),
+      ...InternalUserPool.getMfaConfig(props.mfa),
       name: id,
-      autoVerifiedAttributes: UserPool.getAutoVerifiedAttributes(
+      autoVerifiedAttributes: InternalUserPool.getAutoVerifiedAttributes(
         props.autoVerifyAttributes
       ),
-      accountRecoverySetting: UserPool.getAccountRecoverySettings(props.accountRecovery),
-      aliasAttributes: UserPool.getAliasAttributes(props.signInAliases),
-      adminCreateUserConfig: UserPool.getAdminCreateUserConfig(
+      accountRecoverySetting: InternalUserPool.getAccountRecoverySettings(
+        props.accountRecovery
+      ),
+      aliasAttributes: InternalUserPool.getAliasAttributes(props.signInAliases),
+      adminCreateUserConfig: InternalUserPool.getAdminCreateUserConfig(
         props.selfSignUpEnabled,
         props.invitationMessage
       ),
-      passwordPolicy: UserPool.getPasswordPolicy(props.passwordPolicy),
-      emailConfiguration: UserPool.getEmailConfig(props.email),
-      userPoolTier: UserPool.getCognitoPlan(props.cognitoPlan),
-      usernameConfiguration: UserPool.getSignInCaseSensitive(props.signInCaseSensitive),
-      verificationMessageTemplate: UserPool.getUserVerification(props.userVerification),
+      passwordPolicy: InternalUserPool.getPasswordPolicy(props.passwordPolicy),
+      emailConfiguration: InternalUserPool.getEmailConfig(props.email),
+      userPoolTier: InternalUserPool.getCognitoPlan(props.cognitoPlan),
+      usernameConfiguration: InternalUserPool.getSignInCaseSensitive(
+        props.signInCaseSensitive
+      ),
+      verificationMessageTemplate: InternalUserPool.getUserVerification(
+        props.userVerification
+      ),
       schema: attributes?.schema,
-      smsConfiguration: UserPool.getSmsConfig(
+      smsConfiguration: InternalUserPool.getSmsConfig(
         scope,
         id,
         props.mfa,
         props.userVerification
       ),
-      lambdaConfig: UserPool.getLambdaConfig(scope, props.extensions),
-      usernameAttributes: UserPool.getAliasAttributes(props.usernameAttributes),
+      lambdaConfig: InternalUserPool.getLambdaConfig(scope, props.extensions),
+      usernameAttributes: InternalUserPool.getAliasAttributes(props.usernameAttributes),
       lifecycle: {
         ignoreChanges: ['schema'],
       },

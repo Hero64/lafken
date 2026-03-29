@@ -41,7 +41,8 @@ export interface OAuthConfig {
   scopes?: OAuthScopes[];
 }
 
-export interface UserClient<T extends Function> {
+export interface InternalUserClientProps<T extends Function> {
+  isExternal?: never;
   /**
    * Defines the authentication flows enabled for the Cognito User Pool Client.
    *
@@ -163,7 +164,32 @@ export interface UserClient<T extends Function> {
   outputs?: ResourceOutputType<UserPoolClientOutputAttributes>;
 }
 
-export interface UserPoolClientProps extends UserClient<any> {
+export interface ExternalUserClientProps {
+  /**
+   * Marks the User Pool as an external resource.
+   *
+   * When set to `true`, the User Pool is not created by the framework.
+   * Instead, it references an existing Cognito User Pool using the provided `userPoolId`.
+   */
+  isExternal: true;
+  /**
+   * The ID of the existing Cognito User Pool Client to reference.
+   *
+   * This value is used to look up and integrate with a User Pool Client
+   * that was created outside of the framework.
+   */
+  clientId: string;
+}
+
+export type UserClientProps<T extends Function> =
+  | InternalUserClientProps<T>
+  | ExternalUserClientProps;
+
+export interface InternalUserPoolClientProps extends InternalUserClientProps<any> {
   userPoolId: string;
   attributeByName: Record<string, CustomAttributesMetadata | StandardAttributeMetadata>;
+}
+
+export interface ExternalUserPoolClientProps extends ExternalUserClientProps {
+  userPoolId: string;
 }

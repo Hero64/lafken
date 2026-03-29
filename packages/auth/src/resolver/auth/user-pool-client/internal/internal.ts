@@ -5,23 +5,23 @@ import {
 } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
 import { ResourceOutput } from '@lafken/resolver';
 import { Construct } from 'constructs';
-import type { AuthAttributes } from '../../../main';
-import { mapUserAttributes } from '../auth.utils';
+import type { AuthAttributes } from '../../../../main';
+import { mapUserAttributes } from '../../auth.utils';
 import type {
   AuthFlow,
+  InternalUserClientProps,
+  InternalUserPoolClientProps,
   OAuthConfig,
-  UserClient,
   UserPoolClientOutputAttributes,
-  UserPoolClientProps,
   ValidityUnit,
-} from './user-pool-client.types';
+} from '../user-pool-client.types';
 
-export class UserPoolClient extends Construct {
+export class InternalUserPoolClient extends Construct {
   public cognitoUserPoolClient: CognitoUserPoolClient;
   constructor(
     scope: Construct,
     id: string,
-    private props: UserPoolClientProps
+    private props: InternalUserPoolClientProps
   ) {
     super(scope, 'user-pool-client');
 
@@ -85,7 +85,9 @@ export class UserPoolClient extends Construct {
     };
   }
 
-  private getValidity(props: UserClient<any>): Partial<CognitoUserPoolClientConfig> {
+  private getValidity(
+    props: InternalUserClientProps<any>
+  ): Partial<CognitoUserPoolClientConfig> {
     const accessToken = this.resolveValidityUnit(props.validity?.accessToken);
     const idToken = this.resolveValidityUnit(props.validity?.idToken);
     const refreshToken = this.resolveValidityUnit(props.validity?.refreshToken);
