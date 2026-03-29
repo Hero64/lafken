@@ -14,7 +14,7 @@ describe('ExternalBucket', () => {
   enableBuildEnvVariable();
 
   it('should create an external bucket data source', () => {
-    @BucketDecorator({ externalBucketName: 'my-external-bucket' })
+    @BucketDecorator({ isExternal: true })
     class TestBucket {}
 
     const { stack } = setupTestingStack();
@@ -30,7 +30,7 @@ describe('ExternalBucket', () => {
   });
 
   it('should create an external bucket with the correct bucket name', () => {
-    @BucketDecorator({ externalBucketName: 'production-assets' })
+    @BucketDecorator({ isExternal: true, name: 'production-assets' })
     class AssetsBucket {}
 
     const { stack } = setupTestingStack();

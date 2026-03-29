@@ -119,6 +119,12 @@ export interface KeyLifeCycleRule {
 }
 
 export interface BaseBucketProps {
+  /**
+   * Bucket resource name.
+   *
+   * Defines the logical name of the bucket resource.
+   * If not specified, the name of the decorated class will be used.
+   */
   name?: BucketNames;
   /**
    * Enable X-Ray tracing.
@@ -128,17 +134,12 @@ export interface BaseBucketProps {
    * pass through AWS services, useful for debugging and performance
    * monitoring.
    */
+  tracing?: boolean;
 }
 
 export interface InternalBucketProps extends BaseBucketProps {
-  externalBucketName?: never;
-  /**
-   * Bucket resource name.
-   *
-   * Defines the logical name of the bucket resource.
-   * If not specified, the name of the decorated class will be used.
-   */
-  tracing?: boolean;
+  isExternal?: never;
+
   /**
    * Enable EventBridge events.
    *
@@ -239,7 +240,13 @@ export interface InternalBucketProps extends BaseBucketProps {
 }
 
 export interface ExternalBucketProps extends BaseBucketProps {
-  externalBucketName: string;
+  /**
+   * Marks the bucket as an external resource.
+   *
+   * When set to `true`, the bucket is not created by the framework.
+   * Instead, it references an existing S3 bucket using the provided `name`.
+   */
+  isExternal: true;
 }
 
 export type BucketProps = InternalBucketProps | ExternalBucketProps;

@@ -30,7 +30,7 @@ export class BucketResolver implements ResolverType {
 
       let bucketResource: InternalBucket | ExternalBucket;
 
-      if (bucketProps.externalBucketName !== undefined) {
+      if (bucketProps.isExternal) {
         bucketResource = new ExternalBucket(scope, {
           ...bucketProps,
         });

@@ -5,10 +5,10 @@ import type { ExternalBucketMetadataProps } from '../../../main';
 
 export class ExternalBucket extends lafkenResource.make(DataAwsS3Bucket) {
   constructor(scope: Construct, props: ExternalBucketMetadataProps) {
-    const { externalBucketName, name } = props;
+    const { name } = props;
 
     super(scope, `${name}-bucket`, {
-      bucket: externalBucketName,
+      bucket: name,
     });
 
     this.isGlobal('bucket', name);
