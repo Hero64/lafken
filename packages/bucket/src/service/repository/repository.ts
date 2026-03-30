@@ -12,6 +12,7 @@ import {
   type PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import type { ClassResource } from '@lafken/common';
+import type { BucketProps } from '../../main';
 import { client, getClientWithXRay } from '../client/client';
 import type { InputWithoutBucket, RepositoryReturn } from './repository.types';
 import { getBucketInformation } from './repository.utils';
@@ -19,7 +20,7 @@ import { getBucketInformation } from './repository.utils';
 export const createRepository = <E extends ClassResource>(
   bucket: E
 ): RepositoryReturn<E> => {
-  const { name, tracing } = getBucketInformation(bucket);
+  const { name, tracing } = getBucketInformation<BucketProps>(bucket);
 
   const bucketClient = tracing ? getClientWithXRay() : client;
 
