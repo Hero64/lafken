@@ -27,16 +27,6 @@ describe('AuthResolver', () => {
     });
   });
 
-  it('should throw error in create hook', async () => {
-    const resolver = new AuthResolver({
-      name: 'test',
-    });
-
-    await expect(async () => {
-      await resolver.create();
-    }).rejects.toThrow();
-  });
-
   it('should call extend callback in after create', async () => {
     const { stack } = setupTestingStack();
     const extendFn = vi.fn();

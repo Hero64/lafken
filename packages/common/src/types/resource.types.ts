@@ -23,4 +23,5 @@ export interface GetResourceProps {
     | StateMachineScopedNames
     | QueueScopedNames
   >;
+  getSSMValue: (value: string, secure?: boolean) => string;
 }

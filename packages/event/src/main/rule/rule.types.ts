@@ -3,6 +3,7 @@ import type {
   DynamoTableNames,
   EventBusNames,
   LambdaMetadata,
+  LambdaProps,
 } from '@lafken/common';
 
 export interface EventRuleBaseProps {
@@ -27,6 +28,24 @@ export interface EventRuleBaseProps {
    * If not provided, the default event bus is used.
    */
   bus?: EventBusNames;
+  /**
+   * Lambda configuration for the method.
+   *
+   * Specifies the properties and settings of the Lambda function
+   * associated with this API method. This allows you to customize
+   * aspects such as timeout, memory, runtime, environment variables,
+   * services, and tracing on a per-method basis.
+   *
+   * @example
+   * {
+   *   timeout: 300,
+   *   memory: 1024,
+   *   runtime: 22,
+   *   services: ['sqs'],
+   *   enableTrace: booleam
+   * }
+   */
+  lambda?: LambdaProps;
 }
 
 export type S3DetailType = 'Object Created' | 'Object Deleted';
