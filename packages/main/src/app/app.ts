@@ -100,11 +100,12 @@ export class AppStack extends TerraformStack {
 
   private addAspectProperties() {
     Aspects.of(this).add(
-      new AppAspect({
+      new AppAspect(this, 'app', {
         tags: {
           ...(this.props.globalConfig?.tags || {}),
           'lafken:app': this.id,
         },
+        environment: this.props.globalConfig?.lambda?.env,
       })
     );
   }

@@ -60,11 +60,12 @@ export class StackModule extends Construct {
 
   private addAspectProperties() {
     Aspects.of(this).add(
-      new AppAspect({
+      new AppAspect(this, this.props.name, {
         tags: {
           ...(this.props.globalConfig?.tags || {}),
           'lafken:module': this.props.name,
         },
+        environment: this.props.globalConfig?.lambda?.env,
       })
     );
   }

@@ -35,7 +35,8 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     };
 
     const environments = LambdaHandler.getCurrentEnvironment(environmentProps);
-    let environmentValues = environments.getValues();
+    let environmentValues = environments?.getValues();
+    const hasValues = !!environmentValues;
 
     const handlerName =
       `${id}-${moduleContext?.contextCreator || appContext.contextCreator}${props.suffix ? `-${props.suffix}` : ''}`.toLowerCase();
@@ -66,19 +67,21 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
         mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
       },
       environment: {
-        variables: !environmentValues ? {} : environmentValues,
+        variables: hasValues ? environmentValues || {} : {},
       },
     });
 
-    if (!environmentValues) {
+    if (environments && !environmentValues) {
       this.isDependent(() => {
         environmentValues = environments.getValues();
 
-        if (environments) {
+        if (!environmentValues) {
           throw new Error(`unresolved dependencies in ${props.name} lambda`);
         }
 
-        this.addOverride('environment.variables', environments);
+        this.putEnvironment({
+          variables: environmentValues,
+        });
       });
     }
 
@@ -124,18 +127,13 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   }
 
   private static getCurrentEnvironment(props: GetEnvironmentProps) {
-    const { appContext, moduleContext, lambda, scope, id } = props;
-    const globalEnv = {
-      ...(appContext.env || {}),
-      ...(moduleContext?.env || {}),
-    };
+    const { lambda, scope, id } = props;
 
-    const env = new Environment(
-      scope,
-      `${id}-lambda-env`,
-      !lambda?.env ? {} : lambda?.env,
-      globalEnv
-    );
+    if (!lambda?.env) {
+      return undefined;
+    }
+
+    const env = new Environment(scope, `${id}-lambda-env`, lambda?.env);
 
     return env;
   }
