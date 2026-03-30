@@ -24,9 +24,9 @@ describe('Environment', () => {
   it('should get environment from ssm', () => {
     const { stack } = setupTestingStack();
 
-    const env = new Environment(stack, 'env-test', {
-      foo: 'SSM::STRING::/foo/bar',
-    });
+    const env = new Environment(stack, 'env-test', ({ getSSMValue }) => ({
+      foo: getSSMValue('/foo/bar'),
+    }));
 
     const values = env.getValues() as Record<string, string>;
 
@@ -36,9 +36,9 @@ describe('Environment', () => {
   it('should get environment from secure ssm', () => {
     const { stack } = setupTestingStack();
 
-    const env = new Environment(stack, 'env-test', {
-      foo: 'SSM::SECURE_STRING::/foo/bar',
-    });
+    const env = new Environment(stack, 'env-test', ({ getSSMValue }) => ({
+      foo: getSSMValue('/foo/bar'),
+    }));
 
     const values = env.getValues() as Record<string, string>;
 

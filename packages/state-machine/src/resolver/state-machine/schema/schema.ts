@@ -352,7 +352,7 @@ export class Schema {
     this.unresolvedDependency = true;
 
     task.Arguments = async () => {
-      const argumentValues = await resolveCallbackResource((props) =>
+      const argumentValues = await resolveCallbackResource(this.scope, (props) =>
         resource[handler.name]({}, props)
       );
 

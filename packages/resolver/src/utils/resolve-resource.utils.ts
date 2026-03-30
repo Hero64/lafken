@@ -1,5 +1,7 @@
 import type { GetResourceProps } from '@lafken/common';
+import type { Construct } from 'constructs';
 import { lafkenResource } from '../resources';
+import { ssmFactory } from '../resources/ssm/ssm';
 
 export class ResolveResources {
   private unresolved: string[] = [];
@@ -27,7 +29,10 @@ export class ResolveResources {
   }
 }
 
-export const resolveCallbackResource = <T>(callback: (props: GetResourceProps) => T) => {
+export const resolveCallbackResource = <T>(
+  scope: Construct,
+  callback: (props: GetResourceProps) => T
+) => {
   const resolveResources = new ResolveResources();
   const values = callback({
     getResourceValue: (value, type) => {
@@ -42,6 +47,9 @@ export const resolveCallbackResource = <T>(callback: (props: GetResourceProps) =
         moduleWithId[1],
         type as string
       );
+    },
+    getSSMValue: (value, secure = false) => {
+      return ssmFactory.getValue(scope, value, secure);
     },
   });
   if (resolveResources.hasUnresolved()) {

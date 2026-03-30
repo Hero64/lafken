@@ -78,10 +78,13 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     const roleName = `${resourceMetadata.name}-${moduleName}-role`;
     const role = new Role(this, roleName, {
       name: roleName,
-      services: ({ getResourceValue }) => {
+      services: ({ getResourceValue, getSSMValue }) => {
         const basePermissions: Services[] = ['cloudwatch', 'lambda', ...bucketServices];
         if (typeof resourceMetadata.services === 'function') {
-          return [...basePermissions, ...resourceMetadata.services({ getResourceValue })];
+          return [
+            ...basePermissions,
+            ...resourceMetadata.services({ getResourceValue, getSSMValue }),
+          ];
         }
 
         return [...basePermissions, ...(resourceMetadata.services || [])];

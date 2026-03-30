@@ -200,7 +200,7 @@ export class Role extends lafkenResource.make(IamRole) {
   }
 
   private resolveServices = (getServices: ServiceFunction) => {
-    const services = resolveCallbackResource(getServices);
+    const services = resolveCallbackResource(this, getServices);
     if (!services) {
       return false;
     }

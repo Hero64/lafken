@@ -24,12 +24,12 @@ export type ModuleNames = ResourceNames<ModulesAvailable>;
 export type AuthNames = ResourceNames<AuthAvailable>;
 export type AuthScopedNames = StackResourceName<AuthAvailable, 'auth'>;
 export type BucketNames = ResourceNames<BucketAvailable>;
-export type BucketScopedNames = StackResourceName<ApiRestAvailable, 'bucket'>;
+export type BucketScopedNames = StackResourceName<BucketAvailable, 'bucket'>;
 export type ApiRestNames = ResourceNames<ApiRestAvailable>;
 export type ApiRestScopedNames = StackResourceName<ApiRestAvailable, 'api'>;
 export type ApiAuthorizerNames = ResourceNames<ApiAuthorizerAvailable>;
 export type EventBusNames = ResourceNames<EventBusAvailable>;
-export type EventBusScopedNames = StackResourceName<ApiRestAvailable, 'event-bus'>;
+export type EventBusScopedNames = StackResourceName<EventBusAvailable, 'event-bus'>;
 export type DynamoTableNames = ResourceNames<DynamoTableAvailable>;
 export type DynamoTableScopedNames = StackResourceName<DynamoTableAvailable, 'dynamo'>;
 
