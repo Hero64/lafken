@@ -4,7 +4,7 @@ import type { Construct } from 'constructs';
 export class SsmFactory {
   private ssmValues: Record<string, DataAwsSsmParameter> = {};
 
-  public getValue(scope: Construct, name: string, secure: boolean) {
+  public getValue(scope: Construct, name: string, secure: boolean = false) {
     if (!this.ssmValues[name]) {
       this.ssmValues[name] = new DataAwsSsmParameter(
         scope,

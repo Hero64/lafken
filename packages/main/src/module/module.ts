@@ -66,6 +66,7 @@ export class StackModule extends Construct {
           'lafken:module': this.props.name,
         },
         environment: this.props.globalConfig?.lambda?.env,
+        vpc: this.props.globalConfig?.lambda?.vpcConfig,
       })
     );
   }

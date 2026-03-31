@@ -106,4 +106,67 @@ describe('Lambda handler', () => {
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["s3:AbortMultipartUpload", "s3:CreateBucket", "s3:DeleteBucket", "s3:DeleteObject", "s3:DeleteObjectTagging", "s3:DeleteObjectVersion", "s3:DeleteObjectVersionTagging", "s3:GetBucketTagging", "s3:GetBucketVersioning", "s3:GetObject", "s3:GetObjectAttributes", "s3:GetObjectTagging", "s3:GetObjectVersion", "s3:GetObjectVersionAttributes", "s3:GetObjectVersionTagging", "s3:ListAllMyBuckets", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:ListBucketVersions", "s3:ListMultipartUploadParts", "s3:PutObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging", "s3:ReplicateDelete", "s3:ReplicateObject", "s3:ReplicateTags", "s3:RestoreObject"], "Resource" = "*"}]})}',
     });
   });
+
+  it('should create a lambda function with static vpc config', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        vpcConfig: {
+          securityGroupIds: ['sg-123456'],
+          subnetIds: ['subnet-abc', 'subnet-def'],
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaFunction, {
+      function_name: 'test-app',
+      vpc_config: {
+        security_group_ids: ['sg-123456'],
+        subnet_ids: ['subnet-abc', 'subnet-def'],
+      },
+    });
+  });
+
+  it('should create a lambda function with vpc config from callback', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        vpcConfig: ({ getSSMValue }) => ({
+          securityGroupIds: [getSSMValue('/vpc/security-group-id')],
+          subnetIds: [getSSMValue('/vpc/subnet-id')],
+        }),
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+    const lambda = Object.values(parsed.resource.aws_lambda_function)[0] as any;
+
+    expect(lambda.vpc_config.security_group_ids).toHaveLength(1);
+    expect(lambda.vpc_config.security_group_ids[0]).toContain('aws_ssm_parameter');
+    expect(lambda.vpc_config.subnet_ids).toHaveLength(1);
+    expect(lambda.vpc_config.subnet_ids[0]).toContain('aws_ssm_parameter');
+  });
 });

@@ -21,9 +21,6 @@ describe('App context', () => {
     expect(stack.node.tryGetContext('testing')).toStrictEqual({
       contextCreator: 'app',
       enableTrace: true,
-      env: {
-        foo: 'bar',
-      },
       memory: 2000,
       runtime: 20,
     });

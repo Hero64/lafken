@@ -1,5 +1,38 @@
-import type { EnvironmentValue } from '../../types';
+import type { EnvironmentValue, GetResourceProps } from '../../types';
 import type { ServicesValues } from '../../types/services.types';
+
+export interface VpcConfig {
+  /**
+   * Enables IPv6 for dual-stack networking.
+   *
+   * When set to `true`, the Lambda function will support both IPv4 and IPv6
+   * traffic within the VPC. This is useful when the VPC subnets are configured
+   * with dual-stack addressing.
+   *
+   * @default false
+   */
+  ipv6AllowedForDualStack?: boolean;
+  /**
+   * Security group IDs to associate with the Lambda function.
+   *
+   * Specifies one or more VPC security groups that control inbound and outbound
+   * network traffic for the Lambda function. These security groups determine
+   * which resources the Lambda can communicate with inside and outside the VPC.
+   */
+  securityGroupIds: string[];
+  /**
+   * Subnet IDs where the Lambda function will be deployed.
+   *
+   * Specifies one or more VPC subnets in which the Lambda function will run.
+   * To ensure high availability, it is recommended to provide subnets across
+   * multiple Availability Zones.
+   */
+  subnetIds: string[];
+}
+
+export type VpcConfigValue =
+  | VpcConfig
+  | ((props: Pick<GetResourceProps, 'getSSMValue'>) => VpcConfig);
 
 export interface LambdaProps {
   /**
@@ -91,6 +124,16 @@ export interface LambdaProps {
    * into the execution flow of your Lambda.
    */
   enableTrace?: boolean;
+  /**
+   * VPC configuration for the Lambda function.
+   *
+   * When provided, the Lambda function will be deployed inside the specified
+   * VPC, allowing it to access private resources such as RDS databases,
+   * ElastiCache clusters, or internal services that are not publicly accessible.
+   *
+   * Requires specifying at least one subnet and one security group.
+   */
+  vpcConfig?: VpcConfigValue;
 }
 
 export interface LambdaMetadata {

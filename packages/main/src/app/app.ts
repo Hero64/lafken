@@ -106,6 +106,7 @@ export class AppStack extends TerraformStack {
           'lafken:app': this.id,
         },
         environment: this.props.globalConfig?.lambda?.env,
+        vpc: this.props.globalConfig?.lambda?.vpcConfig,
       })
     );
   }
