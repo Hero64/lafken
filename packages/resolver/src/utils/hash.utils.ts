@@ -1,11 +1,7 @@
 import crypto from 'node:crypto';
 
-export const createMd5Hash = (value: string) => {
-  return crypto.createHash('md5').update(value).digest('hex');
-};
-
-export const createSha1 = (value: string) => {
-  const shasum = crypto.createHash('sha1');
+export const createSha256 = (value: string) => {
+  const shasum = crypto.createHash('sha256');
   shasum.update(value);
 
   return shasum.digest('hex');

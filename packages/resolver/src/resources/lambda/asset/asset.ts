@@ -2,7 +2,7 @@ import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktn';
-import { createSha1 } from '../../../utils';
+import { createSha256 } from '../../../utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
   AddLambdaProps,
@@ -137,7 +137,7 @@ class LambdaAssets {
   }
 
   private createOutputPath(path: string) {
-    return join(cwd(), '.out', createSha1(path));
+    return join(cwd(), '.out', createSha256(path));
   }
 }
 
