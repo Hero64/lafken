@@ -1,6 +1,6 @@
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
-import type { VpcConfigValue } from '@lafken/common';
+import { kebabCase, type VpcConfigValue } from '@lafken/common';
 import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
 import { Environment } from '../environment/environment';
@@ -40,8 +40,9 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     let environmentValues = environments?.getValues();
     const hasValues = !!environmentValues;
 
-    const handlerName =
-      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}${props.suffix ? `-${props.suffix}` : ''}`.toLowerCase();
+    const handlerName = kebabCase(
+      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}${props.suffix ? `-${props.suffix}` : ''}`
+    ).toLowerCase();
     const roleArn = LambdaHandler.getRoleArn({
       name: handlerName,
       scope,
