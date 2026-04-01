@@ -1,6 +1,6 @@
 {
   "name": "@lafken/auth",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": false,
   "description": "Define Cognito User Pools using TypeScript decorators - simplified authentication infrastructure with Lafken",
   "keywords": [

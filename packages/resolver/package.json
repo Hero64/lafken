@@ -1,6 +1,6 @@
 {
   "name": "@lafken/resolver",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": false,
   "description": "Lafken resolver foundation - AWS Lambda and IAM utilities for building decorator-based infrastructure resolvers",
   "keywords": [

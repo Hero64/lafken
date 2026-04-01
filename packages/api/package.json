@@ -1,6 +1,6 @@
 {
   "name": "@lafken/api",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": false,
   "description": "Define AWS REST APIs using TypeScript decorators - declarative, type-safe infrastructure for API Gateway",
   "keywords": [

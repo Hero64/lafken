@@ -1,5 +1,20 @@
 # @lafken/common
 
+## 0.9.0
+
+### Minor Changes
+
+- - Add support for exposing resource properties through SSM parameters and Terraform outputs.
+  - Add support for instantiating resources created in other stacks.
+  - Add support for resolving variables from SSM.
+  - Add support for running Lambdas inside a VPC.
+  - Move global environment variables to module and app aspects.
+  - API: add support for endpointConfiguration.
+
+  - Fix and improve TypeScript interfaces.
+  - Update package dependencies.
+  - Replace SHA-1 with SHA-256.
+
 ## 0.8.1
 
 ### Patch Changes
