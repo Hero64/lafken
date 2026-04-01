@@ -3,6 +3,7 @@ import type {
   ApiAuthorizerNames,
   ApiRestNames,
   ClassResource,
+  GetResourceProps,
   ResourceOutputType,
 } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
@@ -16,6 +17,59 @@ interface ExtendProps {
 }
 
 export type ApiKeySource = 'header' | 'authorizer';
+
+export type EndpointType = 'edge' | 'regional' | 'private';
+
+export type EndpointIpAddressType = 'ipv4' | 'dualstack';
+
+/**
+ * Endpoint configuration options for API Gateway REST API.
+ */
+export interface PrivateEndpointConfigurationOptions {
+  /**
+   * The IP address types that can invoke the API.
+   * For `PRIVATE` endpoint type, only `dualstack` is supported.
+   */
+  ipAddressType?: 'dualstack';
+
+  /**
+   * Endpoint type.
+   * Must be `private`.
+   */
+  type: 'private';
+
+  /**
+   * Set of VPC endpoint identifiers.
+   * Supported only when endpoint type is `PRIVATE`.
+   */
+  vpcEndpointIds?:
+    | string[]
+    | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
+}
+
+/**
+ * Endpoint configuration options for non-private API Gateway REST API endpoints.
+ */
+export interface NonPrivateEndpointConfigurationOptions {
+  /**
+   * The IP address types that can invoke the API.
+   * - `ipv4`: Allows only IPv4 clients.
+   * - `dualstack`: Allows both IPv4 and IPv6 clients.
+   *
+   * Terraform drift detection for this argument is performed only when a value is provided.
+   */
+  ipAddressType?: EndpointIpAddressType;
+
+  /**
+   * Endpoint type.
+   * Valid values are `edge` or `regional`.
+   */
+  type: Exclude<EndpointType, 'private'>;
+}
+
+export type EndpointConfigurationOptions =
+  | PrivateEndpointConfigurationOptions
+  | NonPrivateEndpointConfigurationOptions;
 
 /**
  * HTTP methods allowed for CORS requests
@@ -168,6 +222,11 @@ export interface RestApiProps extends BaseApiProps {
    * }
    */
   supportedMediaTypes?: MediaTypes[];
+
+  /**
+   * Defines API Gateway endpoint configuration.
+   */
+  endpointConfiguration?: EndpointConfigurationOptions;
 
   /**
    * Defines whether the default `execute-api` endpoint of API Gateway should be disabled.

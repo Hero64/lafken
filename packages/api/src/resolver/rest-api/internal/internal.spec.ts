@@ -41,6 +41,25 @@ describe('InternalRestApi', () => {
     });
   });
 
+  it('should add endpoint configuration for private endpoint type', () => {
+    const { stack } = setupInternalTestingRestApi({
+      endpointConfiguration: {
+        type: 'private',
+        ipAddressType: 'dualstack',
+        vpcEndpointIds: ['vpce-1234567890abcdef0'],
+      },
+    });
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayRestApi, {
+      endpoint_configuration: {
+        types: ['PRIVATE'],
+        ip_address_type: 'dualstack',
+        vpc_endpoint_ids: ['vpce-1234567890abcdef0'],
+      },
+    });
+  });
+
   it('should create a new method', async () => {
     @Api()
     class TestingApi {
