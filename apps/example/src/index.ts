@@ -31,7 +31,7 @@ createApp({
         },
         outputs: [
           {
-            name: 'example/api/arn',
+            name: '/example/api/arn',
             type: 'ssm',
             value: 'arn',
           },
