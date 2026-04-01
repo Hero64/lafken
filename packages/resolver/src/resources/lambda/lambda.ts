@@ -3,10 +3,10 @@ import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { kebabCase, type VpcConfigValue } from '@lafken/common';
 import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
+import { resolverSSMValues } from '../../utils';
 import { Environment } from '../environment/environment';
 import { lafkenResource } from '../resource';
 import { Role } from '../role';
-import { ssmFactory } from '../ssm/ssm';
 import { lambdaAssets } from './asset/asset';
 import type {
   GetCurrentOrContextValueProps,
@@ -115,13 +115,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     }
 
     this.putVpcConfig(
-      typeof vpcConfig === 'function'
-        ? vpcConfig({
-            getSSMValue: (value, secure) => {
-              return ssmFactory.getValue(this, value, secure);
-            },
-          })
-        : vpcConfig
+      typeof vpcConfig === 'function' ? vpcConfig(resolverSSMValues(this)) : vpcConfig
     );
   }
 

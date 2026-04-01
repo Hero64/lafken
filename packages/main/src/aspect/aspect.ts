@@ -1,6 +1,6 @@
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import type { VpcConfig } from '@lafken/common';
-import { Environment, ssmFactory } from '@lafken/resolver';
+import { Environment, resolverSSMValues } from '@lafken/resolver';
 import type { IAspect } from 'cdktn';
 import type { Construct, IConstruct } from 'constructs';
 import type {
@@ -64,11 +64,7 @@ export class AppAspect implements IAspect {
 
     this.vpcConfig =
       typeof this.props.vpc === 'function'
-        ? this.props.vpc({
-            getSSMValue: (value, secure) => {
-              return ssmFactory.getValue(this.scope, value, secure);
-            },
-          })
+        ? this.props.vpc(resolverSSMValues(this.scope))
         : this.props.vpc;
   }
 

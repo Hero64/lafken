@@ -29,6 +29,16 @@ export class ResolveResources {
   }
 }
 
+export const resolverSSMValues = (
+  scope: Construct
+): Pick<GetResourceProps, 'getSSMValue'> => {
+  return {
+    getSSMValue: (value, secure = false) => {
+      return ssmFactory.getValue(scope, value, secure);
+    },
+  };
+};
+
 export const resolveCallbackResource = <T>(
   scope: Construct,
   callback: (props: GetResourceProps) => T
@@ -48,9 +58,7 @@ export const resolveCallbackResource = <T>(
         type as string
       );
     },
-    getSSMValue: (value, secure = false) => {
-      return ssmFactory.getValue(scope, value, secure);
-    },
+    ...resolverSSMValues(scope),
   });
   if (resolveResources.hasUnresolved()) {
     return false;
