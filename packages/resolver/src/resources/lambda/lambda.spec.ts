@@ -1,5 +1,7 @@
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
+import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
 import { type TerraformStack, Testing } from 'cdktn';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ContextName } from '../../types';
@@ -168,5 +170,117 @@ describe('Lambda handler', () => {
     expect(lambda.vpc_config.security_group_ids[0]).toContain('aws_ssm_parameter');
     expect(lambda.vpc_config.subnet_ids).toHaveLength(1);
     expect(lambda.vpc_config.subnet_ids[0]).toContain('aws_ssm_parameter');
+  });
+
+  it('should create a lambda function with alias', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        alias: {
+          name: 'live',
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaFunction, {
+      function_name: 'test-app',
+      publish: true,
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaAlias, {
+      name: 'live',
+      function_name: 'test-app',
+      function_version: '${aws_lambda_function.test.version}',
+    });
+  });
+
+  it('should create a lambda function with alias and provisioned concurrency', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        alias: {
+          name: 'live',
+          provisionedExecutions: 5,
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaFunction, {
+      function_name: 'test-app',
+      publish: true,
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaAlias, {
+      name: 'live',
+      function_name: 'test-app',
+      function_version: '${aws_lambda_function.test.version}',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaProvisionedConcurrencyConfig, {
+      function_name: 'test-app',
+      provisioned_concurrent_executions: 5,
+    });
+
+    const parsed = JSON.parse(synthesized);
+    const concurrencyConfig = Object.values(
+      parsed.resource.aws_lambda_provisioned_concurrency_config
+    )[0] as any;
+    expect(concurrencyConfig.qualifier).toContain('aws_lambda_alias');
+  });
+
+  it('should not create provisioned concurrency when provisionedExecutions is 0', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        alias: {
+          name: 'staging',
+          provisionedExecutions: 0,
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaAlias, {
+      name: 'staging',
+      function_name: 'test-app',
+    });
+
+    const parsed = JSON.parse(synthesized);
+    expect(parsed.resource.aws_lambda_provisioned_concurrency_config).toBeUndefined();
   });
 });
