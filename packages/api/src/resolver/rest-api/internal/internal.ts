@@ -32,15 +32,23 @@ export class InternalRestApi extends RestApiBase(lafkenResource.make(ApiGatewayR
       return;
     }
 
+    if (this.props.endpointConfiguration.type === 'private') {
+      this.vpcIds =
+        typeof this.props.endpointConfiguration.vpcEndpointIds === 'function'
+          ? this.props.endpointConfiguration.vpcEndpointIds(resolverSSMValues(this))
+          : this.props.endpointConfiguration.vpcEndpointIds;
+
+      this.putEndpointConfiguration({
+        types: [this.props.endpointConfiguration.type.toUpperCase()],
+        ipAddressType: 'dualstack',
+        vpcEndpointIds: this.vpcIds,
+      });
+      return;
+    }
+
     this.putEndpointConfiguration({
       types: [this.props.endpointConfiguration.type.toUpperCase()],
       ipAddressType: this.props.endpointConfiguration.ipAddressType,
-      vpcEndpointIds:
-        this.props.endpointConfiguration.type === 'private'
-          ? typeof this.props.endpointConfiguration.vpcEndpointIds === 'function'
-            ? this.props.endpointConfiguration.vpcEndpointIds(resolverSSMValues(this))
-            : this.props.endpointConfiguration.vpcEndpointIds
-          : undefined,
     });
   }
 }

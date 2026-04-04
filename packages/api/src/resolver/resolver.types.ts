@@ -27,12 +27,6 @@ export type EndpointIpAddressType = 'ipv4' | 'dualstack';
  */
 export interface PrivateEndpointConfigurationOptions {
   /**
-   * The IP address types that can invoke the API.
-   * For `PRIVATE` endpoint type, only `dualstack` is supported.
-   */
-  ipAddressType?: 'dualstack';
-
-  /**
    * Endpoint type.
    * Must be `private`.
    */
@@ -42,9 +36,7 @@ export interface PrivateEndpointConfigurationOptions {
    * Set of VPC endpoint identifiers.
    * Supported only when endpoint type is `PRIVATE`.
    */
-  vpcEndpointIds?:
-    | string[]
-    | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
+  vpcEndpointIds: string[] | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
 }
 
 /**

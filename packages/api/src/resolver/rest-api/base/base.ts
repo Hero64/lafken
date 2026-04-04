@@ -1,5 +1,8 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
+import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
+import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
 import type { Construct } from 'constructs';
 import type { BaseApiProps, RestApi, Stage } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
@@ -19,6 +22,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public authorizerFactory!: AuthorizerFactory;
     public modelFactory!: ModelFactory;
     public responseFactory!: ResponseFactory;
+    public vpcIds: string[];
+
     #methodFactory!: MethodFactory;
     #baseProps!: BaseApiProps;
     #stages!: Stage[];
@@ -70,6 +75,35 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       ];
 
       if (this.#methodFactory.resources.length > 0) {
+        if (this.vpcIds) {
+          const identity = new DataAwsCallerIdentity(
+            self,
+            `${this.#baseProps.name}-api-caller-identity`
+          );
+          const region = new DataAwsRegion(this, `${this.#baseProps.name}-api-region`);
+          const policy = new ApiGatewayRestApiPolicy(self, 'ApiPolicy', {
+            restApiId: self.id,
+            policy: JSON.stringify({
+              Version: '2012-10-17',
+              Statement: [
+                {
+                  Effect: 'Allow',
+                  Principal: '*',
+                  Action: 'execute-api:Invoke',
+                  Resource: `arn:aws:execute-api:${region.name}:${identity.accountId}:${self.id}/*`,
+                  Condition: {
+                    StringEquals: {
+                      'aws:SourceVpce': self.vpcIds,
+                    },
+                  },
+                },
+              ],
+            }),
+          });
+
+          apiResources.push(policy);
+        }
+
         const deployment = new ApiGatewayDeployment(
           self,
           `${this.#baseProps.name}-deployment`,

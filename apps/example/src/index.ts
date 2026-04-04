@@ -29,6 +29,10 @@ createApp({
           authorizers: [TrainerAuthorizer],
           defaultAuthorizerName: 'pokemon-custom-auth',
         },
+        endpointConfiguration: {
+          type: 'private',
+          vpcEndpointIds: ['1', '2'],
+        },
         outputs: [
           {
             name: '/example/api/arn',
