@@ -79,6 +79,15 @@ export interface SchemaCombiners<T> {
 export interface ApiPayloadProps<T> extends PayloadProps, SchemaCombiners<T> {
   /** Human-readable description of the request body rendered in OpenAPI documentation. */
   description?: string;
+
+  /**
+   * Allows the request body to accept properties beyond those explicitly defined.
+   * Maps to OpenAPI `additionalProperties`.
+   *
+   *
+   * @default false
+   */
+  additionalProperties?: boolean;
 }
 export interface ApiPayloadMetadata<T>
   extends Omit<ApiPayloadProps<T>, 'name'>,
@@ -246,6 +255,21 @@ export interface ContextParamProps {
 }
 
 /**
+ * Properties for a Velocity template parameter.
+ * Allows defining a raw Apache Velocity template expression that is
+ * injected directly into the API Gateway request mapping template.
+ */
+export interface VelocityParamProps extends Omit<FieldProps, 'type'> {
+  /**
+   * The Velocity template expression to use as the value for the decorated property.
+   * This expression is placed directly in the generated request mapping template.
+   *
+   * @example `$input.json('$')` — Forwards the entire raw request body as JSON.
+   */
+  template: string;
+}
+
+/**
  * Base metadata attached to every resolved API parameter.
  * The `source` field indicates where the value is extracted from at runtime.
  */
@@ -329,4 +353,4 @@ export type ApiParamMetadata =
  * - `header` — HTTP header (OpenAPI `in: header`)
  * - `context` — API Gateway request context (internal use only)
  */
-export type Source = 'body' | 'path' | 'query' | 'header' | 'context';
+export type Source = 'body' | 'path' | 'query' | 'header' | 'context' | 'velocity';
