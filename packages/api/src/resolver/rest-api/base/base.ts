@@ -1,10 +1,16 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
 import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
 import type { Construct } from 'constructs';
-import type { BaseApiProps, RestApi, Stage } from '../../resolver.types';
+import type {
+  ApiDefaultResponseType,
+  BaseApiProps,
+  RestApi,
+  Stage,
+} from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
 import { MethodFactory } from '../factories/method/method';
 import type { CreateMethodProps } from '../factories/method/method.types';
@@ -12,6 +18,7 @@ import { ModelFactory } from '../factories/model/model';
 import { ResourceFactory } from '../factories/resource/resource';
 import { ResponseFactory } from '../factories/response/response';
 import { ValidatorFactory } from '../factories/validator/validator';
+import { apiResponseName, apiResponseStatusCode } from './base.utils';
 
 type Constructor = new (...args: any[]) => Construct;
 
@@ -54,6 +61,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       this.modelFactory = new ModelFactory(self);
       this.responseFactory = new ResponseFactory(self);
       this.#methodFactory = new MethodFactory(self);
+      this.addApiGatewayResponse();
     }
 
     public async addMethod(module: Construct, props: CreateMethodProps) {
@@ -128,6 +136,27 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
             dependsOn: [deployment],
           });
         }
+      }
+    }
+
+    public addApiGatewayResponse() {
+      const self = this as unknown as RestApi;
+      const { defaultResponses = {} } = this.#baseProps;
+      for (const responseKey in defaultResponses) {
+        const key = responseKey as ApiDefaultResponseType;
+        const response = defaultResponses[key];
+        if (!response) {
+          continue;
+        }
+
+        new ApiGatewayGatewayResponse(self, `${this.#baseProps.name}-${responseKey}`, {
+          restApiId: self.id,
+          responseType: apiResponseName[key],
+          statusCode: apiResponseStatusCode[key]?.toString(),
+          responseTemplates: {
+            'application/json': JSON.stringify(response),
+          },
+        });
       }
     }
   }

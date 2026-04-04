@@ -184,6 +184,33 @@ export interface Stage
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
 
+export type ApiDefaultResponseType =
+  | 'badRequestBody'
+  | 'accessDenied'
+  | 'apiConfigurationError'
+  | 'authorizerConfigurationError'
+  | 'authorizerFailure'
+  | 'badRequestParameters'
+  | 'default4xx'
+  | 'default5xx'
+  | 'expiredToken'
+  | 'integrationFailure'
+  | 'integrationTimeout'
+  | 'invalidApiKey'
+  | 'invalidSignature'
+  | 'missingAuthenticationToken'
+  | 'quotaExceeded'
+  | 'requestTooLarge'
+  | 'resourceNotFound'
+  | 'throttled'
+  | 'unauthorized'
+  | 'unsupportedMediaType'
+  | 'wafFiltered';
+
+export type ApiDefaultResponse = Partial<
+  Record<ApiDefaultResponseType, Record<string, string>>
+>;
+
 export interface BaseApiProps {
   name: ApiRestNames;
   cors?: CorsOptions;
@@ -192,6 +219,7 @@ export interface BaseApiProps {
     authorizers: ClassResource[];
     defaultAuthorizerName: ApiAuthorizerNames;
   };
+  defaultResponses?: ApiDefaultResponse;
 }
 
 export interface RestApiProps extends BaseApiProps {
