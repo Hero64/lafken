@@ -10,7 +10,7 @@ import type { ResponseMetadata } from '../response.types';
 export interface ResponseObjectMetadata
   extends Omit<ApiObjectMetadata, 'properties' | 'payload' | 'source'> {
   properties: ResponseFieldMetadata[];
-  payload: ResponseMetadata;
+  payload: ResponseMetadata<any>;
 }
 export interface ResponseArrayField extends Omit<ApiArrayMetadata, 'items' | 'source'> {
   items: ResponseFieldMetadata;

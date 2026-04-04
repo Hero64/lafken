@@ -4,6 +4,7 @@ import {
   FieldProperties,
   getEventFields,
 } from '@lafken/common';
+import type { ApiPayloadMetadata, ApiPayloadProps } from '../request';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from './field';
 import type { ResponseMetadata, ResponseProps } from './response.types';
@@ -43,10 +44,19 @@ export const apiResponseKey = createFieldName(RESPONSE_PREFIX, FieldProperties.p
  * }
  * ```
  */
-export const ResponseObject = createPayloadDecorator({
-  prefix: RESPONSE_PREFIX,
-  createUniqueId: true,
-});
+export const ResponseObject =
+  <T extends Function>(props?: ApiPayloadProps<T['prototype']>) =>
+  (target: T) =>
+    createPayloadDecorator<
+      ApiPayloadProps<T['prototype']>,
+      ApiPayloadMetadata<T['prototype']>
+    >({
+      prefix: RESPONSE_PREFIX,
+      createUniqueId: true,
+      getMetadata: (props) => ({
+        ...props,
+      }),
+    })(props)(target);
 
 /**
  * Class decorator that declares a class as an API response payload.
@@ -93,34 +103,46 @@ export const ResponseObject = createPayloadDecorator({
  * export class GetUserResponse {}
  * ```
  */
-export const ApiResponse = createPayloadDecorator<ResponseProps, ResponseMetadata>({
-  createUniqueId: true,
-  prefix: RESPONSE_PREFIX,
-  getMetadata: (props) => {
-    if (!props?.responses) {
-      return {
-        defaultCode: props?.defaultCode,
-      };
-    }
+export const ApiResponse =
+  <T extends Function>(props?: ResponseProps<T['prototype']>) =>
+  (target: T) =>
+    createPayloadDecorator<
+      ResponseProps<T['prototype']>,
+      ResponseMetadata<T['prototype']>
+    >({
+      createUniqueId: true,
+      prefix: RESPONSE_PREFIX,
+      getMetadata: (props) => {
+        if (!props?.responses) {
+          return {
+            allOf: props?.allOf,
+            anyOf: props?.anyOf,
+            description: props?.description,
+            not: props?.not,
+            oneOf: props?.oneOf,
+            defaultCode: props?.defaultCode,
+          };
+        }
 
-    const responses: Partial<Record<string, ResponseFieldMetadata | true>> = {};
+        const responses: Partial<Record<string, ResponseFieldMetadata | true>> = {};
 
-    for (const responseCode in props?.responses) {
-      const code = responseCode as unknown as HTTP_STATUS_CODE_NUMBER;
-      responses[code] = true;
+        for (const responseCode in props?.responses) {
+          const code = responseCode as unknown as HTTP_STATUS_CODE_NUMBER;
+          responses[code] = true;
 
-      if (props.responses[code] !== true) {
-        responses[code] = getEventFields(
-          RESPONSE_PREFIX,
-          props.responses[code],
-          'response'
-        ) as ResponseFieldMetadata;
-      }
-    }
+          if (props.responses[code] !== true) {
+            responses[code] = getEventFields(
+              RESPONSE_PREFIX,
+              props.responses[code],
+              'response'
+            ) as ResponseFieldMetadata;
+          }
+        }
 
-    return {
-      responses,
-      defaultCode: props?.defaultCode,
-    };
-  },
-});
+        return {
+          ...props,
+          responses,
+          defaultCode: props?.defaultCode,
+        };
+      },
+    })(props)(target);

@@ -14,7 +14,10 @@ describe('Response', () => {
     })
     class TestResponse {}
 
-    const resource: ResponseMetadata = getMetadataByKey(TestResponse, apiResponseKey);
+    const resource: ResponseMetadata<any> = getMetadataByKey(
+      TestResponse,
+      apiResponseKey
+    );
 
     expect(resource).toBeDefined();
     expect(resource.name).toBe('TestResponse');
@@ -45,7 +48,10 @@ describe('Response', () => {
     })
     class TestResponse {}
 
-    const resource: ResponseMetadata = Reflect.getMetadata(apiResponseKey, TestResponse);
+    const resource: ResponseMetadata<any> = Reflect.getMetadata(
+      apiResponseKey,
+      TestResponse
+    );
 
     expect(resource).toBeDefined();
     expect(resource.name).toBe('TestResponse');

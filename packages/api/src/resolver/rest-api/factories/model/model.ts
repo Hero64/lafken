@@ -32,6 +32,8 @@ export class ModelFactory {
     const modelName = defaultModelName || uuid();
 
     const newModel = new ApiGatewayModel(this.scope, defaultModelName || uuid(), {
+      description:
+        field.type === 'Object' ? field.payload?.description : field.description,
       name: cleanAndCapitalize(modelName),
       restApiId: this.scope.id,
       contentType: 'application/json',
@@ -149,9 +151,13 @@ export class ModelFactory {
         required: requiredField.length > 0 ? requiredField : undefined,
         properties,
         deprecated: field.deprecated,
-        description: field.description,
+        description: field.payload?.description || field.description,
         example: field.example,
         nullable: field.nullable,
+        allOf: field.payload.allOf as JsonSchema[],
+        oneOf: field.payload.oneOf as JsonSchema[],
+        anyOf: field.payload.anyOf as JsonSchema[],
+        not: field.payload.not as JsonSchema,
       };
 
       const newModel = new ApiGatewayModel(this.scope, field.payload.id, {

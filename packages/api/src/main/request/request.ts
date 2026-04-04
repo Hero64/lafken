@@ -1,5 +1,6 @@
 import { createFieldName, createPayloadDecorator, FieldProperties } from '@lafken/common';
 import { PARAM_PREFIX } from './param';
+import type { ApiPayloadMetadata, ApiPayloadProps } from './param/param.types';
 
 export const apiRequestKey = createFieldName(PARAM_PREFIX, FieldProperties.payload);
 
@@ -35,10 +36,19 @@ export const apiRequestKey = createFieldName(PARAM_PREFIX, FieldProperties.paylo
  * }
  * ```
  */
-export const ApiRequest = createPayloadDecorator({
-  prefix: PARAM_PREFIX,
-  createUniqueId: true,
-});
+export const ApiRequest =
+  <T extends Function>(props?: ApiPayloadProps<T['prototype']>) =>
+  (target: T) =>
+    createPayloadDecorator<
+      ApiPayloadProps<T['prototype']>,
+      ApiPayloadMetadata<T['prototype']>
+    >({
+      prefix: PARAM_PREFIX,
+      createUniqueId: true,
+      getMetadata: (props) => ({
+        ...props,
+      }),
+    })(props)(target);
 
 /**
  * Class decorator that declares a nested sub-object belonging to an

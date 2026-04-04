@@ -6,8 +6,87 @@ import type {
   FieldProps,
   NumberField,
   ObjectField,
+  PayloadMetadata,
+  PayloadProps,
   StringField,
 } from '@lafken/common';
+
+/**
+ * Defines the JSON Schema constraints for a single property within a request body.
+ * Each field maps directly to a standard JSON Schema keyword used in OpenAPI 3.0 schema definitions.
+ */
+export type PropertySchema = {
+  /** Data type of the property. */
+  type?: 'string' | 'number' | 'integer' | 'boolean';
+  /** Restricts the value to a fixed set of allowed values. */
+  enum?: unknown[];
+  /** Restricts the value to an exact constant. */
+  const?: unknown;
+  /** Minimum allowed numeric value (inclusive). */
+  minimum?: number;
+  /** Maximum allowed numeric value (inclusive). */
+  maximum?: number;
+  /** Minimum allowed string length. */
+  minLength?: number;
+  /** Maximum allowed string length. */
+  maxLength?: number;
+  /** Regular expression pattern the string value must match. */
+  pattern?: string;
+  /** Semantic format hint (e.g., `email`, `uuid`, `date-time`). */
+  format?: string;
+  /** Whether the property accepts `null` as a valid value. */
+  nullable?: boolean;
+  /** Human-readable description rendered in OpenAPI documentation. */
+  description?: string;
+};
+
+/**
+ * Partial JSON Schema for a subset of properties of type `T`.
+ * Used inside {@link SchemaCombiners} to express conditional validation rules.
+ *
+ * @typeParam T - The TypeScript type whose keys are referenced.
+ */
+export type PartialSchema<T> = {
+  /** Per-property schema constraints. Only keys of `T` are allowed. */
+  properties?: Partial<Record<keyof T, PropertySchema>>;
+  /** List of property keys that must be present when this partial schema applies. */
+  required?: (keyof T)[];
+};
+
+/**
+ * JSON Schema composition keywords for expressing complex validation logic.
+ * Only accepts properties defined in the body parameter (`BodyParam`).
+ *
+ * @typeParam T - The body parameter type whose properties can be referenced.
+ */
+export interface SchemaCombiners<T> {
+  /** The payload must match exactly one of the given schemas. Only accepts `BodyParam` properties. */
+  oneOf?: PartialSchema<T>[];
+  /** The payload must match at least one of the given schemas. Only accepts `BodyParam` properties. */
+  anyOf?: PartialSchema<T>[];
+  /** The payload must match all of the given schemas. Only accepts `BodyParam` properties. */
+  allOf?: PartialSchema<T>[];
+  /** The payload must not match the given schema. Only accepts `BodyParam` properties. */
+  not?: PartialSchema<T>;
+}
+
+/**
+ * Configuration properties for an API request body payload.
+ * Extends {@link PayloadProps} with OpenAPI schema composition via {@link SchemaCombiners}.
+ *
+ * @typeParam T - The TypeScript type representing the body parameter shape.
+ */
+export interface ApiPayloadProps<T> extends PayloadProps, SchemaCombiners<T> {
+  /** Human-readable description of the request body rendered in OpenAPI documentation. */
+  description?: string;
+}
+export interface ApiPayloadMetadata<T>
+  extends Omit<ApiPayloadProps<T>, 'name'>,
+    PayloadMetadata {}
+
+export interface ObjectFieldWithSchemaProps extends Omit<ObjectField, 'payload'> {
+  payload: ApiPayloadMetadata<any>;
+}
 
 /**
  * Base properties shared by all API parameter definitions.
@@ -211,7 +290,7 @@ export interface ApiBooleanMetadata
  * to support nested object schemas in the OpenAPI spec.
  */
 export interface ApiObjectMetadata
-  extends Omit<ObjectField, 'properties'>,
+  extends Omit<ObjectFieldWithSchemaProps, 'properties'>,
     Omit<BaseParamProps, 'name' | 'type'>,
     BaseParamMetadata {
   /** Nested parameter definitions for each property of the object. */
