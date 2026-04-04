@@ -1,3 +1,9 @@
 packages:
   - apps/*
   - packages/*
+
+onlyBuiltDependencies:
+  - '@cdktf/node-pty-prebuilt-multiarch'
+  - '@swc/core'
+  - aws-sdk
+  - esbuild
