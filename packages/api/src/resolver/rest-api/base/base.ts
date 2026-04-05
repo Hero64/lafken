@@ -135,8 +135,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
               self,
               `${stageProps.stageName}-access-logs`,
               {
-                name: stageProps.accessLogSettings.accessLogGroupKey,
-                retentionInDays: 30,
+                name: stageProps.accessLogSettings.logGroupName,
+                retentionInDays: stageProps.accessLogSettings.retentionDays,
               }
             );
           }

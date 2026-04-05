@@ -194,9 +194,45 @@ export interface Stage
     | 'canarySettings'
     | 'clientCertificateId'
   > {
+  /**
+   * Access log settings for the API Gateway stage.
+   *
+   * Configures CloudWatch Logs for capturing API Gateway access logs,
+   * enabling monitoring and analysis of API request activity.
+   *
+   * @example
+   * {
+   *   accessLogSettings: {
+   *     logGroupName: '/aws/apigateway/my-api',
+   *     retentionDays: 30,
+   *     formatKeys: ['requestId', 'ip', 'httpMethod', 'resourcePath', 'status'],
+   *   }
+   * }
+   */
   accessLogSettings?: {
-    accessLogGroupKey: string;
+    /**
+     * CloudWatch Log Group name.
+     *
+     * Defines the name of the CloudWatch Log Group where the
+     * API Gateway access logs will be sent.
+     *
+     * @example '/aws/apigateway/my-api'
+     */
+    logGroupName: string;
+    /**
+     * Log retention period in days.
+     *
+     * Specifies the number of days to retain the access logs
+     * in the CloudWatch Log Group before they are automatically deleted.
+     */
     retentionDays?: number;
+    /**
+     * Access log format keys.
+     *
+     * Specifies which request/response fields are included in the
+     * access log entries. Each key maps to a `$context` variable
+     * in the API Gateway access log format.
+     */
     formatKeys: StageLogGroupFormatKeys[];
   };
 }

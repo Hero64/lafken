@@ -1,7 +1,11 @@
+import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import type { S3Permissions, Services } from '@lafken/common';
 import { type AppModule, lafkenResource, ResourceOutput, Role } from '@lafken/resolver';
-import type { StateMachineOutputAttributes } from '../../main';
+import type {
+  StateMachineOutputAttributes,
+  StateMachineResourceMetadata,
+} from '../../main';
 import { Schema } from './schema/schema';
 import type { DefinitionSchema, PermissionType } from './schema/schema.types';
 import type { StateMachineProps } from './state-machine.types';
@@ -18,9 +22,15 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
       name: resourceMetadata.name,
       roleArn: '',
       definition: '',
+      tracingConfiguration: resourceMetadata.enableTrace
+        ? {
+            enabled: true,
+          }
+        : undefined,
     });
 
     this.isGlobal(scope.id, id);
+    this.addLoggingConfiguration(resourceMetadata);
     new ResourceOutput<StateMachineOutputAttributes>(this, resourceMetadata.outputs);
   }
 
@@ -93,5 +103,22 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     });
 
     this.addOverride('role_arn', role.arn);
+  }
+
+  private addLoggingConfiguration(resourceMetadata: StateMachineResourceMetadata) {
+    if (!resourceMetadata.loggingConfiguration) {
+      return;
+    }
+
+    const logGroup = new CloudwatchLogGroup(this, 'sfn-logs', {
+      name: resourceMetadata.loggingConfiguration.logGroupName,
+      retentionInDays: resourceMetadata.loggingConfiguration.retentionInDays,
+    });
+
+    this.putLoggingConfiguration({
+      includeExecutionData: resourceMetadata.loggingConfiguration.includeExecutionData,
+      level: resourceMetadata.loggingConfiguration.level?.toUpperCase(),
+      logDestination: `${logGroup.arn}:*`,
+    });
   }
 }

@@ -108,7 +108,7 @@ describe('RestApiBase - createStageDeployment access logs', () => {
         {
           stageName: 'api',
           accessLogSettings: {
-            accessLogGroupKey: '/aws/apigateway/test-logs',
+            logGroupName: '/aws/apigateway/test-logs',
             formatKeys: ['requestId', 'httpMethod', 'status'],
           },
         },
@@ -132,7 +132,7 @@ describe('RestApiBase - createStageDeployment access logs', () => {
         {
           stageName: 'api',
           accessLogSettings: {
-            accessLogGroupKey: '/aws/apigateway/test-logs',
+            logGroupName: '/aws/apigateway/test-logs',
             formatKeys: ['requestId', 'httpMethod', 'status'],
           },
         },
@@ -209,7 +209,7 @@ describe('RestApiBase - createStageDeployment access logs', () => {
         {
           stageName: 'api',
           accessLogSettings: {
-            accessLogGroupKey: '/aws/apigateway/full-logs',
+            logGroupName: '/aws/apigateway/full-logs',
             formatKeys: [...allKeys],
           },
         },
