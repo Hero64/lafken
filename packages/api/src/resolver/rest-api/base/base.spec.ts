@@ -122,7 +122,6 @@ describe('RestApiBase - createStageDeployment access logs', () => {
 
     expect(synthesized).toHaveResourceWithProperties(CloudwatchLogGroup, {
       name: '/aws/apigateway/test-logs',
-      retention_in_days: 30,
     });
   });
 

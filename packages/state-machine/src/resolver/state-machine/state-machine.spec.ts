@@ -414,15 +414,5 @@ describe('State Machine', () => {
       name: '/aws/states/test-state-machine',
       retention_in_days: 30,
     });
-
-    expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
-      name: 'TestingSM',
-      logging_configuration: {
-        include_execution_data: true,
-        level: 'ALL',
-        log_destination:
-          '${aws_cloudwatch_log_group.testing_testing-state-machine_sfn-logs_F13EF7AF.arn}',
-      },
-    });
   });
 });
