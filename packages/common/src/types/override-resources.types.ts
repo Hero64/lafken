@@ -37,10 +37,10 @@ export type StateMachineNames =
   | ResourceIdentifiers<ModulesAvailable, 'StateMachine'>
   | (string & {});
 export type StateMachineScopedNames =
-  | ScopedResourceNames<ModulesAvailable, 'StateMachine'>
+  | ScopedResourceNames<ModulesAvailable, 'StateMachine', 'state-machine'>
   | (string & {});
 
 export type QueueNames = ResourceIdentifiers<ModulesAvailable, 'Queue'> | (string & {});
 export type QueueScopedNames =
-  | ScopedResourceNames<ModulesAvailable, 'Queue'>
+  | ScopedResourceNames<ModulesAvailable, 'Queue', 'queue'>
   | (string & {});

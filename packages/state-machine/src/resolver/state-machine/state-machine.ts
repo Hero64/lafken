@@ -29,7 +29,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
         : undefined,
     });
 
-    this.isGlobal(scope.id, id);
+    this.isGlobal(scope.id, `state-machine::${id}`);
     this.addLoggingConfiguration(resourceMetadata);
     new ResourceOutput<StateMachineOutputAttributes>(this, resourceMetadata.outputs);
   }
