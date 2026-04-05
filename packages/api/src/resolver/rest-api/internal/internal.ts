@@ -18,6 +18,9 @@ export class InternalRestApi extends RestApiBase(lafkenResource.make(ApiGatewayR
       minimumCompressionSize: props.minCompressionSize
         ? props.minCompressionSize.toString()
         : undefined,
+      lifecycle: {
+        createBeforeDestroy: true,
+      },
     });
 
     this.addEndpointConfiguration();

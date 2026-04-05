@@ -172,6 +172,19 @@ type MediaTypes =
   | 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
   | (string & {});
 
+export type StageLogGroupFormatKeys =
+  | 'requestId'
+  | 'extendedRequestId'
+  | 'caller'
+  | 'user'
+  | 'ip'
+  | 'requestTime'
+  | 'httpMethod'
+  | 'resourcePath'
+  | 'status'
+  | 'protocol'
+  | 'responseLength';
+
 export interface Stage
   extends Omit<
     ApiGatewayStageConfig,
@@ -180,7 +193,13 @@ export interface Stage
     | 'accessLogSettings'
     | 'canarySettings'
     | 'clientCertificateId'
-  > {}
+  > {
+  accessLogSettings?: {
+    accessLogGroupKey: string;
+    retentionDays?: number;
+    formatKeys: StageLogGroupFormatKeys[];
+  };
+}
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
 
