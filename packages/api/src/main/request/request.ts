@@ -47,6 +47,7 @@ export const ApiRequest =
       createUniqueId: true,
       getMetadata: (props) => ({
         ...props,
+        additionalProperties: props?.additionalProperties ?? false,
       }),
     })(props)(target);
 
