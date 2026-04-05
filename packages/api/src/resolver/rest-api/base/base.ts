@@ -31,14 +31,14 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public responseFactory!: ResponseFactory;
     public vpcIds: string[];
 
-    #methodFactory!: MethodFactory;
-    #baseProps!: BaseApiProps;
-    #stages!: Stage[];
+    _methodFactory!: MethodFactory;
+    _baseProps!: BaseApiProps;
+    _stages!: Stage[];
 
     public initFactories(props: BaseApiProps) {
-      this.#baseProps = props;
+      this._baseProps = props;
 
-      this.#stages =
+      this._stages =
         (props.stages || []).length > 0
           ? (props.stages as Stage[])
           : [
@@ -55,26 +55,26 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         props.auth?.authorizers || [],
         {
           defaultAuthorizer: props.auth?.defaultAuthorizerName,
-          stageNames: this.#stages.map((stage) => stage.stageName),
+          stageNames: this._stages.map((stage) => stage.stageName),
         }
       );
       this.modelFactory = new ModelFactory(self);
       this.responseFactory = new ResponseFactory(self);
-      this.#methodFactory = new MethodFactory(self);
+      this._methodFactory = new MethodFactory(self);
       this.addApiGatewayResponse();
     }
 
     public async addMethod(module: Construct, props: CreateMethodProps) {
-      await this.#methodFactory.create(module, {
+      await this._methodFactory.create(module, {
         ...props,
-        cors: this.#baseProps.cors,
+        cors: this._baseProps.cors,
       });
     }
 
     public createStageDeployment() {
       const self = this as unknown as RestApi;
       const apiResources = [
-        ...this.#methodFactory.resources,
+        ...this._methodFactory.resources,
         ...this.resourceFactory.resources,
         ...this.validatorFactory.resources,
         ...this.authorizerFactory.resources,
@@ -82,13 +82,13 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         ...this.responseFactory.resources,
       ];
 
-      if (this.#methodFactory.resources.length > 0) {
+      if (this._methodFactory.resources.length > 0) {
         if (this.vpcIds) {
           const identity = new DataAwsCallerIdentity(
             self,
-            `${this.#baseProps.name}-api-caller-identity`
+            `${this._baseProps.name}-api-caller-identity`
           );
-          const region = new DataAwsRegion(this, `${this.#baseProps.name}-api-region`);
+          const region = new DataAwsRegion(this, `${this._baseProps.name}-api-region`);
           const policy = new ApiGatewayRestApiPolicy(self, 'ApiPolicy', {
             restApiId: self.id,
             policy: JSON.stringify({
@@ -114,7 +114,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
 
         const deployment = new ApiGatewayDeployment(
           self,
-          `${this.#baseProps.name}-deployment`,
+          `${this._baseProps.name}-deployment`,
           {
             restApiId: self.id,
             dependsOn: apiResources,
@@ -127,8 +127,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           }
         );
 
-        for (const stageProps of this.#stages) {
-          new ApiGatewayStage(self, `${this.#baseProps.name}-stage`, {
+        for (const stageProps of this._stages) {
+          new ApiGatewayStage(self, `${this._baseProps.name}-stage`, {
             ...(stageProps || {}),
             deploymentId: deployment.id,
             restApiId: self.id,
@@ -141,7 +141,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
 
     public addApiGatewayResponse() {
       const self = this as unknown as RestApi;
-      const { defaultResponses = {} } = this.#baseProps;
+      const { defaultResponses = {} } = this._baseProps;
       for (const responseKey in defaultResponses) {
         const key = responseKey as ApiDefaultResponseType;
         const response = defaultResponses[key];
@@ -149,7 +149,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           continue;
         }
 
-        new ApiGatewayGatewayResponse(self, `${this.#baseProps.name}-${responseKey}`, {
+        new ApiGatewayGatewayResponse(self, `${this._baseProps.name}-${responseKey}`, {
           restApiId: self.id,
           responseType: apiResponseName[key],
           statusCode: apiResponseStatusCode[key]?.toString(),

@@ -55,6 +55,7 @@ export const ResponseObject =
       createUniqueId: true,
       getMetadata: (props) => ({
         ...props,
+        additionalProperties: props?.additionalProperties ?? false,
       }),
     })(props)(target);
 
@@ -121,6 +122,7 @@ export const ApiResponse =
             not: props?.not,
             oneOf: props?.oneOf,
             defaultCode: props?.defaultCode,
+            additionalProperties: props?.additionalProperties ?? false,
           };
         }
 
@@ -142,7 +144,7 @@ export const ApiResponse =
         return {
           ...props,
           responses,
-          defaultCode: props?.defaultCode,
+          additionalProperties: props?.additionalProperties ?? false,
         };
       },
     })(props)(target);

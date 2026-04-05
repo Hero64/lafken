@@ -153,6 +153,7 @@ export class ModelFactory {
         deprecated: field.deprecated,
         description: field.payload?.description || field.description,
         example: field.example,
+        additionalProperties: field.payload.additionalProperties,
         nullable: field.nullable,
         allOf: field.payload.allOf as JsonSchema[],
         oneOf: field.payload.oneOf as JsonSchema[],

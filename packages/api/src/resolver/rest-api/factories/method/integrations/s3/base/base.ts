@@ -14,6 +14,7 @@ const methodParamMap: Record<Source, string> = {
   body: '',
   header: 'method.request.header',
   context: '',
+  velocity: '',
 };
 
 export class BucketBaseIntegration implements Integration {
