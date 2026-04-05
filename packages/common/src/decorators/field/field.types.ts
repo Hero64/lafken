@@ -78,7 +78,7 @@ export enum FieldProperties {
 export interface CreateFieldDecoratorProps<P extends FieldProps, M> {
   prefix: string;
   enableInLambdaInvocation?: boolean;
-  getMetadata: (props?: P) => Omit<M, keyof FieldMetadata>;
+  getMetadata: (props?: P) => Omit<M, keyof FieldMetadata> & { forceType?: any };
 }
 
 export interface GetFieldMetadataProps {

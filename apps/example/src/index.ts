@@ -3,6 +3,7 @@ import { BucketResolver } from '@lafken/bucket/resolver';
 import { DynamoResolver } from '@lafken/dynamo/resolver';
 import { EventRuleResolver } from '@lafken/event/resolver';
 import { createApp } from '@lafken/main';
+import { QueueResolver } from '@lafken/queue/resolver';
 import { StateMachineResolver } from '@lafken/state-machine/resolver';
 import { TrainerAuthorizer } from './auth/pokemon-custom.auth';
 import { PokemonBackupsBucket } from './infra/buckets/pokemon-backups.bucket';
@@ -21,6 +22,7 @@ createApp({
     new BucketResolver([PokemonBackupsBucket]),
     new DynamoResolver([Pokemon]),
     new EventRuleResolver(),
+    new QueueResolver(),
     new StateMachineResolver(),
     new ApiResolver({
       restApi: {
@@ -28,6 +30,11 @@ createApp({
         auth: {
           authorizers: [TrainerAuthorizer],
           defaultAuthorizerName: 'pokemon-custom-auth',
+        },
+        defaultResponses: {
+          badRequestBody: {
+            message: '$context.error.validationErrorString',
+          },
         },
         outputs: [
           {

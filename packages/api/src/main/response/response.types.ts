@@ -1,8 +1,8 @@
-import type { PayloadMetadata, PayloadProps } from '@lafken/common';
+import type { ApiPayloadMetadata, ApiPayloadProps } from '../request';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
 import type { ResponseFieldMetadata } from './field';
 
-export interface ResponseProps extends PayloadProps {
+export interface ResponseProps<T> extends ApiPayloadProps<T> {
   /**
    * Method responses.
    *
@@ -41,8 +41,8 @@ export interface ResponseProps extends PayloadProps {
   defaultCode?: HTTP_STATUS_CODE_NUMBER;
 }
 
-export interface ResponseMetadata
-  extends PayloadMetadata,
-    Omit<ResponseProps, 'name' | 'responses'> {
+export interface ResponseMetadata<T>
+  extends ApiPayloadMetadata<T>,
+    Omit<ResponseProps<T>, 'name' | 'responses'> {
   responses?: Partial<Record<string, ResponseFieldMetadata | true>>;
 }

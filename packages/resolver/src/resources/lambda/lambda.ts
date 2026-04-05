@@ -1,6 +1,8 @@
+import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
-import { kebabCase, type VpcConfigValue } from '@lafken/common';
+import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
+import { type AliasConfig, kebabCase, type VpcConfigValue } from '@lafken/common';
 import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
 import { resolverSSMValues } from '../../utils';
@@ -27,6 +29,11 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     const runtime = LambdaHandler.getCurrentOrContextValue({
       key: 'runtime',
       defaultValue: 22,
+      ...contextValueProps,
+    });
+
+    const alias = LambdaHandler.getCurrentOrContextValue({
+      key: 'alias',
       ...contextValueProps,
     });
 
@@ -96,15 +103,42 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     });
 
     this.addVpcConfig(props.lambda?.vpcConfig);
-    this.addPermission(handlerName, props.principal);
+    this.addAlias(handlerName, alias);
+    this.addPermission(handlerName, props);
   }
 
-  private addPermission(name: string, principal?: string) {
-    if (principal) {
-      new LambdaPermission(this, 'permission', {
-        functionName: name,
-        action: 'lambda:InvokeFunction',
-        principal,
+  private addPermission(name: string, props: LambdaHandlerProps) {
+    if (!props.principal) {
+      return;
+    }
+
+    new LambdaPermission(this, 'permission', {
+      functionName: name,
+      action: 'lambda:InvokeFunction',
+      principal: props.principal,
+      sourceArn: props.sourceArn,
+      sourceAccount: props.sourceAccount,
+    });
+  }
+
+  private addAlias(functionName: string, aliasConfig?: AliasConfig) {
+    if (!aliasConfig) {
+      return;
+    }
+
+    this.publish = true;
+
+    const alias = new LambdaAlias(this, 'alias', {
+      name: aliasConfig.name,
+      functionName,
+      functionVersion: this.version,
+    });
+
+    if (aliasConfig.provisionedExecutions && aliasConfig.provisionedExecutions > 0) {
+      new LambdaProvisionedConcurrencyConfig(this, 'provisioned-concurrency', {
+        functionName,
+        qualifier: alias.name,
+        provisionedConcurrentExecutions: aliasConfig.provisionedExecutions,
       });
     }
   }

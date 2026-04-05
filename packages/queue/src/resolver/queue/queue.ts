@@ -40,7 +40,7 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       delaySeconds: handler.deliveryDelay,
     });
 
-    this.isGlobal(scope.id, handler.queueName);
+    this.isGlobal(scope.id, `queue::${handler.queueName}`);
     this.validateEventParams();
     this.addEventSource(id);
     new ResourceOutput<QueueOutputAttributes>(this, handler.outputs);
@@ -55,7 +55,6 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       filename: resourceMetadata.filename,
       foldername: resourceMetadata.foldername,
       suffix: 'queue',
-      principal: 'sqs.amazonaws.com',
     });
 
     new LambdaEventSourceMapping(this, 'event-mapping', {

@@ -176,7 +176,10 @@ export const createFieldDecorator =
         ...getFieldMetadata({
           destinationName,
           type: propertyType,
-          fieldProps: props,
+          fieldProps: {
+            ...props,
+            type: parentMetadata.forceType ?? props?.type,
+          },
           prefix,
         }),
       },

@@ -1,5 +1,6 @@
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
+import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { type AppStack, setupTestingStackWithModule } from '@lafken/resolver';
@@ -241,5 +242,38 @@ describe('Api Resolver', () => {
     await resolver.afterCreate(stack as AppStack);
 
     expect(extend).toHaveBeenCalledTimes(1);
+  });
+
+  it('should create a rest api policy when private endpoint with vpcEndpointIds is provided', async () => {
+    const { stack, module } = setupTestingStackWithModule();
+
+    const resolver = new ApiResolver({
+      restApi: {
+        name: 'test',
+        endpointConfiguration: {
+          type: 'private',
+          vpcEndpointIds: ['vpce-12345678'],
+        },
+      },
+    });
+
+    @Api({
+      apiGatewayName: 'test',
+    })
+    class TestApiPrivate {
+      @Get({
+        path: '/test',
+      })
+      testHandler() {}
+    }
+
+    await resolver.beforeCreate(module as AppStack);
+    await resolver.create(module, TestApiPrivate);
+    await resolver.afterCreate(stack as AppStack);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayRestApiPolicy, {
+      policy: expect.stringContaining('vpce-12345678'),
+    });
   });
 });

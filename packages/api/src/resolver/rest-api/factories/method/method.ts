@@ -58,6 +58,7 @@ export class MethodFactory {
           name: 'body',
           type: 'Object',
           payload: {
+            ...paramHelper.params.payload,
             id: payloadName,
             name: payloadName,
           },

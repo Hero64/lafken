@@ -1,3 +1,4 @@
+import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
@@ -385,6 +386,33 @@ describe('State Machine', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
       policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogDelivery", "logs:GetLogDelivery", "logs:UpdateLogDelivery", "logs:DeleteLogDelivery", "logs:ListLogDeliveries", "logs:PutResourcePolicy", "logs:DescribeResourcePolicies", "logs:DescribeLogGroups"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["lambda:InvokeFunction"], "Resource" = "*"}, {"Effect" = "Allow", "Action" = ["sqs:GetQueueUrl", "sqs:ReceiveMessage"], "Resource" = [aws_sqs_queue.test.id]}]})}',
+    });
+  });
+
+  it('should create a state machine with logging configuration', async () => {
+    @StateMachine({
+      loggingConfiguration: {
+        logGroupName: '/aws/states/test-state-machine',
+        level: 'all',
+        includeExecutionData: true,
+        retentionInDays: 30,
+      },
+      startAt: {
+        type: 'wait',
+        seconds: 5,
+        next: {
+          type: 'succeed',
+        },
+      },
+    })
+    class TestingSM {}
+
+    const { stack } = await createStateMachine(TestingSM);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(CloudwatchLogGroup, {
+      name: '/aws/states/test-state-machine',
+      retention_in_days: 30,
     });
   });
 });

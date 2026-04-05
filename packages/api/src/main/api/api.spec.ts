@@ -123,9 +123,15 @@ describe('API', () => {
 
       expect(handlers[0].response).toBeDefined();
       expect(handlers[0].response.payload).toStrictEqual({
+        additionalProperties: false,
+        allOf: undefined,
+        anyOf: undefined,
         defaultCode: 300,
+        description: undefined,
         id: 'ExampleResponse',
         name: 'ExampleResponse',
+        not: undefined,
+        oneOf: undefined,
       });
     });
     it('should accept primitive values as responses', () => {

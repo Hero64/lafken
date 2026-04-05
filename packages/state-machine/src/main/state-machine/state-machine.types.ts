@@ -79,7 +79,105 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    * or express state machine.
    */
   executionType?: ProcessorExecutionType;
+
+  /**
+   * State machine services.
+   *
+   * Defines which AWS services the state machine is allowed to access.
+   * Internally, a role is created with the specified service permissions,
+   * granting the state machine the ability to interact with those resources.
+   *
+   * These permissions are merged with the base permissions automatically
+   * granted to the state machine (e.g., `cloudwatch`, `lambda`).
+   *
+   * Can be provided as:
+   * - A static array of service names or permission objects.
+   * - A callback function that receives `getResourceValue` and `getSSMValue`
+   *   helpers, allowing dynamic resolution of cross-resource references.
+   *
+   * @example
+   * {
+   *   services: ['sqs', 'dynamodb']
+   * }
+   *
+   * @example
+   * {
+   *   services: ({ getResourceValue }) => [
+   *     {
+   *       type: 'sqs',
+   *       permissions: ['GetQueueUrl', 'ReceiveMessage'],
+   *       resources: [getResourceValue('queue::test', 'id')],
+   *     },
+   *   ]
+   * }
+   */
   services?: ServicesValues;
+
+  /**
+   * Logging configuration for the state machine.
+   *
+   * Enables CloudWatch Logs for the state machine execution,
+   * allowing you to monitor and debug workflow runs.
+   *
+   * @example
+   * {
+   *   loggingConfiguration: {
+   *     logGroupName: '/aws/states/my-state-machine',
+   *     level: 'all',
+   *     includeExecutionData: true,
+   *     retentionInDays: 30,
+   *   }
+   * }
+   */
+  loggingConfiguration?: {
+    /**
+     * CloudWatch Log Group name.
+     *
+     * Defines the name of the CloudWatch Log Group where the
+     * state machine execution logs will be sent.
+     *
+     * @example '/aws/states/my-state-machine'
+     */
+    logGroupName: string;
+    /**
+     * Log level.
+     *
+     * Controls the verbosity of execution logs sent to CloudWatch.
+     * - `'all'`: Logs all execution events.
+     * - `'error'`: Logs only error events.
+     * - `'fatal'`: Logs only fatal events.
+     * - `'off'`: Disables logging.
+     *
+     * @default 'off'
+     */
+    level?: 'all' | 'error' | 'fatal' | 'off';
+    /**
+     * Include execution data.
+     *
+     * When enabled, the input and output data of each state
+     * is included in the execution logs.
+     *
+     * @default false
+     */
+    includeExecutionData?: boolean;
+    /**
+     * Log retention period in days.
+     *
+     * Specifies the number of days to retain the execution logs
+     * in the CloudWatch Log Group before they are automatically deleted.
+     */
+    retentionInDays?: number;
+  };
+  /**
+   * Enable AWS X-Ray tracing.
+   *
+   * When enabled, AWS X-Ray tracing is activated for the state machine,
+   * allowing you to trace and analyze execution requests across
+   * the services invoked during the workflow.
+   *
+   * @default false
+   */
+  enableTrace?: boolean;
   /**
    * Defines which Step Functions state machine attributes should be exported.
    *

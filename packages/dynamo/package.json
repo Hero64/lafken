@@ -81,6 +81,7 @@
     "cdktn": "^0.22.1",
     "cdktn-vitest": "^1.0.0",
     "constructs": "^10.6.0",
+    "typescript": "6.0.2",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.1.2"
   },

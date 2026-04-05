@@ -8,6 +8,7 @@ import type {
   HeaderParamProps,
   PathParamProps,
   QueryParamProps,
+  VelocityParamProps,
 } from './param.types';
 
 export const PARAM_PREFIX = `${RESOURCE_TYPE}_REQUEST` as const;
@@ -201,6 +202,48 @@ export const ContextParam =
           ...props,
           required: true,
           source: 'context',
+        };
+      },
+    })(props)(target, destination as string);
+  };
+
+/**
+ * Property decorator that generates a raw Apache Velocity template expression
+ * directly in the API Gateway request mapping template.
+ *
+ * Unlike other parameter decorators that derive the template from the field type
+ * and source, `VelocityParam` lets you provide an arbitrary Velocity expression
+ * via `props.template`. The decorated property name becomes the JSON key in the
+ * generated template, and the template expression becomes its value.
+ *
+ * @param props - Optional {@link VelocityParamProps} with the Velocity `template` expression.
+ *
+ * @example
+ * ```typescript
+ * class RequestBody {
+ *   @BodyParam()
+ *   name: string;
+ *
+ *   @VelocityParam({ template: "$input.json('$')" })
+ *   data: any;
+ * }
+ * // Generated template output:
+ * // "data": $input.json('$')
+ * ```
+ */
+export const VelocityParam =
+  (props?: VelocityParamProps) =>
+  (target: any, destination: string): void => {
+    createFieldDecorator<
+      VelocityParamProps,
+      ApiParamMetadata & { directTemplateValue: string }
+    >({
+      prefix: PARAM_PREFIX,
+      getMetadata: (props) => {
+        return {
+          directTemplateValue: props?.template ?? '',
+          forceType: 'any',
+          source: 'velocity',
         };
       },
     })(props)(target, destination as string);

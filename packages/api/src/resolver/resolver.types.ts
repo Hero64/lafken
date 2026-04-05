@@ -27,12 +27,6 @@ export type EndpointIpAddressType = 'ipv4' | 'dualstack';
  */
 export interface PrivateEndpointConfigurationOptions {
   /**
-   * The IP address types that can invoke the API.
-   * For `PRIVATE` endpoint type, only `dualstack` is supported.
-   */
-  ipAddressType?: 'dualstack';
-
-  /**
    * Endpoint type.
    * Must be `private`.
    */
@@ -42,9 +36,7 @@ export interface PrivateEndpointConfigurationOptions {
    * Set of VPC endpoint identifiers.
    * Supported only when endpoint type is `PRIVATE`.
    */
-  vpcEndpointIds?:
-    | string[]
-    | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
+  vpcEndpointIds: string[] | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
 }
 
 /**
@@ -180,6 +172,19 @@ type MediaTypes =
   | 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
   | (string & {});
 
+export type StageLogGroupFormatKeys =
+  | 'requestId'
+  | 'extendedRequestId'
+  | 'caller'
+  | 'user'
+  | 'ip'
+  | 'requestTime'
+  | 'httpMethod'
+  | 'resourcePath'
+  | 'status'
+  | 'protocol'
+  | 'responseLength';
+
 export interface Stage
   extends Omit<
     ApiGatewayStageConfig,
@@ -188,9 +193,78 @@ export interface Stage
     | 'accessLogSettings'
     | 'canarySettings'
     | 'clientCertificateId'
-  > {}
+  > {
+  /**
+   * Access log settings for the API Gateway stage.
+   *
+   * Configures CloudWatch Logs for capturing API Gateway access logs,
+   * enabling monitoring and analysis of API request activity.
+   *
+   * @example
+   * {
+   *   accessLogSettings: {
+   *     logGroupName: '/aws/apigateway/my-api',
+   *     retentionDays: 30,
+   *     formatKeys: ['requestId', 'ip', 'httpMethod', 'resourcePath', 'status'],
+   *   }
+   * }
+   */
+  accessLogSettings?: {
+    /**
+     * CloudWatch Log Group name.
+     *
+     * Defines the name of the CloudWatch Log Group where the
+     * API Gateway access logs will be sent.
+     *
+     * @example '/aws/apigateway/my-api'
+     */
+    logGroupName: string;
+    /**
+     * Log retention period in days.
+     *
+     * Specifies the number of days to retain the access logs
+     * in the CloudWatch Log Group before they are automatically deleted.
+     */
+    retentionDays?: number;
+    /**
+     * Access log format keys.
+     *
+     * Specifies which request/response fields are included in the
+     * access log entries. Each key maps to a `$context` variable
+     * in the API Gateway access log format.
+     */
+    formatKeys: StageLogGroupFormatKeys[];
+  };
+}
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
+
+export type ApiDefaultResponseType =
+  | 'badRequestBody'
+  | 'accessDenied'
+  | 'apiConfigurationError'
+  | 'authorizerConfigurationError'
+  | 'authorizerFailure'
+  | 'badRequestParameters'
+  | 'default4xx'
+  | 'default5xx'
+  | 'expiredToken'
+  | 'integrationFailure'
+  | 'integrationTimeout'
+  | 'invalidApiKey'
+  | 'invalidSignature'
+  | 'missingAuthenticationToken'
+  | 'quotaExceeded'
+  | 'requestTooLarge'
+  | 'resourceNotFound'
+  | 'throttled'
+  | 'unauthorized'
+  | 'unsupportedMediaType'
+  | 'wafFiltered';
+
+export type ApiDefaultResponse = Partial<
+  Record<ApiDefaultResponseType, Record<string, string>>
+>;
 
 export interface BaseApiProps {
   name: ApiRestNames;
@@ -200,6 +274,7 @@ export interface BaseApiProps {
     authorizers: ClassResource[];
     defaultAuthorizerName: ApiAuthorizerNames;
   };
+  defaultResponses?: ApiDefaultResponse;
 }
 
 export interface RestApiProps extends BaseApiProps {

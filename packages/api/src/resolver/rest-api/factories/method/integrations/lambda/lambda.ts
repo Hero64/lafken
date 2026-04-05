@@ -26,6 +26,7 @@ export class LambdaIntegration implements Integration {
         filename: resourceMetadata.filename,
         foldername: resourceMetadata.foldername,
         principal: 'apigateway.amazonaws.com',
+        sourceArn: `${restApi.executionArn}/*/*`,
         suffix: 'api',
       }
     );

@@ -46,7 +46,7 @@ export const resolveCallbackResource = <T>(
   const resolveResources = new ResolveResources();
   const values = callback({
     getResourceValue: (value, type) => {
-      const moduleWithId = value.split('::');
+      const moduleWithId = value.replace('::', '##').split('##');
 
       if (moduleWithId.length !== 2) {
         throw new Error(`resource value ${value} is not valid`);

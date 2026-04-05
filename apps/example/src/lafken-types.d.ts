@@ -6,7 +6,11 @@
 
 declare module '@lafken/common' {
   interface ModulesAvailable {
-    'pokemon-module': {};
+    'pokemon-module': {
+      Queue: {
+        createPokemon: true;
+      };
+    };
   }
 
   interface BucketAvailable {

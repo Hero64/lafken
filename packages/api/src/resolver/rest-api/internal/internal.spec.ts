@@ -1,6 +1,7 @@
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
+import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -45,7 +46,6 @@ describe('InternalRestApi', () => {
     const { stack } = setupInternalTestingRestApi({
       endpointConfiguration: {
         type: 'private',
-        ipAddressType: 'dualstack',
         vpcEndpointIds: ['vpce-1234567890abcdef0'],
       },
     });
@@ -133,6 +133,47 @@ describe('InternalRestApi', () => {
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayMethod, {
       http_method: 'OPTIONS',
+    });
+  });
+
+  it('should create a rest api policy when private endpoint with vpcEndpointIds is provided', async () => {
+    @Api()
+    class TestingApiPrivate {
+      @Get({
+        integration: 'bucket',
+        action: 'Download',
+        path: 'test/method',
+      })
+      get(): BucketIntegrationResponse {
+        return {
+          bucket: 'test',
+          object: 'foo.json',
+        };
+      }
+    }
+
+    const { stack, restApi, app } = setupInternalTestingRestApi({
+      endpointConfiguration: {
+        type: 'private',
+        vpcEndpointIds: ['vpce-1234567890abcdef0'],
+      },
+    });
+
+    const method = getResourceHandlerMetadata<ApiLambdaMetadata>(TestingApiPrivate);
+    const metadata = getResourceMetadata<ApiResourceMetadata>(TestingApiPrivate);
+
+    await restApi.addMethod(app, {
+      classResource: TestingApiPrivate,
+      handler: method[0],
+      resourceMetadata: metadata,
+    });
+
+    restApi.createStageDeployment();
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayRestApiPolicy, {
+      policy: expect.stringContaining('vpce-1234567890abcdef0'),
     });
   });
 });

@@ -34,6 +34,29 @@ export type VpcConfigValue =
   | VpcConfig
   | ((props: Pick<GetResourceProps, 'getSSMValue'>) => VpcConfig);
 
+export interface AliasConfig {
+  /**
+   * The name of the Lambda alias.
+   *
+   * This name will be used to create an AWS Lambda alias pointing to the
+   * latest published version of the function. The alias acts as a stable
+   * reference to a specific function version.
+   */
+  name: string;
+  /**
+   * Number of provisioned concurrent executions for this alias.
+   *
+   * When set to a value greater than 0, a `LambdaProvisionedConcurrencyConfig`
+   * will be created, ensuring that the specified number of execution environments
+   * are initialized and ready to respond immediately to invocations.
+   *
+   * This helps reduce cold start latency for latency-sensitive workloads.
+   *
+   * @default undefined (no provisioned concurrency)
+   */
+  provisionedExecutions?: number;
+}
+
 export interface LambdaProps {
   /**
    * Lambda execution timeout.
@@ -134,6 +157,25 @@ export interface LambdaProps {
    * Requires specifying at least one subnet and one security group.
    */
   vpcConfig?: VpcConfigValue;
+  /**
+   * Alias configuration for the Lambda function.
+   *
+   * When provided, the Lambda function will be published (creating a new version)
+   * and a Lambda alias will be created pointing to the latest published version.
+   *
+   * If `provisionedExecutions` is set to a value greater than 0, a provisioned
+   * concurrency configuration will also be created for the alias to reduce
+   * cold start latency.
+   *
+   * @example
+   * // Create an alias without provisioned concurrency
+   * { name: 'live' }
+   *
+   * @example
+   * // Create an alias with provisioned concurrency
+   * { name: 'live', provisionedExecutions: 5 }
+   */
+  alias?: AliasConfig;
 }
 
 export interface LambdaMetadata {
