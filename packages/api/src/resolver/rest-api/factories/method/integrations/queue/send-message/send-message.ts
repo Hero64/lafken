@@ -120,6 +120,9 @@ export class SendMessageIntegration implements Integration {
     const bodyResolver = proxyHelper.resolveProxyValue(value, paramHelper.pathParams);
 
     if (!bodyResolver.field) {
+      if (typeof value === 'string') {
+        return `&MessageBody=$util.urlEncode("${value}")`;
+      }
       throw new Error('Body message only support event parameters');
     }
 

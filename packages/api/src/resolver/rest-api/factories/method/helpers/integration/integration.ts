@@ -43,7 +43,7 @@ export class IntegrationHelper {
             return resolveResource.getResourceValue(module, value, type);
           }
 
-          const [internModule, resourceValue] = value.split('::');
+          const [internModule, resourceValue] = value.replace('::', '##').split('##');
           return resolveResource.getResourceValue(internModule, resourceValue, type);
         },
         getCurrentDate() {

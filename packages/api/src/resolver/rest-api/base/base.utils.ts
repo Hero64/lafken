@@ -1,4 +1,7 @@
-import type { ApiDefaultResponseType } from '../../resolver.types';
+import type {
+  ApiDefaultResponseType,
+  StageLogGroupFormatKeys,
+} from '../../resolver.types';
 
 export const apiResponseStatusCode: Record<ApiDefaultResponseType, number | undefined> = {
   accessDenied: 401,
@@ -46,4 +49,18 @@ export const apiResponseName: Record<ApiDefaultResponseType, string> = {
   unauthorized: 'UNAUTHORIZED',
   unsupportedMediaType: 'UNSUPPORTED_MEDIA_TYPE',
   wafFiltered: 'WAF_FILTERED',
+};
+
+export const logFormatValues: Record<StageLogGroupFormatKeys, string> = {
+  requestId: '$context.requestId',
+  extendedRequestId: '$context.extendedRequestId',
+  ip: '$context.identity.sourceIp',
+  caller: '$context.identity.caller',
+  user: '$context.identity.user',
+  requestTime: '$context.requestTime',
+  httpMethod: '$context.httpMethod',
+  resourcePath: '$context.resourcePath',
+  status: '$context.status',
+  protocol: '$context.protocol',
+  responseLength: '$context.responseLength',
 };

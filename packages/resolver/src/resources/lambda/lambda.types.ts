@@ -13,6 +13,8 @@ export interface LambdaHandlerProps
   filename: string;
   suffix?: string;
   principal?: string;
+  sourceArn?: string;
+  sourceAccount?: string;
 }
 
 export interface GetRoleArnProps {

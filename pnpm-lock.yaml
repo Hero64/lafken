@@ -81,6 +81,9 @@ importers:
         specifier: 1.11.20
         version: 1.11.20
     devDependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.1020.0
+        version: 3.1020.0
       cdktn-cli:
         specifier: ^0.22.1
         version: 0.22.1(ink@3.2.0(react@17.0.2))(react@17.0.2)

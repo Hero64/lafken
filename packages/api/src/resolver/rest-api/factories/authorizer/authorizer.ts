@@ -203,6 +203,7 @@ export class AuthorizerFactory {
         foldername: metadata.foldername,
         suffix: 'api-auth',
         principal: 'apigateway.amazonaws.com',
+        sourceArn: `${this.scope.executionArn}/authorizers/*`,
       }
     );
 

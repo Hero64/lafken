@@ -36,9 +36,16 @@ export type ResourceIdentifiers<TStacks, TResource extends string> = {
 }[keyof TStacks] &
   string;
 
-export type ScopedResourceNames<TStacks, TResource extends string> = {
+export type ScopedResourceNames<
+  TStacks,
+  TResource extends string,
+  TMiddle extends string = Lowercase<TResource>,
+> = {
   [StackName in keyof TStacks]: TResource extends keyof TStacks[StackName]
-    ? Join<StackName & string, keyof TStacks[StackName][TResource] & string>
+    ? Join<
+        Join<StackName & string, TMiddle>,
+        keyof TStacks[StackName][TResource] & string
+      >
     : never;
 }[keyof TStacks];
 

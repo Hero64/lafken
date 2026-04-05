@@ -39,6 +39,7 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
         foldername: resourceMetadata.foldername,
         suffix: 'event',
         principal: 'events.amazonaws.com',
+        sourceArn: this.arn,
       }
     );
 

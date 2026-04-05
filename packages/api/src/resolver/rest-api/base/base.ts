@@ -2,6 +2,7 @@ import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deploy
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
+import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
 import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
 import type { Construct } from 'constructs';
@@ -18,7 +19,7 @@ import { ModelFactory } from '../factories/model/model';
 import { ResourceFactory } from '../factories/resource/resource';
 import { ResponseFactory } from '../factories/response/response';
 import { ValidatorFactory } from '../factories/validator/validator';
-import { apiResponseName, apiResponseStatusCode } from './base.utils';
+import { apiResponseName, apiResponseStatusCode, logFormatValues } from './base.utils';
 
 type Constructor = new (...args: any[]) => Construct;
 
@@ -89,7 +90,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
             `${this._baseProps.name}-api-caller-identity`
           );
           const region = new DataAwsRegion(this, `${this._baseProps.name}-api-region`);
-          const policy = new ApiGatewayRestApiPolicy(self, 'ApiPolicy', {
+          const policy = new ApiGatewayRestApiPolicy(self, 'api-policy', {
             restApiId: self.id,
             policy: JSON.stringify({
               Version: '2012-10-17',
@@ -128,11 +129,37 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         );
 
         for (const stageProps of this._stages) {
-          new ApiGatewayStage(self, `${this._baseProps.name}-stage`, {
+          let accessLogGroup: CloudwatchLogGroup | undefined;
+          if (stageProps.accessLogSettings) {
+            accessLogGroup = new CloudwatchLogGroup(
+              self,
+              `${stageProps.stageName}-access-logs`,
+              {
+                name: stageProps.accessLogSettings.logGroupName,
+                retentionInDays: stageProps.accessLogSettings.retentionDays,
+              }
+            );
+          }
+
+          new ApiGatewayStage(self, `${stageProps.stageName}-stage`, {
             ...(stageProps || {}),
             deploymentId: deployment.id,
             restApiId: self.id,
             stageName: stageProps.stageName,
+            accessLogSettings: accessLogGroup
+              ? {
+                  destinationArn: accessLogGroup.arn,
+                  format: JSON.stringify(
+                    stageProps.accessLogSettings?.formatKeys.reduce(
+                      (acc, key) => {
+                        acc[key] = logFormatValues[key];
+                        return acc;
+                      },
+                      {} as Record<string, string>
+                    )
+                  ),
+                }
+              : undefined,
             dependsOn: [deployment],
           });
         }

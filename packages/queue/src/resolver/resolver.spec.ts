@@ -242,7 +242,6 @@ describe('queue resolver', () => {
           name: 'handler',
           isFifo: true,
           suffix: 'queue',
-          principal: 'sqs.amazonaws.com',
         })
       );
     });

@@ -1,4 +1,16 @@
-import { Api, Delete, Event, Get, Post, Put, response } from '@lafken/api/main';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import {
+  Api,
+  Delete,
+  Event,
+  Get,
+  IntegrationOptions,
+  Post,
+  Put,
+  type QueueIntegrationOption,
+  type QueueSendMessageIntegrationResponse,
+  response,
+} from '@lafken/api/main';
 import { pokemonRepository } from '../../../infra/models/pokemon.model';
 import {
   BasePokemonPayload,
@@ -6,6 +18,8 @@ import {
   UpdatePokemonPayload,
 } from './pokemon.request';
 import { GetAllResponse, PokemonResponse } from './pokemon.responses';
+
+const sqsClient = new SQSClient();
 
 @Api({
   path: '/pokemon',
@@ -17,7 +31,6 @@ export class PokeApi {
   })
   async getAllPokemons(): Promise<GetAllResponse> {
     const { data } = await pokemonRepository.scan();
-
     return {
       data,
     };
@@ -47,10 +60,20 @@ export class PokeApi {
 
   @Post({
     response: PokemonResponse,
+    lambda: {
+      env: ({ getResourceValue }) => ({
+        queueArn: getResourceValue('pokemon-module::queue::createPokemon', 'id'),
+      }),
+    },
   })
   async createPokemon(@Event(CreatePokemonPayload) e: CreatePokemonPayload) {
     const pokemon = await pokemonRepository.create(e);
-
+    await sqsClient.send(
+      new SendMessageCommand({
+        QueueUrl: process.env.queueArn,
+        MessageBody: 'Hello',
+      })
+    );
     return pokemon;
   }
 
@@ -90,5 +113,19 @@ export class PokeApi {
   })
   async whatIsThisPokemon() {
     console.log("It's pikachu!!!");
+  }
+
+  @Get({
+    path: '/view-pokedex',
+    integration: 'queue',
+    action: 'SendMessage',
+  })
+  async viewPokedex(
+    @IntegrationOptions() { getResourceValue }: QueueIntegrationOption
+  ): Promise<QueueSendMessageIntegrationResponse> {
+    return {
+      queueName: getResourceValue('pokemon-module::queue::createPokemon', 'name'),
+      body: 'view pokedex',
+    };
   }
 }

@@ -13,7 +13,7 @@ export class Extension extends Construct {
     super(scope, id);
   }
 
-  public createTriggers(): CognitoUserPoolLambdaConfig {
+  public createTriggers(userPoolArn: string): CognitoUserPoolLambdaConfig {
     const triggers: StripReadonly<CognitoUserPoolLambdaConfig> = {};
 
     const { handlers, resourceMetadata } = this.props;
@@ -28,6 +28,7 @@ export class Extension extends Construct {
           foldername: resourceMetadata.foldername,
           principal: 'cognito-idp.amazonaws.com',
           suffix: 'auth',
+          sourceArn: userPoolArn,
         }
       );
 
