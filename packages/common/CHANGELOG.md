@@ -1,5 +1,19 @@
 # @lafken/common
 
+## 0.10.0
+
+### Minor Changes
+
+- - Fix role assignments in private API.
+  - Fix default `ipAddressType` in private API.
+  - Fix peer dependency declarations.
+
+  - Add support for `oneOf`, `anyOf`, `allOf`, and `not` combinators in API Gateway models.
+  - Add support for `additionalProperties` in API Gateway models.
+  - Add `VelocityParam` helper.
+  - Add API Gateway default gateway responses.
+  - Harden infrastructure definitions per Checkov policy checks.
+
 ## 0.9.0
 
 ### Minor Changes
