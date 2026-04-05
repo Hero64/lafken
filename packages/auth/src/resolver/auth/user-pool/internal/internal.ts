@@ -83,13 +83,13 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
         props.mfa,
         props.userVerification
       ),
-      lambdaConfig: InternalUserPool.getLambdaConfig(scope, props.extensions),
       usernameAttributes: InternalUserPool.getAliasAttributes(props.usernameAttributes),
       lifecycle: {
         ignoreChanges: ['schema'],
       },
     });
 
+    this.addLambdaConfig();
     if (attributes?.attributeByName) {
       this.attributeByName = attributes.attributeByName;
     }
@@ -111,7 +111,7 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
     }
   }
 
-  private static getLambdaConfig(scope: Construct, extensions: ClassResource[] = []) {
+  private addLambdaConfig(extensions: ClassResource[] = []) {
     let lambdaConfig: StripReadonly<CognitoUserPoolLambdaConfig> = {};
 
     for (const extension of extensions) {
@@ -123,12 +123,12 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
 
       const handlers = getResourceHandlerMetadata<TriggerMetadata>(extension);
 
-      const trigger = new Extension(scope, `${metadata.name}-extension`, {
+      const trigger = new Extension(this, `${metadata.name}-extension`, {
         handlers,
         resourceMetadata: metadata,
       });
 
-      const triggers = trigger.createTriggers();
+      const triggers = trigger.createTriggers(this.arn);
       for (const key in triggers) {
         const configKey = key as keyof CognitoUserPoolLambdaConfig;
         if (lambdaConfig[configKey] !== undefined) {
@@ -142,7 +142,11 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
       };
     }
 
-    return Object.keys(lambdaConfig).length === 0 ? undefined : lambdaConfig;
+    if (Object.keys(lambdaConfig).length === 0) {
+      return;
+    }
+
+    this.putLambdaConfig(lambdaConfig);
   }
 
   private static getSmsConfig(

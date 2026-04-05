@@ -104,17 +104,21 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
 
     this.addVpcConfig(props.lambda?.vpcConfig);
     this.addAlias(handlerName, alias);
-    this.addPermission(handlerName, props.principal);
+    this.addPermission(handlerName, props);
   }
 
-  private addPermission(name: string, principal?: string) {
-    if (principal) {
-      new LambdaPermission(this, 'permission', {
-        functionName: name,
-        action: 'lambda:InvokeFunction',
-        principal,
-      });
+  private addPermission(name: string, props: LambdaHandlerProps) {
+    if (!props.principal) {
+      return;
     }
+
+    new LambdaPermission(this, 'permission', {
+      functionName: name,
+      action: 'lambda:InvokeFunction',
+      principal: props.principal,
+      sourceArn: props.sourceArn,
+      sourceAccount: props.sourceAccount,
+    });
   }
 
   private addAlias(functionName: string, aliasConfig?: AliasConfig) {

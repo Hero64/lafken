@@ -55,7 +55,6 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       filename: resourceMetadata.filename,
       foldername: resourceMetadata.foldername,
       suffix: 'queue',
-      principal: 'sqs.amazonaws.com',
     });
 
     new LambdaEventSourceMapping(this, 'event-mapping', {
