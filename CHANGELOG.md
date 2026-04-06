@@ -1,5 +1,3 @@
-# @lafken/common
-
 ## 0.10.0
 
 ### Minor Changes
@@ -13,6 +11,12 @@
   - Add `VelocityParam` helper.
   - Add API Gateway default gateway responses.
   - Harden infrastructure definitions per Checkov policy checks.
+
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.10.0
+  - @lafken/resolver@1.0.0
 
 ## 0.9.0
 
@@ -29,11 +33,20 @@
   - Update package dependencies.
   - Replace SHA-1 with SHA-256.
 
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.9.0
+  - @lafken/resolver@0.9.0
+
 ## 0.8.1
 
 ### Patch Changes
 
 - The `exec` method is removed when executing a query on DynamoDB
+- Updated dependencies
+  - @lafken/common@0.8.1
+  - @lafken/resolver@0.8.1
 
 ## 0.8.0
 
@@ -82,38 +95,68 @@
   - Update READMEs and JSDoc documentation
   - Add new examples
 
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.8.0
+  - @lafken/resolver@0.8.0
+
 ## 0.7.0
 
 ### Minor Changes
 
 - Migrate cdftf to cdk-terrain
 
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/common@0.7.0
+  - @lafken/resolver@0.7.0
+
 ## 0.6.4
 
 ### Patch Changes
 
 - fix: state-machine schema generator
+- Updated dependencies
+  - @lafken/common@0.6.4
+  - @lafken/resolver@0.6.4
 
 ## 0.6.3
 
 ### Patch Changes
 
 - fix export module
+- Updated dependencies
+  - @lafken/common@0.6.3
+  - @lafken/resolver@0.6.3
 
 ## 0.6.2
 
 ### Patch Changes
 
 - add package description
+- Updated dependencies
+  - @lafken/common@0.6.2
+  - @lafken/resolver@0.6.2
 
 ## 0.1.1
 
 ### Patch Changes
 
 - upgrade types field in package.json
+- Updated dependencies
+  - @lafken/common@0.1.1
+  - @lafken/resolver@0.1.1
 
 ## 0.1.0
 
 ### Minor Changes
 
 - initial release
+
+### Patch Changes
+
+- Updated dependencies
+  - @lafken/resolver@0.1.0
+  - @lafken/common@0.1.0
