@@ -47,9 +47,12 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     let environmentValues = environments?.getValues();
     const hasValues = !!environmentValues;
 
-    const handlerName = kebabCase(
-      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}${props.suffix ? `-${props.suffix}` : ''}`
-    ).toLowerCase();
+    const suffix = props.suffix ? `-${props.suffix}` : '';
+
+    const handlerName = `${kebabCase(
+      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}}`
+    ).slice(0, 63 - suffix.length)}${suffix}`.toLowerCase();
+
     const roleArn = LambdaHandler.getRoleArn({
       name: handlerName,
       scope,
