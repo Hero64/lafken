@@ -1,5 +1,14 @@
 # @lafken/bucket
 
+## 0.10.4
+
+### Patch Changes
+
+- ssm id
+- Updated dependencies
+  - @lafken/common@0.10.4
+  - @lafken/resolver@0.10.4
+
 ## 0.10.3
 
 ### Patch Changes
