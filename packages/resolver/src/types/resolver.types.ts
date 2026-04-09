@@ -25,9 +25,7 @@ export interface AppModule extends Construct {
   id: string;
 }
 
-export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags' | 'env'> {
-  env?: Record<string, string>;
-}
+export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags'> {}
 
 export interface GlobalContext extends Omit<LambdaGlobalConfig, 'services'> {
   contextCreator: string;
