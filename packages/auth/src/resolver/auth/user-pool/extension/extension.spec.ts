@@ -48,7 +48,7 @@ describe('User pool extension', () => {
       resourceMetadata: metadata,
     });
 
-    const triggers = extension.createTriggers();
+    const triggers = extension.createTriggers('');
     Testing.synth(stack);
 
     expect(LambdaHandler).toHaveBeenCalledTimes(2);

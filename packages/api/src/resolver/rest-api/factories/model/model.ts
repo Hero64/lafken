@@ -163,7 +163,7 @@ export class ModelFactory {
 
       const newModel = new ApiGatewayModel(this.scope, field.payload.id, {
         contentType: 'application/json',
-        name: field.payload.id,
+        name: cleanAndCapitalize(field.payload.id),
         restApiId: this.scope.id,
         schema: Token.asString(Fn.jsonencode(schema)),
       });

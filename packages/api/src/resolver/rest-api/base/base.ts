@@ -99,7 +99,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
                   Effect: 'Allow',
                   Principal: '*',
                   Action: 'execute-api:Invoke',
-                  Resource: `arn:aws:execute-api:${region.name}:${identity.accountId}:${self.id}/*`,
+                  Resource: `arn:aws:execute-api:${region.region}:${identity.accountId}:${self.id}/*`,
                   Condition: {
                     StringEquals: {
                       'aws:SourceVpce': self.vpcIds,
