@@ -32,7 +32,7 @@ export interface VpcConfig {
 
 export type VpcConfigValue =
   | VpcConfig
-  | ((props: Pick<GetResourceProps, 'getSSMValue'>) => VpcConfig);
+  | ((props: Omit<GetResourceProps, 'getResourceValue'>) => VpcConfig);
 
 export interface AliasConfig {
   /**

@@ -32,11 +32,13 @@ export class ResolveResources {
 
 export const resolverSSMValues = (
   scope: Construct
-): Pick<GetResourceProps, 'getSSMValue'> => {
+): Omit<GetResourceProps, 'getResourceValue'> => {
   return {
     getSSMValue: (value, secure = false) => {
       return ssmFactory.getValue(scope, value, secure);
     },
+    fn: Fn,
+    token: Token,
   };
 };
 
