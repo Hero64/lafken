@@ -1,5 +1,14 @@
 # @lafken/schedule
 
+## 0.10.2
+
+### Patch Changes
+
+- fixes lambda name, models and functions
+- Updated dependencies
+  - @lafken/common@0.10.2
+  - @lafken/resolver@0.10.2
+
 ## 0.10.0
 
 ### Minor Changes

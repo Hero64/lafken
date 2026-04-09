@@ -1,5 +1,11 @@
 # @lafken/common
 
+## 0.10.2
+
+### Patch Changes
+
+- fixes lambda name, models and functions
+
 ## 0.10.0
 
 ### Minor Changes
