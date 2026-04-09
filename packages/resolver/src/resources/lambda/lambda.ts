@@ -50,7 +50,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     const suffix = props.suffix ? `-${props.suffix}` : '';
 
     const handlerName = `${kebabCase(
-      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}}`
+      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
     ).slice(0, 63 - suffix.length)}${suffix}`.toLowerCase();
 
     const roleArn = LambdaHandler.getRoleArn({
