@@ -1,4 +1,5 @@
 import type { GetResourceProps } from '@lafken/common';
+import { Fn, Token } from 'cdktn';
 import type { Construct } from 'constructs';
 import { lafkenResource } from '../resources';
 import { ssmFactory } from '../resources/ssm/ssm';
@@ -59,6 +60,8 @@ export const resolveCallbackResource = <T>(
       );
     },
     ...resolverSSMValues(scope),
+    fn: Fn,
+    token: Token,
   });
   if (resolveResources.hasUnresolved()) {
     return false;
