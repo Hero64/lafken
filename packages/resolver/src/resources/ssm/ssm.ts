@@ -8,7 +8,7 @@ export class SsmFactory {
     if (!this.ssmValues[name]) {
       this.ssmValues[name] = new DataAwsSsmParameter(
         scope,
-        `${name.replaceAll('/', '-')}-ssm`,
+        `ssm-${name.replaceAll('/', '-')}`,
         {
           name,
           withDecryption: secure,
