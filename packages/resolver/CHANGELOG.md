@@ -1,5 +1,13 @@
 # @lafken/resolver
 
+## 0.10.3
+
+### Patch Changes
+
+- lambda global config
+- Updated dependencies
+  - @lafken/common@0.10.3
+
 ## 0.10.2
 
 ### Patch Changes
