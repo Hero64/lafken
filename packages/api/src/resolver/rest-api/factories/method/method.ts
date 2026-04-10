@@ -17,7 +17,7 @@ import { LambdaIntegration } from './integrations/lambda/lambda';
 import { QueueIntegration } from './integrations/queue/queue';
 import { BucketIntegration } from './integrations/s3/bucket';
 import { StateMachineIntegration } from './integrations/state-machine/state-machine';
-import type { CreateMethodProps } from './method.types';
+import type { AddDocumentationProps, CreateMethodProps } from './method.types';
 
 export class MethodFactory {
   private methodResources: TerraformResource[] = [];
@@ -99,7 +99,16 @@ export class MethodFactory {
       apiGatewayMethod: method,
     });
 
+    const docParams = {
+      ...props,
+      methodName,
+      paramHelper,
+      fullPath: `/${fullPath}`,
+    };
+
     this.methodResources.push(method, integration);
+    this.addMethodDocumentation(docParams);
+    this.addParamsDocumentation(docParams);
   }
 
   get resources() {
@@ -272,5 +281,55 @@ export class MethodFactory {
 
   private cleanPath(path: string) {
     return path.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
+  }
+
+  private addMethodDocumentation(props: AddDocumentationProps) {
+    const { handler, resourceMetadata, fullPath, methodName } = props;
+
+    if (
+      !handler.description &&
+      !handler.summary &&
+      !handler.tags &&
+      !resourceMetadata.tags
+    ) {
+      return;
+    }
+
+    this.scope.docsFactory.createDoc({
+      id: methodName,
+      location: {
+        type: 'METHOD',
+        method: handler.method,
+        path: fullPath,
+      },
+      properties: {
+        description: handler.description,
+        tags: handler.tags || resourceMetadata.tags,
+        summary: handler.summary,
+      },
+    });
+  }
+
+  private addParamsDocumentation(props: AddDocumentationProps) {
+    const { paramHelper, methodName, handler, fullPath } = props;
+
+    const { paramsBySource } = paramHelper;
+
+    const params = [...(paramsBySource.query || []), ...(paramsBySource.path || [])];
+
+    for (const param of params) {
+      const { source, type, destinationName, name, ...properties } = param;
+
+      this.scope.docsFactory.createDoc({
+        id: `${param.name}-${methodName}-${handler.method}`,
+        location: {
+          type: source === 'path' ? 'PATH_PARAMETER' : 'QUERY_PARAMETER',
+          method: handler.method,
+          name: param.name,
+          path: fullPath,
+        },
+        properties,
+      });
+    }
   }
 }

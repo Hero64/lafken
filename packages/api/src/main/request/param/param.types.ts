@@ -213,17 +213,22 @@ export interface HeaderParamProps extends Pick<BaseParamProps, 'name' | 'require
  * Properties for URL path parameters (e.g., `/users/{id}`).
  * Path parameters are always required per OpenAPI spec and only support primitive types.
  */
-export interface PathParamProps extends HeaderParamProps {}
+export type PathParamProps<T> = T extends string
+  ? StringParamProps
+  : T extends number
+    ? NumberParamProps
+    : T extends boolean
+      ? BooleanParamProps
+      : BaseParamProps;
 
 /**
  * Properties for URL query string parameters (e.g., `?page=1&sort=name`).
  * Supports a broader set of types than path/header params, including arrays
  * and objects serialized as query parameters.
  */
-export interface QueryParamProps extends Omit<HeaderParamProps, 'type'> {
-  /** Type of the query parameter value. Supports primitives, arrays, and objects. */
+export type QueryParamProps<T> = BodyParamProps<T> & {
   type?: AllowedTypesWithoutFunction;
-}
+};
 
 /**
  * Properties for API Gateway request context parameters.

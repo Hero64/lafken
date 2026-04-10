@@ -13,6 +13,7 @@ import type {
   Stage,
 } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
+import { DocsFactory } from '../factories/docs/docs.factories';
 import { MethodFactory } from '../factories/method/method';
 import type { CreateMethodProps } from '../factories/method/method.types';
 import { ModelFactory } from '../factories/model/model';
@@ -30,6 +31,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public authorizerFactory!: AuthorizerFactory;
     public modelFactory!: ModelFactory;
     public responseFactory!: ResponseFactory;
+    public docsFactory!: DocsFactory;
     public vpcIds: string[];
 
     _methodFactory!: MethodFactory;
@@ -60,6 +62,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         }
       );
       this.modelFactory = new ModelFactory(self);
+      this.docsFactory = new DocsFactory(self);
       this.responseFactory = new ResponseFactory(self);
       this._methodFactory = new MethodFactory(self);
       this.addApiGatewayResponse();
@@ -81,7 +84,14 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         ...this.authorizerFactory.resources,
         ...this.modelFactory.resources,
         ...this.responseFactory.resources,
+        ...this.docsFactory.resources,
       ];
+
+      const version = this.docsFactory.createVersion();
+
+      if (version) {
+        apiResources.push(version);
+      }
 
       if (this._methodFactory.resources.length > 0) {
         if (this.vpcIds) {
@@ -146,6 +156,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
             deploymentId: deployment.id,
             restApiId: self.id,
             stageName: stageProps.stageName,
+            documentationVersion: version?.version,
             accessLogSettings: accessLogGroup
               ? {
                   destinationArn: accessLogGroup.arn,

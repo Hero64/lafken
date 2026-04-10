@@ -91,6 +91,32 @@ export interface ApiLambdaBaseProps {
    * }
    */
   auth?: MethodAuthorizer | false;
+  /**
+   * OpenAPI summary.
+   *
+   * A short summary of the API method. This value is used to populate
+   * the `summary` field in the OpenAPI specification for the corresponding
+   * operation, providing a brief description of what the endpoint does.
+   *
+   * @example
+   * {
+   *   summary: "Retrieve a user by ID"
+   * }
+   */
+  summary?: string;
+  /**
+   * OpenAPI tags.
+   *
+   * A list of tags used to group the API method in the OpenAPI specification.
+   * Tags help organize endpoints into logical sections when generating
+   * API documentation.
+   *
+   * @example
+   * {
+   *   tags: ["Users", "Admin"]
+   * }
+   */
+  tags?: string[];
 }
 
 export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
@@ -307,6 +333,20 @@ export interface ApiProps extends ResourceProps {
    * the default API Gateway will be used.
    */
   apiGatewayName?: ApiRestNames;
+  /**
+   * OpenAPI tags.
+   *
+   * A list of tags applied at the class level that will be inherited by all
+   * methods defined within the decorated class in the OpenAPI specification.
+   * Tags help organize endpoints into logical sections when generating
+   * API documentation.
+   *
+   * @example
+   * {
+   *   tags: ["Users", "Admin"]
+   * }
+   */
+  tags?: string[];
 }
 
 export interface ApiResourceMetadata extends Required<ApiProps>, ResourceMetadata {}
@@ -320,6 +360,8 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   lambda?: LambdaProps;
   response?: ResponseFieldMetadata;
   auth?: MethodAuthorizer | false;
+  summary?: string;
+  tags?: string[];
 }
 
 export enum Method {

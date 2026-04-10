@@ -43,6 +43,8 @@ const createMethodDecorator = (method: Method) =>
         response: responseParams,
         description: params.description,
         integration: params.integration,
+        summary: params.summary,
+        tags: params.tags,
       } as ApiLambdaMetadata;
     },
   });
@@ -74,8 +76,9 @@ const createMethodDecorator = (method: Method) =>
 export const Api = createResourceDecorator<ApiProps>({
   type: RESOURCE_TYPE,
   callerFileIndex: 5,
-  getMetadata: ({ path, auth, apiGatewayName }) => ({
+  getMetadata: ({ path, auth, apiGatewayName, tags }) => ({
     auth,
+    tags,
     apiGatewayName,
     path: path || '/',
   }),
