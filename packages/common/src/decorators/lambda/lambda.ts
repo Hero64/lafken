@@ -62,7 +62,7 @@ export const createLambdaDecorator =
       ...argumentParser,
     };
 
-    descriptor.value = async (event: any, context: any) => {
+    descriptor.value = async function (event: any, context: any) {
       const methodArguments = (lambdaArguments?.[methodName] || []).map((argumentType) =>
         mapArgumentMethod[argumentType]({ event, context, methodName, target })
       );
