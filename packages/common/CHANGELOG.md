@@ -1,5 +1,11 @@
 # @lafken/common
 
+## 0.10.5
+
+### Patch Changes
+
+- documentation methods
+
 ## 0.10.4
 
 ### Patch Changes

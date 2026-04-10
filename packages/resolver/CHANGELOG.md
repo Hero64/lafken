@@ -1,5 +1,13 @@
 # @lafken/resolver
 
+## 0.10.5
+
+### Patch Changes
+
+- documentation methods
+- Updated dependencies
+  - @lafken/common@0.10.5
+
 ## 0.10.4
 
 ### Patch Changes
