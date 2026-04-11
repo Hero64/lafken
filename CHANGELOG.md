@@ -1,5 +1,3 @@
-# @lafken/queue
-
 ## 0.10.5
 
 ### Patch Changes
@@ -36,7 +34,7 @@
   - @lafken/common@0.10.2
   - @lafken/resolver@0.10.2
 
-## 1.0.0
+## 0.10.0
 
 ### Minor Changes
 
