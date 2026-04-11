@@ -20,7 +20,6 @@ describe('Cron rule', () => {
       name: 'CronTest',
       filename: 'schedule.spec.ts',
       originalName: 'CronTest',
-      minify: true,
     });
   });
 

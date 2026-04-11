@@ -23,6 +23,7 @@ describe('App context', () => {
       enableTrace: true,
       memory: 2000,
       runtime: 20,
+      minify: undefined,
     });
   });
 });

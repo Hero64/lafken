@@ -55,7 +55,6 @@ export class ApiResolver implements ResolverType {
 
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
-    console.log(minify, metadata.minify);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,

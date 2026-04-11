@@ -20,11 +20,12 @@ export interface ResourceProps {
   minify?: boolean;
 }
 
-export interface ResourceMetadata extends Required<ResourceProps> {
+export interface ResourceMetadata extends Required<Omit<ResourceProps, 'minify'>> {
   type: string;
   filename: string;
   foldername: string;
   originalName: string;
+  minify?: boolean;
 }
 
 export interface ResourceDecoratorProps<T> {
