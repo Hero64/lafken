@@ -14,10 +14,10 @@ import type {
   UserPoolClientOutputAttributes,
   ValidityUnit,
 } from '../user-pool-client.types';
-import { UserPoolClient } from '../user-pool-client.utils';
+import { DataInternalUserPoolClient } from '../user-pool-client.utils';
 
 export class InternalUserPoolClient extends Construct {
-  public cognitoUserPoolClient: UserPoolClient;
+  public cognitoUserPoolClient: DataInternalUserPoolClient;
   constructor(
     scope: Construct,
     id: string,
@@ -25,10 +25,10 @@ export class InternalUserPoolClient extends Construct {
   ) {
     super(scope, 'user-pool-client');
 
-    this.cognitoUserPoolClient = new UserPoolClient(this, id, {
+    this.cognitoUserPoolClient = new DataInternalUserPoolClient(this, id, {
       ...this.getValidity(props),
       ...this.getOauthConfig(props.oauth),
-      name: id,
+      name: props.name || id,
       userPoolId: props.userPoolId,
       enableTokenRevocation: props.enableTokenRevocation ?? true,
       generateSecret: props.generateSecret ?? false,
@@ -73,7 +73,7 @@ export class InternalUserPoolClient extends Construct {
   }
 
   private getOauthConfig(oauth?: OAuthConfig): Partial<CognitoUserPoolClientConfig> {
-    if (!oauth || !oauth.flows?.length) {
+    if (!oauth?.flows?.length) {
       return {};
     }
 

@@ -43,6 +43,15 @@ export interface OAuthConfig {
 
 export interface InternalUserClientProps<T extends Function> {
   isExternal?: never;
+
+  /**
+   * Name of the Cognito User Pool Client.
+   *
+   * Specifies a custom name for the User Pool Client resource.
+   * If not provided, a default name is derived from the parent
+   * User Pool configuration.
+   */
+  name?: string;
   /**
    * Defines the authentication flows enabled for the Cognito User Pool Client.
    *

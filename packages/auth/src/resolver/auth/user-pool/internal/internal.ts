@@ -55,7 +55,7 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
 
     super(scope, `${id}-user-pool`, {
       ...InternalUserPool.getMfaConfig(props.mfa),
-      name: id,
+      name: props.name || id,
       autoVerifiedAttributes: InternalUserPool.getAutoVerifiedAttributes(
         props.autoVerifyAttributes
       ),
@@ -94,7 +94,7 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
       this.attributeByName = attributes.attributeByName;
     }
 
-    this.isGlobal('auth', id);
+    this.isGlobal('user-pool', id);
     this.assignIdentityProviders(props.identityProviders);
     new ResourceOutput<UserPoolOutputAttributes>(this, props.outputs);
   }

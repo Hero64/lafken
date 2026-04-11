@@ -24,13 +24,13 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
    */
   name?: ApiAuthorizerNames;
   /**
-   * Cognito User Pool.
+   * Auth resource name.
    *
-   * Specifies the Cognito User Pool that will be used by this authorizer.
-   * This User Pool is required for validating and authenticating users
-   * accessing the API methods protected by this authorizer.
+   * References the name of a Cognito User Pool resource created or loaded
+   * by the `AuthResolver`. This name must match the `name` property
+   * defined in the `AuthResolver` options.
    */
-  userPool: AuthNames;
+  authName: AuthNames;
   /**
    * Authorization header.
    *

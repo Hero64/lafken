@@ -34,6 +34,8 @@ class LafkenResource {
     module: ModuleGlobalReferenceNames | (string & {}),
     id: string
   ): T {
+    console.log(Object.keys(this.globals));
+
     return this.globals[`${module}::${id}`] as T;
   }
 

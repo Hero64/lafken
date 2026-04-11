@@ -234,11 +234,11 @@ export class AuthorizerFactory {
   private createCognitoAuthorizer({ metadata }: AuthorizerDataCognito) {
     const userPool = lafkenResource.getResource<CognitoUserPool>(
       'user-pool',
-      metadata.userPool
+      metadata.authName
     );
 
     if (!userPool) {
-      throw new Error(`user pool ${metadata.userPool} not found`);
+      throw new Error(`user pool ${metadata.authName} not found`);
     }
 
     const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
