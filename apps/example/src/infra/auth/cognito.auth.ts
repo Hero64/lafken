@@ -1,7 +1,7 @@
 import { CognitoAuthorizer } from '@lafken/api/main';
 
 @CognitoAuthorizer({
-  userPool: 'example-user-pool',
+  authName: 'poke-auth',
   name: 'cognito-auth',
 })
 export class CognitoAuth {}

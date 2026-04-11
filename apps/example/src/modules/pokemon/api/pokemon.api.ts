@@ -38,6 +38,9 @@ export class PokeApi {
 
   @Get({
     path: '/{name}',
+    auth: {
+      authorizerName: 'cognito-auth',
+    },
     response: PokemonResponse,
   })
   async getPokemon(
