@@ -26,11 +26,11 @@ type Constructor = new (...args: any[]) => Construct;
 
 export function RestApiBase<TBase extends Constructor>(Base: TBase) {
   let apiProps!: BaseApiProps;
-  let stages!: Stage[];
+  let stageProps!: Stage[];
   let restApi: RestApi;
 
   const createStages = (apiStages: Stage[] = []) => {
-    stages =
+    stageProps =
       (apiStages || []).length > 0
         ? (apiStages as Stage[])
         : [
@@ -48,6 +48,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public docsFactory!: DocsFactory;
     public methodFactory!: MethodFactory;
     public vpcIds: string[];
+    public stages: ApiGatewayStage[] = [];
 
     public initialize(props: BaseApiProps) {
       apiProps = props;
@@ -61,7 +62,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         props.auth?.authorizers || [],
         {
           defaultAuthorizer: props.auth?.defaultAuthorizerName,
-          stageNames: stages.map((stage) => stage.stageName),
+          stageNames: stageProps.map((stage) => stage.stageName),
         }
       );
       this.modelFactory = new ModelFactory(restApi);
@@ -177,23 +178,23 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           }
         );
 
-        for (const stageProps of stages) {
+        for (const stageProp of stageProps) {
           const accessLogGroup = this.assignCloudwatchLog(
-            stageProps.stageName,
-            stageProps.accessLogSettings
+            stageProp.stageName,
+            stageProp.accessLogSettings
           );
 
-          new ApiGatewayStage(restApi, `${stageProps.stageName}-stage`, {
-            ...(stageProps || {}),
+          const stage = new ApiGatewayStage(restApi, `${stageProp.stageName}-stage`, {
+            ...(stageProp || {}),
             deploymentId: deployment.id,
             restApiId: restApi.id,
-            stageName: stageProps.stageName,
+            stageName: stageProp.stageName,
             documentationVersion: version?.version,
             accessLogSettings: accessLogGroup
               ? {
                   destinationArn: accessLogGroup.arn,
                   format: JSON.stringify(
-                    stageProps.accessLogSettings?.formatKeys.reduce(
+                    stageProp.accessLogSettings?.formatKeys.reduce(
                       (acc, key) => {
                         acc[key] = logFormatValues[key];
                         return acc;
@@ -205,6 +206,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
               : undefined,
             dependsOn: [deployment],
           });
+
+          this.stages.push(stage);
         }
       }
     }
