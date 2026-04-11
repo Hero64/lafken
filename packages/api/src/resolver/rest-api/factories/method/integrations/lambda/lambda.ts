@@ -22,6 +22,7 @@ export class LambdaIntegration implements Integration {
       `${handler.name}-${resourceMetadata.name}`,
       {
         ...handler,
+        description: handler.summary || handler.description,
         originalName: resourceMetadata.originalName,
         filename: resourceMetadata.filename,
         foldername: resourceMetadata.foldername,
