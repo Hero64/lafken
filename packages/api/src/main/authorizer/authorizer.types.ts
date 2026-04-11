@@ -45,6 +45,13 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
    * authorization decision, reducing authorizer invocations and improving latency.
    */
   authorizerResultTtlInSeconds?: number;
+  /**
+   * Description of the Cognito authorizer.
+   *
+   * Provides a human-readable summary of the authorizer's purpose,
+   * displayed in the API Gateway documentation.
+   */
+  description?: string;
 }
 
 export const PERMISSION_DEFINITION_FILE = 'permissions.json';
@@ -179,6 +186,13 @@ export interface CustomAuthorizerProps extends ResourceProps {
    * authorization decision, reducing authorizer invocations and improving latency.
    */
   authorizerResultTtlInSeconds?: number;
+  /**
+   * Description of the custom authorizer.
+   *
+   * Provides a human-readable summary of the authorizer's purpose,
+   * displayed in the API Gateway documentation.
+   */
+  description?: string;
 }
 
 export interface AuthorizationHandlerEvent extends APIGatewayRequestAuthorizerEvent {

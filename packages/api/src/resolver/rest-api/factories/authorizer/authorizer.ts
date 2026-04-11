@@ -224,6 +224,9 @@ export class AuthorizerFactory {
         : undefined,
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
     });
+
+    this.createDoc(metadata.name, metadata.description);
+
     this.authResources.push(authorizer);
     this.authorizerIds[metadata.name] = authorizer.id;
   }
@@ -250,7 +253,7 @@ export class AuthorizerFactory {
     });
 
     this.authResources.push(authorizer);
-
+    this.createDoc(metadata.name, metadata.description);
     this.authorizerIds[metadata.name] = authorizer.id;
   }
 
@@ -293,5 +296,21 @@ export class AuthorizerFactory {
     }
 
     this.authorizerIds[metadata.name] = usagePlan.id;
+  }
+
+  private createDoc(name: string, description?: string) {
+    if (!description) {
+      return;
+    }
+    this.scope.docsFactory.createDoc({
+      id: '',
+      location: {
+        type: 'AUTHORIZER',
+        name,
+      },
+      properties: {
+        description,
+      },
+    });
   }
 }

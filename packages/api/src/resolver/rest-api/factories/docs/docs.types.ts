@@ -30,7 +30,7 @@ export interface DocServer {
 }
 
 export interface DocInfoProperties {
-  info: {
+  info?: {
     title?: string;
     description?: string;
     version?: string;
@@ -76,7 +76,7 @@ export interface DocModelProperties {
   description?: string;
 }
 
-export interface DocAuthorizerProperties {
+export interface DocAuthorizerProperties extends Partial<Record<`x-${string}`, string>> {
   description?: string;
 }
 

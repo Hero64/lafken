@@ -7,6 +7,7 @@ import {
 
 @CustomAuthorizer({
   name: 'pokemon-custom-auth',
+  description: "Check if it's the Pokémon trainer",
 })
 export class TrainerAuthorizer {
   @AuthorizerHandler()
