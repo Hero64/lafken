@@ -38,10 +38,6 @@
       },
       "correctness": {
         "noSwitchDeclarations": "off",
-        "noUnusedVariables": {
-          "fix": "safe",
-          "level": "error"
-        },
         "noUnusedImports": {
           "fix": "safe",
           "level": "error"
