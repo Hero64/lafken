@@ -36,7 +36,9 @@ export interface PrivateEndpointConfigurationOptions {
    * Set of VPC endpoint identifiers.
    * Supported only when endpoint type is `PRIVATE`.
    */
-  vpcEndpointIds: string[] | ((props: Pick<GetResourceProps, 'getSSMValue'>) => string[]);
+  vpcEndpointIds:
+    | string[]
+    | ((props: Omit<GetResourceProps, 'getResourceValue'>) => string[]);
 }
 
 /**

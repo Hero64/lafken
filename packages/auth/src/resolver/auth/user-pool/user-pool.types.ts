@@ -1,4 +1,8 @@
-import type { ClassResource, ResourceOutputType } from '@lafken/common';
+import type {
+  ClassResource,
+  GetExternalValues,
+  ResourceOutputType,
+} from '@lafken/common';
 
 export type SignInAliases = 'email' | 'phone' | 'preferred_username';
 export type CognitoPlan = 'lite' | 'essentials' | 'plus';
@@ -190,6 +194,7 @@ export type IdentityProvider<T extends ClassResource> =
   | OidcIdentityProvider<T>;
 
 export interface InternalUserPoolProps<T extends ClassResource> {
+  name?: string;
   isExternal?: never;
   /**
    * Defines the attributes for the Cognito User Pool.
@@ -347,7 +352,7 @@ export interface ExternalUserPoolProps {
    * This value is used to look up and integrate with a User Pool
    * that was created outside of the framework.
    */
-  userPoolId: string;
+  userPoolId: string | ((props: GetExternalValues) => string);
 }
 
 export type UserPoolProps<T extends ClassResource> =

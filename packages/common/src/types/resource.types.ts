@@ -1,12 +1,13 @@
 import type { GetResourceValue } from './output.types';
 import type {
   ApiRestScopedNames,
-  AuthScopedNames,
   BucketScopedNames,
   DynamoTableScopedNames,
   EventBusScopedNames,
   QueueScopedNames,
   StateMachineScopedNames,
+  UserPoolClientScopedNames,
+  UserPoolScopedNames,
 } from './override-resources.types';
 
 export interface ClassResource {
@@ -392,7 +393,8 @@ export interface GetResourceProps {
    */
   getResourceValue: GetResourceValue<
     | DynamoTableScopedNames
-    | AuthScopedNames
+    | UserPoolScopedNames
+    | UserPoolClientScopedNames
     | BucketScopedNames
     | ApiRestScopedNames
     | EventBusScopedNames
@@ -429,3 +431,5 @@ export interface GetResourceProps {
    */
   token: TerraformToken;
 }
+
+export type GetExternalValues = Omit<GetResourceProps, 'getResourceValue'>;

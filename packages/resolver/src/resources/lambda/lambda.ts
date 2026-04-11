@@ -5,7 +5,7 @@ import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lamb
 import { type AliasConfig, kebabCase, type VpcConfigValue } from '@lafken/common';
 import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../../types';
-import { resolverSSMValues } from '../../utils';
+import { getExternalValues } from '../../utils';
 import { Environment } from '../environment/environment';
 import { lafkenResource } from '../resource';
 import { Role } from '../role';
@@ -152,7 +152,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     }
 
     this.putVpcConfig(
-      typeof vpcConfig === 'function' ? vpcConfig(resolverSSMValues(this)) : vpcConfig
+      typeof vpcConfig === 'function' ? vpcConfig(getExternalValues(this)) : vpcConfig
     );
   }
 

@@ -223,7 +223,7 @@ export class AuthorizerFactory {
 
   private createCognitoAuthorizer({ metadata }: AuthorizerDataCognito) {
     const userPool = lafkenResource.getResource<CognitoUserPool>(
-      'auth',
+      'user-pool',
       metadata.userPool
     );
 

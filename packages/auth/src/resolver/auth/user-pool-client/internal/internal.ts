@@ -1,7 +1,6 @@
-import {
-  CognitoUserPoolClient,
-  type CognitoUserPoolClientConfig,
-  type CognitoUserPoolClientRefreshTokenRotation,
+import type {
+  CognitoUserPoolClientConfig,
+  CognitoUserPoolClientRefreshTokenRotation,
 } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
 import { ResourceOutput } from '@lafken/resolver';
 import { Construct } from 'constructs';
@@ -15,9 +14,10 @@ import type {
   UserPoolClientOutputAttributes,
   ValidityUnit,
 } from '../user-pool-client.types';
+import { UserPoolClient } from '../user-pool-client.utils';
 
 export class InternalUserPoolClient extends Construct {
-  public cognitoUserPoolClient: CognitoUserPoolClient;
+  public cognitoUserPoolClient: UserPoolClient;
   constructor(
     scope: Construct,
     id: string,
@@ -25,7 +25,7 @@ export class InternalUserPoolClient extends Construct {
   ) {
     super(scope, 'user-pool-client');
 
-    this.cognitoUserPoolClient = new CognitoUserPoolClient(this, id, {
+    this.cognitoUserPoolClient = new UserPoolClient(this, id, {
       ...this.getValidity(props),
       ...this.getOauthConfig(props.oauth),
       name: id,
@@ -41,6 +41,8 @@ export class InternalUserPoolClient extends Construct {
       readAttributes: this.getAttributes(props.readAttributes as string[]),
       writeAttributes: this.getAttributes(props.writeAttributes as string[]),
     });
+
+    this.cognitoUserPoolClient.isGlobal('user-pool-client', id);
 
     new ResourceOutput<UserPoolClientOutputAttributes>(
       this.cognitoUserPoolClient,

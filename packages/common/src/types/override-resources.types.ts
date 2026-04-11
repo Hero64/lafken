@@ -2,7 +2,8 @@ import type { ResourceIdentifiers, ScopedResourceNames } from './utilities.types
 
 export type ModuleGlobalReferenceNames =
   | 'api'
-  | 'auth'
+  | 'user-pool'
+  | 'user-pool-client'
   | 'bucket'
   | 'dynamo'
   | 'event-bus';
@@ -22,7 +23,11 @@ type StackResourceName<T, S extends ModuleGlobalReferenceNames> =
 
 export type ModuleNames = ResourceNames<ModulesAvailable>;
 export type AuthNames = ResourceNames<AuthAvailable>;
-export type AuthScopedNames = StackResourceName<AuthAvailable, 'auth'>;
+export type UserPoolScopedNames = StackResourceName<AuthAvailable, 'user-pool'>;
+export type UserPoolClientScopedNames = StackResourceName<
+  AuthAvailable,
+  'user-pool-client'
+>;
 export type BucketNames = ResourceNames<BucketAvailable>;
 export type BucketScopedNames = StackResourceName<BucketAvailable, 'bucket'>;
 export type ApiRestNames = ResourceNames<ApiRestAvailable>;

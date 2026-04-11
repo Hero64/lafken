@@ -10,7 +10,7 @@ import type { UserClientProps } from './auth/user-pool-client/user-pool-client.t
 export interface ExtendProps {
   scope: Construct;
   userPool: CognitoUserPool | DataAwsCognitoUserPool;
-  userPoolClient: CognitoUserPoolClient | DataAwsCognitoUserPoolClient;
+  userPoolClient?: CognitoUserPoolClient | DataAwsCognitoUserPoolClient;
 }
 
 export interface AuthOptions<T extends ClassResource> {

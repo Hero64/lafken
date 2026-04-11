@@ -18,25 +18,8 @@ export class Auth extends Construct {
   }
 
   public async create() {
-    if (this.props.userPool?.isExternal) {
-      this.userPool = new ExternalUserPool(this, this.id, this.props.userPool);
-    } else {
-      this.userPool = new InternalUserPool(this, this.id, this.props.userPool || {});
-    }
-
-    if (this.props.userClient?.isExternal) {
-      this.userPoolClient = new ExternalUserPoolClient(this, this.id, {
-        userPoolId: this.userPool.id,
-        ...this.props.userClient,
-      });
-    } else {
-      this.userPoolClient = new InternalUserPoolClient(this, this.id, {
-        userPoolId: this.userPool.id,
-        ...this.props.userClient,
-        attributeByName:
-          this.userPool instanceof InternalUserPool ? this.userPool.attributeByName : {},
-      });
-    }
+    this.createUserPool();
+    this.createUserPoolClient();
   }
 
   public async callExtends() {
@@ -44,8 +27,38 @@ export class Auth extends Construct {
       await this.props.extend({
         scope: this,
         userPool: this.userPool,
-        userPoolClient: this.userPoolClient.cognitoUserPoolClient,
+        userPoolClient: this.userPoolClient?.cognitoUserPoolClient,
       });
     }
+  }
+
+  private createUserPool() {
+    if (this.props.userPool?.isExternal) {
+      this.userPool = new ExternalUserPool(this, this.id, this.props.userPool);
+      return;
+    }
+
+    this.userPool = new InternalUserPool(this, this.id, this.props.userPool || {});
+  }
+
+  private createUserPoolClient() {
+    if (!this.props.userClient) {
+      return;
+    }
+
+    if (this.props.userClient?.isExternal) {
+      this.userPoolClient = new ExternalUserPoolClient(this, this.id, {
+        userPoolId: this.userPool.id,
+        ...this.props.userClient,
+      });
+      return;
+    }
+
+    this.userPoolClient = new InternalUserPoolClient(this, this.id, {
+      userPoolId: this.userPool.id,
+      ...this.props.userClient,
+      attributeByName:
+        this.userPool instanceof InternalUserPool ? this.userPool?.attributeByName : {},
+    });
   }
 }

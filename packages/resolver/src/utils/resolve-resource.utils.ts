@@ -1,4 +1,4 @@
-import type { GetResourceProps } from '@lafken/common';
+import type { GetExternalValues, GetResourceProps } from '@lafken/common';
 import { Fn, Token } from 'cdktn';
 import type { Construct } from 'constructs';
 import { lafkenResource } from '../resources';
@@ -30,9 +30,7 @@ export class ResolveResources {
   }
 }
 
-export const resolverSSMValues = (
-  scope: Construct
-): Omit<GetResourceProps, 'getResourceValue'> => {
+export const getExternalValues = (scope: Construct): GetExternalValues => {
   return {
     getSSMValue: (value, secure = false) => {
       return ssmFactory.getValue(scope, value, secure);
@@ -61,9 +59,7 @@ export const resolveCallbackResource = <T>(
         type as string
       );
     },
-    ...resolverSSMValues(scope),
-    fn: Fn,
-    token: Token,
+    ...getExternalValues(scope),
   });
   if (resolveResources.hasUnresolved()) {
     return false;

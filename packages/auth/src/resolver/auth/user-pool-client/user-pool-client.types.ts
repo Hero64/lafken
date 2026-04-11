@@ -1,4 +1,4 @@
-import type { ResourceOutputType } from '@lafken/common';
+import type { GetExternalValues, ResourceOutputType } from '@lafken/common';
 import type { CustomAttributesMetadata, StandardAttributeMetadata } from '../../../main';
 
 export type AuthFlow =
@@ -178,7 +178,7 @@ export interface ExternalUserClientProps {
    * This value is used to look up and integrate with a User Pool Client
    * that was created outside of the framework.
    */
-  clientId: string;
+  clientId: string | ((props: GetExternalValues) => string);
 }
 
 export type UserClientProps<T extends Function> =

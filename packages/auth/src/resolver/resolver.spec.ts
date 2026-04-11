@@ -1,5 +1,4 @@
 import { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
-import { CognitoUserPoolClient } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
 import { enableBuildEnvVariable } from '@lafken/common';
 import { type AppModule, setupTestingStack } from '@lafken/resolver';
 import { Testing } from 'cdktn';
@@ -19,10 +18,6 @@ describe('AuthResolver', () => {
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(CognitoUserPool, {
-      name: 'test',
-    });
-
-    expect(synthesized).toHaveResourceWithProperties(CognitoUserPoolClient, {
       name: 'test',
     });
   });

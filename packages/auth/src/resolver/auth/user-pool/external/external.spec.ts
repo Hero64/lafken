@@ -41,7 +41,7 @@ describe('ExternalUserPool', () => {
       userPoolId: 'us-east-1_abc123',
     });
 
-    const resource = lafkenResource.getResource('auth', 'my-auth');
+    const resource = lafkenResource.getResource('user-pool', 'my-auth');
 
     expect(userPool).toBe(resource);
   });
