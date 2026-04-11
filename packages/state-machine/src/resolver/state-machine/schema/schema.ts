@@ -63,7 +63,7 @@ export class Schema {
   constructor(
     private scope: Construct,
     private resource: ClassResource,
-    props: SchemaProps = {}
+    private props: SchemaProps = {}
   ) {
     this.stateNames = props.stateNames || new StateNames();
     this.lambdaStates = props.lambdas || new LambdaStates();
@@ -109,7 +109,7 @@ export class Schema {
     return this.bucketPermissions;
   }
 
-  private getMetadata(initializeAssets: boolean) {
+  private getMetadata(initializeAssets: boolean, minify?: boolean) {
     this.resourceMetadata = getResourceMetadata<StateMachineResourceMetadata>(
       this.resource
     );
@@ -128,7 +128,7 @@ export class Schema {
         filename: this.resourceMetadata.filename,
         className: this.resourceMetadata.originalName,
         methods: handlers.map((handler) => handler.name),
-        minify: this.resourceMetadata.minify,
+        minify: this.resourceMetadata.minify ?? minify,
       });
     }
   }
@@ -206,6 +206,7 @@ export class Schema {
             initializeAssets: true,
             lambdas: this.lambdaStates,
             stateNames: this.stateNames,
+            minify: this.props.minify,
           });
           branchStates.push(branchSchema.getDefinition());
           this.mergeBucketPermissions(branchSchema.buckets);
@@ -229,6 +230,7 @@ export class Schema {
           initializeAssets: true,
           lambdas: this.lambdaStates,
           stateNames: this.stateNames,
+          minify: this.props.minify,
         });
         this.mergeBucketPermissions(mapSchema.buckets);
         const mapState = mapSchema.getDefinition();

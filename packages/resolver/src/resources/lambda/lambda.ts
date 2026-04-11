@@ -4,8 +4,8 @@ import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
 import { type AliasConfig, kebabCase, type VpcConfigValue } from '@lafken/common';
 import type { Construct } from 'constructs';
-import { ContextName, type GlobalContext } from '../../types';
-import { getExternalValues } from '../../utils';
+import type { GlobalContext } from '../../types';
+import { getAppContext, getExternalValues, getModuleContext } from '../../utils';
 import { Environment } from '../environment/environment';
 import { lafkenResource } from '../resource';
 import { Role } from '../role';
@@ -19,8 +19,9 @@ import type {
 
 export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   constructor(scope: Construct, id: string, props: LambdaHandlerProps) {
-    const appContext = LambdaHandler.getAppContext(scope);
-    const moduleContext = LambdaHandler.getModuleContext(scope);
+    const appContext = getAppContext(scope);
+    const moduleContext = getModuleContext(scope);
+
     const contextValueProps = {
       lambda: props.lambda,
       appContext: appContext,
@@ -156,21 +157,8 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     );
   }
 
-  private static getAppContext(scope: Construct) {
-    const context = scope.node.tryGetContext(ContextName.app);
-    if (!context) {
-      throw new Error('Context not found');
-    }
-
-    return context;
-  }
-
-  private static getModuleContext(scope: Construct) {
-    return scope.node.tryGetContext(ContextName.module);
-  }
-
   private static getCurrentOrContextValue<
-    T extends keyof Omit<GlobalContext, 'contextCreator'>,
+    T extends keyof Omit<GlobalContext, 'contextCreator' | 'minify'>,
   >(props: GetCurrentOrContextValueProps<T>) {
     const { lambda = {}, appContext, moduleContext, key, defaultValue } = props;
 

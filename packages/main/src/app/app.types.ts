@@ -37,6 +37,15 @@ export interface GlobalConfig {
    * the resource-specific tags will override the global values.
    */
   tags?: Record<string, string>;
+  /**
+   * Enables minification for all Lambda function bundles.
+   *
+   * When set to `true`, the bundled Lambda code will be minified
+   * to reduce deployment package size and improve cold start times.
+   *
+   * @default undefined
+   */
+  minify?: boolean;
 }
 
 export interface CreateAppProps {

@@ -5,4 +5,5 @@ export interface StateMachineProps {
   classResource: ClassResource;
   resourceMetadata: StateMachineResourceMetadata;
   moduleName: string;
+  minify?: boolean;
 }

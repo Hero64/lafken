@@ -3,7 +3,12 @@ import {
   getResourceHandlerMetadata,
   getResourceMetadata,
 } from '@lafken/common';
-import { type AppModule, lambdaAssets, type ResolverType } from '@lafken/resolver';
+import {
+  type AppModule,
+  getContextValueByScope,
+  lambdaAssets,
+  type ResolverType,
+} from '@lafken/resolver';
 
 import {
   type LambdaStateMetadata,
@@ -16,6 +21,7 @@ export class StateMachineResolver implements ResolverType {
   public type = RESOURCE_TYPE;
 
   public async create(module: AppModule, resource: ClassResource) {
+    const minify = getContextValueByScope(module, 'minify');
     const metadata = getResourceMetadata<StateMachineResourceMetadata>(resource);
     const handlers = getResourceHandlerMetadata<LambdaStateMetadata>(resource);
 
@@ -24,10 +30,11 @@ export class StateMachineResolver implements ResolverType {
       filename: metadata.filename,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
-      minify: metadata.minify,
+      minify: metadata.minify ?? minify,
     });
 
     const stateMachine = new StateMachine(module, metadata.name, {
+      minify,
       classResource: resource,
       resourceMetadata: metadata,
       moduleName: module.id,

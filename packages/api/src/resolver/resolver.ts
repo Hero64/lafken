@@ -6,6 +6,7 @@ import {
 import {
   type AppModule,
   type AppStack,
+  getContextValueByScope,
   lambdaAssets,
   type ResolverType,
 } from '@lafken/resolver';
@@ -50,12 +51,15 @@ export class ApiResolver implements ResolverType {
   }
 
   public async create(module: AppModule, resource: ClassResource) {
+    const minify = getContextValueByScope(module, 'minify');
+
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
+    console.log(minify, metadata.minify);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
-      minify: metadata.minify,
+      minify: metadata.minify ?? minify,
       className: metadata.originalName,
       methods: handlers
         .filter((handler) => !handler.integration)

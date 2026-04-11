@@ -9,6 +9,7 @@ import {
 import {
   type AppModule,
   type AppStack,
+  getContextValueByScope,
   lafkenResource,
   lambdaAssets,
   type ResolverType,
@@ -74,12 +75,14 @@ export class EventRuleResolver implements ResolverType {
   }
 
   public create(module: AppModule, resource: ClassResource) {
+    const minify = getContextValueByScope(module, 'minify');
+
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<EventRuleMetadata>(resource);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
-      minify: metadata.minify,
+      minify: metadata.minify ?? minify,
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
     });

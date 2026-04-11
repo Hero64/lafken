@@ -29,6 +29,7 @@ export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags'> {}
 
 export interface GlobalContext extends Omit<LambdaGlobalConfig, 'services'> {
   contextCreator: string;
+  minify?: boolean;
 }
 
 export enum ContextName {

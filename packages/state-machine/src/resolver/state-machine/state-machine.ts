@@ -37,7 +37,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
   public async attachDefinition() {
     const { classResource } = this.props;
 
-    const schema = new Schema(this, classResource);
+    const schema = new Schema(this, classResource, { minify: this.props.minify });
     const definition = await schema.getDefinition();
     this.overrideRole(schema);
 

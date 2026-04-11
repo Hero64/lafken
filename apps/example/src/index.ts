@@ -15,6 +15,7 @@ createApp({
     lambda: {
       runtime: 24,
     },
+    minify: false,
   },
   name: 'pokemon-example',
   modules: [PokemonModule],

@@ -173,6 +173,7 @@ export type StatesWithCatchErrors = StateTask | ParallelTask | MapTask;
 
 export interface SchemaProps {
   initializeAssets?: boolean;
+  minify?: boolean;
   stateNames?: StateNames | undefined;
   lambdas?: LambdaStates | undefined;
 }

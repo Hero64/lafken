@@ -12,7 +12,12 @@ import {
   getResourceMetadata,
   type LambdaMetadata,
 } from '@lafken/common';
-import { LambdaHandler, lafkenResource, lambdaAssets } from '@lafken/resolver';
+import {
+  getContextValueByScope,
+  LambdaHandler,
+  lafkenResource,
+  lambdaAssets,
+} from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import {
   ApiAuthorizerType,
@@ -37,12 +42,14 @@ export class AuthorizerFactory {
   private authResources: TerraformResource[] = [];
   private defaultAuthorizer?: MethodAuthorizer;
   private usagePlans: ApiGatewayUsagePlan[] = [];
+  private globalMinify: boolean | undefined = false;
 
   constructor(
     private scope: RestApi,
     authorizerResources: ClassResource[],
     private props: AuthorizerFactoryProps
   ) {
+    this.globalMinify = getContextValueByScope(scope, 'minify');
     const { defaultAuthorizer } = props;
 
     if (defaultAuthorizer) {
@@ -179,7 +186,7 @@ export class AuthorizerFactory {
       className: metadata.originalName,
       filename: metadata.filename,
       foldername: metadata.foldername,
-      minify: metadata.minify,
+      minify: metadata.minify ?? this.globalMinify,
       methods: [handler.name],
       afterBuild: async (outputPath) => {
         const authorizer = this.authorizerMetadata[id] as AuthorizerDataCustom;

@@ -7,7 +7,6 @@ import {
 
 @CustomAuthorizer({
   name: 'pokemon-custom-auth',
-  minify: false,
 })
 export class TrainerAuthorizer {
   @AuthorizerHandler()

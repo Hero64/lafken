@@ -4,4 +4,5 @@ export interface ContextProps {
   globalConfig?: LambdaGlobalConfig;
   contextCreator: string;
   contextName: string;
+  minify?: boolean;
 }

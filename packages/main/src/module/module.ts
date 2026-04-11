@@ -18,10 +18,12 @@ export class StackModule extends Construct {
     private props: ModuleProps
   ) {
     super(scope, id);
+
     new AppContext(this, {
       contextName: ContextName.module,
       globalConfig: props.globalConfig?.lambda,
       contextCreator: props.name,
+      minify: props.globalConfig?.minify,
     });
     this.createRole();
   }
