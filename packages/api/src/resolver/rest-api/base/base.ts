@@ -25,6 +25,20 @@ import { apiResponseName, apiResponseStatusCode, logFormatValues } from './base.
 type Constructor = new (...args: any[]) => Construct;
 
 export function RestApiBase<TBase extends Constructor>(Base: TBase) {
+  let apiProps!: BaseApiProps;
+  let stages!: Stage[];
+  let restApi: RestApi;
+
+  const createStages = (apiStages: Stage[] = []) => {
+    stages =
+      (apiStages || []).length > 0
+        ? (apiStages as Stage[])
+        : [
+            {
+              stageName: 'api',
+            },
+          ];
+  };
   class RestApiWithFactories extends Base {
     public resourceFactory!: ResourceFactory;
     public validatorFactory!: ValidatorFactory;
@@ -32,53 +46,105 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public modelFactory!: ModelFactory;
     public responseFactory!: ResponseFactory;
     public docsFactory!: DocsFactory;
+    public methodFactory!: MethodFactory;
     public vpcIds: string[];
 
-    _methodFactory!: MethodFactory;
-    _baseProps!: BaseApiProps;
-    _stages!: Stage[];
+    public initialize(props: BaseApiProps) {
+      apiProps = props;
+      createStages(props.stages);
 
-    public initFactories(props: BaseApiProps) {
-      this._baseProps = props;
-
-      this._stages =
-        (props.stages || []).length > 0
-          ? (props.stages as Stage[])
-          : [
-              {
-                stageName: 'api',
-              },
-            ];
-
-      const self = this as unknown as RestApi;
-      this.resourceFactory = new ResourceFactory(self);
-      this.validatorFactory = new ValidatorFactory(self);
+      restApi = this as unknown as RestApi;
+      this.resourceFactory = new ResourceFactory(restApi);
+      this.validatorFactory = new ValidatorFactory(restApi);
       this.authorizerFactory = new AuthorizerFactory(
-        self,
+        restApi,
         props.auth?.authorizers || [],
         {
           defaultAuthorizer: props.auth?.defaultAuthorizerName,
-          stageNames: this._stages.map((stage) => stage.stageName),
+          stageNames: stages.map((stage) => stage.stageName),
         }
       );
-      this.modelFactory = new ModelFactory(self);
-      this.docsFactory = new DocsFactory(self);
-      this.responseFactory = new ResponseFactory(self);
-      this._methodFactory = new MethodFactory(self);
+      this.modelFactory = new ModelFactory(restApi);
+      this.docsFactory = new DocsFactory(restApi);
+      this.responseFactory = new ResponseFactory(restApi);
+      this.methodFactory = new MethodFactory(restApi);
       this.addApiGatewayResponse();
+      this.addDocs();
     }
 
+    public addDocs = () => {
+      if (!apiProps.description) {
+        return;
+      }
+
+      this.docsFactory.createDoc({
+        id: `${apiProps.name}-api`,
+        location: {
+          type: 'API',
+        },
+        properties: {
+          info: {
+            description: apiProps.description,
+          },
+        },
+      });
+    };
+
     public async addMethod(module: Construct, props: CreateMethodProps) {
-      await this._methodFactory.create(module, {
+      await this.methodFactory.create(module, {
         ...props,
-        cors: this._baseProps.cors,
+        cors: apiProps.cors,
       });
     }
 
+    public assignVpc() {
+      if (!this.vpcIds || this.vpcIds.length === 0) {
+        return [];
+      }
+
+      const identity = new DataAwsCallerIdentity(
+        restApi,
+        `${apiProps.name}-api-caller-identity`
+      );
+      const region = new DataAwsRegion(this, `${apiProps.name}-api-region`);
+      const policy = new ApiGatewayRestApiPolicy(restApi, 'api-policy', {
+        restApiId: restApi.id,
+        policy: JSON.stringify({
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Allow',
+              Principal: '*',
+              Action: 'execute-api:Invoke',
+              Resource: `arn:aws:execute-api:${region.region}:${identity.accountId}:${restApi.id}/*`,
+              Condition: {
+                StringEquals: {
+                  'aws:SourceVpce': this.vpcIds,
+                },
+              },
+            },
+          ],
+        }),
+      });
+
+      return [policy];
+    }
+
+    public assignCloudwatchLog(stageName: string, props?: Stage['accessLogSettings']) {
+      if (!props) {
+        return;
+      }
+      const accessLogGroup = new CloudwatchLogGroup(restApi, `${stageName}-access-logs`, {
+        name: props.logGroupName,
+        retentionInDays: props.retentionDays,
+      });
+
+      return accessLogGroup;
+    }
+
     public createStageDeployment() {
-      const self = this as unknown as RestApi;
       const apiResources = [
-        ...this._methodFactory.resources,
+        ...this.methodFactory.resources,
         ...this.resourceFactory.resources,
         ...this.validatorFactory.resources,
         ...this.authorizerFactory.resources,
@@ -93,41 +159,14 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         apiResources.push(version);
       }
 
-      if (this._methodFactory.resources.length > 0) {
-        if (this.vpcIds) {
-          const identity = new DataAwsCallerIdentity(
-            self,
-            `${this._baseProps.name}-api-caller-identity`
-          );
-          const region = new DataAwsRegion(this, `${this._baseProps.name}-api-region`);
-          const policy = new ApiGatewayRestApiPolicy(self, 'api-policy', {
-            restApiId: self.id,
-            policy: JSON.stringify({
-              Version: '2012-10-17',
-              Statement: [
-                {
-                  Effect: 'Allow',
-                  Principal: '*',
-                  Action: 'execute-api:Invoke',
-                  Resource: `arn:aws:execute-api:${region.region}:${identity.accountId}:${self.id}/*`,
-                  Condition: {
-                    StringEquals: {
-                      'aws:SourceVpce': self.vpcIds,
-                    },
-                  },
-                },
-              ],
-            }),
-          });
-
-          apiResources.push(policy);
-        }
+      if (this.methodFactory.resources.length > 0) {
+        apiResources.push(...this.assignVpc());
 
         const deployment = new ApiGatewayDeployment(
-          self,
-          `${this._baseProps.name}-deployment`,
+          restApi,
+          `${apiProps.name}-deployment`,
           {
-            restApiId: self.id,
+            restApiId: restApi.id,
             dependsOn: apiResources,
             triggers: {
               redeployment: Date.now().toString(),
@@ -138,23 +177,16 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           }
         );
 
-        for (const stageProps of this._stages) {
-          let accessLogGroup: CloudwatchLogGroup | undefined;
-          if (stageProps.accessLogSettings) {
-            accessLogGroup = new CloudwatchLogGroup(
-              self,
-              `${stageProps.stageName}-access-logs`,
-              {
-                name: stageProps.accessLogSettings.logGroupName,
-                retentionInDays: stageProps.accessLogSettings.retentionDays,
-              }
-            );
-          }
+        for (const stageProps of stages) {
+          const accessLogGroup = this.assignCloudwatchLog(
+            stageProps.stageName,
+            stageProps.accessLogSettings
+          );
 
-          new ApiGatewayStage(self, `${stageProps.stageName}-stage`, {
+          new ApiGatewayStage(restApi, `${stageProps.stageName}-stage`, {
             ...(stageProps || {}),
             deploymentId: deployment.id,
-            restApiId: self.id,
+            restApiId: restApi.id,
             stageName: stageProps.stageName,
             documentationVersion: version?.version,
             accessLogSettings: accessLogGroup
@@ -178,8 +210,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     }
 
     public addApiGatewayResponse() {
-      const self = this as unknown as RestApi;
-      const { defaultResponses = {} } = this._baseProps;
+      const { defaultResponses = {} } = apiProps;
       for (const responseKey in defaultResponses) {
         const key = responseKey as ApiDefaultResponseType;
         const response = defaultResponses[key];
@@ -187,8 +218,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           continue;
         }
 
-        new ApiGatewayGatewayResponse(self, `${this._baseProps.name}-${responseKey}`, {
-          restApiId: self.id,
+        new ApiGatewayGatewayResponse(restApi, `${apiProps.name}-${responseKey}`, {
+          restApiId: restApi.id,
           responseType: apiResponseName[key],
           statusCode: apiResponseStatusCode[key]?.toString(),
           responseTemplates: {

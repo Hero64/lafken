@@ -2,12 +2,7 @@ import type { Construct } from 'constructs';
 import { ContextName, type GlobalContext } from '../types';
 
 export const getAppContext = (scope: Construct): GlobalContext => {
-  const context = scope.node.tryGetContext(ContextName.app);
-  if (!context) {
-    throw new Error('Context not found');
-  }
-
-  return context;
+  return scope.node.tryGetContext(ContextName.app);
 };
 
 export const getModuleContext = (scope: Construct): GlobalContext => {

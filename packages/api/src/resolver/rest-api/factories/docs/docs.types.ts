@@ -25,10 +25,16 @@ export interface DocExternalDocs {
   url: string;
 }
 
+export interface DocServer {
+  url?: string;
+}
+
 export interface DocInfoProperties {
-  title?: string;
-  description?: string;
-  version?: string;
+  info: {
+    title?: string;
+    description?: string;
+    version?: string;
+  };
   termsOfService?: string;
   contact?: {
     name?: string;
@@ -39,6 +45,7 @@ export interface DocInfoProperties {
     name: string;
     url?: string;
   };
+  servers?: DocServer[];
 }
 
 export interface DocMethodProperties {

@@ -26,7 +26,7 @@ export class InternalRestApi extends RestApiBase(lafkenResource.make(ApiGatewayR
     this.addEndpointConfiguration();
 
     this.isGlobal('api', id);
-    this.initFactories(props);
+    this.initialize(props);
     new ResourceOutput<ApiOutputAttributes>(this, props.outputs);
   }
 

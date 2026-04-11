@@ -13,6 +13,6 @@ export class ExternalRestApi extends RestApiBase(
     });
 
     this.isGlobal('api', id);
-    this.initFactories(props);
+    this.initialize(props);
   }
 }

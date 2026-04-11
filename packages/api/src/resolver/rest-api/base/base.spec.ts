@@ -1,3 +1,4 @@
+import { ApiGatewayDocumentationPart } from '@cdktn/provider-aws/lib/api-gateway-documentation-part';
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
@@ -10,7 +11,7 @@ import { logFormatValues } from './base.utils';
 
 const addDummyMethodResource = (restApi: InternalRestApi) => {
   const dummy = new DataAwsRegion(restApi, 'dummy-method-resource');
-  restApi._methodFactory.resources.push(dummy as any);
+  restApi.methodFactory.resources.push(dummy as any);
 };
 
 describe('RestApiBase - addApiGatewayResponse', () => {
@@ -231,5 +232,33 @@ describe('RestApiBase - createStageDeployment access logs', () => {
 
     expect(stage.access_log_settings.destination_arn).toContain('cloudwatch_log_group');
     expect(stage.access_log_settings.format).toBe(JSON.stringify(expectedFormat));
+  });
+});
+
+describe('RestApiBase - addDocs', () => {
+  it('should not create a documentation part when description is not provided', () => {
+    const { stack } = setupInternalTestingRestApi({});
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).not.toHaveResource(ApiGatewayDocumentationPart);
+  });
+
+  it('should create a documentation part when description is provided', () => {
+    const { stack } = setupInternalTestingRestApi({
+      description: 'My API description',
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayDocumentationPart, {
+      location: {
+        type: 'API',
+      },
+      properties: JSON.stringify({
+        info: {
+          description: 'My API description',
+        },
+      }),
+    });
   });
 });

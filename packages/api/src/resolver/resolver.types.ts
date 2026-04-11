@@ -269,14 +269,61 @@ export type ApiDefaultResponse = Partial<
 >;
 
 export interface BaseApiProps {
+  /**
+   * Unique name identifier for the API Gateway REST API.
+   *
+   * Used as the resource name within the AWS stack.
+   */
   name: ApiRestNames;
+  /**
+   * CORS configuration for the REST API.
+   *
+   * Defines cross-origin resource sharing rules including allowed
+   * origins, methods, headers, and credentials policies.
+   */
   cors?: CorsOptions;
+  /**
+   * Stage configurations for the API Gateway deployment.
+   *
+   * Each stage represents a deployed snapshot of the API (e.g., `api`, `staging`).
+   * If not provided, a default stage named `api` is created.
+   */
   stages?: Stage[];
+  /**
+   * Authorization configuration for the REST API.
+   *
+   * Defines the authorizer classes and the default authorizer
+   * applied to all endpoints unless overridden at the method level.
+   */
   auth?: {
     authorizers: ClassResource[];
     defaultAuthorizerName: ApiAuthorizerNames;
   };
+  /**
+   * Custom gateway responses for specific API Gateway error types.
+   *
+   * Allows overriding the default response body for error scenarios
+   * such as unauthorized access, throttling, or integration failures.
+   *
+   * @example
+   * {
+   *   defaultResponses: {
+   *     unauthorized: { message: 'Unauthorized' },
+   *     default4xx: { message: 'Client Error' },
+   *   }
+   * }
+   */
   defaultResponses?: ApiDefaultResponse;
+
+  /**
+   * Description of the API Gateway REST API.
+   *
+   * Provides a human-readable summary of the API's purpose,
+   * displayed in the AWS console and included in the Terraform resource.
+   *
+   * @example 'REST API for managing user resources'
+   */
+  description?: string;
 }
 
 export interface RestApiProps extends BaseApiProps {
