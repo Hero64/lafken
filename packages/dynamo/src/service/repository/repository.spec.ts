@@ -432,6 +432,83 @@ describe('Dynamo Service', () => {
         })
       ).toHaveLength(1);
     });
+
+    it('Should include ReturnValues when returnValue is provided', async () => {
+      const name = 'example1';
+      await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name,
+        },
+        replaceValues: {
+          age: 30,
+        },
+        returnValue: 'all_new',
+      });
+
+      expect(
+        dynamoClient.commandCalls(UpdateItemCommand, {
+          TableName: 'users',
+          Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+          UpdateExpression: 'SET  #age = :age_1_0',
+          ExpressionAttributeNames: { '#age': 'age' },
+          ExpressionAttributeValues: { ':age_1_0': { N: '30' } },
+          ReturnValues: 'ALL_NEW',
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should return the updated item when returnValue is all_new', async () => {
+      dynamoClient.on(UpdateItemCommand).resolves({
+        Attributes: {
+          email: { S: 'example1@example.com' },
+          name: { S: 'example1' },
+          age: { N: '30' },
+          lastName: { S: 'Doe' },
+        },
+      });
+
+      const result = await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name: 'example1',
+        },
+        replaceValues: {
+          age: 30,
+        },
+        returnValue: 'all_new',
+      });
+
+      expect(result).toEqual({
+        email: 'example1@example.com',
+        name: 'example1',
+        age: 30,
+        lastName: 'Doe',
+      });
+    });
+
+    it('Should return undefined when returnValue is none', async () => {
+      dynamoClient.on(UpdateItemCommand).resolves({
+        Attributes: {
+          email: { S: 'example1@example.com' },
+          name: { S: 'example1' },
+          age: { N: '30' },
+        },
+      });
+
+      const result = await userRepository.update({
+        keyCondition: {
+          email: EMAIL,
+          name: 'example1',
+        },
+        replaceValues: {
+          age: 30,
+        },
+        returnValue: 'none',
+      });
+
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('REMOVE', () => {

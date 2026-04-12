@@ -1,5 +1,9 @@
-import { UpdateItemCommand, type UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import {
+  type ReturnValue,
+  UpdateItemCommand,
+  type UpdateItemCommandInput,
+} from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { ClassResource } from '@lafken/common';
 
 import { QueryBuilderBase } from '../base/base';
@@ -19,15 +23,25 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
     return this.command;
   }
 
-  public then<T>(resolve: (value: boolean) => T, reject: (reason: any) => T): Promise<T> {
+  public then<T>(
+    resolve: (value: Partial<Item<E>> | undefined) => Item<E>,
+    reject: (reason: any) => T
+  ): Promise<T> {
     return this.exec().then(resolve, reject);
   }
 
   private async exec() {
     const command = new UpdateItemCommand(this.command);
 
-    await this.queryOptions.client.send(command);
-    return true;
+    const response = await this.queryOptions.client.send(command);
+    if (
+      !response?.Attributes ||
+      ['none', undefined].includes(this.queryOptions.inputProps.returnValue)
+    ) {
+      return undefined;
+    }
+
+    return unmarshall(response?.Attributes) as Item<E>;
   }
 
   protected prepare() {
@@ -64,6 +78,9 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
         `${setExpression ? `SET ${setExpression}` : ''} ${removeExpression ? `REMOVE ${removeExpression}` : ''}`.trim(),
       ...this.getAttributesAndNames(),
       ConditionExpression: condition ? this.getFilterExpression(condition) : undefined,
+      ReturnValues: this.queryOptions.inputProps.returnValue
+        ? (this.queryOptions.inputProps.returnValue.toUpperCase() as ReturnValue)
+        : undefined,
     };
   }
 

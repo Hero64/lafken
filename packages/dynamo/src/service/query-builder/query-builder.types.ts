@@ -311,6 +311,20 @@ export interface UpdateProps<E extends Function> extends UpsertProps<E> {
    * }
    */
   removeValues?: ObjectToBoolean<Item<E>>;
+  /**
+   * Specifies what DynamoDB should return after the update operation completes.
+   *
+   * - `'all_new'` — Returns all attributes of the item as they appear after the update.
+   * - `'updated_new'` — Returns only the attributes that were updated, with their new values.
+   * - `'all_old'` — Returns all attributes of the item as they appeared before the update.
+   * - `'none'` — Does not return any attribute values.
+   *
+   * @example
+   * {
+   *   returnValue: 'all_new'
+   * }
+   */
+  returnValue?: 'all_new' | 'updated_new' | 'all_old' | 'none';
 }
 
 export interface UpsertProps<E extends Function> {
