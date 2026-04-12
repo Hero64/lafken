@@ -1,10 +1,8 @@
-import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
-import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
-import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
-import type { CorsOptions, RestApi } from '../../../resolver.types';
+import type { RestApi } from '../../../resolver.types';
+import { CorsHelper } from './helpers/cors/cors';
 import { IntegrationHelper } from './helpers/integration/integration';
 import { ParamHelper } from './helpers/param/param';
 import { ProxyHelper } from './helpers/proxy/proxy';
@@ -21,8 +19,13 @@ import type { AddDocumentationProps, CreateMethodProps } from './method.types';
 
 export class MethodFactory {
   private methodResources: TerraformResource[] = [];
+  private corsHelper = new CorsHelper();
 
   constructor(private scope: RestApi) {}
+
+  get resources() {
+    return this.methodResources;
+  }
 
   public async create(module: Construct, props: CreateMethodProps) {
     const { handler, resourceMetadata, classResource } = props;
@@ -47,28 +50,7 @@ export class MethodFactory {
       authorizer: handler.auth ?? resourceMetadata.auth,
     });
 
-    let modelName: string | undefined;
-
-    if (paramHelper.paramsBySource.body) {
-      const payloadName = `${paramHelper.params.payload.id}Body`;
-
-      const model = this.scope.modelFactory.getModel({
-        field: {
-          destinationName: 'body',
-          name: 'body',
-          type: 'Object',
-          payload: {
-            ...paramHelper.params.payload,
-            id: payloadName,
-            name: payloadName,
-          },
-          properties: paramHelper.paramsBySource.body,
-        },
-      });
-
-      modelName = model.name;
-    }
-
+    const modelName = this.resolveModelName(paramHelper);
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
 
     const method = new ApiGatewayMethod(this.scope, `${methodName}-method`, {
@@ -85,7 +67,15 @@ export class MethodFactory {
         : undefined,
     });
 
-    this.corsMethod(methodName, resourceId, props);
+    if (props.cors) {
+      const corsResources = this.corsHelper.createOptionsMethod(
+        this.scope,
+        methodName,
+        resourceId,
+        props.cors
+      );
+      this.methodResources.push(...corsResources);
+    }
 
     const integration = await this.integrateMethod({
       ...props,
@@ -99,155 +89,40 @@ export class MethodFactory {
       apiGatewayMethod: method,
     });
 
+    this.methodResources.push(method, integration);
+
     const docParams = {
       ...props,
       methodName,
       paramHelper,
       fullPath: `/${fullPath}`,
     };
-
-    this.methodResources.push(method, integration);
     this.addMethodDocumentation(docParams);
     this.addParamsDocumentation(docParams);
   }
 
-  get resources() {
-    return this.methodResources;
-  }
-
-  private corsMethod(methodName: string, resourceId: string, props: CreateMethodProps) {
-    if (!props.cors) {
-      return;
+  private resolveModelName(paramHelper: ParamHelper): string | undefined {
+    if (!paramHelper.paramsBySource.body) {
+      return undefined;
     }
 
-    const { cors } = props;
-    const corsHeaders = this.buildCorsHeaders(cors);
+    const payloadName = `${paramHelper.params.payload.id}Body`;
 
-    const corsMethod = new ApiGatewayMethod(this.scope, `${methodName}-options-method`, {
-      resourceId,
-      restApiId: this.scope.id,
-      httpMethod: 'OPTIONS',
-      authorization: 'NONE',
+    const model = this.scope.modelFactory.getModel({
+      field: {
+        destinationName: 'body',
+        name: 'body',
+        type: 'Object',
+        payload: {
+          ...paramHelper.params.payload,
+          id: payloadName,
+          name: payloadName,
+        },
+        properties: paramHelper.paramsBySource.body,
+      },
     });
 
-    const corsIntegration = new ApiGatewayIntegration(
-      this.scope,
-      `${methodName}-options-integration`,
-      {
-        httpMethod: corsMethod.httpMethod,
-        resourceId: corsMethod.resourceId,
-        restApiId: this.scope.id,
-        type: 'MOCK',
-        requestTemplates: {
-          'application/json': '{"statusCode": 200}',
-        },
-      }
-    );
-
-    const corsResponse = new ApiGatewayMethodResponse(
-      this.scope,
-      `${methodName}-options-method-response`,
-      {
-        httpMethod: corsMethod.httpMethod,
-        resourceId: corsMethod.resourceId,
-        restApiId: this.scope.id,
-        statusCode: '200',
-        responseParameters: this.buildCorsMethodResponseParameters(corsHeaders),
-      }
-    );
-
-    const corsIntegrationResponse = new ApiGatewayIntegrationResponse(
-      this.scope,
-      `${methodName}-options-integration-response`,
-      {
-        httpMethod: corsMethod.httpMethod,
-        resourceId: corsMethod.resourceId,
-        restApiId: this.scope.id,
-        statusCode: '200',
-        responseParameters: corsHeaders,
-        responseTemplates: {
-          'application/json': '',
-        },
-      }
-    );
-
-    this.methodResources.push(
-      corsMethod,
-      corsIntegration,
-      corsResponse,
-      corsIntegrationResponse
-    );
-  }
-
-  private buildCorsHeaders(cors: NonNullable<CorsOptions>) {
-    const headers: Record<string, string> = {};
-
-    if (cors.allowOrigins !== undefined) {
-      if (typeof cors.allowOrigins === 'boolean') {
-        headers['method.response.header.Access-Control-Allow-Origin'] = cors.allowOrigins
-          ? "'*'"
-          : "'null'";
-      } else if (typeof cors.allowOrigins === 'string') {
-        headers['method.response.header.Access-Control-Allow-Origin'] =
-          `'${cors.allowOrigins}'`;
-      } else if (Array.isArray(cors.allowOrigins)) {
-        headers['method.response.header.Access-Control-Allow-Origin'] =
-          `'${cors.allowOrigins[0] || '*'}'`;
-      } else if (cors.allowOrigins instanceof RegExp) {
-        headers['method.response.header.Access-Control-Allow-Origin'] = "'*'";
-      }
-    } else {
-      headers['method.response.header.Access-Control-Allow-Origin'] = "'*'";
-    }
-
-    const allowedMethods = cors.allowMethods || [
-      'GET',
-      'HEAD',
-      'PUT',
-      'PATCH',
-      'POST',
-      'DELETE',
-    ];
-    headers['method.response.header.Access-Control-Allow-Methods'] =
-      `'${allowedMethods.join(',')}'`;
-
-    if (cors.allowHeaders !== undefined) {
-      if (typeof cors.allowHeaders === 'boolean') {
-        headers['method.response.header.Access-Control-Allow-Headers'] = cors.allowHeaders
-          ? "'*'"
-          : "''";
-      } else {
-        headers['method.response.header.Access-Control-Allow-Headers'] =
-          `'${cors.allowHeaders.join(',')}'`;
-      }
-    } else {
-      headers['method.response.header.Access-Control-Allow-Headers'] =
-        "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'";
-    }
-
-    if (cors.exposeHeaders && cors.exposeHeaders.length > 0) {
-      headers['method.response.header.Access-Control-Expose-Headers'] =
-        `'${cors.exposeHeaders.join(',')}'`;
-    }
-
-    if (cors.allowCredentials) {
-      headers['method.response.header.Access-Control-Allow-Credentials'] = "'true'";
-    }
-
-    const maxAge = cors.maxAge ?? 86400;
-    headers['method.response.header.Access-Control-Max-Age'] = `'${maxAge}'`;
-
-    return headers;
-  }
-
-  private buildCorsMethodResponseParameters(corsHeaders: Record<string, string>) {
-    const methodParameters: Record<string, boolean> = {};
-
-    for (const headerKey of Object.keys(corsHeaders)) {
-      methodParameters[headerKey] = false;
-    }
-
-    return methodParameters;
+    return model.name;
   }
 
   private async integrateMethod(props: IntegrationProps) {
