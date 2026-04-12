@@ -6,10 +6,11 @@
   "main": "index.js",
   "scripts": {
     "build-app": "tsc",
-    "cdktn:deploy": "pnpm build-app  && cdktn deploy",
+    "cdktn:deploy": "pnpm build-app && cdktn deploy",
     "cdktn:destroy": "pnpm build-app && cdktn destroy",
     "cdktn:synth": "pnpm build-app && cdktn synth",
-    "clean": "rm -rf cdktf.out dist .out"
+    "clean": "rm -rf cdktf.out dist .out",
+    "test": "vitest"
   },
   "dependencies": {
     "@cdktn/provider-aws": "^23.5.0",
@@ -29,6 +30,8 @@
   },
   "devDependencies": {
     "@aws-sdk/client-sqs": "^3.1020.0",
-    "cdktn-cli": "^0.22.1"
+    "cdktn-cli": "^0.22.1",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.1.2"
   }
 }

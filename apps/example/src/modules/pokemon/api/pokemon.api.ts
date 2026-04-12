@@ -112,13 +112,13 @@ export class PokeApi {
   }
 
   @Get({
-    path: '/what-is-this',
+    path: '/what-is-this/{name}',
     auth: {
       authorizerName: 'pokemon-custom-auth',
     },
   })
-  async whatIsThisPokemon() {
-    console.log("It's pikachu!!!");
+  async whatIsThisPokemon(@Event(BasePokemonPayload) e: BasePokemonPayload) {
+    return `It's ${e.name}!!!`;
   }
 
   @Get({
