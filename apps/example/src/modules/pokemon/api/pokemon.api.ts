@@ -84,7 +84,9 @@ export class PokeApi {
     path: '/{name}',
     response: Boolean,
   })
-  async updatePokemon(@Event(UpdatePokemonPayload) e: UpdatePokemonPayload) {
+  async updatePokemon(
+    @Event(UpdatePokemonPayload) e: UpdatePokemonPayload
+  ): Promise<boolean> {
     const updated = await pokemonRepository.update({
       keyCondition: {
         name: e.name,
@@ -94,9 +96,10 @@ export class PokeApi {
         types: e.types,
         order: e.order,
       },
+      returnValue: 'all_new',
     });
 
-    return updated;
+    return !!updated;
   }
 
   @Delete({
