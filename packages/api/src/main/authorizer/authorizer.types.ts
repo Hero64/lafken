@@ -222,6 +222,14 @@ export interface AuthorizerResponse {
    * while `false` denies access.
    */
   allow: boolean;
+  /**
+   * Additional context key-value pairs to include in the authorization response.
+   *
+   * These values are passed to the API Gateway integration and can be accessed
+   * in the downstream Lambda via `$context.authorizer.<key>` in mapping templates
+   * or `event.requestContext.authorizer.<key>` in the handler.
+   */
+  context?: Record<string, string>;
 }
 
 export interface CustomAuthorizerHandler {

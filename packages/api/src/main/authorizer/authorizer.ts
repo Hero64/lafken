@@ -134,7 +134,7 @@ export const AuthorizerHandler =
 
     const { value: originalValue } = descriptor;
 
-    descriptor.value = async (event: APIGatewayRequestAuthorizerEvent) => {
+    descriptor.value = async function (event: APIGatewayRequestAuthorizerEvent) {
       let accessRules: PermissionContent = {};
       try {
         accessRules = (JSON.parse(
@@ -153,6 +153,7 @@ export const AuthorizerHandler =
 
       return {
         principalId: response.principalId,
+        context: response.context,
         policyDocument: {
           Version: '2012-10-17',
           Statement: [
