@@ -349,7 +349,9 @@ export interface ApiProps extends ResourceProps {
   tags?: string[];
 }
 
-export interface ApiResourceMetadata extends Required<ApiProps>, ResourceMetadata {}
+export interface ApiResourceMetadata
+  extends Required<Omit<ApiProps, 'minify'>>,
+    ResourceMetadata {}
 
 export interface ApiLambdaMetadata extends LambdaMetadata {
   path: string;
