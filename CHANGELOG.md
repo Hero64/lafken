@@ -1,3 +1,24 @@
+## 0.11.0
+
+### Minor Changes
+
+- Minify global properties
+- Add API description documentation
+- Add authorization documentation
+- Optimize auth module to create only required resources
+- Rename Cognito authorization in API to "Cognito"
+- Refactor Method class
+- Add support for returning properties in DynamoDB update operations
+- Add Lambda testing utilities
+
+## 0.10.6
+
+### Patch Changes
+
+- this scoped in lambda function
+  - @lafken/common@0.10.6
+  - @lafken/resolver@0.10.6
+
 ## 0.10.5
 
 ### Patch Changes
