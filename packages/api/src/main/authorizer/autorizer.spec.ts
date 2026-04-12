@@ -90,6 +90,7 @@ describe('Authorizers', () => {
 
       expect(response).toStrictEqual({
         principalId: 'test@test.com',
+        context: undefined,
         policyDocument: {
           Version: '2012-10-17',
           Statement: [
