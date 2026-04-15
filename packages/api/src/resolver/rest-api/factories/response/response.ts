@@ -32,13 +32,13 @@ export class ResponseFactory {
           restApiId: this.scope.id,
           statusCode: response.statusCode,
           responseParameters: response.methodParameters,
-          dependsOn: [method],
+          dependsOn: [method, integration],
           responseModels: response.field
             ? {
                 'application/json': this.scope.modelFactory.getModel({
                   field: response.field,
                   defaultModelName: `${responseName}Model`,
-                  dependsOn: [method],
+                  dependsOn: [method, integration],
                 }).name,
               }
             : undefined,

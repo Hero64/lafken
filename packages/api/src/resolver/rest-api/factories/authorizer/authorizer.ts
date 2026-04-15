@@ -223,6 +223,7 @@ export class AuthorizerFactory {
         ? `method.request.header.${metadata.header}`
         : undefined,
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
+      dependsOn: [lambdaHandler],
     });
 
     this.createDoc(metadata.name, metadata.description);
@@ -250,6 +251,7 @@ export class AuthorizerFactory {
         ? `method.request.header.${metadata.header}`
         : undefined,
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
+      // TODO: add depends on userpool
     });
 
     this.authResources.push(authorizer);
@@ -285,12 +287,14 @@ export class AuthorizerFactory {
       for (const key of metadata.defaultKeys) {
         const authKey = new ApiGatewayApiKey(this.scope, `${key}-key`, {
           name: key,
+          dependsOn: [this.scope],
         });
 
         new ApiGatewayUsagePlanKey(this.scope, `${key}-usage-plan-key`, {
           keyId: authKey.id,
           keyType: 'API_KEY',
           usagePlanId: usagePlan.id,
+          dependsOn: [authKey],
         });
       }
     }

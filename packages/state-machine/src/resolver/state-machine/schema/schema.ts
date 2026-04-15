@@ -8,6 +8,7 @@ import {
   LambdaReflectKeys,
 } from '@lafken/common';
 import { lambdaAssets, resolveCallbackResource } from '@lafken/resolver';
+import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
 import {
   type IntegrationStateProps,
@@ -59,6 +60,7 @@ export class Schema {
   private lambdaStates: LambdaStates;
   private unresolvedDependency: boolean = false;
   private bucketPermissions: BucketPermission = {};
+  private lambdaResources: TerraformResource[] = [];
 
   constructor(
     private scope: Construct,
@@ -71,13 +73,17 @@ export class Schema {
     this.getMetadata(props.initializeAssets ?? false);
   }
 
-  public getDefinition(): DefinitionSchema {
+  get definition(): DefinitionSchema {
     const startName = this.getNextState(this.resourceMetadata.startAt);
 
     return {
       StartAt: startName as string,
       States: this.states,
     };
+  }
+
+  get resources() {
+    return this.lambdaResources;
   }
 
   public async resolveArguments(definition: DefinitionSchema) {
@@ -208,7 +214,8 @@ export class Schema {
             stateNames: this.stateNames,
             minify: this.props.minify,
           });
-          branchStates.push(branchSchema.getDefinition());
+          this.resources.push(...this.resources);
+          branchStates.push(branchSchema.definition);
           this.mergeBucketPermissions(branchSchema.buckets);
           this.setUnresolvedDependency(branchSchema.unresolvedDependency);
         }
@@ -232,8 +239,9 @@ export class Schema {
           stateNames: this.stateNames,
           minify: this.props.minify,
         });
+        this.resources.push(...this.resources);
         this.mergeBucketPermissions(mapSchema.buckets);
-        const mapState = mapSchema.getDefinition();
+        const mapState = mapSchema.definition;
         this.setUnresolvedDependency(mapSchema.hasUnresolvedDependency);
 
         const itemProcessor: Partial<ItemProcessor> = {
@@ -384,6 +392,9 @@ export class Schema {
         suffix: 'states',
       },
     ]);
+
+    this.resources.push(lambdaHandler);
+
     return {
       Resource: 'arn:aws:states:::lambda:invoke',
       Arguments: {

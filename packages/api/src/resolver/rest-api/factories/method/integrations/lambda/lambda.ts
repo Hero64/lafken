@@ -42,7 +42,7 @@ export class LambdaIntegration implements Integration {
         type: 'AWS',
         uri: lambdaHandler.invokeArn,
         integrationHttpMethod: 'POST',
-        dependsOn: [apiGatewayMethod],
+        dependsOn: [apiGatewayMethod, lambdaHandler],
         requestTemplates: paramHelper.params
           ? {
               'application/json': templateHelper.generateTemplate({
