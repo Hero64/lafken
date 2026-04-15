@@ -51,6 +51,7 @@ export class Cron extends lafkenResource.make(CloudwatchEventRule) {
         maximumRetryAttempts: handler.retryAttempts,
         maximumEventAgeInSeconds: handler.maxEventAge,
       },
+      dependsOn: [lambdaHandler],
     });
   }
 

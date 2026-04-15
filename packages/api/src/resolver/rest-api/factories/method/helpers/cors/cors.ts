@@ -19,6 +19,7 @@ export class CorsHelper {
       restApiId: scope.id,
       httpMethod: 'OPTIONS',
       authorization: 'NONE',
+      dependsOn: [scope],
     });
 
     const corsIntegration = new ApiGatewayIntegration(
@@ -32,6 +33,7 @@ export class CorsHelper {
         requestTemplates: {
           'application/json': '{"statusCode": 200}',
         },
+        dependsOn: [corsMethod],
       }
     );
 
@@ -44,6 +46,7 @@ export class CorsHelper {
         restApiId: scope.id,
         statusCode: '200',
         responseParameters: this.buildMethodResponseParameters(corsHeaders),
+        dependsOn: [corsMethod],
       }
     );
 
@@ -59,6 +62,7 @@ export class CorsHelper {
         responseTemplates: {
           'application/json': '',
         },
+        dependsOn: [corsMethod],
       }
     );
 

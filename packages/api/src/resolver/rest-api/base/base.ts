@@ -126,6 +126,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
             },
           ],
         }),
+        dependsOn: [restApi],
       });
 
       return [policy];
@@ -138,6 +139,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       const accessLogGroup = new CloudwatchLogGroup(restApi, `${stageName}-access-logs`, {
         name: props.logGroupName,
         retentionInDays: props.retentionDays,
+        dependsOn: [restApi],
       });
 
       return accessLogGroup;
@@ -228,6 +230,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           responseTemplates: {
             'application/json': JSON.stringify(response),
           },
+          dependsOn: [restApi],
         });
       }
     }

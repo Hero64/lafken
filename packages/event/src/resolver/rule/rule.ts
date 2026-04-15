@@ -51,6 +51,7 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
         maximumEventAgeInSeconds: handler.maxEventAge,
       },
       inputPath: '$.detail',
+      dependsOn: [lambdaHandler],
     });
   }
 
