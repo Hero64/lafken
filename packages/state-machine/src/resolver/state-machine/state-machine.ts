@@ -2,6 +2,7 @@ import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
 import type { S3Permissions, Services } from '@lafken/common';
 import { type AppModule, lafkenResource, ResourceOutput, Role } from '@lafken/resolver';
+import { dependable, type TerraformResource } from 'cdktn';
 import type {
   StateMachineOutputAttributes,
   StateMachineResourceMetadata,
@@ -38,16 +39,16 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     const { classResource } = this.props;
 
     const schema = new Schema(this, classResource, { minify: this.props.minify });
-    const definition = await schema.getDefinition();
+    const definition = await schema.definition;
     this.overrideRole(schema);
 
     if (!schema.hasUnresolvedDependency) {
       this.overrideDefinition(definition);
-    }
-
-    if (schema.hasUnresolvedDependency) {
+      this.addDependency(...schema.resources);
+    } else {
       this.isDependent(async () => {
         this.overrideDefinition(await schema.resolveArguments(definition));
+        this.addDependency(...schema.resources);
       });
     }
   }
@@ -101,6 +102,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
       },
       principal: 'states.amazonaws.com',
     });
+    this.addDependency(role, role.policy);
 
     this.addOverride('role_arn', role.arn);
   }
@@ -120,5 +122,13 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
       level: resourceMetadata.loggingConfiguration.level?.toUpperCase(),
       logDestination: `${logGroup.arn}:*`,
     });
+    this.addDependency(logGroup);
+  }
+
+  private addDependency(...resource: TerraformResource[]) {
+    this.dependsOn = [
+      ...(this.dependsOn || []),
+      ...resource.map((res) => dependable(res)),
+    ];
   }
 }

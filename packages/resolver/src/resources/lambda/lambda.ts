@@ -54,7 +54,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
     ).slice(0, 63 - suffix.length)}${suffix}`.toLowerCase();
 
-    const roleArn = LambdaHandler.getRoleArn({
+    const role = LambdaHandler.getRoleArn({
       name: handlerName,
       scope,
       appContext,
@@ -64,7 +64,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
 
     super(scope, id, {
       functionName: handlerName,
-      role: roleArn,
+      role: role.arn,
       filename: 'unresolved',
       handler: `index.${props.name}_${props.originalName}`,
       runtime: `nodejs${runtime}.x`,
@@ -83,6 +83,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       environment: {
         variables: hasValues ? environmentValues || {} : {},
       },
+      dependsOn: [role, role.policy],
     });
 
     if (environments && !environmentValues) {
@@ -122,6 +123,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       principal: props.principal,
       sourceArn: props.sourceArn,
       sourceAccount: props.sourceAccount,
+      dependsOn: [this],
     });
   }
 
@@ -143,6 +145,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
         functionName,
         qualifier: alias.name,
         provisionedConcurrentExecutions: aliasConfig.provisionedExecutions,
+        dependsOn: [alias],
       });
     }
   }
@@ -191,7 +194,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
         `${moduleContext?.contextCreator}-module-role`
       );
 
-      return moduleRole?.arn || appRole.arn;
+      return moduleRole || appRole;
     }
 
     const role = new Role(scope, 'lambda-role', {
@@ -199,6 +202,6 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       services,
     });
 
-    return role.arn;
+    return role;
   }
 }

@@ -118,6 +118,8 @@ export const mapServicesName: Partial<Record<ServicesName, string>> = {
 const RolePolicy = lafkenResource.make(IamRolePolicy);
 
 export class Role extends lafkenResource.make(IamRole) {
+  public policy: InstanceType<typeof RolePolicy>;
+
   constructor(
     scope: Construct,
     id: string,
@@ -146,20 +148,21 @@ export class Role extends lafkenResource.make(IamRole) {
 
     const statement = this.createPolicyStatement(this.props.services);
 
-    const rolePolicy = new RolePolicy(this, policyName, {
+    this.policy = new RolePolicy(this, policyName, {
       name: policyName,
       role: this.id,
       policy: statement ? Fn.jsonencode(statement) : '',
+      dependsOn: [this],
     });
 
     if (!statement) {
-      rolePolicy.isDependent(() => {
+      this.policy.isDependent(() => {
         const statement = this.createPolicyStatement(this.props.services);
         if (!statement) {
           throw new Error('The role policy could not resolve one of its dependencies');
         }
 
-        rolePolicy.addOverride('policy', Fn.jsonencode(statement));
+        this.policy.addOverride('policy', Fn.jsonencode(statement));
       });
     }
   }
