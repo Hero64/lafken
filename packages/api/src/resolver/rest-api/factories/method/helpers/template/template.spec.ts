@@ -301,7 +301,9 @@ describe('TemplateHelper', () => {
         true
       );
 
-      expect(result).toBe("#if($input.path('$.test')) TEMPLATE_CONTENT #end");
+      expect(result).toBe(
+        "#if($input.path('$.test') && $input.path('$.test') != \"\") TEMPLATE_CONTENT #end "
+      );
     });
 
     it('should handle multiple arguments with AND conditions', () => {
@@ -321,7 +323,7 @@ describe('TemplateHelper', () => {
       );
 
       expect(result).toBe(
-        "#if($input.path('$.arg1') && $input.path('$.arg2') && $input.path('$.arg3')) TEMPLATE_CONTENT #end"
+        "#if($input.path('$.arg1') && $input.path('$.arg1') != \"\" && $input.path('$.arg2') && $input.path('$.arg2') != \"\" && $input.path('$.arg3') && $input.path('$.arg3') != \"\") TEMPLATE_CONTENT #end "
       );
     });
 
@@ -342,7 +344,7 @@ describe('TemplateHelper', () => {
       );
 
       expect(result).toBe(
-        "#if($input.path('$.items') && $input.path('$.items').size() > 0) TEMPLATE_CONTENT #end"
+        "#if($input.path('$.items') && $input.path('$.items') != \"\" && $input.path('$.items').size() > 0) TEMPLATE_CONTENT #end "
       );
     });
 
@@ -362,7 +364,7 @@ describe('TemplateHelper', () => {
         false
       );
 
-      expect(result).toBe('#if(test) TEMPLATE_CONTENT #end');
+      expect(result).toBe('#if(test && test != "") TEMPLATE_CONTENT #end ');
     });
 
     it('should handle different source types in validation', () => {
@@ -381,7 +383,9 @@ describe('TemplateHelper', () => {
         true
       );
 
-      expect(result).toBe("#if($input.params().path.get('test')) TEMPLATE_CONTENT #end");
+      expect(result).toBe(
+        "#if($input.params().path.get('test') && $input.params().path.get('test') != \"\") TEMPLATE_CONTENT #end "
+      );
     });
 
     it('should default to body source when no source specified', () => {
@@ -399,7 +403,9 @@ describe('TemplateHelper', () => {
         true
       );
 
-      expect(result).toBe("#if($input.path('$.test')) TEMPLATE_CONTENT #end");
+      expect(result).toBe(
+        "#if($input.path('$.test') && $input.path('$.test') != \"\") TEMPLATE_CONTENT #end "
+      );
     });
   });
 });
