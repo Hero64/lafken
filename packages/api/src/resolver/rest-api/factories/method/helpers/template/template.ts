@@ -129,14 +129,14 @@ export class TemplateHelper {
         const expression = i < totalItems ? ' && ' : '';
         const value = sourceType.replace(TEMPLATE_KEY_REPLACE, argument);
 
-        validationTemplate += `${value}${expression}`;
+        validationTemplate += `${value} && ${value} != ""${expression}`;
       }
 
       if (field.type === 'Array') {
         validationTemplate += ` && ${sourceType.replace(TEMPLATE_KEY_REPLACE, lastValue)}.size() > 0`;
       }
 
-      validationTemplate = `#if(${validationTemplate}) ${field.directTemplateValue || template} #end`;
+      validationTemplate = `#if(${validationTemplate}) ${field.directTemplateValue || template} #end `;
       return validationTemplate;
     }
 
