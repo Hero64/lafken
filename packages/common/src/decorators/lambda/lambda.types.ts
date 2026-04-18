@@ -188,6 +188,7 @@ export enum LambdaReflectKeys {
   handlers = 'lambda:handlers',
   arguments = 'lambda:arguments',
   event_param = 'lambda:event_params',
+  event_class = 'lambda:event_class',
 }
 
 export enum LambdaArgumentTypes {
@@ -214,6 +215,7 @@ export type LambdaArgumentsType = Record<
 export interface CreateLambdaDecoratorProps<T, M> {
   getLambdaMetadata: (params: T, methodName: string) => M;
   descriptorValue?: (descriptor: PropertyDescriptor) => any;
+  validateEvent?: (target: any, methodName: string, event: any) => void;
   argumentParser?: Partial<LambdaArgumentsType | (string & {})>;
 }
 

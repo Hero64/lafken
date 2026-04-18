@@ -31,6 +31,7 @@ export const createLambdaDecorator =
   <T, M>({
     getLambdaMetadata,
     descriptorValue,
+    validateEvent,
     argumentParser,
   }: CreateLambdaDecoratorProps<T, M>) =>
   (props?: T) =>
@@ -63,6 +64,10 @@ export const createLambdaDecorator =
     };
 
     descriptor.value = async function (event: any, context: any) {
+      if (!isBuildEnvironment() && event && validateEvent) {
+        validateEvent(target, methodName, event);
+      }
+
       const methodArguments = (lambdaArguments?.[methodName] || []).map((argumentType) =>
         mapArgumentMethod[argumentType]({ event, context, methodName, target })
       );
@@ -96,6 +101,14 @@ export const createEventDecorator =
     reflectArgumentMethod(target, methodName, LambdaArgumentTypes.event);
 
     if (!eventField || (!enableInLambdaInvocation && !isBuildEnvironment())) {
+      if (eventField) {
+        reflectEventMetadata(
+          target,
+          methodName,
+          LambdaReflectKeys.event_class,
+          eventField
+        );
+      }
       return;
     }
 

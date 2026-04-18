@@ -52,6 +52,7 @@ export const BodyParam =
           source: 'body',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
 
@@ -90,6 +91,7 @@ export const QueryParam =
           source: 'query',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
 
@@ -127,6 +129,7 @@ export const PathParam =
           source: 'path',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
 
@@ -165,6 +168,7 @@ export const HeaderParam =
           source: 'header',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
 
@@ -205,6 +209,7 @@ export const ContextParam =
           source: 'context',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
 
@@ -247,5 +252,6 @@ export const VelocityParam =
           source: 'velocity',
         };
       },
+      enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
