@@ -76,6 +76,19 @@ export interface DocModelProperties {
   description?: string;
 }
 
+export interface DocModelFieldProperties {
+  example?: unknown;
+  deprecated?: boolean;
+  nullable?: boolean;
+}
+
+export interface DocModelSchemaProperties extends DocModelProperties {
+  example?: unknown;
+  deprecated?: boolean;
+  nullable?: boolean;
+  properties?: Record<string, DocModelFieldProperties>;
+}
+
 export interface DocAuthorizerProperties extends Partial<Record<`x-${string}`, string>> {
   description?: string;
 }
@@ -87,6 +100,7 @@ export type DocProperties =
   | DocBodyProperties
   | DocResponseProperties
   | DocModelProperties
+  | DocModelSchemaProperties
   | DocAuthorizerProperties;
 
 export interface CreateDocProps {
