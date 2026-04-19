@@ -118,14 +118,14 @@ describe('Dynamo put integration', () => {
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '4\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Bad request"}',
+        'application/json': '{"message": "Bad request"}',
       },
       status_code: '400',
     });
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '5\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Internal server error"}',
+        'application/json': '{"message": "Internal server error"}',
       },
       status_code: '500',
     });
@@ -176,8 +176,7 @@ describe('Dynamo put integration', () => {
       integration_http_method: 'POST',
       type: 'AWS',
       request_templates: {
-        'application/json':
-          '{"TableName": "test","Item": { #set($comma = "") $comma"id": { "S": "$input.params().path.get(\'id\')" } #set($comma = ",")$comma"age": { "N": "$input.params(\'age\')" } #set($comma = ",") }}',
+        'application/json': `{"TableName": "test","Item": { #set($comma = "") $comma"id": { "S": "$input.params().path.get('id')" } #set($comma = ",")$comma"age": { "N": "#if($input.params('age').matches("^[0-9]+$")) $input.params('age') #else "$input.params('age')" #end" } #set($comma = ",") }}`,
       },
     });
   });

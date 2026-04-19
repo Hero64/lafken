@@ -114,14 +114,14 @@ describe('Dynamo query integration', () => {
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '4\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Bad request"}',
+        'application/json': '{"message": "Bad request"}',
       },
       status_code: '400',
     });
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '5\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Internal server error"}',
+        'application/json': '{"message": "Internal server error"}',
       },
       status_code: '500',
     });
@@ -172,8 +172,7 @@ describe('Dynamo query integration', () => {
       integration_http_method: 'POST',
       type: 'AWS',
       request_templates: {
-        'application/json':
-          '{"TableName": "test","KeyConditionExpression": "#name = :partitionKey and #age = :sortKey","ExpressionAttributeValues": { #set($comma = "") $comma":partitionKey": { "S": "$input.params().path.get(\'id\')" } #set($comma = ",")$comma":sortKey": { "N": "$input.params(\'age\')" } #set($comma = ",") },"ExpressionAttributeNames": { #set($comma = "") $comma"#name": "name" #set($comma = ",")$comma"#age": "age" #set($comma = ",") }}',
+        'application/json': `{"TableName": "test","KeyConditionExpression": "#name = :partitionKey and #age = :sortKey","ExpressionAttributeValues": { #set($comma = "") $comma":partitionKey": { "S": "$input.params().path.get('id')" } #set($comma = ",")$comma":sortKey": { "N": "#if($input.params('age').matches("^[0-9]+$")) $input.params('age') #else "$input.params('age')" #end" } #set($comma = ",") },"ExpressionAttributeNames": { #set($comma = "") $comma"#name": "name" #set($comma = ",")$comma"#age": "age" #set($comma = ",") }}`,
       },
     });
   });

@@ -19,8 +19,6 @@ export interface JsonSchema {
   type?: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
   description?: string;
   default?: unknown;
-  example?: unknown;
-  nullable?: boolean;
   enum?: unknown[];
   format?: string;
   minLength?: number;
@@ -44,16 +42,24 @@ export interface JsonSchema {
   not?: JsonSchema;
   $ref?: string;
   title?: string;
-  readOnly?: boolean;
-  writeOnly?: boolean;
-  deprecated?: boolean;
+}
 
-  [extension: `x-${string}`]: unknown;
+export interface FullJsonSchema extends JsonSchema {
+  example?: unknown;
+  nullable?: boolean;
+  deprecated?: boolean;
+  items?: FullJsonSchema | FullJsonSchema[];
+  properties?: Record<string, FullJsonSchema>;
+  allOf?: FullJsonSchema[];
+  oneOf?: FullJsonSchema[];
+  anyOf?: FullJsonSchema[];
+  not?: FullJsonSchema;
 }
 
 export interface CreateModelResponse {
   model?: ApiGatewayModel;
   schema: JsonSchema;
+  fullSchema: FullJsonSchema;
 }
 
 export interface GetModelProps {

@@ -1,3 +1,10 @@
+## 0.11.3
+
+### Patch Changes
+
+- Validate path and query params
+- remove example from model
+
 ## 0.11.0
 
 ### Minor Changes

@@ -138,6 +138,78 @@ describe('TemplateHelper', () => {
 
         expect(result).toBe("$input.path('$.active')");
       });
+
+      it('should generate numeric validation template for number field from path source', () => {
+        const field = {
+          type: 'Number' as const,
+          name: 'id',
+          destinationName: 'id',
+          source: 'path' as const,
+        };
+
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'id',
+        } as any);
+
+        expect(result).toBe(
+          "#if($input.params().path.get('id').matches(\"^[0-9]+$\")) $input.params().path.get('id') #else \"$input.params().path.get('id')\" #end"
+        );
+      });
+
+      it('should generate numeric validation template for number field from query source', () => {
+        const field = {
+          type: 'Number' as const,
+          name: 'page',
+          destinationName: 'page',
+          source: 'query' as const,
+        };
+
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'page',
+        } as any);
+
+        expect(result).toBe(
+          "#if($input.params('page').matches(\"^[0-9]+$\")) $input.params('page') #else \"$input.params('page')\" #end"
+        );
+      });
+
+      it('should generate boolean validation template for boolean field from path source', () => {
+        const field = {
+          type: 'Boolean' as const,
+          name: 'enabled',
+          destinationName: 'enabled',
+          source: 'path' as const,
+        };
+
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'enabled',
+        } as any);
+
+        expect(result).toBe(
+          "#if($input.params().path.get('enabled').matches(\"^(true|false)$\")) $input.params().path.get('enabled') #else \"$input.params().path.get('enabled')\" #end"
+        );
+      });
+
+      it('should generate boolean validation template for boolean field from query source', () => {
+        const field = {
+          type: 'Boolean' as const,
+          name: 'active',
+          destinationName: 'active',
+          source: 'query' as const,
+        };
+
+        const result = templateHelper.generateTemplate({
+          field,
+          currentValue: 'active',
+        } as any);
+
+        expect(result).toBe(
+          "#if($input.params('active').matches(\"^(true|false)$\")) $input.params('active') #else \"$input.params('active')\" #end"
+        );
+      });
     });
 
     describe('Object type handling', () => {

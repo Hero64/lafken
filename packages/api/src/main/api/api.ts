@@ -4,9 +4,14 @@ import {
   createLambdaDecorator,
   createResourceDecorator,
   getEventFields,
+  LambdaReflectKeys,
 } from '@lafken/common';
+import { type ApiObjectMetadata, PARAM_PREFIX, type Source } from '../request';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from '../response';
+import { objectToSchema } from '../schema/schema';
+import { response } from '../status';
 import { RESOURCE_TYPE } from '../type/type';
+import { SchemaValidator } from '../validator/validators';
 import {
   type ApiLambdaBaseProps,
   type ApiLambdaIntegrationProps,
@@ -15,6 +20,8 @@ import {
   type ApiProps,
   Method,
 } from './api.types';
+
+const unvalidatedSources = new Set<Source>(['path', 'query', 'header']);
 
 const createMethodDecorator = (method: Method) =>
   createLambdaDecorator<ApiLambdaProps, ApiLambdaMetadata>({
@@ -46,6 +53,48 @@ const createMethodDecorator = (method: Method) =>
         summary: params.summary,
         tags: params.tags,
       } as ApiLambdaMetadata;
+    },
+    validateEvent: (target, methodName, event) => {
+      const eventByMethod =
+        Reflect.getMetadata(LambdaReflectKeys.event_class, target) || {};
+
+      const eventClass = eventByMethod[methodName];
+
+      if (!eventClass) {
+        return;
+      }
+
+      const fields = getEventFields(PARAM_PREFIX, eventClass) as ApiObjectMetadata;
+
+      const unvalidatedParameters = fields.properties.filter((p) =>
+        unvalidatedSources.has(p.source)
+      );
+
+      if (unvalidatedParameters.length === 0) {
+        return;
+      }
+
+      const validator = new SchemaValidator();
+
+      const validations = validator.validate(
+        event,
+        objectToSchema({
+          type: 'Object',
+          destinationName: fields.destinationName,
+          name: fields.name,
+          payload: fields.payload,
+          source: 'body',
+          properties: unvalidatedParameters,
+        })
+      );
+
+      if (validations.valid) {
+        return validations;
+      }
+
+      response(400, {
+        message: validations.validationErrorString,
+      });
     },
   });
 
