@@ -2,6 +2,7 @@ import {
   HTTP_STATUS_CODE,
   type HTTP_STATUS_CODE_NUMBER,
   Method,
+  type ResponseFieldMetadata,
 } from '../../../../../../main';
 import type { ResponseHandler } from './response.types';
 
@@ -18,6 +19,7 @@ export const createDefaultResponse = (
   return {
     statusCode: code.toString(),
     selectionPattern: includePattern ? `.*${HTTP_STATUS_CODE[code]}.*` : undefined,
+    field: InternalDefaultHttpResponse,
   };
 };
 
@@ -36,4 +38,22 @@ export const getSuccessStatusCode = (method: Method): HTTP_STATUS_CODE_NUMBER =>
 export const responseMessages: Record<string, string> = {
   400: 'Bad request',
   500: 'Internal server error',
+};
+
+export const InternalDefaultHttpResponse: ResponseFieldMetadata = {
+  type: 'Object',
+  destinationName: 'InternalDefaultHttpResponse',
+  name: 'InternalDefaultHttpResponse',
+  payload: {
+    id: 'InternalDefaultHttpResponse',
+    name: 'InternalDefaultHttpResponse',
+  },
+  properties: [
+    {
+      type: 'String',
+      name: 'message',
+      destinationName: 'message',
+      required: true,
+    },
+  ],
 };

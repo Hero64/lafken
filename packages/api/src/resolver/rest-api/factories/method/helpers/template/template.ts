@@ -26,7 +26,7 @@ export class TemplateHelper {
     }: GenerateTemplateProps,
     index = 0
   ): string {
-    const value =
+    let value =
       index === 0
         ? requestTemplateMap[field.source || 'body'](currentValue, field.type)
         : currentValue;
@@ -101,9 +101,18 @@ export class TemplateHelper {
       return `{ #set($comma = "") ${template} }`;
     }
 
+    const template = `${quoteType}${value}${quoteType}`;
+
     if (field.type === 'String') {
-      const template = `${quoteType}${value}${quoteType}`;
       return valueParser(field.directTemplateValue || template, field.type);
+    }
+
+    if (field.source === 'path' || field.source === 'query') {
+      if (field.type === 'Boolean') {
+        value = `#if(${value}.matches("^(true|false)$")) ${value} #else ${template} #end`;
+      } else {
+        value = `#if(${value}.matches("^[0-9]+$")) ${value} #else ${template} #end`;
+      }
     }
 
     return valueParser(field.directTemplateValue || value, field.type);

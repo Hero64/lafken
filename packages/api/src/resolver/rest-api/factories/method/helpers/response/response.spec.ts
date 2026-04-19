@@ -86,7 +86,7 @@ describe('ResponseHelper', () => {
       const responseHelper = new ResponseHelper(handler);
       const result = responseHelper.handlerResponse;
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(3);
       expect(result[0].statusCode).toBe('201');
       expect(result[0].field).toEqual(handler.response);
     });
@@ -156,10 +156,11 @@ describe('ResponseHelper', () => {
       const responseHelper = new ResponseHelper(handler);
       const result = responseHelper.handlerResponse;
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(4);
       expect(result[0].statusCode).toBe('200');
       expect(result[0].field).toEqual(handler.response.items);
-      expect(result[1].statusCode).toBe('404');
+      expect(result[1].statusCode).toBe('400');
+      expect(result[2].statusCode).toBe('404');
     });
 
     it('should use method-specific default status codes', () => {
@@ -203,7 +204,7 @@ describe('ResponseHelper', () => {
       const responseHelper = new ResponseHelper(handler);
       const result = responseHelper.handlerResponse;
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(3);
       expect(result[0].statusCode).toBe('204');
       expect(result[0].field).toEqual(handler.response);
     });

@@ -99,14 +99,14 @@ describe('Queue send message integration', () => {
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '4\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Bad request"}',
+        'application/json': '{"message": "Bad request"}',
       },
       status_code: '400',
     });
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
       selection_pattern: '5\\d{2}',
       response_templates: {
-        'application/json': '{"error": "Internal server error"}',
+        'application/json': '{"message": "Internal server error"}',
       },
       status_code: '500',
     });

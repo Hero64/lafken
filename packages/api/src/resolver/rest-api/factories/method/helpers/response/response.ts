@@ -11,6 +11,7 @@ import {
   defaultDataResponseTemplate,
   defaultResponses,
   getSuccessStatusCode,
+  InternalDefaultHttpResponse,
   responseMessages,
 } from './response.utils';
 
@@ -18,6 +19,7 @@ const typesWithObjects = new Set<FieldTypes>(['Object', 'Array']);
 
 export class ResponseHelper {
   private _handlerResponse: ResponseHandler[];
+  private codeResponses = new Set<string>([]);
   constructor(private handler: ApiLambdaMetadata) {}
 
   get handlerResponse(): ResponseHandler[] {
@@ -44,14 +46,20 @@ export class ResponseHelper {
     }
 
     if (this.handler.response.type === 'Object') {
-      this.setHandlerResponseByConfig(this.handler.response, this.handler.method);
+      this.setHandlerResponseByConfig(
+        this.addDefaultResponses(this.handler.response),
+        this.handler.method
+      );
     }
 
     if (
       this.handler.response.type === 'Array' &&
       this.handler.response.items.type === 'Object'
     ) {
-      this.setHandlerResponseByConfig(this.handler.response.items, this.handler.method);
+      this.setHandlerResponseByConfig(
+        this.addDefaultResponses(this.handler.response.items),
+        this.handler.method
+      );
     }
 
     return this._handlerResponse;
@@ -66,12 +74,11 @@ export class ResponseHelper {
       field: response,
     });
 
-    if (!response.payload.responses) {
-      this._handlerResponse = responses;
-      return responses;
-    }
-
     for (const statusCode in response.payload.responses) {
+      if (this.codeResponses.has(statusCode)) {
+        continue;
+      }
+      this.codeResponses.add(statusCode);
       const subResponse = response.payload.responses[statusCode];
 
       responses.push({
@@ -87,11 +94,21 @@ export class ResponseHelper {
     this._handlerResponse = responses;
   }
 
+  private addDefaultResponses(data: ResponseObjectMetadata) {
+    data.payload.responses = {
+      '400': InternalDefaultHttpResponse,
+      '500': InternalDefaultHttpResponse,
+      ...(data.payload.responses || {}),
+    };
+
+    return data;
+  }
+
   getPatternResponse(statusCode: '400' | '500'): ResponseHandler {
     return {
       selectionPattern: `${statusCode[0]}\\d{2}`,
       statusCode,
-      template: `{"error": "${responseMessages[statusCode]}"}`,
+      template: `{"message": "${responseMessages[statusCode]}"}`,
     };
   }
 }

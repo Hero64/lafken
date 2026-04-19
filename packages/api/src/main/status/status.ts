@@ -1,6 +1,6 @@
 import { HTTP_STATUS_CODE, type HTTP_STATUS_CODE_NUMBER } from './status.types';
 
-const createHttpResponse = (message: string) => {
+export const createHttpResponse = (message: string) => {
   return class HttpErrorResponse extends Error {
     constructor(public data?: any | undefined) {
       super(
