@@ -15,6 +15,6 @@ export const requestTemplateMap: Record<
       ? `$input.params('${key}')`
       : `$method.request.multivaluequerystring.get('${key}')`,
   header: (key) => `$input.params().header.get('${key}')`,
-  context: (key) => `$content.${key}`,
+  context: (key) => `$context.${key}`,
   velocity: () => '',
 };
