@@ -126,7 +126,7 @@ export class Role extends lafkenResource.make(IamRole) {
     private props: RoleProps
   ) {
     super(scope, id, {
-      name: props.name,
+      name: props.name.slice(0, 63),
       assumeRolePolicy: Fn.jsonencode({
         Version: '2012-10-17',
         Statement: [

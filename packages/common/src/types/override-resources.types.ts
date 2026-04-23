@@ -45,6 +45,18 @@ export type StateMachineScopedNames =
   | ScopedResourceNames<ModulesAvailable, 'StateMachine', 'state-machine'>
   | (string & {});
 
+export type StandaloneHandlerNames =
+  | ResourceIdentifiers<ModulesAvailable, 'Handler'>
+  | (string & {});
+
+export type StandaloneHandlerScopedNames =
+  | ScopedResourceNames<ModulesAvailable, 'Handler', 'handler'>
+  | (string & {});
+
+export type StandaloneHandlerRolesScopedNames =
+  | ScopedResourceNames<ModulesAvailable, 'Handler', 'handler::role'>
+  | (string & {});
+
 export type QueueNames = ResourceIdentifiers<ModulesAvailable, 'Queue'> | (string & {});
 export type QueueScopedNames =
   | ScopedResourceNames<ModulesAvailable, 'Queue', 'queue'>

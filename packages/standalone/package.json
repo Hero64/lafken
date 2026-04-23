@@ -1,0 +1,85 @@
+{
+  "name": "@lafken/standalone",
+  "version": "0.11.6",
+  "private": false,
+  "description": "Define Lambdas using TypeScript decorators - serverless event-driven infrastructure",
+  "keywords": [
+    "aws",
+    "lambda",
+    "serverless",
+    "typescript",
+    "decorators",
+    "lafken"
+  ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/event"
+  },
+  "license": "MIT",
+  "author": "Aníbal Jorquera",
+  "exports": {
+    "./main": {
+      "import": "./lib/main/index.js",
+      "types": "./lib/main/index.d.ts",
+      "require": "./lib/main/index.js"
+    },
+    "./resolver": {
+      "import": "./lib/resolver/index.js",
+      "types": "./lib/resolver/index.d.ts",
+      "require": "./lib/resolver/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "main": [
+        "./lib/main/index.d.ts"
+      ],
+      "resolver": [
+        "./lib/resolver/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "pnpm clean && tsc -p ./tsconfig.build.json",
+    "check-types": "tsc --noEmit -p ./tsconfig.build.json",
+    "clean": "rm -rf ./lib",
+    "dev": "tsc -w",
+    "prepublishOnly": "pnpm build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@lafken/resolver": "workspace:*",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@cdktn/provider-aws": "^23.5.0",
+    "@lafken/common": "workspace:*",
+    "@swc/core": "^1.15.21",
+    "@swc/helpers": "^0.5.20",
+    "@vitest/runner": "^4.1.2",
+    "cdktn": "^0.22.1",
+    "cdktn-vitest": "^1.0.0",
+    "constructs": "^10.6.0",
+    "typescript": "6.0.2",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.1.2"
+  },
+  "peerDependencies": {
+    "@cdktn/provider-aws": ">=23.0.0",
+    "@lafken/common": "workspace:*",
+    "cdktn": ">=0.22.0",
+    "constructs": "^10.4.5"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
