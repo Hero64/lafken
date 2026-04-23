@@ -23,6 +23,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
       name: resourceMetadata.name,
       roleArn: '',
       definition: '',
+      type: resourceMetadata.executionType,
       tracingConfiguration: resourceMetadata.enableTrace
         ? {
             enabled: true,
@@ -54,16 +55,11 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
   }
 
   private overrideDefinition(definition: DefinitionSchema) {
-    const { resourceMetadata } = this.props;
-
     this.addOverride(
       'definition',
       JSON.stringify({
         ...definition,
         QueryLanguage: 'JSONata',
-        ExecutionType: resourceMetadata.executionType
-          ? resourceMetadata.executionType.toUpperCase()
-          : undefined,
       })
     );
   }
