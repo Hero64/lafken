@@ -6,5 +6,5 @@ import type { UpsertBuilder } from '../query-builder/upsert/upsert';
 export type QueryTransactions =
   | CreateBuilder<any>
   | UpsertBuilder<any>
-  | UpdateBuilder<any>
+  | UpdateBuilder<any, any>
   | DeleteBuilder<any>;

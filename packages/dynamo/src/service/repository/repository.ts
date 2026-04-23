@@ -14,6 +14,7 @@ import type {
   Item,
   QueryOneProps,
   QueryProps,
+  ReturnValueOption,
   UpdateProps,
   UpsertProps,
 } from '../query-builder/query-builder.types';
@@ -79,10 +80,12 @@ export const createRepository = <E extends ClassResource>(
         item,
       });
     },
-    update(inputProps: UpdateProps<E>) {
-      return new UpdateBuilder({
+    update<R extends ReturnValueOption | undefined = undefined>(
+      inputProps: Omit<UpdateProps<E>, 'returnValue'> & { returnValue?: R }
+    ) {
+      return new UpdateBuilder<E, R>({
         ...queryBuilderProps,
-        inputProps,
+        inputProps: inputProps as UpdateProps<E>,
       });
     },
     delete(key: TablePartition<Item<E>>) {
