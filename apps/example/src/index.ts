@@ -5,6 +5,7 @@ import { DynamoResolver } from '@lafken/dynamo/resolver';
 import { EventRuleResolver } from '@lafken/event/resolver';
 import { createApp } from '@lafken/main';
 import { QueueResolver } from '@lafken/queue/resolver';
+import { StandaloneResolver } from '@lafken/standalone/resolver';
 import { StateMachineResolver } from '@lafken/state-machine/resolver';
 import { TrainerAuthorizer } from './auth/pokemon-custom.auth';
 import { CognitoAuth } from './infra/auth/cognito.auth';
@@ -27,6 +28,7 @@ createApp({
     new EventRuleResolver(),
     new QueueResolver(),
     new StateMachineResolver(),
+    new StandaloneResolver(),
     new AuthResolver({
       name: 'poke-auth',
       userPool: {

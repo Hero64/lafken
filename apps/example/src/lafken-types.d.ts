@@ -8,7 +8,10 @@ declare module '@lafken/common' {
   interface ModulesAvailable {
     'pokemon-module': {
       Queue: {
-        createPokemon: true;
+        createPokemosn: true;
+      };
+      Handler: {
+        callPokemon: true;
       };
     };
   }

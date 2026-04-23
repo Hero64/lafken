@@ -23,12 +23,14 @@
     "@lafken/main": "workspace:*",
     "@lafken/queue": "workspace:*",
     "@lafken/schedule": "workspace:*",
+    "@lafken/standalone": "workspace:*",
     "@lafken/state-machine": "workspace:*",
     "cdktn": "^0.22.1",
     "constructs": "^10.6.0",
     "dayjs": "1.11.20"
   },
   "devDependencies": {
+    "@aws-sdk/client-scheduler": "3.1036.0",
     "@aws-sdk/client-sqs": "^3.1020.0",
     "cdktn-cli": "^0.22.1",
     "unplugin-swc": "^1.5.9",
