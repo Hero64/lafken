@@ -1,5 +1,6 @@
 import type {
   AllowedTypesWithoutFunction,
+  AnyField,
   ArrayField,
   BasicTypes,
   BooleanField,
@@ -177,6 +178,8 @@ export interface ArrayParamProps extends BaseParamProps {
   uniqueItems?: boolean;
 }
 
+export interface AnyParamProps extends BaseParamProps {}
+
 /**
  * Conditional type that resolves the appropriate param props based on `T`.
  * Used for request body parameters where the TypeScript type determines
@@ -339,6 +342,11 @@ export interface ApiArrayMetadata
   items: ApiParamMetadata;
 }
 
+export interface ApiAnyMetadata
+  extends AnyField,
+    BaseParamMetadata,
+    Omit<AnyParamProps, 'type' | 'name'> {}
+
 /**
  * Union of all resolved API parameter metadata types.
  * Used by resolvers to generate OpenAPI parameter and schema definitions.
@@ -348,7 +356,8 @@ export type ApiParamMetadata =
   | ApiNumberMetadata
   | ApiBooleanMetadata
   | ApiObjectMetadata
-  | ApiArrayMetadata;
+  | ApiArrayMetadata
+  | ApiAnyMetadata;
 
 /**
  * Origin of an API parameter within an HTTP request.

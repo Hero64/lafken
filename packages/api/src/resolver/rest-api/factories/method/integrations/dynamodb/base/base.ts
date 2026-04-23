@@ -12,6 +12,7 @@ const mapDynamoType: Record<FieldTypes, string> = {
   Number: 'N',
   Object: 'M',
   String: 'S',
+  Any: 'ANY',
 };
 
 export class DynamoBaseIntegration<T> implements Integration {
@@ -115,6 +116,9 @@ export class DynamoBaseIntegration<T> implements Integration {
   }
 
   protected marshallField(template: string, type: FieldTypes) {
+    if (type === 'Any') {
+      throw new Error('It is not possible to identify the type');
+    }
     return `{ "${mapDynamoType[type]}": ${template} }`;
   }
 

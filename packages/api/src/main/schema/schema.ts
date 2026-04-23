@@ -81,6 +81,13 @@ export const paramToSchema = (param: ApiParamMetadata): SchemaDefinition => {
     };
   }
 
+  if (param.type === 'Any') {
+    return {
+      type: 'object',
+      nullable: param.nullable,
+    };
+  }
+
   return objectToSchema(param);
 };
 

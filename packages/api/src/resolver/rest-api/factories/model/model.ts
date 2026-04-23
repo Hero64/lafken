@@ -206,6 +206,21 @@ export class ModelFactory {
       };
     }
 
+    if (field.type === 'Any') {
+      const fullSchema: FullJsonSchema = {
+        deprecated: field.deprecated,
+        description: field.description,
+        example: field.example,
+        nullable: field.nullable,
+        type: 'object',
+      };
+
+      return {
+        fullSchema,
+        schema: stripNonDraft4Fields(fullSchema),
+      };
+    }
+
     const itemResult = this.createModel(field.items);
 
     const fullSchema: FullJsonSchema = {
