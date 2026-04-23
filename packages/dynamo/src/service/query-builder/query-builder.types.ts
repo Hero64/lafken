@@ -56,13 +56,13 @@ export type CommonExpression<E> = OnlyOne<
 export type Filter<E> = {
   [key in keyof E]?: E[key] extends PrimaryPartition<number>
     ?
-        | number
+        | E[key]
         | OnlyOne<
             OperationExpression<number> & CommonExpression<number> & InExpression<number>
           >
     : E[key] extends PrimaryPartition<string>
       ?
-          | string
+          | E[key]
           | OnlyOne<
               StringExpression &
                 StringFilterExpression &
@@ -107,9 +107,9 @@ export type KeyCondition<E> = {
     [key in keyof E as E[key] extends number | string
       ? key
       : never]?: E[key] extends PrimaryPartition<number>
-      ? number | OperationExpression<E[key]>
+      ? E[key] | OperationExpression<E[key]>
       : E[key] extends PrimaryPartition<string>
-        ? string | OnlyOne<OperationExpression<E[key]> & StringExpression>
+        ? E[key] | OnlyOne<OperationExpression<E[key]> & StringExpression>
         :
             | E[key]
             | (E[key] extends number
@@ -246,6 +246,17 @@ export type DeepReplaceValue<T> = {
     ? NumericOrExist<T[K]>
     : ExistValue<T[K]> | DeepReplaceValue<T[K]>;
 };
+
+export type ReturnValueOption = 'all_new' | 'updated_new' | 'all_old' | 'none';
+
+export type UpdateReturnType<
+  E extends Function,
+  R extends ReturnValueOption | undefined,
+> = R extends 'all_new' | 'all_old'
+  ? Item<E>
+  : R extends 'updated_new'
+    ? Partial<Item<E>>
+    : undefined;
 
 export interface UpdateProps<E extends Function> extends UpsertProps<E> {
   /**

@@ -1,3 +1,23 @@
+## 0.11.5
+
+### Patch Changes
+
+- fix dynamo update
+- improve types in dynamo queries
+- state machine support undefined types
+- api support undefined types
+
+## 0.11.4
+
+### Patch Changes
+
+- rename content to context in velocity template
+
+### Patch Changes
+
+- Validate path and query params
+- remove example from model
+
 ## 0.11.3
 
 ### Patch Changes

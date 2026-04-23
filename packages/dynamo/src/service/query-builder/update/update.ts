@@ -7,11 +7,20 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { ClassResource } from '@lafken/common';
 
 import { QueryBuilderBase } from '../base/base';
-import type { DeepReplaceValue, Item, ObjectToBoolean } from '../query-builder.types';
+import type {
+  DeepReplaceValue,
+  Item,
+  ObjectToBoolean,
+  ReturnValueOption,
+  UpdateReturnType,
+} from '../query-builder.types';
 import type { UpdateBuilderProps } from './update.types';
 import { updateResolver, updateResolverKeys } from './update.utils';
 
-export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
+export class UpdateBuilder<
+  E extends ClassResource,
+  R extends ReturnValueOption | undefined = undefined,
+> extends QueryBuilderBase<E> {
   protected command: UpdateItemCommandInput;
 
   constructor(protected queryOptions: UpdateBuilderProps<E>) {
@@ -24,10 +33,10 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
   }
 
   public then<T>(
-    resolve: (value: Partial<Item<E>> | undefined) => Item<E>,
+    resolve: (value: UpdateReturnType<E, R>) => T,
     reject: (reason: any) => T
   ): Promise<T> {
-    return this.exec().then(resolve, reject);
+    return (this.exec() as Promise<UpdateReturnType<E, R>>).then(resolve, reject);
   }
 
   private async exec() {
@@ -74,10 +83,10 @@ export class UpdateBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
     this.command = {
       TableName: this.queryOptions.modelProps.name,
       Key: marshall(keyCondition),
+      ConditionExpression: condition ? this.getFilterExpression(condition) : undefined,
       UpdateExpression:
         `${setExpression ? `SET ${setExpression}` : ''} ${removeExpression ? `REMOVE ${removeExpression}` : ''}`.trim(),
       ...this.getAttributesAndNames(),
-      ConditionExpression: condition ? this.getFilterExpression(condition) : undefined,
       ReturnValues: this.queryOptions.inputProps.returnValue
         ? (this.queryOptions.inputProps.returnValue.toUpperCase() as ReturnValue)
         : undefined,

@@ -1,4 +1,5 @@
 import type {
+  ApiAnyMetadata,
   ApiArrayMetadata,
   ApiBooleanMetadata,
   ApiNumberMetadata,
@@ -20,5 +21,6 @@ export type ResponseFieldMetadata =
   | Omit<ApiStringMetadata, 'source'>
   | Omit<ApiNumberMetadata, 'source'>
   | Omit<ApiBooleanMetadata, 'source'>
+  | Omit<ApiAnyMetadata, 'source'>
   | ResponseObjectMetadata
   | ResponseArrayField;

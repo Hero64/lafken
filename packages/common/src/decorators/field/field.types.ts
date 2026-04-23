@@ -60,12 +60,17 @@ export interface ArrayField extends BaseFieldMetadata {
   items: FieldMetadata;
 }
 
+export interface AnyField extends BaseFieldMetadata {
+  type: 'Any';
+}
+
 export type FieldMetadata =
   | StringField
   | NumberField
   | BooleanField
   | ObjectField
-  | ArrayField;
+  | ArrayField
+  | AnyField;
 
 export type FieldTypes = FieldMetadata['type'];
 export type PrimitiveTypes = Extract<FieldTypes, 'String' | 'Number' | 'Boolean'>;

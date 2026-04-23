@@ -1,6 +1,7 @@
 import type { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import type { ITerraformDependable } from 'cdktn';
 import type {
+  ApiAnyMetadata,
   ApiBooleanMetadata,
   ApiNumberMetadata,
   ApiStringMetadata,
@@ -13,7 +14,8 @@ export type ModelMetadata =
   | Omit<ApiNumberMetadata, 'source'>
   | Omit<ApiBooleanMetadata, 'source'>
   | Omit<ResponseObjectMetadata, 'source'>
-  | Omit<ResponseArrayField, 'source'>;
+  | Omit<ResponseArrayField, 'source'>
+  | Omit<ApiAnyMetadata, 'source'>;
 
 export interface JsonSchema {
   type?: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';

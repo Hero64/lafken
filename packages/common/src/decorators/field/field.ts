@@ -147,7 +147,10 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
     };
   }
 
-  throw new Error(`unidentified type ${type} in ${destinationName} field`);
+  return {
+    ...metadata,
+    type: 'Any',
+  };
 };
 
 export const createFieldDecorator =
