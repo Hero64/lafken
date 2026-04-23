@@ -1,6 +1,6 @@
 {
   "name": "@lafken/bucket",
-  "version": "0.11.5",
+  "version": "0.11.6",
   "private": false,
   "description": "Define S3 buckets using TypeScript decorators - automatic infrastructure generation with Lafken",
   "keywords": [
