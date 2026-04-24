@@ -9,6 +9,7 @@ import {
   type ServicesValues,
   type VpcConfigValue,
 } from '@lafken/common';
+import { dependable } from 'cdktn';
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 import { getAppContext, getExternalValues, getModuleContext } from '../../utils';
@@ -203,7 +204,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     if (!services) {
       const role = moduleRole || appRole;
       this.role = role.arn;
-      this.node.addDependency(role, role.policy);
+      this.dependsOn = [dependable(role), dependable(role.policy)];
       return;
     }
 
@@ -218,9 +219,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       },
     });
 
-    console.log(`${name}-role`);
-
     this.role = role.arn;
-    this.node.addDependency(role, role.policy);
+    this.dependsOn = [dependable(role), dependable(role.policy)];
   }
 }
