@@ -5,6 +5,7 @@ import type {
   DynamoTableScopedNames,
   EventBusScopedNames,
   QueueScopedNames,
+  ResourcesScopedNames,
   StateMachineScopedNames,
   UserPoolClientScopedNames,
   UserPoolScopedNames,
@@ -400,6 +401,7 @@ export interface GetResourceProps {
     | EventBusScopedNames
     | StateMachineScopedNames
     | QueueScopedNames
+    | ResourcesScopedNames
   >;
   /**
    * Retrieves a value from AWS Systems Manager Parameter Store.
