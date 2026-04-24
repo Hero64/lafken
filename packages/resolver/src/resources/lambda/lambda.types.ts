@@ -19,7 +19,6 @@ export interface LambdaHandlerProps
 
 export interface GetRoleArnProps {
   name: string;
-  scope: Construct;
   appContext: GlobalContext;
   moduleContext?: GlobalContext;
   services?: ServicesValues;

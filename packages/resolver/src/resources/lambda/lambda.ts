@@ -2,7 +2,13 @@ import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
-import { type AliasConfig, kebabCase, type VpcConfigValue } from '@lafken/common';
+import {
+  type AliasConfig,
+  type GetResourceProps,
+  kebabCase,
+  type ServicesValues,
+  type VpcConfigValue,
+} from '@lafken/common';
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 import { getAppContext, getExternalValues, getModuleContext } from '../../utils';
@@ -54,17 +60,9 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
     ).slice(0, 63 - suffix.length)}${suffix}`.toLowerCase();
 
-    const role = LambdaHandler.getRoleArn({
-      name: handlerName,
-      scope,
-      appContext,
-      moduleContext,
-      services: props.lambda?.services,
-    });
-
     super(scope, id, {
       functionName: handlerName,
-      role: role.arn,
+      role: '',
       filename: 'unresolved',
       handler: `index.${props.name}_${props.originalName}`,
       runtime: `nodejs${runtime}.x`,
@@ -83,7 +81,13 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       environment: {
         variables: hasValues ? environmentValues || {} : {},
       },
-      dependsOn: [role, role.policy],
+    });
+
+    this.setRole({
+      appContext,
+      moduleContext,
+      name: handlerName,
+      services: props.lambda?.services,
     });
 
     if (environments && !environmentValues) {
@@ -180,28 +184,43 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     return env;
   }
 
-  private static getRoleArn(props: GetRoleArnProps) {
-    const { services, appContext, moduleContext, name, scope } = props;
+  private getServiceRole(props: GetResourceProps, services: ServicesValues = []) {
+    return Array.isArray(services) ? services : services(props);
+  }
+
+  private setRole(props: GetRoleArnProps) {
+    const { services, appContext, moduleContext, name } = props;
+    const appRole = lafkenResource.getResource<Role>(
+      'app',
+      `${appContext.contextCreator}-global-role`
+    );
+
+    const moduleRole = lafkenResource.getResource<Role | undefined>(
+      'module',
+      `${moduleContext?.contextCreator}-module-role`
+    );
 
     if (!services) {
-      const appRole = lafkenResource.getResource<Role>(
-        'app',
-        `${appContext.contextCreator}-global-role`
-      );
-
-      const moduleRole = lafkenResource.getResource<Role | undefined>(
-        'module',
-        `${moduleContext?.contextCreator}-module-role`
-      );
-
-      return moduleRole || appRole;
+      const role = moduleRole || appRole;
+      this.role = role.arn;
+      this.node.addDependency(role, role.policy);
+      return;
     }
 
-    const role = new Role(scope, 'lambda-role', {
+    const role = new Role(this, 'lambda-role', {
       name: `${name}-role`,
-      services,
+      services: (props) => {
+        return [
+          ...this.getServiceRole(props, appRole.services),
+          ...this.getServiceRole(props, moduleRole?.services),
+          ...this.getServiceRole(props, services),
+        ];
+      },
     });
 
-    return role;
+    console.log(`${name}-role`);
+
+    this.role = role.arn;
+    this.node.addDependency(role, role.policy);
   }
 }
