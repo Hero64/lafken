@@ -16,6 +16,7 @@ export class QueryBuilderBase<E extends ClassResource> {
 
   protected attributeNames: Record<string, string> = {};
   protected attributeValues: Record<string, any> = {};
+  protected expressionGroupCounter = 0;
 
   protected getKeyConditionExpression(
     expression: KeyCondition<E>,

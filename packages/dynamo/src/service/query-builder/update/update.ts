@@ -69,9 +69,12 @@ export class UpdateBuilder<
       throw new Error('You must assign a value to update');
     }
 
-    let setExpression = this.setValues(setValues, true);
+    let setExpression = '';
+    if (Object.keys(setValues).length > 0) {
+      setExpression = this.setValues(setValues, true, [], this.expressionGroupCounter++);
+    }
     if (Object.keys(replaceValues).length > 0) {
-      setExpression += ` ${this.setValues(replaceValues, false)}`;
+      setExpression += ` ${this.setValues(replaceValues, false, [], this.expressionGroupCounter++)}`;
     }
 
     const removeExpression = this.removeValues(removeValues);
@@ -83,7 +86,9 @@ export class UpdateBuilder<
     this.command = {
       TableName: this.queryOptions.modelProps.name,
       Key: marshall(keyCondition),
-      ConditionExpression: condition ? this.getFilterExpression(condition) : undefined,
+      ConditionExpression: condition
+        ? this.getFilterExpression(condition, [], 'and', this.expressionGroupCounter++)
+        : undefined,
       UpdateExpression:
         `${setExpression ? `SET ${setExpression}` : ''} ${removeExpression ? `REMOVE ${removeExpression}` : ''}`.trim(),
       ...this.getAttributesAndNames(),
