@@ -56,6 +56,43 @@ export interface AliasConfig {
    */
   provisionedExecutions?: number;
 }
+export interface LoggingConfig {
+  /**
+   * Log format for the Lambda function.
+   *
+   * Controls the format of the log records written to CloudWatch.
+   * - `'Text'`: Unstructured text output (default Lambda behaviour).
+   * - `'JSON'`: Structured JSON records, enabling `applicationLogLevel`
+   *             and `systemLogLevel`.
+   */
+  logFormat: 'text' | 'json';
+  /**
+   * Log retention period in days.
+   *
+   * Specifies the number of days to retain Lambda invocation logs
+   * in the CloudWatch Log Group before they are automatically deleted.
+   * When omitted, the log group never expires.
+   */
+  retentionInDays?: number;
+  /**
+   * Application-level log verbosity.
+   *
+   * Only valid when `logFormat` is `'json'`.
+   * Controls the level of logs emitted by your function code.
+   *
+   * Supported values: `'trace'` | `'debug'` | `'info'` | `'warn'` | `'error'` | `'fatal'`
+   */
+  applicationLogLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  /**
+   * System-level log verbosity.
+   *
+   * Only valid when `logFormat` is `'json'`.
+   * Controls the level of logs emitted by the Lambda runtime itself.
+   *
+   * Supported values: `'debug'` | `'info'` | `'warn'`
+   */
+  systemLogLevel?: 'debug' | 'info' | 'warn';
+}
 
 export interface LambdaProps {
   /**
@@ -176,6 +213,20 @@ export interface LambdaProps {
    * { name: 'live', provisionedExecutions: 5 }
    */
   alias?: AliasConfig;
+  /**
+   * Logging configuration for the Lambda function.
+   *
+   * When provided, configures the CloudWatch logging behaviour for the
+   * Lambda function. If `logGroup` is specified, a `CloudwatchLogGroup`
+   * resource will be created and linked automatically.
+   *
+   * @example
+   * { logFormat: 'Text', logGroup: { name: '/aws/lambda/my-fn', retentionInDays: 30 } }
+   *
+   * @example
+   * { logFormat: 'JSON', applicationLogLevel: 'WARN', systemLogLevel: 'INFO' }
+   */
+  loggingConfig?: LoggingConfig;
 }
 
 export interface LambdaMetadata {

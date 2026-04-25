@@ -1,3 +1,4 @@
+import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
@@ -250,6 +251,96 @@ describe('Lambda handler', () => {
       parsed.resource.aws_lambda_provisioned_concurrency_config
     )[0] as any;
     expect(concurrencyConfig.qualifier).toContain('aws_lambda_alias');
+  });
+
+  it('should create a lambda function with logging config (text format + log group)', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        loggingConfig: {
+          logFormat: 'text',
+          retentionInDays: 14,
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(CloudwatchLogGroup, {
+      name: '/aws/lambda/test-app',
+      retention_in_days: 14,
+    });
+
+    const parsed = JSON.parse(synthesized);
+    const lambda = Object.values(parsed.resource.aws_lambda_function)[0] as any;
+
+    expect(lambda.logging_config.log_format).toBe('Text');
+    expect(lambda.logging_config.log_group).toContain('aws_cloudwatch_log_group');
+  });
+
+  it('should create a lambda function with logging config (json format + log levels)', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      lambda: {
+        loggingConfig: {
+          logFormat: 'json',
+          applicationLogLevel: 'warn',
+          systemLogLevel: 'info',
+        },
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+
+    expect(parsed.resource.aws_cloudwatch_log_group).toBeUndefined();
+
+    const lambda = Object.values(parsed.resource.aws_lambda_function)[0] as any;
+
+    expect(lambda.logging_config.log_format).toBe('JSON');
+    expect(lambda.logging_config.application_log_level).toBe('WARN');
+    expect(lambda.logging_config.system_log_level).toBe('INFO');
+  });
+
+  it('should not create a log group when loggingConfig is omitted', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      minify: false,
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+    });
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+
+    expect(parsed.resource.aws_cloudwatch_log_group).toBeUndefined();
   });
 
   it('should not create provisioned concurrency when provisionedExecutions is 0', () => {
