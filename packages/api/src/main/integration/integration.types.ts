@@ -1,13 +1,10 @@
 import type {
   BucketNames,
   DynamoTableNames,
-  DynamoTableScopedNames,
   GetResourceValue,
   OnlyNumberString,
   OnlyOne,
   QueueNames,
-  QueueScopedNames,
-  StateMachineScopedNames,
 } from '@lafken/common';
 
 /**
@@ -154,14 +151,13 @@ export interface StateMachineStopIntegrationResponse
  * Integration options scoped to Step Functions state machine resources.
  * Resource identifiers follow the format `module::state-machine::name`.
  */
-export type StateMachineIntegrationOption =
-  IntegrationOptionBase<StateMachineScopedNames>;
+export type StateMachineIntegrationOption = IntegrationOptionBase<String>;
 
 /**
  * Integration options scoped to DynamoDB table resources.
  * Resource identifiers follow the format `dynamo::tableName`.
  */
-export type DynamoIntegrationOption = IntegrationOptionBase<DynamoTableScopedNames>;
+export type DynamoIntegrationOption = IntegrationOptionBase<String>;
 
 /**
  * Base interface for DynamoDB integration responses that require a table name.
@@ -311,10 +307,7 @@ export interface DynamoDeleteIntegrationResponse<T = any>
  * }
  * ```
  */
-export type QueueIntegrationOption = IntegrationOptionBase<
-  QueueScopedNames,
-  'id' | 'arn' | 'name'
->;
+export type QueueIntegrationOption = IntegrationOptionBase<String, 'id' | 'arn' | 'name'>;
 
 /**
  * Response shape for the SQS SendMessage integration.

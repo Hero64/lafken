@@ -29,7 +29,7 @@ export class IntegrationHelper {
       principal: 'apigateway.amazonaws.com',
     });
 
-    serviceRole.isGlobal('role', name);
+    serviceRole.register('role', name);
     return serviceRole;
   }
 

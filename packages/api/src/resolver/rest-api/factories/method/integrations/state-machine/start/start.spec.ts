@@ -158,7 +158,7 @@ describe('State machine start integration', () => {
       definition: '',
       roleArn: '',
     });
-    stateMachine.isGlobal('testing', 'test');
+    stateMachine.register('testing', 'test');
 
     await initializeMethod(
       restApi,
@@ -167,7 +167,7 @@ describe('State machine start integration', () => {
       'startWithResource'
     );
 
-    await lafkenResource.callDependentCallbacks();
+    await lafkenResource.resolve();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
