@@ -1,4 +1,9 @@
-import type { BucketNames, OnlyOne, ResourceOutputType } from '@lafken/common';
+import type {
+  BucketNames,
+  BucketReferenceNames,
+  OnlyOne,
+  ResourceOutputType,
+} from '@lafken/common';
 import 'reflect-metadata';
 
 export enum BucketMetadataKeys {
@@ -135,6 +140,15 @@ export interface BaseBucketProps {
    * monitoring.
    */
   tracing?: boolean;
+  /**
+   * Registers this Bucket as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'orders'
+   */
+  ref?: BucketReferenceNames;
 }
 
 export interface InternalBucketProps extends BaseBucketProps {
