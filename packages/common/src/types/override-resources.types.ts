@@ -6,7 +6,8 @@ export type ModuleGlobalReferenceNames =
   | 'user-pool-client'
   | 'bucket'
   | 'dynamo'
-  | 'event-bus';
+  | 'event-bus'
+  | 'resource';
 
 export interface ModulesAvailable {}
 export interface AuthAvailable {}
@@ -15,6 +16,7 @@ export interface ApiRestAvailable {}
 export interface ApiAuthorizerAvailable {}
 export interface EventBusAvailable {}
 export interface DynamoTableAvailable {}
+export interface ResourceAvailable {}
 
 type ResourceNames<T> = keyof T | (string & {});
 type StackResourceName<T, S extends ModuleGlobalReferenceNames> =
@@ -29,6 +31,7 @@ export type UserPoolClientScopedNames = StackResourceName<
   'user-pool-client'
 >;
 export type BucketNames = ResourceNames<BucketAvailable>;
+export type ResourcesScopedNames = StackResourceName<ResourceAvailable, 'resource'>;
 export type BucketScopedNames = StackResourceName<BucketAvailable, 'bucket'>;
 export type ApiRestNames = ResourceNames<ApiRestAvailable>;
 export type ApiRestScopedNames = StackResourceName<ApiRestAvailable, 'api'>;

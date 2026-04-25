@@ -263,8 +263,9 @@ describe('state-machine resolver', () => {
       const synthesized = Testing.synth(stack);
       expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
         name: 'TestSM',
+        type: 'EXPRESS',
         definition:
-          '{"StartAt":"wait","States":{"succeed":{"Type":"Succeed"},"wait":{"Type":"Wait","Seconds":1,"Next":"succeed"}},"QueryLanguage":"JSONata","ExecutionType":"EXPRESS"}',
+          '{"StartAt":"wait","States":{"succeed":{"Type":"Succeed"},"wait":{"Type":"Wait","Seconds":1,"Next":"succeed"}},"QueryLanguage":"JSONata"}',
       });
     });
   });

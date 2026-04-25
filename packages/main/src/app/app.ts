@@ -73,7 +73,11 @@ export class AppStack extends TerraformStack {
       {} as Record<string, ResolverType>
     );
 
-    await Promise.all(modules.map((module) => module(this, resolversByType)));
+    await Promise.all(
+      modules.map((module) =>
+        module(this, resolversByType, this.props.globalConfig?.lambda?.services)
+      )
+    );
   }
 
   private createRole() {

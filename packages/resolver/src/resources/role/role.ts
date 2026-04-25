@@ -119,6 +119,7 @@ const RolePolicy = lafkenResource.make(IamRolePolicy);
 
 export class Role extends lafkenResource.make(IamRole) {
   public policy: InstanceType<typeof RolePolicy>;
+  public services: ServicesValues;
 
   constructor(
     scope: Construct,
@@ -126,7 +127,7 @@ export class Role extends lafkenResource.make(IamRole) {
     private props: RoleProps
   ) {
     super(scope, id, {
-      name: props.name,
+      name: props.name.slice(0, 63),
       assumeRolePolicy: Fn.jsonencode({
         Version: '2012-10-17',
         Statement: [
@@ -140,6 +141,7 @@ export class Role extends lafkenResource.make(IamRole) {
         ],
       }),
     });
+    this.services = props.services;
     this.createPolicy();
   }
 
@@ -149,7 +151,7 @@ export class Role extends lafkenResource.make(IamRole) {
     const statement = this.createPolicyStatement(this.props.services);
 
     this.policy = new RolePolicy(this, policyName, {
-      name: policyName,
+      name: policyName.slice(0, 63),
       role: this.id,
       policy: statement ? Fn.jsonencode(statement) : '',
       dependsOn: [this],

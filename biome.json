@@ -42,6 +42,9 @@
           "fix": "safe",
           "level": "error"
         }
+      },
+      "style": {
+        "noNonNullAssertion": "off"
       }
     }
   },
