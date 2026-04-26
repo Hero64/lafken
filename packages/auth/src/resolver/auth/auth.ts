@@ -46,7 +46,7 @@ export class Auth extends Construct {
   }
 
   private createUserPoolClient() {
-    if (!this.props.userClient) {
+    if (!this.userPool || !this.props.userClient) {
       return;
     }
 

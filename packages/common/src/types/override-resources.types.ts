@@ -16,12 +16,52 @@ export type ApiNames = ResourceScopeKeys<SharedResourceNames, 'api'>;
 export type ApiReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'api'>;
 
 export type BucketNames = ResourceScopeKeys<SharedResourceNames, 'bucket'>;
+export type BucketReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'bucket'>;
+
 export type DynamoTableNames = ResourceScopeKeys<SharedResourceNames, 'dynamo'>;
+export type DynamoReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'dynamo'>;
+
 export type StateMachineNames = ResourceScopeKeys<SharedResourceNames, 'state-machine'>;
+export type StateMachineReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'state-machine'
+>;
+
 export type EventBusNames = ResourceScopeKeys<SharedResourceNames, 'event-bus'>;
+export type EventBusReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'event-bus'
+>;
+
+export type EventRuleReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'event-rule'
+>;
+
 export type QueueNames = ResourceScopeKeys<SharedResourceNames, 'queue'>;
-export type AuthNames = ResourceScopeKeys<SharedResourceNames, 'authentication'>;
+export type QueueReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'queue'>;
+
+export type UserPoolNames = ResourceScopeKeys<SharedResourceNames, 'user-pool'>;
+export type UserPoolReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'user-pool'
+>;
+
+export type UserPoolClientNames = ResourceScopeKeys<
+  SharedResourceNames,
+  'user-pool-client'
+>;
+export type UserPoolClientReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'user-pool-client'
+>;
+
 export type ApiAuthorizerNames = ResourceScopeKeys<SharedResourceNames, 'api-authorizer'>;
+
+export type ScheduleReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'schedule'
+>;
 
 export type RegisterNamespaces =
   | 'api'
@@ -31,4 +71,9 @@ export type RegisterNamespaces =
   | 'queue'
   | 'authentication'
   | 'api-authorizer'
+  | 'user-pool'
+  | 'user-pool-client'
+  | 'schedule'
+  | 'event-bus'
+  | 'event-rule'
   | (string & {});

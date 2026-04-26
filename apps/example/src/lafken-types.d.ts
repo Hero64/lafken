@@ -5,32 +5,8 @@
  */
 
 declare module '@lafken/common' {
-  interface ModulesAvailable {
-    'pokemon-module': {
-      Queue: {
-        createPokemon: true;
-      };
-    };
-  }
-
-  interface BucketAvailable {
-    'lafken-pokemon-backups': true;
-  }
-
-  interface ApiRestAvailable {
-    'poke-api': boolean;
-  }
-
-  interface ApiAuthorizerAvailable {
-    'pokemon-custom-auth': true;
-  }
-
-  interface DynamoTableAvailable {
-    pokemons: true;
-  }
-
-  interface AuthAvailable {
-    'example-user-pool': true;
+  interface SharedResourceNames {
+    api: 'poke-api';
   }
 }
 

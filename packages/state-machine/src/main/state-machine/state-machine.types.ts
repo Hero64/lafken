@@ -8,6 +8,7 @@ import type {
   ResourceProps,
   ServicesValues,
   StateMachineNames,
+  StateMachineReferenceNames,
 } from '@lafken/common';
 
 import type { JsonAtaString } from '../param';
@@ -199,6 +200,15 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    * }
    */
   outputs?: ResourceOutputType<StateMachineOutputAttributes>;
+  /**
+   * Registers this State Machine as a named global reference, allowing other resources
+   * to access its attributes (e.g. execution ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'my-state-machine'
+   */
+  ref?: StateMachineReferenceNames;
 }
 
 interface WaitStateBase<T> {

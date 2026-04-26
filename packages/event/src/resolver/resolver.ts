@@ -65,7 +65,9 @@ export class EventRuleResolver implements ResolverType {
         new ResourceOutput<BusOutputAttributes>(eventBus, eventBusProps.outputs);
       }
 
-      eventBus.isGlobal('event-bus', eventBusProps.busName);
+      if (eventBusProps.ref) {
+        eventBus.register('event-bus', eventBusProps.ref);
+      }
 
       this.eventBuses[eventBusProps.busName] = {
         eventBus: eventBus,

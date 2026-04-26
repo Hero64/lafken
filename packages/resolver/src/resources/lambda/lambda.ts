@@ -99,7 +99,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     });
 
     if (environments && !environmentValues) {
-      this.isDependent(() => {
+      this.onResolve(() => {
         environmentValues = environments.getValues();
 
         if (!environmentValues) {
