@@ -159,7 +159,7 @@ describe('Bucket upload integration', () => {
     const Bucket = lafkenResource.make(S3Bucket);
 
     const bucket = new Bucket(stack, 'test');
-    bucket.isGlobal('bucket', 'test');
+    bucket.register('bucket', 'test');
 
     await restApi.addMethod(stack, {
       classResource: BucketIntegrationApi,

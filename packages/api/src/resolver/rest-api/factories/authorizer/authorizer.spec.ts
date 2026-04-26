@@ -119,7 +119,7 @@ describe('authorizer factory', () => {
   it('should create a cognito authorizer', () => {
     @CognitoAuthorizer({
       name: 'cognito-auth',
-      authName: 'testing-user-pool',
+      userPoolArn: () => 'testing-user-pool',
     })
     class CognitoAuthTest {}
 
@@ -136,7 +136,7 @@ describe('authorizer factory', () => {
       name: 'testing-user-pool',
     });
 
-    userPool.isGlobal('user-pool', 'testing-user-pool');
+    userPool.register('user-pool', 'testing-user-pool');
 
     const properties = restApi.authorizerFactory.getAuthorizerProps({
       fullPath: '/',

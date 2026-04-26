@@ -149,7 +149,7 @@ describe('App', () => {
       async create(scope: AppModule) {
         const Bucket = lafkenResource.make(S3Bucket);
         const bucket = new Bucket(scope, 'bucket');
-        bucket.isDependent(dependentCallback);
+        bucket.onResolve(dependentCallback);
       }
     }
     await createApp({

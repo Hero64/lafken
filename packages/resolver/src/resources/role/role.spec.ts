@@ -80,7 +80,7 @@ describe('Role', () => {
     const Bucket = lafkenResource.make(S3Bucket);
 
     const bucket = new Bucket(stack, 'test', {});
-    bucket.isGlobal('bucket', 'test');
+    bucket.register('bucket', 'test');
 
     new Role(stack, 'testing', {
       name: 'testing',
@@ -117,6 +117,6 @@ describe('Role', () => {
       ],
     });
 
-    await expect(lafkenResource.callDependentCallbacks()).rejects.toThrow();
+    await expect(lafkenResource.resolve()).rejects.toThrow();
   });
 });

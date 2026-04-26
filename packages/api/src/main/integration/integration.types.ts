@@ -1,13 +1,11 @@
 import type {
+  AvailableReference,
   BucketNames,
   DynamoTableNames,
-  DynamoTableScopedNames,
   GetResourceValue,
   OnlyNumberString,
   OnlyOne,
   QueueNames,
-  QueueScopedNames,
-  StateMachineScopedNames,
 } from '@lafken/common';
 
 /**
@@ -92,7 +90,7 @@ export interface BucketIntegrationResponse {
  * }
  * ```
  */
-export type BucketIntegrationOption = IntegrationOptionBase<BucketNames>;
+export type BucketIntegrationOption = IntegrationOptionBase<AvailableReference>;
 
 /**
  * Response shape for starting a Step Functions state machine execution.
@@ -154,14 +152,13 @@ export interface StateMachineStopIntegrationResponse
  * Integration options scoped to Step Functions state machine resources.
  * Resource identifiers follow the format `module::state-machine::name`.
  */
-export type StateMachineIntegrationOption =
-  IntegrationOptionBase<StateMachineScopedNames>;
+export type StateMachineIntegrationOption = IntegrationOptionBase<AvailableReference>;
 
 /**
  * Integration options scoped to DynamoDB table resources.
  * Resource identifiers follow the format `dynamo::tableName`.
  */
-export type DynamoIntegrationOption = IntegrationOptionBase<DynamoTableScopedNames>;
+export type DynamoIntegrationOption = IntegrationOptionBase<AvailableReference>;
 
 /**
  * Base interface for DynamoDB integration responses that require a table name.
@@ -312,7 +309,7 @@ export interface DynamoDeleteIntegrationResponse<T = any>
  * ```
  */
 export type QueueIntegrationOption = IntegrationOptionBase<
-  QueueScopedNames,
+  AvailableReference,
   'id' | 'arn' | 'name'
 >;
 

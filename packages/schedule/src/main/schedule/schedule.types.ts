@@ -1,4 +1,8 @@
-import type { LambdaMetadata, ResourceOutputType } from '@lafken/common';
+import type {
+  LambdaMetadata,
+  ResourceOutputType,
+  ScheduleReferenceNames,
+} from '@lafken/common';
 
 type ScheduleExpressions = number | '*' | '?' | (string & {});
 
@@ -68,6 +72,15 @@ export interface EventCronProps {
    * }
    */
   outputs?: ResourceOutputType<ScheduleOutputAttributes>;
+  /**
+   * Registers this Eventbridge schedule as a named global reference, allowing other resources
+   * to access its attributes (e.g. execution ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'my-state-machine'
+   */
+  ref?: ScheduleReferenceNames;
 }
 
 export interface EventCronMetadata extends LambdaMetadata, EventCronProps {}

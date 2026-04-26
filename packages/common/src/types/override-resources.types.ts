@@ -1,54 +1,79 @@
-import type { ResourceIdentifiers, ScopedResourceNames } from './utilities.types';
+export interface SharedResourceNames {}
+export interface SharedReferenceResources {}
 
-export type ModuleGlobalReferenceNames =
-  | 'api'
-  | 'user-pool'
-  | 'user-pool-client'
-  | 'bucket'
-  | 'dynamo'
-  | 'event-bus'
-  | 'resource';
+export type ResourceScopedKeys<T> = {
+  [Scope in keyof T]: `${Scope & string}::${T[Scope] & string}`;
+}[keyof T];
 
-export interface ModulesAvailable {}
-export interface AuthAvailable {}
-export interface BucketAvailable {}
-export interface ApiRestAvailable {}
-export interface ApiAuthorizerAvailable {}
-export interface EventBusAvailable {}
-export interface DynamoTableAvailable {}
-export interface ResourceAvailable {}
+export type ResourceScopeKeys<T, Scope extends string> =
+  T extends Record<Scope, string> ? T[Scope] : string & {};
 
-type ResourceNames<T> = keyof T | (string & {});
-type StackResourceName<T, S extends ModuleGlobalReferenceNames> =
-  | `${S}::${Extract<keyof T, string | number>}`
-  | (string & {});
+export type AvailableReference = [keyof SharedReferenceResources] extends [never]
+  ? string
+  : ResourceScopedKeys<SharedReferenceResources>;
 
-export type ModuleNames = ResourceNames<ModulesAvailable>;
-export type AuthNames = ResourceNames<AuthAvailable>;
-export type UserPoolScopedNames = StackResourceName<AuthAvailable, 'user-pool'>;
-export type UserPoolClientScopedNames = StackResourceName<
-  AuthAvailable,
+export type ApiNames = ResourceScopeKeys<SharedResourceNames, 'api'>;
+export type ApiReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'api'>;
+
+export type BucketNames = ResourceScopeKeys<SharedResourceNames, 'bucket'>;
+export type BucketReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'bucket'>;
+
+export type DynamoTableNames = ResourceScopeKeys<SharedResourceNames, 'dynamo'>;
+export type DynamoReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'dynamo'>;
+
+export type StateMachineNames = ResourceScopeKeys<SharedResourceNames, 'state-machine'>;
+export type StateMachineReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'state-machine'
+>;
+
+export type EventBusNames = ResourceScopeKeys<SharedResourceNames, 'event-bus'>;
+export type EventBusReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'event-bus'
+>;
+
+export type EventRuleReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'event-rule'
+>;
+
+export type QueueNames = ResourceScopeKeys<SharedResourceNames, 'queue'>;
+export type QueueReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'queue'>;
+
+export type UserPoolNames = ResourceScopeKeys<SharedResourceNames, 'user-pool'>;
+export type UserPoolReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'user-pool'
+>;
+
+export type UserPoolClientNames = ResourceScopeKeys<
+  SharedResourceNames,
   'user-pool-client'
 >;
-export type BucketNames = ResourceNames<BucketAvailable>;
-export type ResourcesScopedNames = StackResourceName<ResourceAvailable, 'resource'>;
-export type BucketScopedNames = StackResourceName<BucketAvailable, 'bucket'>;
-export type ApiRestNames = ResourceNames<ApiRestAvailable>;
-export type ApiRestScopedNames = StackResourceName<ApiRestAvailable, 'api'>;
-export type ApiAuthorizerNames = ResourceNames<ApiAuthorizerAvailable>;
-export type EventBusNames = ResourceNames<EventBusAvailable>;
-export type EventBusScopedNames = StackResourceName<EventBusAvailable, 'event-bus'>;
-export type DynamoTableNames = ResourceNames<DynamoTableAvailable>;
-export type DynamoTableScopedNames = StackResourceName<DynamoTableAvailable, 'dynamo'>;
+export type UserPoolClientReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'user-pool-client'
+>;
 
-export type StateMachineNames =
-  | ResourceIdentifiers<ModulesAvailable, 'StateMachine'>
-  | (string & {});
-export type StateMachineScopedNames =
-  | ScopedResourceNames<ModulesAvailable, 'StateMachine', 'state-machine'>
-  | (string & {});
+export type ApiAuthorizerNames = ResourceScopeKeys<SharedResourceNames, 'api-authorizer'>;
 
-export type QueueNames = ResourceIdentifiers<ModulesAvailable, 'Queue'> | (string & {});
-export type QueueScopedNames =
-  | ScopedResourceNames<ModulesAvailable, 'Queue', 'queue'>
+export type ScheduleReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'schedule'
+>;
+
+export type RegisterNamespaces =
+  | 'api'
+  | 'bucket'
+  | 'dynamo'
+  | 'state-machine'
+  | 'queue'
+  | 'authentication'
+  | 'api-authorizer'
+  | 'user-pool'
+  | 'user-pool-client'
+  | 'schedule'
+  | 'event-bus'
+  | 'event-rule'
   | (string & {});

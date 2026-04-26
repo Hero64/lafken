@@ -40,7 +40,10 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       delaySeconds: handler.deliveryDelay,
     });
 
-    this.isGlobal(scope.id, `queue::${handler.queueName}`);
+    if (handler.ref) {
+      this.register('queue', handler.ref);
+    }
+
     this.validateEventParams();
     this.addEventSource(id);
     new ResourceOutput<QueueOutputAttributes>(this, handler.outputs);

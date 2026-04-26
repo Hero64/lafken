@@ -1,6 +1,6 @@
 import type {
   ApiAuthorizerNames,
-  AuthNames,
+  GetResourceProps,
   ResourceMetadata,
   ResourceProps,
 } from '@lafken/common';
@@ -30,7 +30,7 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
    * by the `AuthResolver`. This name must match the `name` property
    * defined in the `AuthResolver` options.
    */
-  authName: AuthNames;
+  userPoolArn: (props: GetResourceProps) => string;
   /**
    * Authorization header.
    *

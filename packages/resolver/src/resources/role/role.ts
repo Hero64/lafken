@@ -158,7 +158,7 @@ export class Role extends lafkenResource.make(IamRole) {
     });
 
     if (!statement) {
-      this.policy.isDependent(() => {
+      this.policy.onResolve(() => {
         const statement = this.createPolicyStatement(this.props.services);
         if (!statement) {
           throw new Error('The role policy could not resolve one of its dependencies');

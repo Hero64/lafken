@@ -1,6 +1,6 @@
 {
   "name": "@lafken/resolver",
-  "version": "0.11.8",
+  "version": "0.11.9",
   "private": false,
   "description": "Lafken resolver foundation - AWS Lambda and IAM utilities for building decorator-based infrastructure resolvers",
   "keywords": [
@@ -37,16 +37,16 @@
   },
   "dependencies": {
     "reflect-metadata": "^0.2.2",
-    "rolldown": "1.0.0-rc.12"
+    "rolldown": "1.0.0-rc.17"
   },
   "devDependencies": {
-    "@cdktn/provider-aws": "^23.5.0",
+    "@cdktn/provider-aws": "^23.9.0",
     "@lafken/common": "workspace:*",
     "cdktn": "^0.22.1",
     "cdktn-vitest": "^1.0.0",
     "constructs": "^10.6.0",
-    "typescript": "6.0.2",
-    "vitest": "^4.1.2"
+    "typescript": "6.0.3",
+    "vitest": "^4.1.5"
   },
   "peerDependencies": {
     "@cdktn/provider-aws": ">=23.0.0",

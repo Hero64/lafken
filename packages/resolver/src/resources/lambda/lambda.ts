@@ -1,3 +1,4 @@
+import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
@@ -6,6 +7,7 @@ import {
   type AliasConfig,
   type GetResourceProps,
   kebabCase,
+  type LoggingConfig,
   type ServicesValues,
   type VpcConfigValue,
 } from '@lafken/common';
@@ -42,6 +44,11 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
 
     const alias = LambdaHandler.getCurrentOrContextValue({
       key: 'alias',
+      ...contextValueProps,
+    });
+
+    const loggingConfig = LambdaHandler.getCurrentOrContextValue({
+      key: 'loggingConfig',
       ...contextValueProps,
     });
 
@@ -92,7 +99,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     });
 
     if (environments && !environmentValues) {
-      this.isDependent(() => {
+      this.onResolve(() => {
         environmentValues = environments.getValues();
 
         if (!environmentValues) {
@@ -113,6 +120,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     });
 
     this.addVpcConfig(props.lambda?.vpcConfig);
+    this.addLoggingConfig(handlerName, loggingConfig);
     this.addAlias(handlerName, alias);
     this.addPermission(handlerName, props);
   }
@@ -163,6 +171,33 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     this.putVpcConfig(
       typeof vpcConfig === 'function' ? vpcConfig(getExternalValues(this)) : vpcConfig
     );
+  }
+
+  private addLoggingConfig(name: string, loggingConfig?: LoggingConfig) {
+    if (!loggingConfig) {
+      return;
+    }
+
+    let logGroupArn: string | undefined;
+
+    if (loggingConfig.retentionInDays) {
+      const logGroup = new CloudwatchLogGroup(this, 'lambda-logs', {
+        name: `/aws/lambda/${name}`,
+        retentionInDays: loggingConfig.retentionInDays,
+      });
+
+      logGroupArn = logGroup.arn;
+      this.dependsOn = [...(this.dependsOn || []), dependable(logGroup)];
+    }
+
+    const logFormatMap = { text: 'Text', json: 'JSON' } as const;
+
+    this.putLoggingConfig({
+      logFormat: logFormatMap[loggingConfig.logFormat],
+      logGroup: logGroupArn,
+      applicationLogLevel: loggingConfig.applicationLogLevel?.toUpperCase(),
+      systemLogLevel: loggingConfig.systemLogLevel?.toUpperCase(),
+    });
   }
 
   private static getCurrentOrContextValue<

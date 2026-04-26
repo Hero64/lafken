@@ -54,7 +54,7 @@ export class DynamoBaseIntegration<T> implements Integration {
     );
 
     if (resolveResource.hasUnresolved()) {
-      integration.isDependent(async () => {
+      integration.onResolve(async () => {
         const { integrationResponse, resolveResource } =
           await this.callIntegrationMethod<T>();
 

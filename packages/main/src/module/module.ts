@@ -65,7 +65,7 @@ export class StackModule extends Construct {
       },
     });
 
-    lambdaRole.isGlobal('module', roleName);
+    lambdaRole.register('module', roleName);
   }
 
   private addAspectProperties() {

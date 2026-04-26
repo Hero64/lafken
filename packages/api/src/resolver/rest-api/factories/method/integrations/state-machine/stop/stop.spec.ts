@@ -128,7 +128,7 @@ describe('State machine status integration', () => {
       definition: '',
       roleArn: '',
     });
-    stateMachine.isGlobal('state-machine', 'test');
+    stateMachine.register('state-machine', 'test');
 
     await initializeMethod(
       restApi,
@@ -138,7 +138,7 @@ describe('State machine status integration', () => {
     );
 
     const synthesized = Testing.synth(stack);
-    lafkenResource.callDependentCallbacks();
+    lafkenResource.resolve();
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
       integration_http_method: 'POST',

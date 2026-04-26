@@ -1,7 +1,7 @@
 import type {
   AllowedTypes,
   ApiAuthorizerNames,
-  ApiRestNames,
+  ApiNames,
   LambdaMetadata,
   LambdaProps,
   ResourceMetadata,
@@ -332,7 +332,7 @@ export interface ApiProps extends ResourceProps {
    * to register the methods of the decorated class. If no value is provided,
    * the default API Gateway will be used.
    */
-  apiGatewayName?: ApiRestNames;
+  apiGatewayName?: ApiNames;
   /**
    * OpenAPI tags.
    *

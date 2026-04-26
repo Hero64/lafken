@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@cdktn/provider-aws": "^23.5.0",
+    "@cdktn/provider-aws": "^23.9.0",
     "@lafken/api": "workspace:*",
     "@lafken/auth": "workspace:*",
     "@lafken/bucket": "workspace:*",
@@ -29,9 +29,9 @@
     "dayjs": "1.11.20"
   },
   "devDependencies": {
-    "@aws-sdk/client-sqs": "^3.1020.0",
+    "@aws-sdk/client-sqs": "^3.1037.0",
     "cdktn-cli": "^0.22.1",
     "unplugin-swc": "^1.5.9",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.5"
   }
 }
