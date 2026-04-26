@@ -262,8 +262,6 @@ export class AuthorizerFactory {
       });
     }
 
-    authorizer.providerArns = [];
-
     this.authResources.push(authorizer);
     this.createDoc(metadata.name, metadata.description);
     this.authorizerIds[metadata.name] = authorizer.id;
