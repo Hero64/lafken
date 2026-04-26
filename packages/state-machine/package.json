@@ -1,6 +1,6 @@
 {
   "name": "@lafken/state-machine",
-  "version": "0.11.8",
+  "version": "0.11.9",
   "private": false,
   "description": "Build Step Functions workflows with TypeScript decorators - declarative orchestration with Lafken",
   "keywords": [
