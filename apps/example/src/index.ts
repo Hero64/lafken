@@ -6,8 +6,8 @@ import { EventRuleResolver } from '@lafken/event/resolver';
 import { createApp } from '@lafken/main';
 import { QueueResolver } from '@lafken/queue/resolver';
 import { StateMachineResolver } from '@lafken/state-machine/resolver';
+import { CognitoAuth } from './auth/cognito.auth';
 import { TrainerAuthorizer } from './auth/pokemon-custom.auth';
-import { CognitoAuth } from './infra/auth/cognito.auth';
 import { PokemonBackupsBucket } from './infra/buckets/pokemon-backups.bucket';
 import { Pokemon } from './infra/models/pokemon.model';
 import PokemonModule from './modules/pokemon/pokemon.module';
@@ -31,6 +31,7 @@ createApp({
       name: 'poke-auth',
       userPool: {
         signInAliases: ['preferred_username'],
+        ref: 'poke-auth-user-pool',
       },
       userClient: {
         authFlows: ['allow_user_password_auth', 'allow_refresh_token_auth'],

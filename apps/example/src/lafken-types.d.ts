@@ -7,6 +7,14 @@
 declare module '@lafken/common' {
   interface SharedResourceNames {
     api: 'poke-api';
+    'api-authorizer': 'cognito-auth' | 'pokemon-custom-auth' | 'poke-auth';
+  }
+
+  interface SharedReferenceResources {
+    'user-pool': 'poke-auth-user-pool';
+    queue: 'create-pokemon';
+    dynamo: 'pokemons';
+    'state-machine': 'get-pokemon';
   }
 }
 

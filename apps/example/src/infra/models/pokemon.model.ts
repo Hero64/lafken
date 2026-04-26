@@ -7,6 +7,7 @@ import { createRepository } from '@lafken/dynamo/service';
     enabled: true,
     type: 'NEW_AND_OLD_IMAGES',
   },
+  ref: 'pokemons',
   // indexes: [
   //   {
   //     type: 'local',
