@@ -24,7 +24,7 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
     });
 
     if (props.handler.ref) {
-      this.register(scope.id, id);
+      this.register('event-rule', props.handler.ref);
     }
 
     this.addEventTarget(id);
