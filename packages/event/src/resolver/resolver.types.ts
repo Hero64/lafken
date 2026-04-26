@@ -1,6 +1,10 @@
 import type { CloudwatchEventBus } from '@cdktn/provider-aws/lib/cloudwatch-event-bus';
 import type { DataAwsCloudwatchEventBus } from '@cdktn/provider-aws/lib/data-aws-cloudwatch-event-bus';
-import type { EventBusNames, ResourceOutputType } from '@lafken/common';
+import type {
+  EventBusNames,
+  EventBusReferenceNames,
+  ResourceOutputType,
+} from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
 
 export type BusOutputAttributes = 'arn' | 'id';
@@ -32,6 +36,16 @@ export interface EventRuleResolverBaseProps {
    * is always provisioned automatically.
    */
   busName: EventBusNames;
+
+  /**
+   * Registers this Event bus as a named global reference, allowing other resources
+   * to access its attributes (e.g. execution ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'event-bus'
+   */
+  ref?: EventBusReferenceNames;
 }
 
 export interface InternalEventRuleResolverProps extends EventRuleResolverBaseProps {

@@ -145,7 +145,7 @@ describe('Dynamo query integration', () => {
     const table = new Table(stack, 'test', {
       name: 'test',
     });
-    table.isGlobal('dynamo', 'test');
+    table.register('dynamo', 'test');
 
     await initializeMethod(restApi, stack, DynamoIntegrationApi, 'queryWithResource');
 

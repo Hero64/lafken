@@ -128,7 +128,7 @@ describe('Queue send message integration', () => {
     const Queue = lafkenResource.make(SqsQueue);
 
     const queue = new Queue(stack, 'test');
-    queue.isGlobal('testing', 'test');
+    queue.register('testing', 'test');
 
     await initializeMethod(restApi, stack, TestingApi, 'sendMessageWithResource');
 

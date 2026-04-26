@@ -31,7 +31,9 @@ export class InternalBucket extends lafkenResource.make(S3Bucket) {
       },
     });
 
-    this.isGlobal('bucket', name);
+    if (props.ref) {
+      this.register('bucket', props.ref);
+    }
 
     if (eventBridgeEnabled ?? props.eventBridgeEnabled) {
       new S3BucketNotification(this, `${name}-notification`, {

@@ -260,9 +260,9 @@ describe('State Machine', () => {
     const Queue = lafkenResource.make(SqsQueue);
 
     const queue = new Queue(stack, 'test');
-    queue.isGlobal('queue', 'test');
+    queue.register('queue', 'test');
 
-    await lafkenResource.callDependentCallbacks();
+    await lafkenResource.resolve();
 
     const synthesized = Testing.synth(stack);
 
@@ -294,7 +294,7 @@ describe('State Machine', () => {
 
     await createStateMachine(TestingSM);
 
-    await expect(lafkenResource.callDependentCallbacks()).rejects.toThrow(
+    await expect(lafkenResource.resolve()).rejects.toThrow(
       'The schema has a unresolved dependency'
     );
   });
@@ -378,9 +378,9 @@ describe('State Machine', () => {
     const Queue = lafkenResource.make(SqsQueue);
 
     const queue = new Queue(stack, 'test');
-    queue.isGlobal('queue', 'test');
+    queue.register('queue', 'test');
 
-    await lafkenResource.callDependentCallbacks();
+    await lafkenResource.resolve();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {

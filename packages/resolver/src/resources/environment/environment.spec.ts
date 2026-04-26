@@ -63,7 +63,7 @@ describe('Environment', () => {
     const Bucket = lafkenResource.make(S3Bucket);
 
     const bucket = new Bucket(stack, 'test', {});
-    bucket.isGlobal('bucket', 'test');
+    bucket.register('bucket', 'test');
 
     const env = new Environment(stack, 'env-test', ({ getResourceValue }) => ({
       foo: getResourceValue('bucket::test', 'id'),

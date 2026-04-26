@@ -61,7 +61,7 @@ export class SendMessageIntegration implements Integration {
     );
 
     if (resolveResource.hasUnresolved()) {
-      integration.isDependent(async () => {
+      integration.onResolve(async () => {
         const integrationResponse = await resource[handler.name](
           proxyHelper.createEvent(),
           options

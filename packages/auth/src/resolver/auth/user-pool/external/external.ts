@@ -12,6 +12,8 @@ export class ExternalUserPool extends lafkenResource.make(DataAwsCognitoUserPool
           : props.userPoolId(getExternalValues(scope)),
     });
 
-    this.isGlobal('user-pool', id);
+    if (props.ref) {
+      this.register('user-pool', props.ref);
+    }
   }
 }

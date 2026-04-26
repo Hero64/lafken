@@ -2,6 +2,7 @@ import type {
   LambdaMetadata,
   LambdaProps,
   QueueNames,
+  QueueReferenceNames,
   ResourceOutputType,
 } from '@lafken/common';
 
@@ -96,6 +97,15 @@ export interface StandardProps {
    * }
    */
   outputs?: ResourceOutputType<QueueOutputAttributes>;
+  /**
+   * Registers this Queue as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'order'
+   */
+  ref?: QueueReferenceNames;
 }
 
 export interface FifoProps extends StandardProps {
