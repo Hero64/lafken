@@ -7,6 +7,7 @@ import {
   type AliasConfig,
   type GetResourceProps,
   kebabCase,
+  type LambdaOutputAttributes,
   type LoggingConfig,
   type ServicesValues,
   type VpcConfigValue,
@@ -16,6 +17,7 @@ import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 import { getAppContext, getExternalValues, getModuleContext } from '../../utils';
 import { Environment } from '../environment/environment';
+import { ResourceOutput } from '../output/output';
 import { lafkenResource } from '../resource';
 import { Role } from '../role';
 import { lambdaAssets } from './asset/asset';
@@ -90,6 +92,12 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
         variables: hasValues ? environmentValues || {} : {},
       },
     });
+
+    if (props.lambda?.ref) {
+      this.register('lambda', props.lambda.ref);
+    }
+
+    new ResourceOutput<LambdaOutputAttributes>(this, props.lambda?.outputs);
 
     this.setRole({
       appContext,
