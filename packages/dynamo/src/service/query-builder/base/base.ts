@@ -119,14 +119,14 @@ export class QueryBuilderBase<E extends ClassResource> {
         }
         case 'AND': {
           const andFilter = filter as AndFilter<T>;
-          const expression = this.getFilterExpression(
-            andFilter.AND,
-            names,
-            'and',
-            counter
-          );
+          const andExpressions: string[] = [];
+          for (const condition of andFilter.AND) {
+            const expression = this.getFilterExpression(condition, names, 'and', counter);
+            counter += 1;
+            andExpressions.push(expression);
+          }
 
-          filterExpression.join(`(${expression})`);
+          filterExpression.push(`(${andExpressions.join(' and ')})`);
           break;
         }
         default: {
