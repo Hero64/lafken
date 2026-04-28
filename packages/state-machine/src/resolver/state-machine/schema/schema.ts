@@ -70,7 +70,7 @@ export class Schema {
     this.stateNames = props.stateNames || new StateNames();
     this.lambdaStates = props.lambdas || new LambdaStates();
 
-    this.getMetadata(props.initializeAssets ?? false);
+    this.getMetadata(props.initializeAssets ?? false, props.minify);
   }
 
   get definition(): DefinitionSchema {
@@ -198,7 +198,7 @@ export class Schema {
           Type: 'Pass',
           Assign: currentState.assign,
           Output: currentState.output,
-          End: currentState.end,
+          End: currentState.next !== undefined ? undefined : currentState.end,
           Next: this.getNextState(currentState.next, currentState.end),
         };
         break;
@@ -214,7 +214,7 @@ export class Schema {
             stateNames: this.stateNames,
             minify: this.props.minify,
           });
-          this.resources.push(...this.resources);
+          this.lambdaResources.push(...branchSchema.resources);
           branchStates.push(branchSchema.definition);
           this.mergeBucketPermissions(branchSchema.buckets);
           this.setUnresolvedDependency(branchSchema.unresolvedDependency);
@@ -225,7 +225,7 @@ export class Schema {
           Arguments: this.getParallelArguments(currentState.arguments),
           Output: currentState.output,
           Assign: currentState.assign,
-          End: currentState.end ?? currentState.next === undefined,
+          End: currentState.next !== undefined ? undefined : (currentState.end ?? true),
           Next: this.getNextState(currentState.next, currentState.end),
           Branches: branchStates,
         };
@@ -239,7 +239,7 @@ export class Schema {
           stateNames: this.stateNames,
           minify: this.props.minify,
         });
-        this.resources.push(...this.resources);
+        this.lambdaResources.push(...mapSchema.resources);
         this.mergeBucketPermissions(mapSchema.buckets);
         const mapState = mapSchema.definition;
         this.setUnresolvedDependency(mapSchema.hasUnresolvedDependency);
@@ -255,7 +255,7 @@ export class Schema {
           Type: 'Map',
           Items: currentState.items,
           ItemProcessor: itemProcessor as ItemProcessor,
-          End: currentState.end ?? currentState.next === undefined,
+          End: currentState.next !== undefined ? undefined : (currentState.end ?? true),
           Next: this.getNextState(currentState.next, currentState.end),
           Output: currentState.output,
           Assign: currentState.assign,
@@ -410,7 +410,7 @@ export class Schema {
   private addTaskState(handler: LambdaStateMetadata) {
     const stateName = this.stateNames.createName(handler.name);
     if (this.states[stateName]) {
-      return handler.name;
+      return stateName;
     }
 
     const task: StateTask = {
@@ -418,7 +418,7 @@ export class Schema {
       Resource: '',
       Arguments: {},
       Next: this.getNextState(handler.next, handler.end),
-      End: handler.end,
+      End: handler.next !== undefined ? undefined : handler.end,
       Assign: handler.assign,
       ...(handler.integrationResource !== undefined
         ? this.getIntegrationTask(handler)
@@ -570,11 +570,9 @@ export class Schema {
   }
 
   private setUnresolvedDependency(unresolved: boolean) {
-    if (!this.unresolvedDependency || !unresolved) {
-      return;
+    if (unresolved) {
+      this.unresolvedDependency = true;
     }
-
-    this.unresolvedDependency = true;
   }
 
   private mergeBucketPermissions(bucketPermissions: BucketPermission) {

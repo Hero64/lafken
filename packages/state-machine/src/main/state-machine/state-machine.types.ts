@@ -752,7 +752,7 @@ interface MapReaderCSVItem extends MapReaderItemBase {
 
 interface MapWriteResult {
   bucket: BucketNames;
-  prefix?: string;
+  prefix: string;
   config?: {
     outputType: 'JSON' | 'JSONL';
     transformation?: 'NONE' | 'COMPACT' | 'FLATTEN';
