@@ -1,3 +1,4 @@
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import type { ClassResource } from '@lafken/common';
 import type { TablePartition } from '../../main';
 import type {
@@ -31,4 +32,5 @@ export type RepositoryReturn<E extends ClassResource> = {
   delete(key: TablePartition<Item<E>>): DeleteBuilder<E>;
   bulkCreate(items: Item<E>[]): BulkCreateBuilder<E>;
   bulkDelete(keys: TablePartition<Item<E>>[]): BulkDeleteBuilder<E>;
+  sendRawCommand<T = unknown>(command: Parameters<DynamoDBClient['send']>[0]): Promise<T>;
 };
