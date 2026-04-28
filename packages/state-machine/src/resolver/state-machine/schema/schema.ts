@@ -254,6 +254,8 @@ export class Schema {
         const mapTask: MapTask = {
           Type: 'Map',
           Items: currentState.items,
+          ItemSelector: currentState.itemSelector,
+          MaxConcurrency: currentState.maxCurrency,
           ItemProcessor: itemProcessor as ItemProcessor,
           End: currentState.next !== undefined ? undefined : (currentState.end ?? true),
           Next: this.getNextState(currentState.next, currentState.end),
@@ -324,8 +326,7 @@ export class Schema {
           }
 
           if (currentState.toleratedFailurePercentage) {
-            mapTask.ToleratedFailurePercentage =
-              currentState.toleratedFailurePercentage.toString();
+            mapTask.ToleratedFailurePercentage = currentState.toleratedFailurePercentage;
           }
         }
 
