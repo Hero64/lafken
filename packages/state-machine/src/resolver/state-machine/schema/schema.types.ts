@@ -75,6 +75,7 @@ export interface ItemReader {
     ManifestType?: 'ATHENA_DATA' | 'S3_INVENTORY';
     CSVDelimiter?: CsvDelimiter;
     MaxItems?: number;
+    ItemsPointer?: string;
   };
   Arguments: {
     Bucket: string;

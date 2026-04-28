@@ -293,6 +293,9 @@ export class Schema {
               readerConfig.ReaderConfig.CSVHeaders =
                 currentState.itemReader.headers?.titles;
               readerConfig.ReaderConfig.MaxItems = currentState.itemReader.maxItems;
+            } else if (currentState.itemReader.source === 'json') {
+              readerConfig.ReaderConfig.ItemsPointer =
+                currentState.itemReader.itemsPointer;
             }
 
             mapTask.ItemReader = readerConfig;

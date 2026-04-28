@@ -739,6 +739,7 @@ interface MapReaderItemBase {
 
 interface MapReaderJSONItem extends MapReaderItemBase {
   source: 'json' | 'jsonl' | 'manifest';
+  itemsPointer?: string;
 }
 
 interface MapReaderCSVItem extends MapReaderItemBase {
