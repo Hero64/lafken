@@ -8,7 +8,7 @@ Lafken leverages [cdk-terrain](https://github.com/open-constructs/cdk-terrain) t
 
 If you find Lafken useful, please consider supporting the cdk-terrain project. Your support helps us grow the ecosystem and continue building better tools together.
 
-## ✨ Key Features
+##  Key Features
 
 - **Decorator-Based**: Define infrastructure with familiar TypeScript decorators
 - **Type-Safe**: Full TypeScript support with autocomplete for resources
