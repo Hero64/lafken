@@ -1,10 +1,10 @@
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
+import { Role } from '@lafken/resolver';
 import {
   type ApiParamMetadata,
   Method,
   type QueueSendMessageIntegrationResponse,
 } from '../../../../../../../main';
-import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
 import type {
   InitializedClass,
   Integration,
@@ -28,12 +28,27 @@ export class SendMessageIntegration implements Integration {
     } = this.props;
 
     const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
+
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
       new classResource();
     const integrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
       options
     );
+
+    const role = new Role(restApi, `${resourceMetadata.name}-${handler.name}-role`, {
+      name: `${resourceMetadata.name}-${handler.name}-integration`,
+      services: (props) => {
+        return {
+          type: 'sqs',
+          permissions: ['SendMessage'],
+          ...(Array.isArray(handler.additionalServices) ||
+          handler.additionalServices === undefined
+            ? handler.additionalServices || []
+            : handler.additionalServices(props)),
+        };
+      },
+    });
 
     const integration = new LafkenIntegration(
       restApi,
@@ -45,7 +60,7 @@ export class SendMessageIntegration implements Integration {
         type: 'AWS',
         integrationHttpMethod: Method.POST,
         uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
-        credentials: integrationHelper.createRole('sqs.write', restApi).arn,
+        credentials: role.arn,
         passthroughBehavior: 'WHEN_NO_TEMPLATES',
         requestParameters: {
           'integration.request.header.Content-Type':
@@ -82,9 +97,9 @@ export class SendMessageIntegration implements Integration {
       apiGatewayMethod,
       integration,
       [
-        {
-          statusCode: getSuccessStatusCode(handler.method).toString(),
-        },
+        ...(responseHelper.handlerResponse || []).filter(
+          ({ statusCode }) => !['400', '500'].includes(statusCode)
+        ),
         responseHelper.getPatternResponse('400'),
         responseHelper.getPatternResponse('500'),
       ],

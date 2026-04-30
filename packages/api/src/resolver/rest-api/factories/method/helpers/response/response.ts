@@ -72,6 +72,7 @@ export class ResponseHelper {
     responses.push({
       statusCode: (defaultCode || getSuccessStatusCode(method)).toString(),
       field: response,
+      template: response.payload.responseTemplate,
     });
 
     for (const statusCode in response.payload.responses) {
@@ -109,6 +110,7 @@ export class ResponseHelper {
       selectionPattern: `${statusCode[0]}\\d{2}`,
       statusCode,
       template: `{"message": "${responseMessages[statusCode]}"}`,
+      field: InternalDefaultHttpResponse,
     };
   }
 }

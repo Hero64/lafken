@@ -39,6 +39,37 @@ export interface ResponseProps<T> extends ApiPayloadProps<T> {
    * - For `POST` methods, the default is `201 Created`.
    */
   defaultCode?: HTTP_STATUS_CODE_NUMBER;
+  /**
+   * Apache Velocity Template Language (VTL) expression used as the
+   * `responseTemplates['application/json']` value in the API Gateway
+   * integration response for the success status code.
+   *
+   * When omitted, API Gateway uses the default pass-through behaviour
+   * (i.e. the raw backend response body is forwarded unchanged).
+   *
+   * @example
+   * // Forward the entire response body as-is
+   * responseTemplate: "$input.json('$')"
+   *
+   * @example
+   * // Extract a nested field
+   * responseTemplate: "$input.json('$.body')"
+   */
+  responseTemplate?: string;
+}
+
+export interface ResponseObjectProps<T> extends ApiPayloadProps<T> {
+  /**
+   * Apache Velocity Template Language (VTL) expression used as the
+   * `responseTemplates['application/json']` value in the API Gateway
+   * integration response for the success status code.
+   *
+   * When omitted, API Gateway uses the default pass-through behaviour.
+   *
+   * @example
+   * responseTemplate: "$input.json('$')"
+   */
+  responseTemplate?: string;
 }
 
 export interface ResponseMetadata<T>

@@ -5,6 +5,7 @@ import {
   createResourceDecorator,
   getEventFields,
   LambdaReflectKeys,
+  type ServicesValues,
 } from '@lafken/common';
 import { type ApiObjectMetadata, PARAM_PREFIX, type Source } from '../request';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from '../response';
@@ -28,9 +29,10 @@ const createMethodDecorator = (method: Method) =>
     getLambdaMetadata: (params, methodName) => {
       const { path = '/' } = params;
       let action: string | undefined;
-
+      let additionalServices: ServicesValues | undefined;
       if (params.integration) {
         action = params.action;
+        additionalServices = params.additionalServices;
       }
 
       const responseHandler = params as ApiLambdaBaseProps;
@@ -52,6 +54,7 @@ const createMethodDecorator = (method: Method) =>
         integration: params.integration,
         summary: params.summary,
         tags: params.tags,
+        additionalServices,
       } as ApiLambdaMetadata;
     },
     validateEvent: (target, methodName, event) => {

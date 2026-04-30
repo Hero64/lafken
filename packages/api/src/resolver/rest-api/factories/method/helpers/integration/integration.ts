@@ -54,7 +54,7 @@ export class IntegrationHelper {
     };
   }
 
-  private getPermissionByRoleName(roleName: ServiceRoleName) {
+  public getPermissionByRoleName(roleName: ServiceRoleName) {
     const permissionsByRole: Partial<
       Record<
         ServiceRoleName,

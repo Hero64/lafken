@@ -6,6 +6,7 @@ import type {
   LambdaProps,
   ResourceMetadata,
   ResourceProps,
+  ServicesValues,
 } from '@lafken/common';
 import type { ResponseFieldMetadata } from '../response';
 
@@ -119,6 +120,10 @@ export interface ApiLambdaBaseProps {
   tags?: string[];
 }
 
+export interface ApiIntegrationBaseProps extends ApiLambdaBaseProps {
+  additionalServices?: ServicesValues;
+}
+
 export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
   /**
    * Method integration type.
@@ -150,7 +155,7 @@ export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
 
 export type BucketIntegrationActions = 'Download' | 'Upload' | 'Delete';
 
-export interface BucketDownloadIntegrationServiceProps extends ApiLambdaBaseProps {
+export interface BucketDownloadIntegrationServiceProps extends ApiIntegrationBaseProps {
   /**
    * Method integration type.
    *
@@ -172,7 +177,7 @@ export interface BucketDownloadIntegrationServiceProps extends ApiLambdaBaseProp
 }
 
 export interface BucketUploadDeleteIntegrationServiceProps
-  extends Omit<ApiLambdaBaseProps, 'response'> {
+  extends Omit<ApiIntegrationBaseProps, 'response'> {
   /**
    * Method integration type.
    *
@@ -200,7 +205,7 @@ export type BucketIntegrationServiceProps =
 export type StateMachineIntegrationActions = 'Start' | 'Stop' | 'Status';
 
 export interface StateMachineIntegrationServiceProps
-  extends Omit<ApiLambdaBaseProps, 'response'> {
+  extends Omit<ApiIntegrationBaseProps, 'response'> {
   /**
    * Method integration type.
    *
@@ -223,7 +228,7 @@ export interface StateMachineIntegrationServiceProps
 
 export type DynamoDbIntegrationActions = 'Query' | 'Put' | 'Delete';
 
-export interface DynamoDbQueryIntegrationServiceProps extends ApiLambdaBaseProps {
+export interface DynamoDbQueryIntegrationServiceProps extends ApiIntegrationBaseProps {
   /**
    * Method integration type.
    *
@@ -245,7 +250,7 @@ export interface DynamoDbQueryIntegrationServiceProps extends ApiLambdaBaseProps
 }
 
 export interface DynamoDbPutDeleteIntegrationServiceProps
-  extends Omit<ApiLambdaBaseProps, 'response'> {
+  extends Omit<ApiIntegrationBaseProps, 'response'> {
   /**
    * Method integration type.
    *
@@ -272,8 +277,7 @@ export type DynamoDbIntegrationServiceProps =
 
 export type QueueIntegrationActions = 'SendMessage';
 
-export interface QueueIntegrationServiceProps
-  extends Omit<ApiLambdaBaseProps, 'response'> {
+export interface QueueIntegrationServiceProps extends ApiIntegrationBaseProps {
   /**
    * Method integration type.
    *
@@ -364,6 +368,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   auth?: MethodAuthorizer | false;
   summary?: string;
   tags?: string[];
+  additionalServices?: ServicesValues;
 }
 
 export enum Method {
