@@ -26,8 +26,9 @@ export class ResponseHelper {
     if (this._handlerResponse !== undefined) {
       return this._handlerResponse;
     }
-
-    this._handlerResponse = defaultResponses(this.handler.method);
+    if (!this.handler.integration) {
+      this._handlerResponse = defaultResponses(this.handler.method);
+    }
 
     if (!this.handler.response) {
       return this._handlerResponse;
@@ -72,7 +73,7 @@ export class ResponseHelper {
     responses.push({
       statusCode: (defaultCode || getSuccessStatusCode(method)).toString(),
       field: response,
-      template: response.payload.responseTemplate,
+      selectionPattern: response.payload.selectionPattern,
     });
 
     for (const statusCode in response.payload.responses) {
@@ -96,6 +97,10 @@ export class ResponseHelper {
   }
 
   private addDefaultResponses(data: ResponseObjectMetadata) {
+    if (this.handler.integration) {
+      return data;
+    }
+
     data.payload.responses = {
       '400': InternalDefaultHttpResponse,
       '500': InternalDefaultHttpResponse,

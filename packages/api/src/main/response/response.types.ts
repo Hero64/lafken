@@ -40,36 +40,17 @@ export interface ResponseProps<T> extends ApiPayloadProps<T> {
    */
   defaultCode?: HTTP_STATUS_CODE_NUMBER;
   /**
-   * Apache Velocity Template Language (VTL) expression used as the
-   * `responseTemplates['application/json']` value in the API Gateway
-   * integration response for the success status code.
+   * Regex selection pattern for the success integration response in API Gateway.
    *
-   * When omitted, API Gateway uses the default pass-through behaviour
-   * (i.e. the raw backend response body is forwarded unchanged).
-   *
-   * @example
-   * // Forward the entire response body as-is
-   * responseTemplate: "$input.json('$')"
+   * API Gateway uses this pattern to decide which integration response mapping
+   * applies to a given backend reply. When omitted the response acts as the
+   * default (catch-all) mapping — i.e. any reply that does not match a more
+   * specific pattern is routed here.
    *
    * @example
-   * // Extract a nested field
-   * responseTemplate: "$input.json('$.body')"
+   * selectionPattern: '2\\d{2}'
    */
-  responseTemplate?: string;
-}
-
-export interface ResponseObjectProps<T> extends ApiPayloadProps<T> {
-  /**
-   * Apache Velocity Template Language (VTL) expression used as the
-   * `responseTemplates['application/json']` value in the API Gateway
-   * integration response for the success status code.
-   *
-   * When omitted, API Gateway uses the default pass-through behaviour.
-   *
-   * @example
-   * responseTemplate: "$input.json('$')"
-   */
-  responseTemplate?: string;
+  selectionPattern?: string;
 }
 
 export interface ResponseMetadata<T>

@@ -132,6 +132,7 @@ describe('API', () => {
         name: 'ExampleResponse',
         not: undefined,
         oneOf: undefined,
+        selectionPattern: undefined,
       });
     });
     it('should accept primitive values as responses', () => {

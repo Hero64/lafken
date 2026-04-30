@@ -61,4 +61,45 @@ describe('Response', () => {
     expect((resource.responses?.[500] as ApiObjectMetadata).properties).toBeDefined();
     expect(resource.responses?.[404]).toBeDefined();
   });
+
+  describe('selectionPattern', () => {
+    it('should store selectionPattern in metadata (no responses branch)', () => {
+      @ApiResponse({ selectionPattern: '2\\d{2}' })
+      class TestResponse {}
+
+      const resource: ResponseMetadata<any> = getMetadataByKey(
+        TestResponse,
+        apiResponseKey
+      );
+
+      expect(resource.selectionPattern).toBe('2\\d{2}');
+    });
+
+    it('should store selectionPattern in metadata (with responses branch)', () => {
+      @ApiResponse({
+        selectionPattern: '2\\d{2}',
+        responses: { '404': true },
+      })
+      class TestResponse {}
+
+      const resource: ResponseMetadata<any> = getMetadataByKey(
+        TestResponse,
+        apiResponseKey
+      );
+
+      expect(resource.selectionPattern).toBe('2\\d{2}');
+    });
+
+    it('should leave selectionPattern undefined when not provided', () => {
+      @ApiResponse({ defaultCode: 200 })
+      class TestResponse {}
+
+      const resource: ResponseMetadata<any> = getMetadataByKey(
+        TestResponse,
+        apiResponseKey
+      );
+
+      expect(resource.selectionPattern).toBeUndefined();
+    });
+  });
 });

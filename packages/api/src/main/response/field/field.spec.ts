@@ -67,5 +67,50 @@ describe('Field', () => {
         },
       ]);
     });
+
+    it('should store a custom VTL template on the field metadata', () => {
+      class Response {
+        @ResField({ template: "$input.path('$.nested.id')" })
+        id: string;
+      }
+
+      const params = getMetadataPrototypeByKey(Response, key);
+      expect(params).toStrictEqual([
+        {
+          required: true,
+          type: 'String',
+          initialValue: undefined,
+          destinationName: 'id',
+          name: 'id',
+          template: "$input.path('$.nested.id')",
+        },
+      ]);
+    });
+
+    it('should store template alongside other field props', () => {
+      class Response {
+        @ResField({ description: 'source field', template: "$input.path('$.src.value')" })
+        value: number;
+      }
+
+      const params = getMetadataPrototypeByKey(Response, key) as any[];
+      expect(params[0]).toMatchObject({
+        name: 'value',
+        type: 'Number',
+        template: "$input.path('$.src.value')",
+        description: 'source field',
+        required: true,
+      });
+    });
+
+    it('should not include template when not provided', () => {
+      class Response {
+        @ResField()
+        title: string;
+      }
+
+      const params = getMetadataPrototypeByKey(Response, key) as any[];
+      expect(params[0].template).toBeUndefined();
+    });
   });
 });

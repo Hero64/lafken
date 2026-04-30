@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Api,
   ApiRequest,
+  ApiResponse,
   Delete,
   Event,
   Get,
@@ -18,6 +19,7 @@ import {
   QueryParam,
   type QueueIntegrationOption,
   type QueueSendMessageIntegrationResponse,
+  ResField,
 } from '../../../../../../../main';
 import {
   initializeMethod,
@@ -113,7 +115,7 @@ describe('Queue send message integration', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRole, {
       assume_role_policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
-      name: 'sqs-write',
+      name: 'TestingApi-sendMessage-integration',
     });
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
@@ -164,6 +166,79 @@ describe('Queue send message integration', () => {
       },
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:sqs:path/${data.aws_caller_identity.TestingApi-sendMessageWithEvent-identity.account_id}/test',
+    });
+  });
+
+  describe('response template generation', () => {
+    @ApiResponse()
+    class MessageResult {
+      @ResField()
+      messageId: string;
+
+      @ResField()
+      sequenceNumber: string;
+    }
+
+    @ApiResponse()
+    class CustomTemplateResult {
+      @ResField({
+        template: "$input.path('$.SendMessageResponse.SendMessageResult.MessageId')",
+      })
+      messageId: string;
+
+      @ResField()
+      requestId: string;
+    }
+
+    @Api()
+    class ResponseApi {
+      @Get({
+        integration: 'queue',
+        action: 'SendMessage',
+        response: MessageResult,
+      })
+      sendWithResponse(): QueueSendMessageIntegrationResponse {
+        return { queueName: 'my-queue' };
+      }
+
+      @Get({
+        integration: 'queue',
+        action: 'SendMessage',
+        response: CustomTemplateResult,
+      })
+      sendWithCustomTemplate(): QueueSendMessageIntegrationResponse {
+        return { queueName: 'my-queue' };
+      }
+    }
+
+    it('should set response_templates on the success integration response using field names', async () => {
+      const { restApi, stack } = setupInternalTestingRestApi();
+
+      await initializeMethod(restApi, stack, ResponseApi, 'sendWithResponse');
+
+      const synthesized = Testing.synth(stack);
+
+      expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+        status_code: '200',
+        response_templates: {
+          'application/json': `{"messageId":"$input.path('$.messageId')","sequenceNumber":"$input.path('$.sequenceNumber')"}`,
+        },
+      });
+    });
+
+    it('should use field.template when set and fall back to $input.path for others', async () => {
+      const { restApi, stack } = setupInternalTestingRestApi();
+
+      await initializeMethod(restApi, stack, ResponseApi, 'sendWithCustomTemplate');
+
+      const synthesized = Testing.synth(stack);
+
+      expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+        status_code: '200',
+        response_templates: {
+          'application/json': `{"messageId":$input.path('$.SendMessageResponse.SendMessageResult.MessageId'),"requestId":"$input.path('$.requestId')"}`,
+        },
+      });
     });
   });
 });

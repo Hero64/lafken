@@ -4,14 +4,10 @@ import {
   FieldProperties,
   getEventFields,
 } from '@lafken/common';
-import type { ApiPayloadMetadata } from '../request';
+import type { ApiPayloadMetadata, ApiPayloadProps } from '../request';
 import type { HTTP_STATUS_CODE_NUMBER } from '../status';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from './field';
-import type {
-  ResponseMetadata,
-  ResponseObjectProps,
-  ResponseProps,
-} from './response.types';
+import type { ResponseMetadata, ResponseProps } from './response.types';
 
 export const apiResponseKey = createFieldName(RESPONSE_PREFIX, FieldProperties.payload);
 
@@ -49,11 +45,11 @@ export const apiResponseKey = createFieldName(RESPONSE_PREFIX, FieldProperties.p
  * ```
  */
 export const ResponseObject =
-  <T extends Function>(props?: ResponseObjectProps<T['prototype']>) =>
+  <T extends Function>(props?: ApiPayloadProps<T['prototype']>) =>
   (target: T) =>
     createPayloadDecorator<
-      ResponseObjectProps<T['prototype']>,
-      ApiPayloadMetadata<T['prototype']> & { responseTemplate?: string }
+      ApiPayloadProps<T['prototype']>,
+      ApiPayloadMetadata<T['prototype']>
     >({
       prefix: RESPONSE_PREFIX,
       createUniqueId: true,
@@ -126,7 +122,7 @@ export const ApiResponse =
             not: props?.not,
             oneOf: props?.oneOf,
             defaultCode: props?.defaultCode,
-            responseTemplate: props?.responseTemplate,
+            selectionPattern: props?.selectionPattern,
             additionalProperties: props?.additionalProperties ?? false,
           };
         }

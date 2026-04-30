@@ -4,7 +4,10 @@ import {
   type ApiParamMetadata,
   Method,
   type QueueSendMessageIntegrationResponse,
+  type ResponseObjectMetadata,
 } from '../../../../../../../main';
+import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
+import { buildResponseTemplate } from '../../../helpers/response/response-template';
 import type {
   InitializedClass,
   Integration,
@@ -38,15 +41,13 @@ export class SendMessageIntegration implements Integration {
 
     const role = new Role(restApi, `${resourceMetadata.name}-${handler.name}-role`, {
       name: `${resourceMetadata.name}-${handler.name}-integration`,
+      principal: 'apigateway.amazonaws.com',
       services: (props) => {
-        return {
-          type: 'sqs',
-          permissions: ['SendMessage'],
-          ...(Array.isArray(handler.additionalServices) ||
-          handler.additionalServices === undefined
-            ? handler.additionalServices || []
-            : handler.additionalServices(props)),
-        };
+        const base = { type: 'sqs' as const, permissions: ['SendMessage' as const] };
+        if (handler.additionalServices === undefined) return [base];
+        if (Array.isArray(handler.additionalServices))
+          return [base, ...handler.additionalServices];
+        return [base, ...handler.additionalServices(props)];
       },
     });
 
@@ -97,9 +98,19 @@ export class SendMessageIntegration implements Integration {
       apiGatewayMethod,
       integration,
       [
-        ...(responseHelper.handlerResponse || []).filter(
-          ({ statusCode }) => !['400', '500'].includes(statusCode)
-        ),
+        ...(
+          responseHelper.handlerResponse || [
+            {
+              statusCode: getSuccessStatusCode(handler.method).toString(),
+            },
+          ]
+        ).map((response) => ({
+          ...response,
+          template:
+            response.field?.type === 'Object'
+              ? buildResponseTemplate(response.field as ResponseObjectMetadata)
+              : response.template,
+        })),
         responseHelper.getPatternResponse('400'),
         responseHelper.getPatternResponse('500'),
       ],
