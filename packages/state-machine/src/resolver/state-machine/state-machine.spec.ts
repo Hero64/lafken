@@ -415,4 +415,51 @@ describe('State Machine', () => {
       retention_in_days: 30,
     });
   });
+
+  it('should create a state machine with a circular loop (A → B → A)', async () => {
+    @StateMachine({
+      startAt: 'taskA',
+    })
+    class TestingSM {
+      @State({ next: 'taskB' })
+      taskA() {}
+
+      @State({ next: 'taskA' })
+      taskB() {}
+    }
+
+    const { stack } = await createStateMachine(TestingSM);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
+      definition:
+        '{"StartAt":"taskA","States":{"taskB":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{},"FunctionName":"test-function"},"Next":"taskA","Output":"{% $exists($states.result.Payload) ? $states.result.Payload : {} %}"},"taskA":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{},"FunctionName":"test-function"},"Next":"taskB","Output":"{% $exists($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
+      name: 'TestingSM',
+    });
+  });
+
+  it('should create a state machine with a circular dependency via catch', async () => {
+    @StateMachine({
+      startAt: 'taskA',
+    })
+    class TestingSM {
+      @State({ next: 'taskB' })
+      taskA() {}
+
+      @State({
+        end: true,
+        catch: [{ errorEquals: ['States.ALL'], next: 'taskA' }],
+      })
+      taskB() {}
+    }
+
+    const { stack } = await createStateMachine(TestingSM);
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
+      definition:
+        '{"StartAt":"taskA","States":{"taskB":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{},"FunctionName":"test-function"},"End":true,"Output":"{% $exists($states.result.Payload) ? $states.result.Payload : {} %}","Catch":[{"ErrorEquals":["States.ALL"],"Next":"taskA"}]},"taskA":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Arguments":{"Payload":{},"FunctionName":"test-function"},"Next":"taskB","Output":"{% $exists($states.result.Payload) ? $states.result.Payload : {} %}"}},"QueryLanguage":"JSONata"}',
+      name: 'TestingSM',
+    });
+  });
 });
