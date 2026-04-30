@@ -185,6 +185,27 @@ describe('Dynamo Service', () => {
       ).toHaveLength(1);
     });
 
+    it('Should scan with AND filter on same attribute', async () => {
+      await userRepository.scan({
+        filter: {
+          AND: [{ age: { exist: true } }, { age: { greaterThan: 18 } }],
+        },
+      });
+
+      expect(
+        dynamoClient.commandCalls(ScanCommand, {
+          TableName: 'users',
+          FilterExpression: '(((attribute_exists(#age)) and (#age > :age_3_0)))',
+          ExpressionAttributeNames: {
+            '#age': 'age',
+          },
+          ExpressionAttributeValues: {
+            ':age_3_0': { N: '18' },
+          },
+        })
+      ).toHaveLength(1);
+    });
+
     it('Should scan with complex query', async () => {
       await userRepository.scan({
         filter: {

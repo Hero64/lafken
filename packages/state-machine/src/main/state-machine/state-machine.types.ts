@@ -739,6 +739,7 @@ interface MapReaderItemBase {
 
 interface MapReaderJSONItem extends MapReaderItemBase {
   source: 'json' | 'jsonl' | 'manifest';
+  itemsPointer?: string;
 }
 
 interface MapReaderCSVItem extends MapReaderItemBase {
@@ -752,7 +753,7 @@ interface MapReaderCSVItem extends MapReaderItemBase {
 
 interface MapWriteResult {
   bucket: BucketNames;
-  prefix?: string;
+  prefix: string;
   config?: {
     outputType: 'JSON' | 'JSONL';
     transformation?: 'NONE' | 'COMPACT' | 'FLATTEN';

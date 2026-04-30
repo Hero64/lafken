@@ -63,6 +63,9 @@ export type ScheduleReferenceNames = ResourceScopeKeys<
   'schedule'
 >;
 
+export type LambdaNames = ResourceScopeKeys<SharedResourceNames, 'lambda'>;
+export type LambdaReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'lambda'>;
+
 export type RegisterNamespaces =
   | 'api'
   | 'bucket'
@@ -76,4 +79,5 @@ export type RegisterNamespaces =
   | 'schedule'
   | 'event-bus'
   | 'event-rule'
+  | 'lambda'
   | (string & {});

@@ -1,5 +1,12 @@
-import type { EnvironmentValue, GetResourceProps } from '../../types';
+import type {
+  EnvironmentValue,
+  GetResourceProps,
+  LambdaReferenceNames,
+  ResourceOutputType,
+} from '../../types';
 import type { ServicesValues } from '../../types/services.types';
+
+export type LambdaOutputAttributes = 'arn' | 'invokeArn' | 'qualifiedArn';
 
 export interface VpcConfig {
   /**
@@ -227,6 +234,20 @@ export interface LambdaProps {
    * { logFormat: 'JSON', applicationLogLevel: 'WARN', systemLogLevel: 'INFO' }
    */
   loggingConfig?: LoggingConfig;
+  /**
+   * Output configuration for the Lambda function.
+   *
+   * Defines which attributes should be exported to SSM Parameter Store or
+   * as Terraform outputs. Supported attributes: `'arn'`, `'invokeArn'`, `'qualifiedArn'`.
+   */
+  outputs?: ResourceOutputType<LambdaOutputAttributes>;
+  /**
+   * Registers this Lambda as a named global reference.
+   *
+   * Allows other resources to look up this function by name via
+   * `lafkenResource.getResource('lambda', ref)`.
+   */
+  ref?: LambdaReferenceNames;
 }
 
 export interface LambdaMetadata {
