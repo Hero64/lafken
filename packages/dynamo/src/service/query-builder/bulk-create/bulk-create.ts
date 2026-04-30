@@ -13,7 +13,7 @@ export class BulkCreateBuilder<E extends ClassResource> extends BatchWriteBuilde
             [queryOptions.modelProps.name]: items.map((item) => {
               return {
                 PutRequest: {
-                  Item: marshall(item),
+                  Item: marshall(item, { removeUndefinedValues: true }),
                 },
               };
             }),

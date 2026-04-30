@@ -183,7 +183,7 @@ export class QueryBuilderBase<E extends ClassResource> {
         Object.keys(this.attributeNames).length > 0 ? this.attributeNames : undefined,
       ExpressionAttributeValues:
         Object.keys(this.attributeValues).length > 0
-          ? marshall(this.attributeValues)
+          ? marshall(this.attributeValues, { removeUndefinedValues: true })
           : undefined,
     };
   }

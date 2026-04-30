@@ -85,7 +85,7 @@ export class UpdateBuilder<
 
     this.command = {
       TableName: this.queryOptions.modelProps.name,
-      Key: marshall(keyCondition),
+      Key: marshall(keyCondition, { removeUndefinedValues: true }),
       ConditionExpression: condition
         ? this.getFilterExpression(condition, [], 'and', this.expressionGroupCounter++)
         : undefined,

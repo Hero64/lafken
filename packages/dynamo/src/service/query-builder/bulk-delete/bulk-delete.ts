@@ -15,7 +15,7 @@ export class BulkDeleteBuilder<E extends ClassResource> extends BatchWriteBuilde
             [queryOptions.modelProps.name]: items.map((item) => {
               return {
                 DeleteRequest: {
-                  Key: marshall(item),
+                  Key: marshall(item, { removeUndefinedValues: true }),
                 },
               };
             }),

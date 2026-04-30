@@ -39,7 +39,7 @@ export class UpsertBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
 
     this.command = {
       TableName: this.queryOptions.modelProps.name,
-      Item: marshall(this.queryOptions.item),
+      Item: marshall(this.queryOptions.item, { removeUndefinedValues: true }),
       ConditionExpression: conditionExpression,
       ...this.getAttributesAndNames(),
     };

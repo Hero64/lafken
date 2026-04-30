@@ -42,7 +42,9 @@ export class FindBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
       IndexName: index?.name,
       KeyConditionExpression: keyConditionExpression,
       FilterExpression: filterExpression,
-      ExclusiveStartKey: cursor ? marshall(cursor) : undefined,
+      ExclusiveStartKey: cursor
+        ? marshall(cursor, { removeUndefinedValues: true })
+        : undefined,
       Limit: limit,
       ScanIndexForward: sortDirection === 'asc',
       ProjectionExpression: projection === 'ALL' ? undefined : projection.join(', '),
