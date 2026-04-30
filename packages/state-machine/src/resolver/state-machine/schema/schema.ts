@@ -61,6 +61,7 @@ export class Schema {
   private unresolvedDependency: boolean = false;
   private bucketPermissions: BucketPermission = {};
   private lambdaResources: TerraformResource[] = [];
+  private handlerStateNames: Map<string, string> = new Map();
 
   constructor(
     private scope: Construct,
@@ -412,10 +413,14 @@ export class Schema {
   }
 
   private addTaskState(handler: LambdaStateMetadata) {
-    const stateName = this.stateNames.createName(handler.name);
-    if (this.states[stateName]) {
-      return stateName;
+    const existingName = this.handlerStateNames.get(handler.name);
+    if (existingName) {
+      return existingName;
     }
+
+    const stateName = this.stateNames.createName(handler.name);
+
+    this.handlerStateNames.set(handler.name, stateName);
 
     const task: StateTask = {
       Type: 'Task',
