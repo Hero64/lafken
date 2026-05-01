@@ -118,7 +118,7 @@ describe('Query builder base', () => {
       }
 
       const qb = new QueryBuilder(getQueryBuilderProps());
-      expect(qb.getQueryFilter()).toEqual('(#name = :name_1_0 and #age = :age_1_1)');
+      expect(qb.getQueryFilter()).toEqual('#name = :name_1_0 and #age = :age_1_1');
     });
 
     it('should return a valid filter expression in complex filter', () => {
@@ -150,7 +150,7 @@ describe('Query builder base', () => {
       const qb = new QueryBuilder(getQueryBuilderProps());
 
       expect(qb.getQueryFilter()).toEqual(
-        '(#age BETWEEN :age_1_0_0 and :age_1_0_1 and contains(#email, :email_1_1) and ((#name in (:name_2_0_0,:name_2_0_1,:name_2_0_2)) or (attribute_not_exists(#other))))'
+        '#age BETWEEN :age_1_0_0 and :age_1_0_1 and contains(#email, :email_1_1) and (#name in (:name_2_0_0,:name_2_0_1,:name_2_0_2) or attribute_not_exists(#other))'
       );
     });
   });

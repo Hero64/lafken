@@ -114,7 +114,8 @@ export class QueryBuilderBase<E extends ClassResource> {
             orExpressions.push(expression);
           }
 
-          filterExpression.push(`(${orExpressions.join(' or ')})`);
+          const joined = orExpressions.join(' or ');
+          filterExpression.push(orExpressions.length > 1 ? `(${joined})` : joined);
           break;
         }
         case 'AND': {
@@ -126,7 +127,7 @@ export class QueryBuilderBase<E extends ClassResource> {
             andExpressions.push(expression);
           }
 
-          filterExpression.push(`(${andExpressions.join(' and ')})`);
+          filterExpression.push(andExpressions.join(' and '));
           break;
         }
         default: {
@@ -174,7 +175,7 @@ export class QueryBuilderBase<E extends ClassResource> {
       index++;
     }
 
-    return `(${filterExpression.join(` ${union} `)})`;
+    return filterExpression.join(` ${union} `);
   }
 
   protected getAttributesAndNames() {
