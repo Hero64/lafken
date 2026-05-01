@@ -16,6 +16,17 @@ import type {
  */
 export type QueueOutputAttributes = 'arn' | 'id' | 'url';
 
+export interface DlqProps {
+  /**
+   * Maximum number of times a message can be received before being moved to the DLQ.
+   */
+  maxReceiveCount: number;
+  /**
+   * Message retention period in seconds for the DLQ.
+   */
+  retentionPeriod?: number;
+}
+
 export interface StandardProps {
   /**
    * Delivery delay in seconds.
@@ -106,6 +117,14 @@ export interface StandardProps {
    * ref: 'order'
    */
   ref?: QueueReferenceNames;
+  /**
+   * Dead Letter Queue configuration.
+   *
+   * When specified, a DLQ is created and the main queue is configured
+   * with a redrive policy to move unprocessable messages after the defined
+   * number of receive attempts.
+   */
+  dlq?: DlqProps;
 }
 
 export interface FifoProps extends StandardProps {
