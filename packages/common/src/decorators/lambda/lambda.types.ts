@@ -202,6 +202,39 @@ export interface LambdaProps {
    */
   vpcConfig?: VpcConfigValue;
   /**
+   * Ephemeral storage size for the Lambda function.
+   *
+   * Specifies the size of the `/tmp` directory in MB. Useful for functions that
+   * need to process large files (PDFs, ZIPs, audio, etc.) during execution.
+   *
+   * Valid range: 512–10240 MB.
+   *
+   * @default 512
+   */
+  ephemeralStorage?: number;
+  /**
+   * Reserved concurrency for the Lambda function.
+   *
+   * Limits the maximum number of concurrent executions for this function.
+   * Setting this to `0` throttles the function entirely. Useful for protecting
+   * downstream resources (RDS, ElastiCache) from burst traffic or for
+   * guaranteeing capacity to critical functions.
+   *
+   * When not set, the function shares the account's unreserved concurrency pool.
+   */
+  reservedConcurrency?: number;
+  /**
+   * Instruction set architecture for the Lambda function.
+   *
+   * Specifies the CPU architecture that the Lambda function will run on.
+   * - `'x86_64'`: 64-bit x86 architecture (default AWS behaviour).
+   * - `'arm64'`: 64-bit ARM architecture (AWS Graviton2), which can offer
+   *             better price-performance for many workloads.
+   *
+   * @default 'x86_64'
+   */
+  architecture?: 'x86_64' | 'arm64';
+  /**
    * Alias configuration for the Lambda function.
    *
    * When provided, the Lambda function will be published (creating a new version)

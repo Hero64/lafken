@@ -1,6 +1,9 @@
 import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
-import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import {
+  LambdaFunction,
+  type LambdaFunctionConfig,
+} from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
 import {
@@ -22,76 +25,43 @@ import { lafkenResource } from '../resource';
 import { Role } from '../role';
 import { lambdaAssets } from './asset/asset';
 import type {
+  CommonContextProps,
   GetCurrentOrContextValueProps,
   GetEnvironmentProps,
   GetRoleArnProps,
   LambdaHandlerProps,
+  ResolvedLambdaContext,
 } from './lambda.types';
 
 export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   constructor(scope: Construct, id: string, props: LambdaHandlerProps) {
     const appContext = getAppContext(scope);
     const moduleContext = getModuleContext(scope);
-
-    const contextValueProps = {
+    const contextValueProps: CommonContextProps = {
       lambda: props.lambda,
-      appContext: appContext,
-      moduleContext: moduleContext,
+      appContext,
+      moduleContext,
     };
-    const runtime = LambdaHandler.getCurrentOrContextValue({
-      key: 'runtime',
-      defaultValue: 22,
-      ...contextValueProps,
-    });
 
-    const alias = LambdaHandler.getCurrentOrContextValue({
-      key: 'alias',
-      ...contextValueProps,
-    });
-
-    const loggingConfig = LambdaHandler.getCurrentOrContextValue({
-      key: 'loggingConfig',
-      ...contextValueProps,
-    });
-
-    const environmentProps: GetEnvironmentProps = {
+    const ctx = LambdaHandler.resolveContextValues(contextValueProps);
+    const environments = LambdaHandler.getCurrentEnvironment({
       ...contextValueProps,
       id,
       scope,
-    };
-
-    const environments = LambdaHandler.getCurrentEnvironment(environmentProps);
-    let environmentValues = environments?.getValues();
-    const hasValues = !!environmentValues;
-
-    const suffix = props.suffix ? `-${props.suffix}` : '';
-
-    const handlerName = `${kebabCase(
-      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
-    ).slice(0, 63 - suffix.length)}${suffix}`.toLowerCase();
-
-    super(scope, id, {
-      functionName: handlerName,
-      role: '',
-      filename: 'unresolved',
-      handler: `index.${props.name}_${props.originalName}`,
-      runtime: `nodejs${runtime}.x`,
-      timeout: LambdaHandler.getCurrentOrContextValue({
-        key: 'timeout',
-        ...contextValueProps,
-      }),
-      memorySize: LambdaHandler.getCurrentOrContextValue({
-        key: 'memory',
-        ...contextValueProps,
-      }),
-      description: props.description,
-      tracingConfig: {
-        mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
-      },
-      environment: {
-        variables: hasValues ? environmentValues || {} : {},
-      },
     });
+    let environmentValues = environments?.getValues() || undefined;
+    const handlerName = LambdaHandler.buildFunctionName(
+      id,
+      appContext,
+      moduleContext,
+      props.suffix
+    );
+
+    super(
+      scope,
+      id,
+      LambdaHandler.buildFunctionConfig(handlerName, ctx, props, environmentValues)
+    );
 
     if (props.lambda?.ref) {
       this.register('lambda', props.lambda.ref);
@@ -108,15 +78,13 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
 
     if (environments && !environmentValues) {
       this.onResolve(() => {
-        environmentValues = environments.getValues();
+        environmentValues = environments.getValues() || undefined;
 
         if (!environmentValues) {
           throw new Error(`unresolved dependencies in ${props.name} lambda`);
         }
 
-        this.putEnvironment({
-          variables: environmentValues,
-        });
+        this.putEnvironment({ variables: environmentValues });
       });
     }
 
@@ -128,9 +96,78 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     });
 
     this.addVpcConfig(props.lambda?.vpcConfig);
-    this.addLoggingConfig(handlerName, loggingConfig);
-    this.addAlias(handlerName, alias);
+    this.addLoggingConfig(handlerName, ctx.loggingConfig);
+    this.addAlias(handlerName, ctx.alias);
     this.addPermission(handlerName, props);
+  }
+
+  private static resolveContextValues(props: CommonContextProps): ResolvedLambdaContext {
+    return {
+      runtime: LambdaHandler.getCurrentOrContextValue({
+        key: 'runtime',
+        defaultValue: 22,
+        ...props,
+      })!,
+      alias: LambdaHandler.getCurrentOrContextValue({ key: 'alias', ...props }),
+      loggingConfig: LambdaHandler.getCurrentOrContextValue({
+        key: 'loggingConfig',
+        ...props,
+      }),
+      architecture: LambdaHandler.getCurrentOrContextValue({
+        key: 'architecture',
+        ...props,
+      }),
+      ephemeralStorage: LambdaHandler.getCurrentOrContextValue({
+        key: 'ephemeralStorage',
+        ...props,
+      }),
+      reservedConcurrency: LambdaHandler.getCurrentOrContextValue({
+        key: 'reservedConcurrency',
+        ...props,
+      }),
+      timeout: LambdaHandler.getCurrentOrContextValue({ key: 'timeout', ...props }),
+      memory: LambdaHandler.getCurrentOrContextValue({ key: 'memory', ...props }),
+    };
+  }
+
+  private static buildFunctionName(
+    id: string,
+    appContext: GlobalContext,
+    moduleContext: GlobalContext | undefined,
+    suffix?: string
+  ): string {
+    const sfx = suffix ? `-${suffix}` : '';
+
+    return `${kebabCase(
+      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
+    ).slice(0, 63 - sfx.length)}${sfx}`.toLowerCase();
+  }
+
+  private static buildFunctionConfig(
+    functionName: string,
+    ctx: ResolvedLambdaContext,
+    props: LambdaHandlerProps,
+    environmentValues: Record<string, string> | undefined
+  ): LambdaFunctionConfig {
+    return {
+      functionName,
+      role: '',
+      filename: 'unresolved',
+      handler: `index.${props.name}_${props.originalName}`,
+      runtime: `nodejs${ctx.runtime}.x`,
+      timeout: ctx.timeout,
+      memorySize: ctx.memory,
+      description: props.description,
+      architectures: ctx.architecture ? [ctx.architecture] : undefined,
+      reservedConcurrentExecutions: ctx.reservedConcurrency,
+      ephemeralStorage: ctx.ephemeralStorage ? { size: ctx.ephemeralStorage } : undefined,
+      tracingConfig: {
+        mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
+      },
+      environment: {
+        variables: environmentValues ?? {},
+      },
+    };
   }
 
   private addPermission(name: string, props: LambdaHandlerProps) {
@@ -223,9 +260,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       return undefined;
     }
 
-    const env = new Environment(scope, `${id}-lambda-env`, lambda?.env);
-
-    return env;
+    return new Environment(scope, `${id}-lambda-env`, lambda.env);
   }
 
   private getServiceRole(props: GetResourceProps, services: ServicesValues = []) {

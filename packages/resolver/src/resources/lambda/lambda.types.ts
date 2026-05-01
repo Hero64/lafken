@@ -7,6 +7,17 @@ import type {
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 
+export interface ResolvedLambdaContext {
+  runtime: NonNullable<GlobalContext['runtime']>;
+  alias?: GlobalContext['alias'];
+  loggingConfig?: GlobalContext['loggingConfig'];
+  architecture?: GlobalContext['architecture'];
+  ephemeralStorage?: GlobalContext['ephemeralStorage'];
+  reservedConcurrency?: GlobalContext['reservedConcurrency'];
+  timeout?: GlobalContext['timeout'];
+  memory?: GlobalContext['memory'];
+}
+
 export interface LambdaHandlerProps
   extends LambdaMetadata,
     Pick<ResourceMetadata, 'filename' | 'foldername' | 'originalName'> {
