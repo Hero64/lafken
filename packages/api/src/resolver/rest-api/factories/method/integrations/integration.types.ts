@@ -8,6 +8,7 @@ import type { IntegrationHelper } from '../helpers/integration/integration';
 import type { ParamHelper } from '../helpers/param/param';
 import type { ProxyHelper } from '../helpers/proxy/proxy';
 import type { ResponseHelper } from '../helpers/response/response';
+import type { ResponseTemplateHelper } from '../helpers/response-template/response-template';
 import type { TemplateHelper } from '../helpers/template/template';
 
 export interface Integration {
@@ -22,6 +23,7 @@ export interface IntegrationProps {
   templateHelper: TemplateHelper;
   responseHelper: ResponseHelper;
   integrationHelper: IntegrationHelper;
+  responseTemplateHelper: ResponseTemplateHelper;
   apiGatewayMethod: ApiGatewayMethod;
   resourceMetadata: ApiResourceMetadata;
   proxyHelper: ProxyHelper;

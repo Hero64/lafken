@@ -1,7 +1,5 @@
 import type { FieldTypes } from '@lafken/common';
 import { Method } from '../../../../../../../main';
-import type { ResponseHandler } from '../../../helpers/response/response.types';
-import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
 import type { InitializedClass, Integration } from '../../integration.types';
 import { LafkenIntegration } from '../../integration.utils';
 import type { DynamoIntegrationBaseProps } from './base.types';
@@ -22,36 +20,42 @@ export class DynamoBaseIntegration<T> implements Integration {
     const {
       handler,
       restApi,
-      roleArn,
+      service,
       action,
       resourceMetadata,
       apiGatewayMethod,
+      integrationHelper,
+      responseHelper,
+      responseTemplateHelper,
       createTemplate,
     } = this.props;
 
     const { integrationResponse, resolveResource } =
       await this.callIntegrationMethod<T>();
+    const name = `${resourceMetadata.name}-${handler.name}`;
+    const role = integrationHelper.createRole({
+      name,
+      scope: restApi,
+      service,
+      additionalServices: handler.additionalServices,
+    });
 
-    const integration = new LafkenIntegration(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
-      {
-        httpMethod: apiGatewayMethod.httpMethod,
-        resourceId: apiGatewayMethod.resourceId,
-        restApiId: restApi.id,
-        type: 'AWS',
-        integrationHttpMethod: Method.POST,
-        uri: this.getUri(action),
-        credentials: roleArn,
-        passthroughBehavior: 'WHEN_NO_TEMPLATES',
-        requestTemplates: {
-          'application/json': resolveResource.hasUnresolved()
-            ? ''
-            : createTemplate(integrationResponse),
-        },
-        dependsOn: [apiGatewayMethod],
-      }
-    );
+    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: this.getUri(action),
+      credentials: role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestTemplates: {
+        'application/json': resolveResource.hasUnresolved()
+          ? ''
+          : createTemplate(integrationResponse),
+      },
+      dependsOn: [apiGatewayMethod],
+    });
 
     if (resolveResource.hasUnresolved()) {
       integration.onResolve(async () => {
@@ -72,8 +76,11 @@ export class DynamoBaseIntegration<T> implements Integration {
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      this.createResponse(),
-      `${resourceMetadata.name}-${handler.name}`
+      integrationHelper.generateResponseTemplate(
+        responseHelper.handlerResponse,
+        responseTemplateHelper
+      ),
+      name
     );
 
     return integration;
@@ -99,20 +106,6 @@ export class DynamoBaseIntegration<T> implements Integration {
   private getUri(action: string) {
     const { restApi } = this.props;
     return `arn:aws:apigateway:${restApi.region}:dynamodb:action/${action}`;
-  }
-
-  private createResponse(): ResponseHandler[] {
-    const { responseHelper, handler } = this.props;
-    const statusCode = getSuccessStatusCode(handler.method);
-
-    return [
-      {
-        statusCode: statusCode.toString(),
-        template: "$input.json('$')",
-      },
-      responseHelper.getPatternResponse('400'),
-      responseHelper.getPatternResponse('500'),
-    ];
   }
 
   protected marshallField(template: string, type: FieldTypes) {

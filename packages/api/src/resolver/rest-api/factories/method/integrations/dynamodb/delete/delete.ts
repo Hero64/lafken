@@ -10,7 +10,7 @@ export class DeleteIntegration
     super({
       ...props,
       action: 'DeleteItem',
-      roleArn: props.integrationHelper.createRole('dynamodb.delete', props.restApi).arn,
+      service: { type: 'dynamodb', permissions: ['DeleteItem'] },
       createTemplate: (integrationResponse) => {
         const tableResolver = props.proxyHelper.resolveProxyValue(
           integrationResponse.tableName,

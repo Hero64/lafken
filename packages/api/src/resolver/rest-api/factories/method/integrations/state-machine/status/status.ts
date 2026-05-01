@@ -10,27 +10,9 @@ export class StatusIntegration
     super({
       ...props,
       action: 'DescribeExecution',
-      roleArn: props.integrationHelper.createRole('state_machine.read', props.restApi)
-        .arn,
-      successResponse: {
-        field: {
-          type: 'Object',
-          destinationName: 'StatusStateMachineResponse',
-          name: 'StatusStateMachineResponse',
-          properties: [
-            {
-              destinationName: 'status',
-              name: 'status',
-              type: 'String',
-              required: true,
-            },
-          ],
-          payload: {
-            id: 'StatusStateMachineResponse',
-            name: 'StatusStateMachineResponse',
-          },
-        },
-        template: `#set($status = $input.json('status')) { "status": $status }`,
+      service: {
+        type: 'state_machine',
+        permissions: ['DescribeExecution'],
       },
       createTemplate: (integrationResponse) => {
         const executionArn = this.getResponseValue(integrationResponse.executionArn, '');

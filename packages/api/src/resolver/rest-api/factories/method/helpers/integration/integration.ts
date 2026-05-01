@@ -1,36 +1,27 @@
-import type {
-  DynamoPermissions,
-  S3Permissions,
-  ServicesName,
-  SQSPermissions,
-  StateMachinePermissions,
-} from '@lafken/common';
-import { lafkenResource, ResolveResources, Role } from '@lafken/resolver';
-import type { Construct } from 'constructs';
-import type { IntegrationOption, ServiceRoleName } from './integration.types';
+import { ResolveResources, Role } from '@lafken/resolver';
+import type { ResponseArrayField, ResponseObjectMetadata } from '../../../../../../main';
+import type { ResponseHandler } from '../response/response.types';
+import type { ResponseTemplateHelper } from '../response-template/response-template';
+import type { CreateRoleProps, IntegrationOption } from './integration.types';
 
 export class IntegrationHelper {
-  public createRole(name: ServiceRoleName, scope: Construct) {
-    const role = lafkenResource.getResource<Role>('role', name);
+  public createRole(props: CreateRoleProps) {
+    const { name, scope, service, additionalServices = [] } = props;
 
-    if (role) {
-      return role;
-    }
-    const serviceName = name.split('.')[0] as ServicesName;
-
-    const serviceRole = new Role(scope, name, {
-      name: name.replaceAll('.', '-'),
-      services: [
-        {
-          type: serviceName,
-          permissions: this.getPermissionByRoleName(name) as any[],
-        },
-      ],
+    const role = new Role(scope, `${name}-role`, {
+      name: `${name}-integration`,
       principal: 'apigateway.amazonaws.com',
+      services: (props) => {
+        return [
+          service,
+          ...(Array.isArray(additionalServices)
+            ? additionalServices
+            : additionalServices(props)),
+        ];
+      },
     });
 
-    serviceRole.register('role', name);
-    return serviceRole;
+    return role;
   }
 
   public generateIntegrationOptions(module?: string): IntegrationOption {
@@ -54,31 +45,21 @@ export class IntegrationHelper {
     };
   }
 
-  public getPermissionByRoleName(roleName: ServiceRoleName) {
-    const permissionsByRole: Partial<
-      Record<
-        ServiceRoleName,
-        (S3Permissions | StateMachinePermissions | DynamoPermissions | SQSPermissions)[]
-      >
-    > = {
-      's3.read': ['GetObject'],
-      's3.write': ['GetObject', 'PutObject'],
-      's3.delete': ['DeleteObject'],
-      'state_machine.read': ['DescribeExecution'],
-      'state_machine.write': ['StopExecution', 'StartExecution'],
-      'state_machine.delete': ['StopExecution'],
-      'dynamodb.read': ['Query', 'GetItem', 'BatchGetItem'],
-      'dynamodb.write': ['PutItem', 'UpdateItem'],
-      'dynamodb.delete': ['DeleteItem'],
-      'sqs.write': ['SendMessage'],
-    };
-
-    const permissions = permissionsByRole[roleName];
-
-    if (permissions) {
-      return permissions;
-    }
-
-    throw new Error(`permission not found by role ${roleName}`);
+  public generateResponseTemplate(
+    handlerResponse: ResponseHandler[],
+    responseTemplateHelper: ResponseTemplateHelper
+  ) {
+    return handlerResponse.map((response) => {
+      return {
+        ...response,
+        template:
+          !response.template &&
+          (response.field?.type === 'Object' || response.field?.type === 'Array')
+            ? responseTemplateHelper.buildTemplate(
+                response.field as ResponseObjectMetadata | ResponseArrayField
+              )
+            : response.template,
+      };
+    });
   }
 }

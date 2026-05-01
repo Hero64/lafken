@@ -7,6 +7,7 @@ export class DownloadIntegration extends BucketBaseIntegration implements Integr
     super({
       ...props,
       httpMethod: Method.GET,
+      service: { type: 's3', permissions: ['GetObject'] },
     });
   }
 }

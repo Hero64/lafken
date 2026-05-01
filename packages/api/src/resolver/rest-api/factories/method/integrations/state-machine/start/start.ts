@@ -10,33 +10,9 @@ export class StartIntegration
     super({
       ...props,
       action: 'StartExecution',
-      roleArn: props.integrationHelper.createRole('state_machine.write', props.restApi)
-        .arn,
-      successResponse: {
-        field: {
-          type: 'Object',
-          destinationName: 'StartStateMachineResponse',
-          name: 'StartStateMachineResponse',
-          properties: [
-            {
-              destinationName: 'startDate',
-              name: 'startDate',
-              type: 'String',
-              required: true,
-            },
-            {
-              destinationName: 'executionId',
-              name: 'executionId',
-              type: 'String',
-              required: true,
-            },
-          ],
-          payload: {
-            id: 'StartStateMachineResponse',
-            name: 'StartStateMachineResponse',
-          },
-        },
-        template: "$input.json('$')",
+      service: {
+        type: 'state_machine',
+        permissions: ['StartExecution', 'StopExecution'],
       },
       createTemplate: (integrationResponse) => {
         const { templateHelper, proxyHelper, paramHelper } = props;

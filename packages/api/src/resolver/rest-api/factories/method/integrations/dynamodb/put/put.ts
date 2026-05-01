@@ -10,7 +10,7 @@ export class PutIntegration
     super({
       ...props,
       action: 'PutItem',
-      roleArn: props.integrationHelper.createRole('dynamodb.write', props.restApi).arn,
+      service: { type: 'dynamodb', permissions: ['PutItem', 'UpdateItem'] },
       createTemplate: (integrationResponse) => {
         const tableResolver = props.proxyHelper.resolveProxyValue(
           integrationResponse.tableName,

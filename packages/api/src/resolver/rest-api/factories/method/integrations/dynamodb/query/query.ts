@@ -27,7 +27,7 @@ export class QueryIntegration
     super({
       ...props,
       action: 'Query',
-      roleArn: props.integrationHelper.createRole('dynamodb.read', props.restApi).arn,
+      service: { type: 'dynamodb', permissions: ['Query', 'GetItem', 'BatchGetItem'] },
       createTemplate: (integrationResponse) => {
         this.resolveKeyCondition(
           ':partitionKey',

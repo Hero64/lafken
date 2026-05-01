@@ -10,9 +10,10 @@ export class StopIntegration
     super({
       ...props,
       action: 'StopExecution',
-      roleArn: props.integrationHelper.createRole('state_machine.delete', props.restApi)
-        .arn,
-      successResponse: {},
+      service: {
+        type: 'state_machine',
+        permissions: ['StopExecution'],
+      },
       createTemplate: (integrationResponse) => {
         const executionArn = this.getResponseValue(integrationResponse.executionArn, '');
         return `{ "executionArn": "${executionArn}" }`;

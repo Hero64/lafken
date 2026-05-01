@@ -1,6 +1,4 @@
 import { Method } from '../../../../../../../main';
-import type { ResponseHandler } from '../../../helpers/response/response.types';
-import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
 import type { InitializedClass, Integration } from '../../integration.types';
 import { LafkenIntegration } from '../../integration.utils';
 import type { StateMachineIntegrationBaseProps } from './base.types';
@@ -12,36 +10,44 @@ export class StateMachineBaseIntegration<T> implements Integration {
     const {
       handler,
       restApi,
-      roleArn,
       action,
+      service,
       resourceMetadata,
+      responseHelper,
+      responseTemplateHelper,
       apiGatewayMethod,
+      integrationHelper,
       createTemplate,
     } = this.props;
 
     const { integrationResponse, resolveResource } =
       await this.callIntegrationMethod<T>();
 
-    const integration = new LafkenIntegration(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
-      {
-        httpMethod: apiGatewayMethod.httpMethod,
-        resourceId: apiGatewayMethod.resourceId,
-        restApiId: restApi.id,
-        type: 'AWS',
-        integrationHttpMethod: Method.POST,
-        uri: this.getUri(action),
-        credentials: roleArn,
-        passthroughBehavior: 'WHEN_NO_TEMPLATES',
-        dependsOn: [apiGatewayMethod],
-        requestTemplates: {
-          'application/json': resolveResource.hasUnresolved()
-            ? ''
-            : createTemplate(integrationResponse),
-        },
-      }
-    );
+    const name = `${resourceMetadata.name}-${handler.name}`;
+
+    const role = integrationHelper.createRole({
+      name,
+      service,
+      scope: restApi,
+      additionalServices: handler.additionalServices,
+    });
+
+    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: this.getUri(action),
+      credentials: role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': resolveResource.hasUnresolved()
+          ? ''
+          : createTemplate(integrationResponse),
+      },
+    });
 
     if (resolveResource.hasUnresolved()) {
       integration.onResolve(async () => {
@@ -62,8 +68,11 @@ export class StateMachineBaseIntegration<T> implements Integration {
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      this.createResponse(),
-      `${resourceMetadata.name}-${handler.name}`
+      integrationHelper.generateResponseTemplate(
+        responseHelper.handlerResponse,
+        responseTemplateHelper
+      ),
+      name
     );
 
     return integration;
@@ -88,20 +97,6 @@ export class StateMachineBaseIntegration<T> implements Integration {
   private getUri(action: string) {
     const { restApi } = this.props;
     return `arn:aws:apigateway:${restApi.region}:states:action/${action}`;
-  }
-
-  private createResponse(): ResponseHandler[] {
-    const { responseHelper, handler, successResponse } = this.props;
-    const statusCode = getSuccessStatusCode(handler.method);
-
-    return [
-      {
-        ...successResponse,
-        statusCode: statusCode.toString(),
-      },
-      responseHelper.getPatternResponse('400'),
-      responseHelper.getPatternResponse('500'),
-    ];
   }
 
   protected getResponseValue(value: any, quoteType = '"') {

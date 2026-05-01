@@ -1,13 +1,9 @@
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
-import { Role } from '@lafken/resolver';
 import {
   type ApiParamMetadata,
   Method,
   type QueueSendMessageIntegrationResponse,
-  type ResponseArrayField,
-  type ResponseObjectMetadata,
 } from '../../../../../../../main';
-import { ResponseTemplateHelper } from '../../../helpers/response-template/response-template';
 import type {
   InitializedClass,
   Integration,
@@ -28,9 +24,11 @@ export class SendMessageIntegration implements Integration {
       resourceMetadata,
       integrationHelper,
       responseHelper,
+      responseTemplateHelper,
     } = this.props;
 
     const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
+    const name = `${resourceMetadata.name}-${handler.name}`;
 
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
       new classResource();
@@ -39,42 +37,35 @@ export class SendMessageIntegration implements Integration {
       options
     );
 
-    const role = new Role(restApi, `${resourceMetadata.name}-${handler.name}-role`, {
-      name: `${resourceMetadata.name}-${handler.name}-integration`,
-      principal: 'apigateway.amazonaws.com',
-      services: (props) => {
-        const base = { type: 'sqs' as const, permissions: ['SendMessage' as const] };
-        if (handler.additionalServices === undefined) return [base];
-        if (Array.isArray(handler.additionalServices))
-          return [base, ...handler.additionalServices];
-        return [base, ...handler.additionalServices(props)];
+    const role = integrationHelper.createRole({
+      name,
+      scope: restApi,
+      service: {
+        type: 'sqs',
+        permissions: ['SendMessage'],
       },
+      additionalServices: handler.additionalServices,
     });
 
-    const integration = new LafkenIntegration(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
-      {
-        httpMethod: apiGatewayMethod.httpMethod,
-        resourceId: apiGatewayMethod.resourceId,
-        restApiId: restApi.id,
-        type: 'AWS',
-        integrationHttpMethod: Method.POST,
-        uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
-        credentials: role.arn,
-        passthroughBehavior: 'WHEN_NO_TEMPLATES',
-        requestParameters: {
-          'integration.request.header.Content-Type':
-            "'application/x-www-form-urlencoded'",
-        },
-        dependsOn: [apiGatewayMethod],
-        requestTemplates: {
-          'application/json': resolveResource.hasUnresolved()
-            ? ''
-            : this.createTemplate(integrationResponse),
-        },
-      }
-    );
+    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
+      credentials: role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestParameters: {
+        'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'",
+      },
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': resolveResource.hasUnresolved()
+          ? ''
+          : this.createTemplate(integrationResponse),
+      },
+    });
 
     if (resolveResource.hasUnresolved()) {
       integration.onResolve(async () => {
@@ -94,24 +85,14 @@ export class SendMessageIntegration implements Integration {
       });
     }
 
-    const responseTemplateHelper = new ResponseTemplateHelper();
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      responseHelper.handlerResponse.map((response) => {
-        return {
-          ...response,
-          template:
-            !response.template &&
-            (response.field?.type === 'Object' || response.field?.type === 'Array')
-              ? responseTemplateHelper.buildTemplate(
-                  response.field as ResponseObjectMetadata | ResponseArrayField
-                )
-              : response.template,
-        };
-      }),
-
-      `${resourceMetadata.name}-${handler.name}`
+      integrationHelper.generateResponseTemplate(
+        responseHelper.handlerResponse,
+        responseTemplateHelper
+      ),
+      name
     );
 
     return integration;

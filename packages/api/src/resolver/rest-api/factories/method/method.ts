@@ -8,6 +8,7 @@ import { ParamHelper } from './helpers/param/param';
 import { ProxyHelper } from './helpers/proxy/proxy';
 import { RequestHelper } from './helpers/request/request';
 import { ResponseHelper } from './helpers/response/response';
+import { ResponseTemplateHelper } from './helpers/response-template/response-template';
 import { TemplateHelper } from './helpers/template/template';
 import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
 import type { Integration, IntegrationProps } from './integrations/integration.types';
@@ -36,6 +37,7 @@ export class MethodFactory {
     const templateHelper = new TemplateHelper(this.scope);
     const proxyHelper = new ProxyHelper();
     const integrationHelper = new IntegrationHelper();
+    const responseTemplateHelper = new ResponseTemplateHelper();
 
     const fullPath = this.cleanPath(`/${resourceMetadata.path}/${handler.path}`) || '/';
     paramHelper.validateParamsInPath(fullPath);
@@ -84,6 +86,7 @@ export class MethodFactory {
       responseHelper,
       templateHelper,
       integrationHelper,
+      responseTemplateHelper,
       scope: module,
       restApi: this.scope,
       apiGatewayMethod: method,

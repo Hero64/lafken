@@ -113,13 +113,10 @@ describe('State machine start integration', () => {
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
       schema:
-        '${jsonencode({"type" = "object", "required" = ["startDate", "executionId"], "properties" = {"startDate" = {"type" = "string"}, "executionId" = {"type" = "string"}}})}',
+        '${jsonencode({"type" = "object", "required" = ["message"], "properties" = {"message" = {"type" = "string"}}})}',
     });
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
-      response_templates: {
-        'application/json': "$input.json('$')",
-      },
       status_code: '201',
     });
 
@@ -140,12 +137,12 @@ describe('State machine start integration', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRole, {
       assume_role_policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
-      name: 'state_machine-write',
+      name: 'StateMachineIntegrationApi-start-integration',
     });
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
       policy:
-        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["states:StopExecution", "states:StartExecution"], "Resource" = ["*"]}]})}',
+        '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Effect" = "Allow", "Action" = ["states:StartExecution", "states:StopExecution"], "Resource" = ["*"]}]})}',
     });
   });
 

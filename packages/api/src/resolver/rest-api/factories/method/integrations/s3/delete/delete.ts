@@ -7,6 +7,7 @@ export class DeleteIntegration extends BucketBaseIntegration implements Integrat
     super({
       ...props,
       httpMethod: Method.DELETE,
+      service: { type: 's3', permissions: ['DeleteObject'] },
     });
   }
 }
