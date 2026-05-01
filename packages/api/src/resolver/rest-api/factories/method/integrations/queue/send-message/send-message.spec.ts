@@ -221,7 +221,7 @@ describe('Queue send message integration', () => {
       expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
         status_code: '200',
         response_templates: {
-          'application/json': `{"messageId":"$input.path('$.messageId')","sequenceNumber":"$input.path('$.sequenceNumber')"}`,
+          'application/json': `{ #set($comma = "") $comma"messageId": "$input.path('$.messageId')" #set($comma = ",")$comma"sequenceNumber": "$input.path('$.sequenceNumber')" #set($comma = ",") }`,
         },
       });
     });
@@ -236,7 +236,7 @@ describe('Queue send message integration', () => {
       expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
         status_code: '200',
         response_templates: {
-          'application/json': `{"messageId":$input.path('$.SendMessageResponse.SendMessageResult.MessageId'),"requestId":"$input.path('$.requestId')"}`,
+          'application/json': `{ #set($comma = "") $comma"messageId": "$input.path('$.SendMessageResponse.SendMessageResult.MessageId')" #set($comma = ",")$comma"requestId": "$input.path('$.requestId')" #set($comma = ",") }`,
         },
       });
     });

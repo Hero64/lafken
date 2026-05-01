@@ -32,6 +32,9 @@ export class TemplateHelper {
         : currentValue;
 
     if (field.type === 'Array') {
+      if (field.directTemplateValue) {
+        return field.directTemplateValue;
+      }
       let forVariableName = `$item${index}`;
       const start = `#foreach(${forVariableName} in ${value})`;
       const end = '#if($foreach.hasNext),#end #end';
@@ -56,6 +59,9 @@ export class TemplateHelper {
     }
 
     if (field.type === 'Object') {
+      if (field.directTemplateValue) {
+        return field.directTemplateValue;
+      }
       let template = '';
       for (const property of field.properties) {
         const value = `${currentValue ? `${currentValue}.` : ''}${property.name}`;

@@ -12,7 +12,6 @@ import {
   defaultResponses,
   getSuccessStatusCode,
   InternalDefaultHttpResponse,
-  responseMessages,
 } from './response.utils';
 
 const typesWithObjects = new Set<FieldTypes>(['Object', 'Array']);
@@ -26,9 +25,10 @@ export class ResponseHelper {
     if (this._handlerResponse !== undefined) {
       return this._handlerResponse;
     }
-    if (!this.handler.integration) {
-      this._handlerResponse = defaultResponses(this.handler.method);
-    }
+    this._handlerResponse = defaultResponses(
+      this.handler.method,
+      !!this.handler.integration
+    );
 
     if (!this.handler.response) {
       return this._handlerResponse;
@@ -108,14 +108,5 @@ export class ResponseHelper {
     };
 
     return data;
-  }
-
-  getPatternResponse(statusCode: '400' | '500'): ResponseHandler {
-    return {
-      selectionPattern: `${statusCode[0]}\\d{2}`,
-      statusCode,
-      template: `{"message": "${responseMessages[statusCode]}"}`,
-      field: InternalDefaultHttpResponse,
-    };
   }
 }

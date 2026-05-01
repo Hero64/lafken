@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { ResponseObjectMetadata } from '../../../../../../main';
-import { buildResponseTemplate } from './response-template';
+import type { ResponseArrayField, ResponseObjectMetadata } from '../../../../../../main';
+import { ResponseTemplateHelper } from './response-template';
+
+const helper = new ResponseTemplateHelper();
 
 const makeObject = (
   props: Partial<ResponseObjectMetadata> = {}
@@ -13,7 +15,7 @@ const makeObject = (
   ...props,
 });
 
-describe('buildResponseTemplate', () => {
+describe('ResponseTemplateHelper', () => {
   describe('primitive fields', () => {
     it('should quote String fields with $input.path', () => {
       const response = makeObject({
@@ -22,7 +24,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"name":"$input.path('$.name')"}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",") }`
+      );
     });
 
     it('should not quote Number fields', () => {
@@ -32,7 +36,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"age":$input.path('$.age')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"age": $input.path('$.age') #set($comma = ",") }`
+      );
     });
 
     it('should not quote Boolean fields', () => {
@@ -42,7 +48,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"active":$input.path('$.active')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"active": $input.path('$.active') #set($comma = ",") }`
+      );
     });
 
     it('should not quote Any fields', () => {
@@ -52,7 +60,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"data":$input.path('$.data')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"data": $input.path('$.data') #set($comma = ",") }`
+      );
     });
 
     it('should build multiple primitive fields', () => {
@@ -64,8 +74,8 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"name":"$input.path('$.name')","age":$input.path('$.age'),"active":$input.path('$.active')}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",")$comma"age": $input.path('$.age') #set($comma = ",")$comma"active": $input.path('$.active') #set($comma = ",") }`
       );
     });
   });
@@ -84,7 +94,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"id":$input.path('$.nested.id')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"id": "$input.path('$.nested.id')" #set($comma = ",") }`
+      );
     });
 
     it('should use field.template directly when provided on a Number', () => {
@@ -100,8 +112,8 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"total":$input.path('$.meta.total')}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"total": $input.path('$.meta.total') #set($comma = ",") }`
       );
     });
   });
@@ -126,8 +138,8 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"name":"$input.path('$.name')","address":{"street":"$input.path('$.address.street')","city":"$input.path('$.address.city')"}}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",")$comma"address": { #set($comma = "") $comma"street": "$input.path('$.address.street')" #set($comma = ",")$comma"city": "$input.path('$.address.city')" #set($comma = ",") } #set($comma = ",") }`
       );
     });
 
@@ -156,14 +168,14 @@ describe('buildResponseTemplate', () => {
 
       const response = makeObject({ properties: [address] });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"address":{"city":"$input.path('$.address.city')","geo":{"lat":$input.path('$.address.geo.lat'),"lng":$input.path('$.address.geo.lng')}}}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"address": { #set($comma = "") $comma"city": "$input.path('$.address.city')" #set($comma = ",")$comma"geo": { #set($comma = "") $comma"lat": $input.path('$.address.geo.lat') #set($comma = ",")$comma"lng": $input.path('$.address.geo.lng') #set($comma = ",") } #set($comma = ",") } #set($comma = ",") }`
       );
     });
   });
 
   describe('Array fields', () => {
-    it('should pass through array of primitives via $input.path', () => {
+    it('should generate foreach for array of strings', () => {
       const response = makeObject({
         properties: [
           {
@@ -181,7 +193,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"tags":$input.path('$.tags')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"tags": [#foreach($item0 in $input.path('$.tags')) "$item0" #if($foreach.hasNext),#end #end] #set($comma = ",") }`
+      );
     });
 
     it('should generate foreach for array of objects', () => {
@@ -206,8 +220,8 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"items":[#foreach($item in $input.path('$.items')){"id":"$item.id","qty":$item.qty}#if($foreach.hasNext),#end#end]}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"items": [#foreach($item0 in $input.path('$.items')) { #set($comma = "") $comma"id": "$item0.id" #set($comma = ",")$comma"qty": $item0.qty #set($comma = ",") } #if($foreach.hasNext),#end #end] #set($comma = ",") }`
       );
     });
 
@@ -231,7 +245,9 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(`{"items":$input.json('$.items')}`);
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"items": $input.json('$.items') #set($comma = ",") }`
+      );
     });
 
     it('should use custom template on foreach item fields', () => {
@@ -252,7 +268,7 @@ describe('buildResponseTemplate', () => {
                   name: 'fullName',
                   destinationName: 'fullName',
                   required: true,
-                  template: '"$item.firstName $item.lastName"',
+                  template: '$item.firstName $item.lastName',
                 },
               ],
               payload: { id: 'User', name: 'User', additionalProperties: false },
@@ -261,8 +277,8 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"users":[#foreach($item in $input.path('$.users')){"fullName":"$item.firstName $item.lastName"}#if($foreach.hasNext),#end#end]}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"users": [#foreach($item0 in $input.path('$.users')) { #set($comma = "") $comma"fullName": "$item.firstName $item.lastName" #set($comma = ",") } #if($foreach.hasNext),#end #end] #set($comma = ",") }`
       );
     });
   });
@@ -295,9 +311,50 @@ describe('buildResponseTemplate', () => {
         ],
       });
 
-      expect(buildResponseTemplate(response)).toBe(
-        `{"title":"$input.path('$.title')","count":$input.path('$.count'),"ref":$input.path('$.meta.ref'),"ids":$input.path('$.ids')}`
+      expect(helper.buildTemplate(response)).toBe(
+        `{ #set($comma = "") $comma"title": "$input.path('$.title')" #set($comma = ",")$comma"count": $input.path('$.count') #set($comma = ",")$comma"ref": "$input.path('$.meta.ref')" #set($comma = ",")$comma"ids": [#foreach($item0 in $input.path('$.ids')) $item0 #if($foreach.hasNext),#end #end] #set($comma = ",") }`
       );
+    });
+  });
+
+  describe('root Array', () => {
+    it('should generate foreach for a root array of objects', () => {
+      const response: ResponseArrayField = {
+        type: 'Array',
+        name: 'Root',
+        destinationName: 'Root',
+        items: {
+          type: 'Object',
+          name: 'item',
+          destinationName: 'item',
+          properties: [
+            { type: 'String', name: 'id', destinationName: 'id', required: true },
+            { type: 'Number', name: 'qty', destinationName: 'qty', required: true },
+          ],
+          payload: { id: 'Item', name: 'Item', additionalProperties: false },
+        },
+      };
+
+      expect(helper.buildTemplate(response)).toBe(
+        `[#foreach($item0 in $input.path('$')) { #set($comma = "") $comma"id": "$item0.id" #set($comma = ",")$comma"qty": $item0.qty #set($comma = ",") } #if($foreach.hasNext),#end #end]`
+      );
+    });
+
+    it('should use template override on a root array', () => {
+      const response: ResponseArrayField = {
+        type: 'Array',
+        name: 'Root',
+        destinationName: 'Root',
+        template: "$input.json('$')",
+        items: {
+          type: 'String',
+          name: 'item',
+          destinationName: 'item',
+          required: true,
+        },
+      };
+
+      expect(helper.buildTemplate(response)).toBe(`$input.json('$')`);
     });
   });
 });

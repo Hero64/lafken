@@ -4,10 +4,10 @@ import {
   type ApiParamMetadata,
   Method,
   type QueueSendMessageIntegrationResponse,
+  type ResponseArrayField,
   type ResponseObjectMetadata,
 } from '../../../../../../../main';
-import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
-import { buildResponseTemplate } from '../../../helpers/response/response-template';
+import { ResponseTemplateHelper } from '../../../helpers/response-template/response-template';
 import type {
   InitializedClass,
   Integration,
@@ -94,26 +94,23 @@ export class SendMessageIntegration implements Integration {
       });
     }
 
+    const responseTemplateHelper = new ResponseTemplateHelper();
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      [
-        ...(
-          responseHelper.handlerResponse || [
-            {
-              statusCode: getSuccessStatusCode(handler.method).toString(),
-            },
-          ]
-        ).map((response) => ({
+      responseHelper.handlerResponse.map((response) => {
+        return {
           ...response,
           template:
-            response.field?.type === 'Object'
-              ? buildResponseTemplate(response.field as ResponseObjectMetadata)
+            !response.template &&
+            (response.field?.type === 'Object' || response.field?.type === 'Array')
+              ? responseTemplateHelper.buildTemplate(
+                  response.field as ResponseObjectMetadata | ResponseArrayField
+                )
               : response.template,
-        })),
-        responseHelper.getPatternResponse('400'),
-        responseHelper.getPatternResponse('500'),
-      ],
+        };
+      }),
+
       `${resourceMetadata.name}-${handler.name}`
     );
 
