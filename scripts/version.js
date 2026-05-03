@@ -46,7 +46,11 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const ask = (q) => new Promise((resolve) => rl.question(q, (ans) => resolve(ans)));
+const ask = (q, defaultValue) =>
+  new Promise((resolve) => {
+    const hint = defaultValue !== undefined ? ` [${defaultValue}]` : '';
+    rl.question(`${q}${hint}: `, (ans) => resolve(ans.trim() || defaultValue));
+  });
 
 (async () => {
   try {
@@ -55,16 +59,16 @@ const ask = (q) => new Promise((resolve) => rl.question(q, (ans) => resolve(ans)
 
     console.log(`\n📦 Current version: ${currentVersion}\n`);
 
-    const type = await ask('Select version bump (major/minor/patch/manual): ');
+    const type = await ask('Select version bump (major/minor/patch/manual)', 'manual');
 
     let newVersion;
 
     if (type === 'manual') {
-      newVersion = await ask('Enter full version (e.g. 1.2.3-alpha.0): ');
+      newVersion = await ask('Enter full version (e.g. 1.2.3-alpha.0)');
     } else if (['major', 'minor', 'patch'].includes(type)) {
       newVersion = bumpVersion(currentVersion, type);
 
-      const pre = await ask('Pre-release? (alpha/beta/rc/none): ');
+      const pre = await ask('Pre-release? (alpha/beta/rc/none)', 'none');
 
       if (pre && pre !== 'none') {
         newVersion = `${newVersion}-${pre}.0`;
@@ -76,8 +80,8 @@ const ask = (q) => new Promise((resolve) => rl.question(q, (ans) => resolve(ans)
 
     console.log(`\n🚀 New version: ${newVersion}\n`);
 
-    const confirm = await ask('Continue? (y/n): ');
-    if (confirm !== 'y') {
+    const confirm = await ask('Continue? (y/n)', 'y');
+    if (!['y', 'yes'].includes(confirm.toLowerCase())) {
       console.log('Cancelled.');
       process.exit(0);
     }
