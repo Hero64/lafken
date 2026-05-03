@@ -132,7 +132,7 @@ export class UserApi {
   @Get({
     path: '/{id}',
     lambda: {
-      env: ({ getResourceValue }) => ({
+      env: ({ getResourceValue, getSSMValue }) => ({
         // Static value
         APP_NAME: 'my-app',
         
@@ -143,7 +143,7 @@ export class UserApi {
         TABLE_NAME: getResourceValue('dynamo::users', 'name'),
         
         // AWS Systems Manager Parameter Store
-        API_KEY: 'SSM::STRING::/my-app/api-key'
+        API_KEY: getSSMValue('/my-app/api-key')
       }),
     }
   })
@@ -155,49 +155,49 @@ export class UserApi {
 
 Enable TypeScript autocomplete for your infrastructure:
 
-Create `lafken-types.d.ts` in your project root:
+Create `lafken-types.d.ts` in your project root and extend the two interfaces from `@lafken/common`:
+
+- **`SharedResourceNames`** — resources defined and owned by your application
+- **`SharedReferenceResources`** — resources from external stacks that your app references
 
 ```ts
 declare module '@lafken/common' {
-
-  // Register application modules
-  interface ModulesAvailable {
-    // Module name
-    greeting: {
-      // STATE MACHINE resources within the module
-      StateMachine: {
-        // Resource name mapped to a boolean flag
-        GreetingStepFunction: true;
-      };
-      // QUEUE resources within the module
-      Queue: {
-        'greeting-standard-queue': true;
-      };
-    };
+  // Resources defined in this application
+  interface SharedResourceNames {
+    api: 'my-api';
+    'api-authorizer': 'cognito-auth' | 'custom-auth';
+    lambda: 'my-function';
+    queue: 'my-queue';
+    bucket: 'my-bucket';
+    dynamo: 'my-table';
+    'state-machine': 'my-workflow';
+    'user-pool': 'my-user-pool';
+    'user-pool-client': 'my-user-pool-client';
   }
 
-  // bucket
-  interface BucketAvailable {
-    'lafken-example-documents': true;
-  }
-  // api
-  interface ApiRestAvailable {
-    UserApi: true;
-  }
-
-  interface DynamoTableAvailable {
-    users: true;
+  // Resources from external stacks referenced by this application
+  interface SharedReferenceResources {
+    dynamo: 'shared-table';
+    queue: 'shared-queue';
+    'user-pool': 'shared-user-pool';
+    'state-machine': 'shared-workflow';
+    'event-bus': 'shared-event-bus';
+    'event-rule': 'shared-event-rule';
+    schedule: 'shared-schedule';
+    lambda: 'shared-function';
   }
 }
 
 export {};
 ```
 
+Each key is a resource scope, and the value is a union of valid resource names for that scope. Only include the scopes your application actually uses.
+
 Now you get full autocomplete:
 
 ```ts
-getResourceValue('dynamo::users', 'arn')  // ✓ TypeScript knows this is valid
-getResourceValue('dynamo::invalid', 'arn') // ✗ TypeScript error
+getResourceValue('dynamo::my-table', 'arn')    // ✓ TypeScript knows this is valid
+getResourceValue('dynamo::invalid', 'arn')      // ✗ TypeScript error
 ```
 
 ### Creating Custom Resolvers
