@@ -137,12 +137,6 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       );
     }
 
-    if (param.source === 'body' && param.parse && !bodyParsedTypes.has(param.type)) {
-      throw new Error(
-        `Body params only support ${[...bodyParsedTypes].join(', ')} values`
-      );
-    }
-
     if (param?.source === 'body' && !param.parse && !bodyUnparsedTypes.has(param.type)) {
       throw new Error(
         `Body params only support ${[...bodyUnparsedTypes].join(', ')} values`
