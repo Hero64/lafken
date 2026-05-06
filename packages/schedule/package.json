@@ -1,6 +1,6 @@
 {
   "name": "@lafken/schedule",
-  "version": "0.11.17",
+  "version": "0.11.18",
   "private": false,
   "description": "Define EventBridge scheduled rules and cron jobs using TypeScript decorators with Lafken",
   "keywords": [
