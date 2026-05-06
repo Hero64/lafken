@@ -65,7 +65,7 @@ describe('Dynamo query integration', () => {
         partitionKey: {
           name: 'foo',
         },
-        tableName: getResourceValue('test', 'id'),
+        tableName: getResourceValue('dynamo::test', 'id'),
       };
     }
 

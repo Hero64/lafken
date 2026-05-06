@@ -38,7 +38,7 @@ export class BucketBaseIntegration implements Integration {
     const resource: InitializedClass<BucketIntegrationResponse> = new classResource();
 
     const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions('bucket');
+      integrationHelper.generateIntegrationOptions(restApi);
     const integrationResponse: BucketIntegrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
       options

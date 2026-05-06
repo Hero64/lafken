@@ -64,7 +64,7 @@ describe('Bucket upload integration', () => {
       @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
     ): BucketIntegrationResponse {
       return {
-        bucket: getResourceValue('test', 'id'),
+        bucket: getResourceValue('bucket::test', 'id'),
         object: 'test.json',
       };
     }

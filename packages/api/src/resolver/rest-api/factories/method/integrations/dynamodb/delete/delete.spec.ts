@@ -65,7 +65,7 @@ describe('Dynamo delete integration', () => {
         sortKey: {
           age: 30,
         },
-        tableName: getResourceValue('test', 'id'),
+        tableName: getResourceValue('dynamo::test', 'id'),
       };
     }
 

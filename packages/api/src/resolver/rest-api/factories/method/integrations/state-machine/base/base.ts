@@ -79,10 +79,12 @@ export class StateMachineBaseIntegration<T> implements Integration {
   }
 
   protected async callIntegrationMethod<R>() {
-    const { classResource, handler, proxyHelper, integrationHelper } = this.props;
+    const { classResource, handler, proxyHelper, integrationHelper, restApi } =
+      this.props;
 
     const resource: InitializedClass<R> = new classResource();
-    const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
+    const { options, resolveResource } =
+      integrationHelper.generateIntegrationOptions(restApi);
     const integrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
       options

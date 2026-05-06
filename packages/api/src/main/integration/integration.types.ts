@@ -2,6 +2,7 @@ import type {
   AvailableReference,
   BucketNames,
   DynamoTableNames,
+  GetExternalValues,
   GetResourceValue,
   OnlyNumberString,
   OnlyOne,
@@ -28,7 +29,8 @@ import type {
  * }
  * ```
  */
-export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'> {
+export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'>
+  extends GetExternalValues {
   /**
    * Retrieves a registered resource attribute (e.g. ARN or ID) by its scoped identifier.
    *
@@ -343,4 +345,6 @@ export interface QueueSendMessageIntegrationResponse {
   attributes?: Partial<Record<string, string | number>>;
   /** Optional message body payload. Can be a plain string or a full `@Event` object. */
   body?: any;
+  groupId?: string;
+  deduplicationId?: string;
 }

@@ -27,7 +27,8 @@ export class SendMessageIntegration implements Integration {
       responseTemplateHelper,
     } = this.props;
 
-    const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
+    const { options, resolveResource } =
+      integrationHelper.generateIntegrationOptions(restApi);
     const name = `${resourceMetadata.name}-${handler.name}`;
 
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
@@ -223,10 +224,30 @@ export class SendMessageIntegration implements Integration {
     return queueAttributes.join('');
   };
 
+  private resolveGroupId(groupId?: string) {
+    if (!groupId) {
+      return '';
+    }
+
+    return `&MessageGroupId=${groupId}`;
+  }
+
+  private resolveDeduplicationId(deduplicationId?: string) {
+    if (!deduplicationId) {
+      return '';
+    }
+
+    return `&MessageDeduplicationId=${deduplicationId}`;
+  }
+
   private createTemplate(integrationResponse: QueueSendMessageIntegrationResponse) {
     const bodyTemplate = this.resolveBody(integrationResponse.body);
     const attributeTemplate = this.resolveAttributes(integrationResponse.attributes);
+    const groupIdTemplate = this.resolveGroupId(integrationResponse.groupId);
+    const deduplicationIdTemplate = this.resolveDeduplicationId(
+      integrationResponse.deduplicationId
+    );
 
-    return `Action=SendMessage${bodyTemplate}${attributeTemplate}`;
+    return `Action=SendMessage${bodyTemplate}${attributeTemplate}${groupIdTemplate}${deduplicationIdTemplate}`;
   }
 }
