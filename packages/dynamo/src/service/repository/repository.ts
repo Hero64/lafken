@@ -106,5 +106,10 @@ export const createRepository = <E extends ClassResource>(
         keys,
       });
     },
+    sendRawCommand<T = unknown>(
+      command: Parameters<typeof queryBuilderProps.client.send>[0]
+    ) {
+      return queryBuilderProps.client.send(command) as Promise<T>;
+    },
   };
 };

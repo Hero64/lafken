@@ -1,16 +1,5 @@
 import type { GetResourceValue } from './output.types';
-import type {
-  ApiRestScopedNames,
-  BucketScopedNames,
-  DynamoTableScopedNames,
-  EventBusScopedNames,
-  QueueScopedNames,
-  StandaloneHandlerRolesScopedNames,
-  StandaloneHandlerScopedNames,
-  StateMachineScopedNames,
-  UserPoolClientScopedNames,
-  UserPoolScopedNames,
-} from './override-resources.types';
+import type { AvailableReference } from './override-resources.types';
 
 export interface ClassResource {
   new (...args: any[]): {};
@@ -393,18 +382,7 @@ export interface GetResourceProps {
    * // Get a bucket ARN
    * getResourceValue('bucket::uploads', 'arn')
    */
-  getResourceValue: GetResourceValue<
-    | DynamoTableScopedNames
-    | UserPoolScopedNames
-    | UserPoolClientScopedNames
-    | BucketScopedNames
-    | ApiRestScopedNames
-    | EventBusScopedNames
-    | StateMachineScopedNames
-    | QueueScopedNames
-    | StandaloneHandlerScopedNames
-    | StandaloneHandlerRolesScopedNames
-  >;
+  getResourceValue: GetResourceValue<AvailableReference>;
   /**
    * Retrieves a value from AWS Systems Manager Parameter Store.
    *

@@ -71,7 +71,9 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
       replica: modelProps.replica,
     });
 
-    this.isGlobal('dynamo', modelProps.name);
+    if (modelProps.ref) {
+      this.register('dynamo', modelProps.ref);
+    }
 
     if (modelProps.stream?.enabled) {
       const defaultBus = new DataAwsCloudwatchEventBus(this, 'DefaultBus', {

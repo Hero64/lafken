@@ -45,7 +45,7 @@ export class AppStack extends TerraformStack {
     await this.triggerHook(resolvers, 'afterCreate');
 
     this.addAspectProperties();
-    await lafkenResource.callDependentCallbacks();
+    await lafkenResource.resolve();
     await lambdaAssets.createAssets();
     if (extend) {
       await extend(this);
@@ -73,7 +73,11 @@ export class AppStack extends TerraformStack {
       {} as Record<string, ResolverType>
     );
 
-    await Promise.all(modules.map((module) => module(this, resolversByType)));
+    await Promise.all(
+      modules.map((module) =>
+        module(this, resolversByType, this.props.globalConfig?.lambda?.services)
+      )
+    );
   }
 
   private createRole() {
@@ -94,7 +98,7 @@ export class AppStack extends TerraformStack {
       ],
     });
 
-    lambdaRole.isGlobal('app', roleName);
+    lambdaRole.register('app', roleName);
   }
 
   private addAspectProperties() {

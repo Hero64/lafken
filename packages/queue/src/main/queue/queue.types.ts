@@ -2,6 +2,7 @@ import type {
   LambdaMetadata,
   LambdaProps,
   QueueNames,
+  QueueReferenceNames,
   ResourceOutputType,
 } from '@lafken/common';
 
@@ -14,6 +15,17 @@ import type {
  * - `url`: Same as `id`: the URL for the created Amazon SQS queue.
  */
 export type QueueOutputAttributes = 'arn' | 'id' | 'url';
+
+export interface DlqProps {
+  /**
+   * Maximum number of times a message can be received before being moved to the DLQ.
+   */
+  maxReceiveCount: number;
+  /**
+   * Message retention period in seconds for the DLQ.
+   */
+  retentionPeriod?: number;
+}
 
 export interface StandardProps {
   /**
@@ -96,6 +108,23 @@ export interface StandardProps {
    * }
    */
   outputs?: ResourceOutputType<QueueOutputAttributes>;
+  /**
+   * Registers this Queue as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'order'
+   */
+  ref?: QueueReferenceNames;
+  /**
+   * Dead Letter Queue configuration.
+   *
+   * When specified, a DLQ is created and the main queue is configured
+   * with a redrive policy to move unprocessable messages after the defined
+   * number of receive attempts.
+   */
+  dlq?: DlqProps;
 }
 
 export interface FifoProps extends StandardProps {

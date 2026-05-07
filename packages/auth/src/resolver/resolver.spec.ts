@@ -11,6 +11,9 @@ describe('AuthResolver', () => {
     const { stack } = setupTestingStack();
     const resolver = new AuthResolver({
       name: 'test',
+      userPool: {
+        name: 'test',
+      },
     });
 
     await resolver.beforeCreate(stack as unknown as AppModule);

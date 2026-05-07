@@ -16,6 +16,7 @@ export class QueryBuilderBase<E extends ClassResource> {
 
   protected attributeNames: Record<string, string> = {};
   protected attributeValues: Record<string, any> = {};
+  protected expressionGroupCounter = 0;
 
   protected getKeyConditionExpression(
     expression: KeyCondition<E>,
@@ -113,19 +114,20 @@ export class QueryBuilderBase<E extends ClassResource> {
             orExpressions.push(expression);
           }
 
-          filterExpression.push(`(${orExpressions.join(' or ')})`);
+          const joined = orExpressions.join(' or ');
+          filterExpression.push(orExpressions.length > 1 ? `(${joined})` : joined);
           break;
         }
         case 'AND': {
           const andFilter = filter as AndFilter<T>;
-          const expression = this.getFilterExpression(
-            andFilter.AND,
-            names,
-            'and',
-            counter
-          );
+          const andExpressions: string[] = [];
+          for (const condition of andFilter.AND) {
+            const expression = this.getFilterExpression(condition, names, 'and', counter);
+            counter += 1;
+            andExpressions.push(expression);
+          }
 
-          filterExpression.join(`(${expression})`);
+          filterExpression.push(andExpressions.join(' and '));
           break;
         }
         default: {
@@ -173,7 +175,7 @@ export class QueryBuilderBase<E extends ClassResource> {
       index++;
     }
 
-    return `(${filterExpression.join(` ${union} `)})`;
+    return filterExpression.join(` ${union} `);
   }
 
   protected getAttributesAndNames() {
@@ -182,7 +184,7 @@ export class QueryBuilderBase<E extends ClassResource> {
         Object.keys(this.attributeNames).length > 0 ? this.attributeNames : undefined,
       ExpressionAttributeValues:
         Object.keys(this.attributeValues).length > 0
-          ? marshall(this.attributeValues)
+          ? marshall(this.attributeValues, { removeUndefinedValues: true })
           : undefined,
     };
   }

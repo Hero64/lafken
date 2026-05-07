@@ -54,33 +54,33 @@ export type CommonExpression<E> = OnlyOne<
 >;
 
 export type Filter<E> = {
-  [key in keyof E]?: E[key] extends PrimaryPartition<number>
+  [key in keyof E]?: NonNullable<E[key]> extends PrimaryPartition<number>
     ?
-        | E[key]
+        | NonNullable<E[key]>
         | OnlyOne<
             OperationExpression<number> & CommonExpression<number> & InExpression<number>
           >
-    : E[key] extends PrimaryPartition<string>
+    : NonNullable<E[key]> extends PrimaryPartition<string>
       ?
-          | E[key]
+          | NonNullable<E[key]>
           | OnlyOne<
               StringExpression &
                 StringFilterExpression &
                 CommonExpression<string> &
                 InExpression<string>
             >
-      : E[key] extends string | number | boolean | Date | null
+      : NonNullable<E[key]> extends string | number | boolean | Date | null
         ?
-            | E[key]
-            | (E[key] extends number
+            | NonNullable<E[key]>
+            | (NonNullable<E[key]> extends number
                 ? OnlyOne<
                     OperationExpression<number> &
                       CommonExpression<number> &
                       InExpression<number>
                   >
-                : E[key] extends boolean
+                : NonNullable<E[key]> extends boolean
                   ? CommonExpression<boolean>
-                  : E[key] extends null
+                  : NonNullable<E[key]> extends null
                     ? NullExpression
                     : OnlyOne<
                         StringExpression &
@@ -96,7 +96,7 @@ export type OrFilter<E> = {
 };
 
 export type AndFilter<E> = {
-  AND: Filter<E> | OrFilter<E>;
+  AND: Array<Filter<E> | OrFilter<E>>;
 };
 
 export type SortDirectionType = 'asc' | 'desc';
@@ -148,7 +148,7 @@ export interface FindProps<E extends Function> {
    *   },
    * }
    */
-  filter?: Filter<E['prototype']> | OrFilter<E['prototype']>;
+  filter?: Filter<E['prototype']> | OrFilter<E['prototype']> | AndFilter<E['prototype']>;
   /**
    * Specifies the sort order to apply to the query results.
    * This determines whether items are returned in ascending or descending order.
@@ -347,7 +347,10 @@ export interface UpsertProps<E extends Function> {
    *   foo: 'bar'
    * }
    */
-  condition?: Filter<E['prototype']>;
+  condition?:
+    | Filter<E['prototype']>
+    | OrFilter<E['prototype']>
+    | AndFilter<E['prototype']>;
 }
 
 export interface ModelInformation<E extends ClassResource> {

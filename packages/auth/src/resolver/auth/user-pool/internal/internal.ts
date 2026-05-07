@@ -94,7 +94,9 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
       this.attributeByName = attributes.attributeByName;
     }
 
-    this.isGlobal('user-pool', id);
+    if (props.ref) {
+      this.register('user-pool', props.ref);
+    }
     this.assignIdentityProviders(props.identityProviders);
     new ResourceOutput<UserPoolOutputAttributes>(this, props.outputs);
   }

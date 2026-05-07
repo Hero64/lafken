@@ -4,7 +4,6 @@ import {
   Method,
   type QueueSendMessageIntegrationResponse,
 } from '../../../../../../../main';
-import { getSuccessStatusCode } from '../../../helpers/response/response.utils';
 import type {
   InitializedClass,
   Integration,
@@ -25,9 +24,13 @@ export class SendMessageIntegration implements Integration {
       resourceMetadata,
       integrationHelper,
       responseHelper,
+      responseTemplateHelper,
     } = this.props;
 
-    const { options, resolveResource } = integrationHelper.generateIntegrationOptions();
+    const { options, resolveResource } =
+      integrationHelper.generateIntegrationOptions(restApi);
+    const name = `${resourceMetadata.name}-${handler.name}`;
+
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
       new classResource();
     const integrationResponse = await resource[handler.name](
@@ -35,33 +38,38 @@ export class SendMessageIntegration implements Integration {
       options
     );
 
-    const integration = new LafkenIntegration(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
-      {
-        httpMethod: apiGatewayMethod.httpMethod,
-        resourceId: apiGatewayMethod.resourceId,
-        restApiId: restApi.id,
-        type: 'AWS',
-        integrationHttpMethod: Method.POST,
-        uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
-        credentials: integrationHelper.createRole('sqs.write', restApi).arn,
-        passthroughBehavior: 'WHEN_NO_TEMPLATES',
-        requestParameters: {
-          'integration.request.header.Content-Type':
-            "'application/x-www-form-urlencoded'",
-        },
-        dependsOn: [apiGatewayMethod],
-        requestTemplates: {
-          'application/json': resolveResource.hasUnresolved()
-            ? ''
-            : this.createTemplate(integrationResponse),
-        },
-      }
-    );
+    const role = integrationHelper.createRole({
+      name,
+      scope: restApi,
+      service: {
+        type: 'sqs',
+        permissions: ['SendMessage'],
+      },
+      additionalServices: handler.additionalServices,
+    });
+
+    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
+      credentials: role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestParameters: {
+        'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'",
+      },
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': resolveResource.hasUnresolved()
+          ? ''
+          : this.createTemplate(integrationResponse),
+      },
+    });
 
     if (resolveResource.hasUnresolved()) {
-      integration.isDependent(async () => {
+      integration.onResolve(async () => {
         const integrationResponse = await resource[handler.name](
           proxyHelper.createEvent(),
           options
@@ -81,14 +89,11 @@ export class SendMessageIntegration implements Integration {
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      [
-        {
-          statusCode: getSuccessStatusCode(handler.method).toString(),
-        },
-        responseHelper.getPatternResponse('400'),
-        responseHelper.getPatternResponse('500'),
-      ],
-      `${resourceMetadata.name}-${handler.name}`
+      integrationHelper.generateResponseTemplate(
+        responseHelper.handlerResponse,
+        responseTemplateHelper
+      ),
+      name
     );
 
     return integration;
@@ -219,10 +224,30 @@ export class SendMessageIntegration implements Integration {
     return queueAttributes.join('');
   };
 
+  private resolveGroupId(groupId?: string) {
+    if (!groupId) {
+      return '';
+    }
+
+    return `&MessageGroupId=${groupId}`;
+  }
+
+  private resolveDeduplicationId(deduplicationId?: string) {
+    if (!deduplicationId) {
+      return '';
+    }
+
+    return `&MessageDeduplicationId=${deduplicationId}`;
+  }
+
   private createTemplate(integrationResponse: QueueSendMessageIntegrationResponse) {
     const bodyTemplate = this.resolveBody(integrationResponse.body);
     const attributeTemplate = this.resolveAttributes(integrationResponse.attributes);
+    const groupIdTemplate = this.resolveGroupId(integrationResponse.groupId);
+    const deduplicationIdTemplate = this.resolveDeduplicationId(
+      integrationResponse.deduplicationId
+    );
 
-    return `Action=SendMessage${bodyTemplate}${attributeTemplate}`;
+    return `Action=SendMessage${bodyTemplate}${attributeTemplate}${groupIdTemplate}${deduplicationIdTemplate}`;
   }
 }

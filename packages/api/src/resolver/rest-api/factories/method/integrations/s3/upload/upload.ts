@@ -7,6 +7,7 @@ export class UploadIntegration extends BucketBaseIntegration implements Integrat
     super({
       ...props,
       httpMethod: Method.PUT,
+      service: { type: 's3', permissions: ['GetObject', 'PutObject'] },
     });
   }
 }

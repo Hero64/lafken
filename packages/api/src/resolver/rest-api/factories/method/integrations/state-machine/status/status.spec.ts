@@ -90,10 +90,6 @@ describe('State machine status integration', () => {
     });
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
-      response_templates: {
-        'application/json':
-          '#set($status = $input.json(\'status\')) { "status": $status }',
-      },
       status_code: '200',
     });
 
@@ -114,7 +110,7 @@ describe('State machine status integration', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRole, {
       assume_role_policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
-      name: 'state_machine-read',
+      name: 'StateMachineIntegrationApi-status-integration',
     });
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
@@ -132,7 +128,7 @@ describe('State machine status integration', () => {
       definition: '',
       roleArn: '',
     });
-    stateMachine.isGlobal('state-machine', 'test');
+    stateMachine.register('state-machine', 'test');
 
     await initializeMethod(
       restApi,
@@ -141,7 +137,7 @@ describe('State machine status integration', () => {
       'statusWithResource'
     );
 
-    await lafkenResource.callDependentCallbacks();
+    await lafkenResource.resolve();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {

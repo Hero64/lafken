@@ -11,6 +11,8 @@ export class ExternalTable extends lafkenResource.make(DataAwsDynamodbTable) {
       name,
     });
 
-    this.isGlobal('dynamo', name);
+    if (props.ref) {
+      this.register('dynamo', props.ref);
+    }
   }
 }

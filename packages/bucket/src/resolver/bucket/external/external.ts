@@ -11,6 +11,8 @@ export class ExternalBucket extends lafkenResource.make(DataAwsS3Bucket) {
       bucket: name,
     });
 
-    this.isGlobal('bucket', name);
+    if (props.ref) {
+      this.register('bucket', props.ref);
+    }
   }
 }

@@ -39,6 +39,7 @@ describe('ExternalUserPool', () => {
     const userPool = new ExternalUserPool(stack, 'my-auth', {
       isExternal: true,
       userPoolId: 'us-east-1_abc123',
+      ref: 'my-auth',
     });
 
     const resource = lafkenResource.getResource('user-pool', 'my-auth');

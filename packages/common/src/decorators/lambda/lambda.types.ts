@@ -1,5 +1,12 @@
-import type { EnvironmentValue, GetResourceProps } from '../../types';
+import type {
+  EnvironmentValue,
+  GetResourceProps,
+  LambdaReferenceNames,
+  ResourceOutputType,
+} from '../../types';
 import type { ServicesValues } from '../../types/services.types';
+
+export type LambdaOutputAttributes = 'arn' | 'invokeArn' | 'qualifiedArn';
 
 export interface VpcConfig {
   /**
@@ -55,6 +62,43 @@ export interface AliasConfig {
    * @default undefined (no provisioned concurrency)
    */
   provisionedExecutions?: number;
+}
+export interface LoggingConfig {
+  /**
+   * Log format for the Lambda function.
+   *
+   * Controls the format of the log records written to CloudWatch.
+   * - `'Text'`: Unstructured text output (default Lambda behaviour).
+   * - `'JSON'`: Structured JSON records, enabling `applicationLogLevel`
+   *             and `systemLogLevel`.
+   */
+  logFormat: 'text' | 'json';
+  /**
+   * Log retention period in days.
+   *
+   * Specifies the number of days to retain Lambda invocation logs
+   * in the CloudWatch Log Group before they are automatically deleted.
+   * When omitted, the log group never expires.
+   */
+  retentionInDays?: number;
+  /**
+   * Application-level log verbosity.
+   *
+   * Only valid when `logFormat` is `'json'`.
+   * Controls the level of logs emitted by your function code.
+   *
+   * Supported values: `'trace'` | `'debug'` | `'info'` | `'warn'` | `'error'` | `'fatal'`
+   */
+  applicationLogLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  /**
+   * System-level log verbosity.
+   *
+   * Only valid when `logFormat` is `'json'`.
+   * Controls the level of logs emitted by the Lambda runtime itself.
+   *
+   * Supported values: `'debug'` | `'info'` | `'warn'`
+   */
+  systemLogLevel?: 'debug' | 'info' | 'warn';
 }
 
 export interface LambdaProps {
@@ -158,6 +202,39 @@ export interface LambdaProps {
    */
   vpcConfig?: VpcConfigValue;
   /**
+   * Ephemeral storage size for the Lambda function.
+   *
+   * Specifies the size of the `/tmp` directory in MB. Useful for functions that
+   * need to process large files (PDFs, ZIPs, audio, etc.) during execution.
+   *
+   * Valid range: 512–10240 MB.
+   *
+   * @default 512
+   */
+  ephemeralStorage?: number;
+  /**
+   * Reserved concurrency for the Lambda function.
+   *
+   * Limits the maximum number of concurrent executions for this function.
+   * Setting this to `0` throttles the function entirely. Useful for protecting
+   * downstream resources (RDS, ElastiCache) from burst traffic or for
+   * guaranteeing capacity to critical functions.
+   *
+   * When not set, the function shares the account's unreserved concurrency pool.
+   */
+  reservedConcurrency?: number;
+  /**
+   * Instruction set architecture for the Lambda function.
+   *
+   * Specifies the CPU architecture that the Lambda function will run on.
+   * - `'x86_64'`: 64-bit x86 architecture (default AWS behaviour).
+   * - `'arm64'`: 64-bit ARM architecture (AWS Graviton2), which can offer
+   *             better price-performance for many workloads.
+   *
+   * @default 'x86_64'
+   */
+  architecture?: 'x86_64' | 'arm64';
+  /**
    * Alias configuration for the Lambda function.
    *
    * When provided, the Lambda function will be published (creating a new version)
@@ -176,6 +253,34 @@ export interface LambdaProps {
    * { name: 'live', provisionedExecutions: 5 }
    */
   alias?: AliasConfig;
+  /**
+   * Logging configuration for the Lambda function.
+   *
+   * When provided, configures the CloudWatch logging behaviour for the
+   * Lambda function. If `logGroup` is specified, a `CloudwatchLogGroup`
+   * resource will be created and linked automatically.
+   *
+   * @example
+   * { logFormat: 'Text', logGroup: { name: '/aws/lambda/my-fn', retentionInDays: 30 } }
+   *
+   * @example
+   * { logFormat: 'JSON', applicationLogLevel: 'WARN', systemLogLevel: 'INFO' }
+   */
+  loggingConfig?: LoggingConfig;
+  /**
+   * Output configuration for the Lambda function.
+   *
+   * Defines which attributes should be exported to SSM Parameter Store or
+   * as Terraform outputs. Supported attributes: `'arn'`, `'invokeArn'`, `'qualifiedArn'`.
+   */
+  outputs?: ResourceOutputType<LambdaOutputAttributes>;
+  /**
+   * Registers this Lambda as a named global reference.
+   *
+   * Allows other resources to look up this function by name via
+   * `lafkenResource.getResource('lambda', ref)`.
+   */
+  ref?: LambdaReferenceNames;
 }
 
 export interface LambdaMetadata {

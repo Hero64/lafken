@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import type {
   DeepPartial,
+  DynamoReferenceNames,
   DynamoTableNames,
   FieldTypes,
   OnlyNumber,
@@ -338,6 +339,15 @@ export interface TableBase<T extends Function> {
    * }
    */
   outputs?: ResourceOutputType<TableOutputAttributes>;
+  /**
+   * Registers this Table as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'order'
+   */
+  ref?: DynamoReferenceNames;
 }
 
 export interface TableProvisioned<T extends Function>

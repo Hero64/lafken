@@ -2,7 +2,7 @@ import type { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool'
 import type { CognitoUserPoolClient } from '@cdktn/provider-aws/lib/cognito-user-pool-client';
 import type { DataAwsCognitoUserPool } from '@cdktn/provider-aws/lib/data-aws-cognito-user-pool';
 import type { DataAwsCognitoUserPoolClient } from '@cdktn/provider-aws/lib/data-aws-cognito-user-pool-client';
-import type { AuthNames, ClassResource } from '@lafken/common';
+import type { ClassResource } from '@lafken/common';
 import type { Construct } from 'constructs';
 import type { UserPoolProps } from './auth/user-pool/user-pool.types';
 import type { UserClientProps } from './auth/user-pool-client/user-pool-client.types';
@@ -15,9 +15,9 @@ export interface ExtendProps {
 
 export interface AuthOptions<T extends ClassResource> {
   /**
-   * Determines the name of the Cognito User Pool and its associated User Client.
+   * name of authorizer
    */
-  name: AuthNames;
+  name: string;
   /**
    * Defines a custom configuration for the Cognito User Pool.
    * This allows specifying properties such as:

@@ -65,7 +65,7 @@ export class PokeApi {
     response: PokemonResponse,
     lambda: {
       env: ({ getResourceValue }) => ({
-        queueArn: getResourceValue('pokemon-module::queue::createPokemon', 'id'),
+        queueArn: getResourceValue('queue::create-pokemon', 'id'),
       }),
     },
   })
@@ -104,6 +104,11 @@ export class PokeApi {
 
   @Delete({
     path: '/{name}',
+    lambda: {
+      env: ({ getResourceValue }) => ({
+        stateMachineArn: getResourceValue('state-machine::get-pokemon', 'arn'),
+      }),
+    },
   })
   async deletePokemon(@Event(BasePokemonPayload) e: BasePokemonPayload) {
     await pokemonRepository.delete({
@@ -130,7 +135,7 @@ export class PokeApi {
     @IntegrationOptions() { getResourceValue }: QueueIntegrationOption
   ): Promise<QueueSendMessageIntegrationResponse> {
     return {
-      queueName: getResourceValue('pokemon-module::queue::createPokemon', 'name'),
+      queueName: getResourceValue('queue::create-pokemon', 'name'),
       body: 'view pokedex',
     };
   }

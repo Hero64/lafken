@@ -119,6 +119,7 @@ const RolePolicy = lafkenResource.make(IamRolePolicy);
 
 export class Role extends lafkenResource.make(IamRole) {
   public policy: InstanceType<typeof RolePolicy>;
+  public services: ServicesValues;
 
   constructor(
     scope: Construct,
@@ -140,6 +141,7 @@ export class Role extends lafkenResource.make(IamRole) {
         ],
       }),
     });
+    this.services = props.services;
     this.createPolicy();
   }
 
@@ -149,14 +151,14 @@ export class Role extends lafkenResource.make(IamRole) {
     const statement = this.createPolicyStatement(this.props.services);
 
     this.policy = new RolePolicy(this, policyName, {
-      name: policyName,
+      name: policyName.slice(0, 63),
       role: this.id,
       policy: statement ? Fn.jsonencode(statement) : '',
       dependsOn: [this],
     });
 
     if (!statement) {
-      this.policy.isDependent(() => {
+      this.policy.onResolve(() => {
         const statement = this.createPolicyStatement(this.props.services);
         if (!statement) {
           throw new Error('The role policy could not resolve one of its dependencies');

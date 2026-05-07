@@ -31,7 +31,10 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
         : undefined,
     });
 
-    this.isGlobal(scope.id, `state-machine::${id}`);
+    if (resourceMetadata.ref) {
+      this.register('state-machine', resourceMetadata.ref);
+    }
+
     this.addLoggingConfiguration(resourceMetadata);
     new ResourceOutput<StateMachineOutputAttributes>(this, resourceMetadata.outputs);
   }
@@ -47,7 +50,7 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
       this.overrideDefinition(definition);
       this.addDependency(...schema.resources);
     } else {
-      this.isDependent(async () => {
+      this.onResolve(async () => {
         this.overrideDefinition(await schema.resolveArguments(definition));
         this.addDependency(...schema.resources);
       });

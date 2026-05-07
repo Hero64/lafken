@@ -1,9 +1,9 @@
-import type { ModuleGlobalReferenceNames } from '@lafken/common';
+import type { RegisterNamespaces } from '@lafken/common';
 import { Construct } from 'constructs';
 
 class LafkenResource {
-  private globals: Record<string, Construct> = {};
-  private dependent: (() => void)[] = [];
+  private registry: Record<string, Construct> = {};
+  private resolvers: (() => void)[] = [];
 
   make<T extends new (...args: any[]) => Construct>(ExtendResource: T) {
     const self = this;
@@ -13,12 +13,20 @@ class LafkenResource {
     }
 
     class Resource extends ExtendResource {
-      isGlobal(module: ModuleGlobalReferenceNames | (string & {}), id: string) {
-        self.globals[`${module}::${id}`] = this;
+      /**
+       * Registers this resource under a namespaced key so it can be
+       * retrieved globally via `getResource(module, id)`.
+       */
+      register(namespaces: RegisterNamespaces | (string & {}), id: string) {
+        self.registry[`${namespaces}::${id}`] = this;
       }
 
-      isDependent(resolveDependency: () => void) {
-        self.dependent.push(resolveDependency);
+      /**
+       * Enqueues a callback to be executed once all resources are
+       * registered, useful for resolving cross-resource dependencies.
+       */
+      onResolve(callback: () => void) {
+        self.resolvers.push(callback);
       }
     }
 
@@ -26,19 +34,16 @@ class LafkenResource {
   }
 
   reset() {
-    this.globals = {};
-    this.dependent = [];
+    this.registry = {};
+    this.resolvers = [];
   }
 
-  getResource<T = any>(
-    module: ModuleGlobalReferenceNames | (string & {}),
-    id: string
-  ): T {
-    return this.globals[`${module}::${id}`] as T;
+  getResource<T = any>(module: RegisterNamespaces | (string & {}), id: string): T {
+    return this.registry[`${module}::${id}`] as T;
   }
 
-  async callDependentCallbacks() {
-    for (const callback of this.dependent) {
+  async resolve() {
+    for (const callback of this.resolvers) {
       await callback();
     }
   }

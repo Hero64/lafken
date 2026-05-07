@@ -39,7 +39,9 @@ export class ScanBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
     this.command = {
       TableName: this.queryOptions.modelProps.name,
       FilterExpression: filterExpression,
-      ExclusiveStartKey: cursor ? marshall(cursor) : undefined,
+      ExclusiveStartKey: cursor
+        ? marshall(cursor, { removeUndefinedValues: true })
+        : undefined,
       Limit: limit,
       ProjectionExpression: projection === 'ALL' ? undefined : projection.join(', '),
       ...this.getAttributesAndNames(),

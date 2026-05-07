@@ -1,9 +1,4 @@
-import type {
-  BucketIntegrationResponse,
-  Method,
-  Source,
-} from '../../../../../../../main';
-import type { ServiceRoleName } from '../../../helpers/integration/integration.types';
+import type { BucketIntegrationResponse, Source } from '../../../../../../../main';
 import type { InitializedClass, Integration } from '../../integration.types';
 import { LafkenIntegration } from '../../integration.utils';
 import type { BucketIntegrationBaseProps } from './base.types';
@@ -32,6 +27,8 @@ export class BucketBaseIntegration implements Integration {
       paramHelper,
       responseHelper,
       integrationHelper,
+      responseTemplateHelper,
+      service,
     } = this.props;
 
     if ((paramHelper.paramsBySource.body || []).length > 0) {
@@ -41,11 +38,20 @@ export class BucketBaseIntegration implements Integration {
     const resource: InitializedClass<BucketIntegrationResponse> = new classResource();
 
     const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions('bucket');
+      integrationHelper.generateIntegrationOptions(restApi);
     const integrationResponse: BucketIntegrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
       options
     );
+
+    const name = `${resourceMetadata.name}-${handler.name}`;
+
+    const role = integrationHelper.createRole({
+      name,
+      service,
+      scope: restApi,
+      additionalServices: handler.additionalServices,
+    });
 
     const integration = new LafkenIntegration(
       restApi,
@@ -57,7 +63,7 @@ export class BucketBaseIntegration implements Integration {
         type: 'AWS',
         integrationHttpMethod: httpMethod,
         uri: this.getUri(integrationResponse),
-        credentials: this.getRole().arn,
+        credentials: role.arn,
         requestParameters: this.createRequestParameters(integrationResponse),
         dependsOn: [apiGatewayMethod],
       }
@@ -72,18 +78,15 @@ export class BucketBaseIntegration implements Integration {
       'method.response.header.Content-Type': 'integration.response.header.Content-Type',
     };
 
-    responses[1] = responseHelper.getPatternResponse('400');
-    responses[2] = responseHelper.getPatternResponse('500');
-
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
-      responses,
-      `${resourceMetadata.name}-${handler.name}`
+      integrationHelper.generateResponseTemplate(responses, responseTemplateHelper),
+      name
     );
 
     if (resolveResource.hasUnresolved()) {
-      integration.isDependent(async () => {
+      integration.onResolve(async () => {
         const integrationResponse = await resource[handler.name](
           proxyHelper.createEvent(),
           options
@@ -128,22 +131,6 @@ export class BucketBaseIntegration implements Integration {
     }
 
     return requestParameters;
-  }
-
-  private getRole() {
-    const { httpMethod, integrationHelper, restApi } = this.props;
-
-    const roleByMethod: Partial<Record<Method, ServiceRoleName>> = {
-      GET: 's3.read',
-      PUT: 's3.write',
-      DELETE: 's3.delete',
-    };
-
-    if (!roleByMethod[httpMethod]) {
-      throw new Error(`Method ${httpMethod} is not allowed in bucket integration`);
-    }
-
-    return integrationHelper.createRole(roleByMethod[httpMethod], restApi);
   }
 
   private getIntegrationRequestParams(value: any) {

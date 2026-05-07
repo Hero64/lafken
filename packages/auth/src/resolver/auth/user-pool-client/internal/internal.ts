@@ -42,7 +42,9 @@ export class InternalUserPoolClient extends Construct {
       writeAttributes: this.getAttributes(props.writeAttributes as string[]),
     });
 
-    this.cognitoUserPoolClient.isGlobal('user-pool-client', id);
+    if (props.ref) {
+      this.cognitoUserPoolClient.register('user-pool-client', props.ref);
+    }
 
     new ResourceOutput<UserPoolClientOutputAttributes>(
       this.cognitoUserPoolClient,

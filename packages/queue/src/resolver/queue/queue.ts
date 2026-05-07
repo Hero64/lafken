@@ -1,5 +1,6 @@
 import { LambdaEventSourceMapping } from '@cdktn/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
+import { SqsQueueRedrivePolicy } from '@cdktn/provider-aws/lib/sqs-queue-redrive-policy';
 import {
   type FieldTypes,
   getMetadataPrototypeByKey,
@@ -17,6 +18,7 @@ import type {
   QueueParamMetadata,
 } from '../../main';
 import type { QueueProps } from './queue.types';
+import { sqsName } from './queue.utils';
 
 const attributeAllowedTypes = new Set<FieldTypes>(['String', 'Number']);
 const bodyParsedTypes = new Set<FieldTypes>(['String', 'Object', 'Array']);
@@ -31,7 +33,7 @@ export class Queue extends lafkenResource.make(SqsQueue) {
     const { handler } = props;
 
     super(scope, `${id}-queue`, {
-      name: `${handler.queueName}${handler.isFifo ? '.fifo' : ''}`,
+      name: sqsName(handler.queueName, handler.isFifo ? '.fifo' : ''),
       fifoQueue: handler.isFifo,
       contentBasedDeduplication: handler.contentBasedDeduplication,
       visibilityTimeoutSeconds: handler.visibilityTimeout,
@@ -40,10 +42,35 @@ export class Queue extends lafkenResource.make(SqsQueue) {
       delaySeconds: handler.deliveryDelay,
     });
 
-    this.isGlobal(scope.id, `queue::${handler.queueName}`);
+    if (handler.ref) {
+      this.register('queue', handler.ref);
+    }
+
+    this.addDeadLetterQueue(id);
     this.validateEventParams();
     this.addEventSource(id);
     new ResourceOutput<QueueOutputAttributes>(this, handler.outputs);
+  }
+
+  private addDeadLetterQueue(id: string) {
+    const { handler } = this.props;
+    if (!handler.dlq) return;
+
+    const dlqName = sqsName(handler.queueName, `-dlq${handler.isFifo ? '.fifo' : ''}`);
+
+    const dlq = new SqsQueue(this, `${id}-dlq`, {
+      name: dlqName,
+      fifoQueue: handler.isFifo,
+      messageRetentionSeconds: handler.dlq.retentionPeriod,
+    });
+
+    new SqsQueueRedrivePolicy(this, `${id}-redrive-policy`, {
+      queueUrl: this.url,
+      redrivePolicy: JSON.stringify({
+        deadLetterTargetArn: dlq.arn,
+        maxReceiveCount: handler.dlq.maxReceiveCount,
+      }),
+    });
   }
 
   private addEventSource(id: string) {
@@ -107,12 +134,6 @@ export class Queue extends lafkenResource.make(SqsQueue) {
     if (param.source === 'attribute' && !attributeAllowedTypes.has(param.type)) {
       throw new Error(
         `Attribute params only support ${[...attributeAllowedTypes].join(', ')} values`
-      );
-    }
-
-    if (param.source === 'body' && param.parse && !bodyParsedTypes.has(param.type)) {
-      throw new Error(
-        `Body params only support ${[...bodyParsedTypes].join(', ')} values`
       );
     }
 

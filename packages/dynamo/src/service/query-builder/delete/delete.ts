@@ -30,7 +30,9 @@ export class DeleteBuilder<E extends ClassResource> extends QueryBuilderBase<E> 
   protected prepare() {
     this.command = {
       TableName: this.queryOptions.modelProps.name,
-      Key: marshall(this.queryOptions.key as Record<string, string>),
+      Key: marshall(this.queryOptions.key as Record<string, string>, {
+        removeUndefinedValues: true,
+      }),
     };
   }
 }

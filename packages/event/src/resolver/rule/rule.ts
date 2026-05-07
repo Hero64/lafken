@@ -23,7 +23,10 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
       eventPattern: Fn.jsonencode(Rule.getEvent(handler)),
     });
 
-    this.isGlobal(scope.id, id);
+    if (props.handler.ref) {
+      this.register('event-rule', props.handler.ref);
+    }
+
     this.addEventTarget(id);
   }
 

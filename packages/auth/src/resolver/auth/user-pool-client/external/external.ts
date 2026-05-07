@@ -15,7 +15,8 @@ export class ExternalUserPoolClient extends Construct {
           : props.clientId(getExternalValues(scope)),
       userPoolId: props.userPoolId,
     });
-
-    this.cognitoUserPoolClient.isGlobal('user-pool-client', id);
+    if (props.ref) {
+      this.cognitoUserPoolClient.register('user-pool-client', props.ref);
+    }
   }
 }

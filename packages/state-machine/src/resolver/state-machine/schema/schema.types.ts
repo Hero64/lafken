@@ -75,6 +75,7 @@ export interface ItemReader {
     ManifestType?: 'ATHENA_DATA' | 'S3_INVENTORY';
     CSVDelimiter?: CsvDelimiter;
     MaxItems?: number;
+    ItemsPointer?: string;
   };
   Arguments: {
     Bucket: string;
@@ -106,8 +107,9 @@ export interface MapTask {
   ResultWriter?: ResultWriter;
   ItemBatcher?: ItemBatcher;
   Items?: any[] | string;
+  ItemSelector?: string | Record<string, any>;
   MaxConcurrency?: number;
-  ToleratedFailurePercentage?: string;
+  ToleratedFailurePercentage?: number | string;
   ToleratedFailureCount?: number;
   Output?: string | Record<string, any>;
   Assign?: Record<string, any>;

@@ -21,7 +21,10 @@ export class Cron extends lafkenResource.make(CloudwatchEventRule) {
       scheduleExpression: Cron.buildScheduleExpression(handler.schedule),
     });
 
-    this.isGlobal(scope.id, id);
+    if (props.handler.ref) {
+      this.register('schedule', props.handler.ref);
+    }
+
     this.addEventTarget(id);
 
     new ResourceOutput<ScheduleOutputAttributes>(this, handler.outputs);

@@ -8,7 +8,7 @@ export const requestTemplateMap: Record<
   Source,
   (key: string, type?: FieldTypes) => string
 > = {
-  body: (key) => `$input.path('$.${key}')`,
+  body: (key) => (key ? `$input.path('$.${key}')` : `$input.path('$')`),
   path: (key) => `$input.params().path.get('${key}')`,
   query: (key, type) =>
     type !== 'Array'

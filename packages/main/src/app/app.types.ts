@@ -1,4 +1,5 @@
 import type { AwsProviderConfig } from '@cdktn/provider-aws/lib/provider';
+import type { ServicesValues } from '@lafken/common';
 import type { LambdaGlobalConfig, ResolverType } from '@lafken/resolver';
 import type { S3BackendConfig } from 'cdktn';
 import type { StackModule } from '../module';
@@ -78,7 +79,8 @@ export interface CreateAppProps {
    */
   modules: ((
     scope: AppStack,
-    resources: Record<string, ModuleResolverType>
+    resources: Record<string, ModuleResolverType>,
+    globalServices?: ServicesValues
   ) => Promise<StackModule>)[];
   /**
    * Resource resolvers.

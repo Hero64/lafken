@@ -1,7 +1,8 @@
 import type { ApiGatewayStageConfig } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import type {
   ApiAuthorizerNames,
-  ApiRestNames,
+  ApiNames,
+  ApiReferenceNames,
   ClassResource,
   GetResourceProps,
   ResourceOutputType,
@@ -274,7 +275,7 @@ export interface BaseApiProps {
    *
    * Used as the resource name within the AWS stack.
    */
-  name: ApiRestNames;
+  name: ApiNames;
   /**
    * CORS configuration for the REST API.
    *
@@ -324,6 +325,16 @@ export interface BaseApiProps {
    * @example 'REST API for managing user resources'
    */
   description?: string;
+
+  /**
+   * Registers this API as a named global reference, allowing other resources
+   * to access its attributes (e.g. execution ARN, endpoint URL) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'myApi'
+   */
+  ref?: ApiReferenceNames;
 }
 
 export interface RestApiProps extends BaseApiProps {

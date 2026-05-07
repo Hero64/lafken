@@ -2,6 +2,7 @@ import type {
   BucketNames,
   DynamoTableNames,
   EventBusNames,
+  EventRuleReferenceNames,
   LambdaMetadata,
   LambdaProps,
 } from '@lafken/common';
@@ -46,6 +47,15 @@ export interface EventRuleBaseProps {
    * }
    */
   lambda?: LambdaProps;
+  /**
+   * Registers this Event Rule as a named global reference, allowing other resources
+   * to access its attributes (e.g. execution ARN, endpoint URL) by reference name.
+   *
+   * @example
+   * // Register the API under a reference name
+   * ref: 'event-rule'
+   */
+  ref?: EventRuleReferenceNames;
 }
 
 export type S3DetailType = 'Object Created' | 'Object Deleted';

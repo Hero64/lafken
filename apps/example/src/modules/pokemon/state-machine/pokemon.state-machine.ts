@@ -9,6 +9,7 @@ import {
 @StateMachine({
   startAt: 'getPokemon',
   services: ['dynamodb'],
+  ref: 'get-pokemon',
 })
 export class PokemonStateMachine {
   @State({

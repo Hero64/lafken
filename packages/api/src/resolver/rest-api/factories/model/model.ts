@@ -230,6 +230,9 @@ export class ModelFactory {
       description: field.description,
       example: field.example,
       nullable: field.nullable,
+      maxItems: field.maxItems,
+      minItems: field.minItems,
+      uniqueItems: field.uniqueItems,
     };
 
     return {

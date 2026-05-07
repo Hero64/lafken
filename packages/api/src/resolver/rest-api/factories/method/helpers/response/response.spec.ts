@@ -224,5 +224,39 @@ describe('ResponseHelper', () => {
 
       expect(result[0].statusCode).toBe(getSuccessStatusCode(Method.DELETE).toString());
     });
+
+    it('should propagate selectionPattern from payload to the success handler', () => {
+      const handler = {
+        method: Method.GET,
+        response: {
+          type: 'Object',
+          payload: {
+            selectionPattern: '2\\d{2}',
+          },
+          properties: [],
+        },
+      } as any;
+
+      const responseHelper = new ResponseHelper(handler);
+      const result = responseHelper.handlerResponse;
+
+      expect(result[0].selectionPattern).toBe('2\\d{2}');
+    });
+
+    it('should leave selectionPattern undefined on success handler when not set', () => {
+      const handler = {
+        method: Method.GET,
+        response: {
+          type: 'Object',
+          payload: {},
+          properties: [],
+        },
+      } as any;
+
+      const responseHelper = new ResponseHelper(handler);
+      const result = responseHelper.handlerResponse;
+
+      expect(result[0].selectionPattern).toBeUndefined();
+    });
   });
 });

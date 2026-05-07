@@ -5,7 +5,7 @@ import { ApiGatewayAuthorizer } from '@cdktn/provider-aws/lib/api-gateway-author
 import type { ApiGatewayMethodConfig } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayUsagePlan } from '@cdktn/provider-aws/lib/api-gateway-usage-plan';
 import { ApiGatewayUsagePlanKey } from '@cdktn/provider-aws/lib/api-gateway-usage-plan-key';
-import type { CognitoUserPool } from '@cdktn/provider-aws/lib/cognito-user-pool';
+
 import {
   type ClassResource,
   getMetadataPrototypeByKey,
@@ -17,6 +17,7 @@ import {
   LambdaHandler,
   lafkenResource,
   lambdaAssets,
+  resolveCallbackResource,
 } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import {
@@ -35,6 +36,8 @@ import type {
   AuthPermissions,
   GetAuthorizerProps,
 } from './authorizer.types';
+
+const LafkenAuthorizer = lafkenResource.make(ApiGatewayAuthorizer);
 
 export class AuthorizerFactory {
   private authorizerIds: Record<string, string> = {};
@@ -233,26 +236,31 @@ export class AuthorizerFactory {
   }
 
   private createCognitoAuthorizer({ metadata }: AuthorizerDataCognito) {
-    const userPool = lafkenResource.getResource<CognitoUserPool>(
-      'user-pool',
-      metadata.authName
-    );
-
-    if (!userPool) {
-      throw new Error(`user pool ${metadata.authName} not found`);
-    }
-
-    const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
+    const authorizer = new LafkenAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
       restApiId: this.scope.id,
       type: 'COGNITO_USER_POOLS',
-      providerArns: [userPool.arn],
       identitySource: metadata.header
         ? `method.request.header.${metadata.header}`
         : undefined,
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
-      // TODO: add depends on userpool
     });
+
+    const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
+
+    if (userPoolArn) {
+      authorizer.providerArns = [userPoolArn];
+    } else {
+      authorizer.onResolve(() => {
+        const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
+
+        if (!userPoolArn) {
+          throw new Error('userPoolArn not found, please check user pool ref');
+        }
+
+        authorizer.providerArns = [userPoolArn];
+      });
+    }
 
     this.authResources.push(authorizer);
     this.createDoc(metadata.name, metadata.description);

@@ -1,5 +1,5 @@
 import { mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, dirname, extname, join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktn';
 import { createSha256 } from '../../../utils';
@@ -85,7 +85,10 @@ class LambdaAssets {
       await build({
         input: prebuildPath,
         platform: 'node',
-        external: ['@aws-sdk', 'aws-lambda'],
+        external: [/^@aws-sdk/, 'aws-lambda', /^node:/],
+        treeshake: {
+          moduleSideEffects: false,
+        },
         plugins: [
           LafkenBuildPlugin({
             filename: prebuildPath,
@@ -106,12 +109,17 @@ class LambdaAssets {
           codeSplitting: {
             groups: [
               {
+                name: 'vendor',
+                priority: 10,
+                test(moduleId) {
+                  const isLocal = moduleId.startsWith(dirname(prebuildPath));
+                  return !isLocal || moduleId.includes('node_modules');
+                },
+              },
+              {
                 name(moduleId) {
-                  if (prebuildPath === moduleId) {
-                    return null;
-                  }
-
-                  return 'vendor';
+                  if (prebuildPath === moduleId) return null;
+                  return basename(moduleId, extname(moduleId));
                 },
               },
             ],

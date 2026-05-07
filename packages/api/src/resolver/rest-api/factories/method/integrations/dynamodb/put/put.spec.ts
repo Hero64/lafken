@@ -74,7 +74,7 @@ describe('Dynamo put integration', () => {
           name: 'foo',
           date: getCurrentDate(),
         },
-        tableName: getResourceValue('test', 'id'),
+        tableName: getResourceValue('dynamo::test', 'id'),
       };
     }
 
@@ -132,7 +132,7 @@ describe('Dynamo put integration', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRole, {
       assume_role_policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
-      name: 'dynamodb-write',
+      name: 'DynamoIntegrationApi-put-integration',
     });
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
@@ -149,7 +149,7 @@ describe('Dynamo put integration', () => {
     const table = new Table(stack, 'test', {
       name: 'test',
     });
-    table.isGlobal('dynamo', 'test');
+    table.register('dynamo', 'test');
 
     await initializeMethod(restApi, stack, DynamoIntegrationApi, 'putWithResource');
 

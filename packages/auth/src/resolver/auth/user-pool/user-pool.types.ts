@@ -2,6 +2,8 @@ import type {
   ClassResource,
   GetExternalValues,
   ResourceOutputType,
+  UserPoolNames,
+  UserPoolReferenceNames,
 } from '@lafken/common';
 
 export type SignInAliases = 'email' | 'phone' | 'preferred_username';
@@ -193,8 +195,20 @@ export type IdentityProvider<T extends ClassResource> =
   | GoogleIdentityProvider<T>
   | OidcIdentityProvider<T>;
 
-export interface InternalUserPoolProps<T extends ClassResource> {
-  name?: string;
+export interface UserPoolCommon {
+  /**
+   * Registers this User Pool as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN, ID) by reference name.
+   *
+   * @example
+   * // Register the User Pool under a reference name
+   * ref: 'myUserPool'
+   */
+  ref?: UserPoolReferenceNames;
+}
+export interface InternalUserPoolProps<T extends ClassResource> extends UserPoolCommon {
+  /** Unique identifier for this User Pool within the application. */
+  name?: UserPoolNames;
   isExternal?: never;
   /**
    * Defines the attributes for the Cognito User Pool.
@@ -338,7 +352,7 @@ export interface InternalUserPoolProps<T extends ClassResource> {
   outputs?: ResourceOutputType<UserPoolOutputAttributes>;
 }
 
-export interface ExternalUserPoolProps {
+export interface ExternalUserPoolProps extends UserPoolCommon {
   /**
    * Marks the User Pool as an external resource.
    *

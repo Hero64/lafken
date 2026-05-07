@@ -1,4 +1,8 @@
-import type { GetExternalValues, ResourceOutputType } from '@lafken/common';
+import type {
+  GetExternalValues,
+  ResourceOutputType,
+  UserPoolClientReferenceNames,
+} from '@lafken/common';
 import type { CustomAttributesMetadata, StandardAttributeMetadata } from '../../../main';
 
 export type AuthFlow =
@@ -41,7 +45,20 @@ export interface OAuthConfig {
   scopes?: OAuthScopes[];
 }
 
-export interface InternalUserClientProps<T extends Function> {
+export interface UserPoolClientCommon {
+  /**
+   * Registers this User Pool Client as a named global reference, allowing other resources
+   * to access its attributes (e.g. ARN, ID) by reference name.
+   *
+   * @example
+   * // Register the User Pool under a reference name
+   * ref: 'myUserPool'
+   */
+  ref?: UserPoolClientReferenceNames;
+}
+
+export interface InternalUserClientProps<T extends Function>
+  extends UserPoolClientCommon {
   isExternal?: never;
 
   /**
@@ -173,7 +190,7 @@ export interface InternalUserClientProps<T extends Function> {
   outputs?: ResourceOutputType<UserPoolClientOutputAttributes>;
 }
 
-export interface ExternalUserClientProps {
+export interface ExternalUserClientProps extends UserPoolClientCommon {
   /**
    * Marks the User Pool as an external resource.
    *

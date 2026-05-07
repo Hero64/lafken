@@ -23,12 +23,24 @@ export const createDefaultResponse = (
   };
 };
 
-export const defaultResponses = (method: Method): ResponseHandler[] => [
+export const getPatternResponse = (statusCode: '400' | '500'): ResponseHandler => {
+  return {
+    selectionPattern: `${statusCode[0]}\\d{2}`,
+    statusCode,
+    template: `{"message": "${responseMessages[statusCode]}"}`,
+    field: InternalDefaultHttpResponse,
+  };
+};
+
+export const defaultResponses = (
+  method: Method,
+  integration?: boolean
+): ResponseHandler[] => [
   {
     statusCode: getSuccessStatusCode(method).toString(),
   },
-  createDefaultResponse(400),
-  createDefaultResponse(500),
+  integration ? getPatternResponse('400') : createDefaultResponse(400),
+  integration ? getPatternResponse('500') : createDefaultResponse(500),
 ];
 
 export const getSuccessStatusCode = (method: Method): HTTP_STATUS_CODE_NUMBER => {

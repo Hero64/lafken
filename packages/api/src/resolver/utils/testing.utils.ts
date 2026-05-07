@@ -16,7 +16,7 @@ export const setupApp = () => {
   const AppStack = lafkenResource.make(TerraformStack);
 
   const stack = new AppStack(app, 'testing-stack');
-  stack.isGlobal('app', 'testing-stack');
+  stack.register('app', 'testing-stack');
 
   return {
     app,

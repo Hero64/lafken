@@ -63,7 +63,7 @@ describe('Bucket delete integration', () => {
       @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
     ): BucketIntegrationResponse {
       return {
-        bucket: getResourceValue('test', 'id'),
+        bucket: getResourceValue('bucket::test', 'id'),
         object: 'test.json',
       };
     }
@@ -134,7 +134,7 @@ describe('Bucket delete integration', () => {
     expect(synthesized).toHaveResourceWithProperties(IamRole, {
       assume_role_policy:
         '${jsonencode({"Version" = "2012-10-17", "Statement" = [{"Action" = "sts:AssumeRole", "Effect" = "Allow", "Principal" = {"Service" = "apigateway.amazonaws.com"}}]})}',
-      name: 's3-delete',
+      name: 'BucketIntegrationApi-delete-integration',
     });
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
@@ -157,7 +157,7 @@ describe('Bucket delete integration', () => {
     const Bucket = lafkenResource.make(S3Bucket);
 
     const bucket = new Bucket(stack, 'test');
-    bucket.isGlobal('bucket', 'test');
+    bucket.register('bucket', 'test');
 
     await restApi.addMethod(stack, {
       classResource: BucketIntegrationApi,

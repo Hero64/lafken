@@ -178,9 +178,30 @@ describe('Dynamo Service', () => {
       expect(
         dynamoClient.commandCalls(ScanCommand, {
           TableName: 'users',
-          FilterExpression: '(#age < :age_1_0)',
+          FilterExpression: '#age < :age_1_0',
           ExpressionAttributeNames: { '#age': 'age' },
           ExpressionAttributeValues: { ':age_1_0': { N: '25' } },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should scan with AND filter on same attribute', async () => {
+      await userRepository.scan({
+        filter: {
+          AND: [{ age: { exist: true } }, { age: { greaterThan: 18 } }],
+        },
+      });
+
+      expect(
+        dynamoClient.commandCalls(ScanCommand, {
+          TableName: 'users',
+          FilterExpression: 'attribute_exists(#age) and #age > :age_3_0',
+          ExpressionAttributeNames: {
+            '#age': 'age',
+          },
+          ExpressionAttributeValues: {
+            ':age_3_0': { N: '18' },
+          },
         })
       ).toHaveLength(1);
     });
@@ -217,7 +238,7 @@ describe('Dynamo Service', () => {
         dynamoClient.commandCalls(ScanCommand, {
           TableName: 'users',
           FilterExpression:
-            '(#age < :age_1_0 and ((#lastName = :lastName_2_0 and begins_with(#name, :name_2_1)) or (#lastName = :lastName_3_0)) and not contains(#lastName, :lastName_3_2) and (attribute_not_exists(#address.#city)))',
+            '#age < :age_1_0 and (#lastName = :lastName_2_0 and begins_with(#name, :name_2_1) or #lastName = :lastName_3_0) and not contains(#lastName, :lastName_3_2) and attribute_not_exists(#address.#city)',
           ExpressionAttributeNames: {
             '#age': 'age',
             '#lastName': 'lastName',
@@ -264,7 +285,7 @@ describe('Dynamo Service', () => {
             lastName: { S: 'example3' },
           },
           ConditionExpression:
-            '(attribute_not_exists(#email) and attribute_not_exists(#name))',
+            'attribute_not_exists(#email) and attribute_not_exists(#name)',
           ExpressionAttributeNames: { '#email': 'email', '#name': 'name' },
           ExpressionAttributeValues: undefined,
         })
@@ -428,7 +449,7 @@ describe('Dynamo Service', () => {
           UpdateExpression: 'SET  #age = :age_1_0',
           ExpressionAttributeNames: { '#age': 'age', '#name': 'name' },
           ExpressionAttributeValues: { ':age_1_0': { N: '55' } },
-          ConditionExpression: '(attribute_exists(#name) and attribute_exists(#age))',
+          ConditionExpression: 'attribute_exists(#name) and attribute_exists(#age)',
         })
       ).toHaveLength(1);
     });

@@ -33,16 +33,20 @@ export class Auth extends Construct {
   }
 
   private createUserPool() {
+    if (!this.props.userPool) {
+      return;
+    }
+
     if (this.props.userPool?.isExternal) {
       this.userPool = new ExternalUserPool(this, this.id, this.props.userPool);
       return;
     }
 
-    this.userPool = new InternalUserPool(this, this.id, this.props.userPool || {});
+    this.userPool = new InternalUserPool(this, this.id, this.props.userPool);
   }
 
   private createUserPoolClient() {
-    if (!this.props.userClient) {
+    if (!this.userPool || !this.props.userClient) {
       return;
     }
 

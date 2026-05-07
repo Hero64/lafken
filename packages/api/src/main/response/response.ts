@@ -122,6 +122,7 @@ export const ApiResponse =
             not: props?.not,
             oneOf: props?.oneOf,
             defaultCode: props?.defaultCode,
+            selectionPattern: props?.selectionPattern,
             additionalProperties: props?.additionalProperties ?? false,
           };
         }

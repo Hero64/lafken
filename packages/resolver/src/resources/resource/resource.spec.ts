@@ -10,8 +10,8 @@ describe('Lafken resource', () => {
 
     const bucket = new Bucket(stack, 'test');
 
-    expect(bucket.isGlobal).toBeDefined();
-    expect(bucket.isDependent).toBeDefined();
+    expect(bucket.register).toBeDefined();
+    expect(bucket.onResolve).toBeDefined();
   });
 
   it('should create a global resource', () => {
@@ -19,7 +19,7 @@ describe('Lafken resource', () => {
 
     const bucket = new Bucket(stack, 'testing');
 
-    bucket.isGlobal('bucket', 'testing');
+    bucket.register('bucket', 'testing');
 
     const resourceBucket = lafkenResource.getResource('bucket', 'testing');
 
@@ -33,8 +33,8 @@ describe('Lafken resource', () => {
 
     const dependentFn = vitest.fn();
 
-    bucket.isDependent(dependentFn);
-    await lafkenResource.callDependentCallbacks();
+    bucket.onResolve(dependentFn);
+    await lafkenResource.resolve();
 
     expect(dependentFn).toHaveBeenCalledTimes(1);
   });
