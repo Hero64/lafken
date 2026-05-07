@@ -1,61 +1,52 @@
-import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
+import { SchedulerSchedule } from '@cdktn/provider-aws/lib/scheduler-schedule';
 import {
   type AppModule,
   LambdaHandler,
   lafkenResource,
   ResourceOutput,
+  Role,
 } from '@lafken/resolver';
 import type { ScheduleOutputAttributes, ScheduleTime } from '../../main';
 import type { CronProps } from './cron.types';
 
-export class Cron extends lafkenResource.make(CloudwatchEventRule) {
-  constructor(
-    scope: AppModule,
-    id: string,
-    private props: CronProps
-  ) {
-    const { handler } = props;
+export class Cron extends lafkenResource.make(SchedulerSchedule) {
+  constructor(scope: AppModule, id: string, props: CronProps) {
+    const { handler, resourceMetadata } = props;
+
+    const lambdaHandler = new LambdaHandler(scope, id, {
+      ...handler,
+      originalName: resourceMetadata.originalName,
+      filename: resourceMetadata.filename,
+      foldername: resourceMetadata.foldername,
+      suffix: 'event',
+      principal: 'scheduler.amazonaws.com',
+    });
+
+    const schedulerRole = new Role(scope, `${handler.name}-scheduler-role`, {
+      name: `${handler.name}-scheduler`,
+      principal: 'scheduler.amazonaws.com',
+      services: ['lambda'],
+    });
+
     super(scope, `${handler.name}-cron`, {
       name: handler.name,
       scheduleExpression: Cron.buildScheduleExpression(handler.schedule),
+      flexibleTimeWindow: { mode: 'OFF' },
+      target: {
+        arn: lambdaHandler.arn,
+        roleArn: schedulerRole.arn,
+        retryPolicy: {
+          maximumRetryAttempts: handler.retryAttempts,
+          maximumEventAgeInSeconds: handler.maxEventAge,
+        },
+      },
     });
 
-    if (props.handler.ref) {
-      this.register('schedule', props.handler.ref);
+    if (handler.ref) {
+      this.register('schedule', handler.ref);
     }
 
-    this.addEventTarget(id);
-
     new ResourceOutput<ScheduleOutputAttributes>(this, handler.outputs);
-  }
-
-  public addEventTarget(id: string) {
-    const { handler, resourceMetadata } = this.props;
-
-    const lambdaHandler = new LambdaHandler(
-      this,
-      `${handler.name}-${resourceMetadata.name}`,
-      {
-        ...handler,
-        originalName: resourceMetadata.originalName,
-        filename: resourceMetadata.filename,
-        foldername: resourceMetadata.foldername,
-        suffix: 'event',
-        principal: 'events.amazonaws.com',
-        sourceArn: this.arn,
-      }
-    );
-
-    new CloudwatchEventTarget(this, `${id}-event-target`, {
-      rule: this.name,
-      arn: lambdaHandler.arn,
-      retryPolicy: {
-        maximumRetryAttempts: handler.retryAttempts,
-        maximumEventAgeInSeconds: handler.maxEventAge,
-      },
-      dependsOn: [lambdaHandler],
-    });
   }
 
   private static buildScheduleExpression(schedule: string | ScheduleTime): string {
