@@ -27,13 +27,15 @@ export class Handler extends GlobalLambdaHandler {
 
     this.createInvokeRole(id);
 
-    this.isGlobal(scope.id, `handler::${props.handlerMetadata.name}`);
+    if (props.handlerMetadata.ref) {
+      this.register('lambda', props.handlerMetadata.ref);
+    }
   }
 
   private createInvokeRole(id: string) {
-    const { invocatorService } = this.props.handlerMetadata;
+    const { invocator } = this.props.handlerMetadata;
 
-    if (!invocatorService) {
+    if (!invocator) {
       return;
     }
 
@@ -41,8 +43,11 @@ export class Handler extends GlobalLambdaHandler {
 
     const role = new Role(this, 'handler-role', {
       name: `${appContext.contextCreator}-${id.toLocaleLowerCase()}-invoke-role`,
-      principal: invocatorService,
-      services: [
+      principal: invocator.principal,
+      services: (props) => [
+        ...(Array.isArray(invocator.services)
+          ? invocator.services
+          : invocator.services(props)),
         {
           type: 'lambda',
           permissions: ['InvokeFunction'],
@@ -51,6 +56,8 @@ export class Handler extends GlobalLambdaHandler {
       ],
     });
 
-    role.isGlobal(this.scope.id, `handler::role::${this.props.handlerMetadata.name}`);
+    if (invocator.roleRef) {
+      role.register('role', invocator.roleRef);
+    }
   }
 }
