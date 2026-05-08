@@ -1,4 +1,5 @@
 import type {
+  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   QueueNames,
@@ -27,7 +28,15 @@ export interface DlqProps {
   retentionPeriod?: number;
 }
 
-export interface StandardProps {
+export interface InternalStandardProps {
+  /**
+   * Marks the queue as an external resource.
+   *
+   * When set to `true`, the SQS queue is not created by the framework.
+   * Instead, it references an existing queue by `queueName`. The Lambda
+   * handler and event source mapping are still created.
+   */
+  isExternal?: false;
   /**
    * Delivery delay in seconds.
    *
@@ -127,7 +136,22 @@ export interface StandardProps {
   dlq?: DlqProps;
 }
 
-export interface FifoProps extends StandardProps {
+export interface ExternalQueueProps {
+  /**
+   * Marks the queue as an external resource.
+   *
+   * When set to `true`, the SQS queue is not created by the framework.
+   * Instead, it references an existing queue by `queueName`. The Lambda
+   * handler and event source mapping are still created.
+   */
+  isExternal: true;
+  /**
+   *
+   */
+  queueName: string | ((props: GetResourceProps) => string);
+}
+
+export interface InternalFifoProps extends InternalStandardProps {
   /**
    * Enable content-based deduplication.
    *
@@ -139,9 +163,13 @@ export interface FifoProps extends StandardProps {
   contentBasedDeduplication?: boolean;
 }
 
+export type StandardProps = InternalStandardProps | ExternalQueueProps;
+export type FifoProps = InternalFifoProps | ExternalQueueProps;
+
 export interface QueueLambdaMetadata
   extends LambdaMetadata,
-    Omit<FifoProps, 'queueName'> {
-  queueName: string;
+    Omit<InternalFifoProps, 'queueName' | 'isExternal'> {
+  queueName: ExternalQueueProps['queueName'];
   isFifo: boolean;
+  isExternal: boolean;
 }
