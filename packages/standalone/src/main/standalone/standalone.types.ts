@@ -31,8 +31,9 @@ export interface HandlerProps {
    * }
    */
   invocator?: {
-    principal: string;
-    services: ServicesValues;
+    principalRole?: string;
+    principalPermission?: string;
+    services?: ServicesValues;
     roleRef?: string;
   };
 

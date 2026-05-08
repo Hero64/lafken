@@ -23,6 +23,7 @@ export class Handler extends GlobalLambdaHandler {
       name: handlerMetadata.name,
       originalName: resourceMetadata.originalName,
       lambda: handlerMetadata.lambda,
+      principal: handlerMetadata?.invocator?.principalPermission,
     });
 
     this.createInvokeRole(id);
@@ -33,9 +34,10 @@ export class Handler extends GlobalLambdaHandler {
   }
 
   private createInvokeRole(id: string) {
-    const { invocator } = this.props.handlerMetadata;
+    const { invocator = {} } = this.props.handlerMetadata;
+    const { principalPermission: _exclude, ...rolePermissions } = invocator;
 
-    if (!invocator) {
+    if (Object.values(rolePermissions).length === 0) {
       return;
     }
 
@@ -43,11 +45,12 @@ export class Handler extends GlobalLambdaHandler {
 
     const role = new Role(this, 'handler-role', {
       name: `${appContext.contextCreator}-${id.toLocaleLowerCase()}-invoke-role`,
-      principal: invocator.principal,
+      principal: rolePermissions.principalRole,
       services: (props) => [
-        ...(Array.isArray(invocator.services)
-          ? invocator.services
-          : invocator.services(props)),
+        ...(Array.isArray(rolePermissions.services) ||
+        rolePermissions.services === undefined
+          ? rolePermissions.services || []
+          : rolePermissions.services(props)),
         {
           type: 'lambda',
           permissions: ['InvokeFunction'],
@@ -56,8 +59,8 @@ export class Handler extends GlobalLambdaHandler {
       ],
     });
 
-    if (invocator.roleRef) {
-      role.register('role', invocator.roleRef);
+    if (this.props.handlerMetadata.ref) {
+      role.register('lambda', this.props.handlerMetadata.ref);
     }
   }
 }

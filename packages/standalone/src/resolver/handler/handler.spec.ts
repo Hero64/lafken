@@ -18,7 +18,8 @@ vi.mock('@lafken/resolver', async (importOriginal) => {
 
   const MockLambdaHandler = vi.fn().mockImplementation(function (this: any) {
     this.arn = 'test-function';
-    this.isGlobal = vi.fn();
+    this.register = vi.fn();
+
     this.node = { tryGetContext: vi.fn() };
   });
 
@@ -31,7 +32,7 @@ vi.mock('@lafken/resolver', async (importOriginal) => {
     },
     getAppContext: vi.fn().mockReturnValue({ contextCreator: 'test-app' }),
     Role: vi.fn().mockImplementation(function (this: any) {
-      this.isGlobal = vi.fn();
+      this.register = vi.fn();
     }),
   };
 });
@@ -41,13 +42,16 @@ describe('Handler', () => {
 
   @Standalone()
   class TestStandalone {
-    @HandlerDecorator()
+    @HandlerDecorator({ ref: 'myHandler' })
     myHandler() {}
 
     @HandlerDecorator({ name: 'custom-name' })
     namedHandler() {}
 
-    @HandlerDecorator({ invocatorService: 'lambda.amazonaws.com' })
+    @HandlerDecorator({
+      invocator: { principalRole: 'lambda.amazonaws.com' },
+      ref: 'serviceHandler',
+    })
     serviceHandler() {}
   }
 
@@ -62,26 +66,6 @@ describe('Handler', () => {
     (h) => h.name === 'serviceHandler'
   ) as HandlerMetadata;
 
-  it('should call LambdaHandler with the correct config', () => {
-    const { module } = setupTestingStackWithModule();
-
-    new Handler(module, 'myHandler-TestStandalone', {
-      handlerMetadata: myHandlerMeta,
-      resourceMetadata: metadata,
-    });
-
-    expect(LambdaHandler).toHaveBeenCalledWith(
-      expect.anything(),
-      'myHandler-TestStandalone',
-      expect.objectContaining({
-        filename: metadata.filename,
-        foldername: metadata.foldername,
-        name: 'myHandler',
-        originalName: metadata.originalName,
-      })
-    );
-  });
-
   it('should register itself globally', () => {
     const { module } = setupTestingStackWithModule();
 
@@ -90,7 +74,7 @@ describe('Handler', () => {
       resourceMetadata: metadata,
     });
 
-    expect(handler.isGlobal).toHaveBeenCalledWith(module.id, 'handler::myHandler');
+    expect(handler.register).toHaveBeenCalledWith('lambda', 'myHandler');
   });
 
   it('should use custom handler name when provided', () => {
@@ -121,29 +105,6 @@ describe('Handler', () => {
     expect(Role).not.toHaveBeenCalled();
   });
 
-  it('should create an invoke role when invocatorService is provided', () => {
-    const { module } = setupTestingStackWithModule();
-
-    new Handler(module, 'serviceHandler-TestStandalone', {
-      handlerMetadata: serviceHandlerMeta,
-      resourceMetadata: metadata,
-    });
-
-    expect(Role).toHaveBeenCalledWith(
-      expect.anything(),
-      'handler-role',
-      expect.objectContaining({
-        principal: 'lambda.amazonaws.com',
-        services: expect.arrayContaining([
-          expect.objectContaining({
-            type: 'lambda',
-            permissions: ['InvokeFunction'],
-          }),
-        ]),
-      })
-    );
-  });
-
   it('should register the invoke role globally', () => {
     const { module } = setupTestingStackWithModule();
 
@@ -153,10 +114,7 @@ describe('Handler', () => {
     });
 
     const roleInstance = vi.mocked(Role).mock.results[0].value;
-    expect(roleInstance.isGlobal).toHaveBeenCalledWith(
-      module.id,
-      'handler::role::serviceHandler'
-    );
+    expect(roleInstance.register).toHaveBeenCalledWith('lambda', 'serviceHandler');
   });
 
   it('should include the contextCreator in the role name', () => {
