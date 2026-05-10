@@ -1,6 +1,6 @@
 {
   "name": "@lafken/dynamo",
-  "version": "0.11.20",
+  "version": "0.12.0",
   "private": false,
   "description": "Define DynamoDB tables using TypeScript decorators - type-safe, declarative infrastructure with Lafken",
   "keywords": [
@@ -64,21 +64,20 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1037.0",
+    "@aws-sdk/client-dynamodb": "^3.1045.0",
     "@aws-sdk/util-dynamodb": "^3.996.2",
     "@lafken/resolver": "workspace:*",
     "aws-xray-sdk": "^3.12.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@cdktn/provider-aws": "^23.9.0",
+    "@cdktn/provider-aws": "^24.0.0",
     "@lafken/common": "workspace:*",
-    "@swc/core": "^1.15.30",
+    "@swc/core": "^1.15.33",
     "@swc/helpers": "^0.5.21",
     "@vitest/runner": "^4.1.5",
     "aws-sdk-client-mock": "^4.1.0",
-    "aws-sdk-client-mock-vitest": "^7.0.1",
-    "cdktn": "^0.22.1",
+    "cdktn": "^0.23.0",
     "cdktn-vitest": "^1.0.0",
     "constructs": "^10.6.0",
     "typescript": "6.0.3",

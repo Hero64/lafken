@@ -10,17 +10,17 @@ import {
   lambdaAssets,
   type ResolverType,
 } from '@lafken/resolver';
-import { type QueueLambdaMetadata, RESOURCE_TYPE } from '../main';
-import { ExternalQueue } from './queue/external/external';
-import { InternalQueue } from './queue/internal/internal';
+import { type HandlerMetadata, RESOURCE_TYPE } from '../main';
+import { Handler } from './handler/handler';
 
-export class QueueResolver implements ResolverType {
+export class StandaloneResolver implements ResolverType {
   public type = RESOURCE_TYPE;
 
   public create(module: AppModule, resource: ClassResource) {
     const minify = getContextValueByScope(module, 'minify');
+
     const metadata: ResourceMetadata = getResourceMetadata(resource);
-    const handlers = getResourceHandlerMetadata<QueueLambdaMetadata>(resource);
+    const handlers = getResourceHandlerMetadata<HandlerMetadata>(resource);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
@@ -30,19 +30,9 @@ export class QueueResolver implements ResolverType {
     });
 
     for (const handler of handlers) {
-      if (handler.isExternal) {
-        new ExternalQueue(module, `${metadata.name}-${handler.name}`, {
-          resourceMetadata: metadata,
-          classResource: resource,
-          handler,
-        });
-        return;
-      }
-
-      new InternalQueue(module, `${metadata.name}-${handler.name}`, {
+      new Handler(module, `${handler.name}-${metadata.name}`, {
+        handlerMetadata: handler,
         resourceMetadata: metadata,
-        classResource: resource,
-        handler,
       });
     }
   }

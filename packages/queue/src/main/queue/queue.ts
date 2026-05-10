@@ -113,6 +113,7 @@ export const Standard = createLambdaDecorator<StandardProps, QueueLambdaMetadata
   getLambdaMetadata: (props, methodName) => ({
     ...props,
     queueName: props.queueName || methodName,
+    isExternal: props.isExternal ?? false,
     name: methodName,
     isFifo: false,
   }),
@@ -144,6 +145,7 @@ export const Fifo = createLambdaDecorator<FifoProps, QueueLambdaMetadata>({
   getLambdaMetadata: (props, methodName) => ({
     ...props,
     queueName: props.queueName || methodName,
+    isExternal: props.isExternal ?? false,
     name: methodName,
     isFifo: true,
   }),

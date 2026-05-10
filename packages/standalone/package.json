@@ -1,13 +1,11 @@
 {
-  "name": "@lafken/bucket",
+  "name": "@lafken/standalone",
   "version": "0.12.0",
   "private": false,
-  "description": "Define S3 buckets using TypeScript decorators - automatic infrastructure generation with Lafken",
+  "description": "Define Lambdas using TypeScript decorators - serverless event-driven infrastructure",
   "keywords": [
     "aws",
-    "s3",
-    "storage",
-    "object storage",
+    "lambda",
     "serverless",
     "typescript",
     "decorators",
@@ -18,24 +16,19 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Hero64/lafken",
-    "directory": "packages/bucket"
+    "directory": "packages/event"
   },
   "license": "MIT",
   "author": "Aníbal Jorquera",
   "exports": {
     "./main": {
-      "types": "./lib/main/index.d.ts",
       "import": "./lib/main/index.js",
+      "types": "./lib/main/index.d.ts",
       "require": "./lib/main/index.js"
     },
-    "./service": {
-      "types": "./lib/service/index.d.ts",
-      "import": "./lib/service/index.js",
-      "require": "./lib/service/index.js"
-    },
     "./resolver": {
-      "types": "./lib/resolver/index.d.ts",
       "import": "./lib/resolver/index.js",
+      "types": "./lib/resolver/index.d.ts",
       "require": "./lib/resolver/index.js"
     }
   },
@@ -43,9 +36,6 @@
     "*": {
       "main": [
         "./lib/main/index.d.ts"
-      ],
-      "service": [
-        "./lib/service/index.d.ts"
       ],
       "resolver": [
         "./lib/resolver/index.d.ts"
@@ -65,11 +55,9 @@
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
-    "aws-xray-sdk": "^3.12.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1045.0",
     "@cdktn/provider-aws": "^24.0.0",
     "@lafken/common": "workspace:*",
     "@swc/core": "^1.15.33",

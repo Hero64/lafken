@@ -80,4 +80,5 @@ export type RegisterNamespaces =
   | 'event-bus'
   | 'event-rule'
   | 'lambda'
+  | 'role'
   | (string & {});

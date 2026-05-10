@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@cdktn/provider-aws": "^23.9.0",
+    "@cdktn/provider-aws": "^24.0.0",
     "@lafken/api": "workspace:*",
     "@lafken/auth": "workspace:*",
     "@lafken/bucket": "workspace:*",
@@ -23,13 +23,14 @@
     "@lafken/main": "workspace:*",
     "@lafken/queue": "workspace:*",
     "@lafken/schedule": "workspace:*",
+    "@lafken/standalone": "workspace:*",
     "@lafken/state-machine": "workspace:*",
-    "cdktn": "^0.22.1",
+    "cdktn": "^0.23.0",
     "constructs": "^10.6.0",
     "dayjs": "1.11.20"
   },
   "devDependencies": {
-    "@aws-sdk/client-sqs": "^3.1037.0",
+    "@aws-sdk/client-sqs": "^3.1045.0",
     "cdktn-cli": "^0.22.1",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.1.5"
