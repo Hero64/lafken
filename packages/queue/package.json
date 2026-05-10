@@ -60,9 +60,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.1044.0",
+    "@aws-sdk/client-sqs": "^3.1045.0",
     "@lafken/resolver": "workspace:*",
-    "aws-lambda": "^1.0.7",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {

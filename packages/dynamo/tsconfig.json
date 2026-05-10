@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["node", "cdktn-vitest", "aws-sdk-client-mock-vitest/extend"]
+    "types": ["node", "cdktn-vitest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
