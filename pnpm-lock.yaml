@@ -65,6 +65,9 @@ importers:
       '@lafken/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
+      '@lafken/standalone':
+        specifier: workspace:*
+        version: link:../../packages/standalone
       '@lafken/state-machine':
         specifier: workspace:*
         version: link:../../packages/state-machine
@@ -78,6 +81,9 @@ importers:
         specifier: 1.11.20
         version: 1.11.20
     devDependencies:
+      '@aws-sdk/client-scheduler':
+        specifier: 3.1036.0
+        version: 3.1036.0
       '@aws-sdk/client-sqs':
         specifier: ^3.1044.0
         version: 3.1044.0
@@ -514,6 +520,49 @@ importers:
       vitest:
         specifier: ^4.1.5
         version: 4.1.5(@types/node@25.6.0)(vite@7.3.1(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.4))
+
+  packages/standalone:
+    dependencies:
+      '@lafken/resolver':
+        specifier: workspace:*
+        version: link:../resolver
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+    devDependencies:
+      '@cdktn/provider-aws':
+        specifier: ^23.5.0
+        version: 23.9.0(cdktn@0.22.1(constructs@10.6.0))(constructs@10.6.0)
+      '@lafken/common':
+        specifier: workspace:*
+        version: link:../common
+      '@swc/core':
+        specifier: ^1.15.21
+        version: 1.15.30(@swc/helpers@0.5.21)
+      '@swc/helpers':
+        specifier: ^0.5.20
+        version: 0.5.21
+      '@vitest/runner':
+        specifier: ^4.1.2
+        version: 4.1.5
+      cdktn:
+        specifier: ^0.22.1
+        version: 0.22.1(constructs@10.6.0)
+      cdktn-vitest:
+        specifier: ^1.0.0
+        version: 1.0.0(cdktn@0.22.1(constructs@10.6.0))(vitest@4.1.5(@types/node@25.6.0)(vite@7.3.1(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)))
+      constructs:
+        specifier: ^10.6.0
+        version: 10.6.0
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+      unplugin-swc:
+        specifier: ^1.5.9
+        version: 1.5.9(@swc/core@1.15.30(@swc/helpers@0.5.21))(rollup@4.60.2)
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.5(@types/node@25.6.0)(vite@7.3.1(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3))
 
   packages/state-machine:
     dependencies:
@@ -3590,6 +3639,11 @@ packages:
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@6.0.2:
+    resolution: {integrity: sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -7487,6 +7541,8 @@ snapshots:
   type-fest@0.21.3: {}
 
   typescript@5.9.3: {}
+
+  typescript@6.0.2: {}
 
   typescript@6.0.3: {}
 
