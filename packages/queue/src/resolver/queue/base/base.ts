@@ -59,7 +59,7 @@ export function QueueBase<TBase extends Constructor>(Base: TBase) {
         scalingConfig: handler.maxConcurrency
           ? { maximumConcurrency: handler.maxConcurrency }
           : undefined,
-        dependsOn: [lambdaHandler, this],
+        dependsOn: [lambdaHandler],
       });
     }
 

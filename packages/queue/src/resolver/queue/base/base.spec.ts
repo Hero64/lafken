@@ -56,7 +56,12 @@ describe('QueueBase', () => {
 
     expect(() => {
       new ExternalQueue(module, 'test', {
-        handler: { name: 'invalidAttribute', isFifo: true, queueName: 'test-queue' },
+        handler: {
+          name: 'invalidAttribute',
+          isFifo: true,
+          queueName: 'test-queue',
+          isExternal: false,
+        },
         resourceMetadata: baseMetadata,
         classResource: TestQueue,
       });
@@ -68,7 +73,12 @@ describe('QueueBase', () => {
 
     expect(() => {
       new ExternalQueue(module, 'test', {
-        handler: { name: 'multipleBody', isFifo: true, queueName: 'test-queue' },
+        handler: {
+          name: 'multipleBody',
+          isFifo: true,
+          queueName: 'test-queue',
+          isExternal: false,
+        },
         resourceMetadata: baseMetadata,
         classResource: TestQueue,
       });
