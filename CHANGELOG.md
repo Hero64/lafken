@@ -1,3 +1,12 @@
+## 0.12.0
+
+### Minor Changes
+
+- Replace EventRule to SchedulerSchedule
+- External Queue support
+- New Standalone package
+- Update dependencies
+
 ## 0.11.5
 
 ### Patch Changes
