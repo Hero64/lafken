@@ -186,7 +186,12 @@ export type StageLogGroupFormatKeys =
   | 'resourcePath'
   | 'status'
   | 'protocol'
-  | 'responseLength';
+  | 'responseLength'
+  | 'integrationStatus'
+  | 'integrationError'
+  | 'integrationLatency'
+  | 'errorMessage'
+  | 'errorResponseType';
 
 export interface Stage
   extends Omit<
