@@ -7,11 +7,11 @@ export type DeepPartial<T> = T extends object
   : T;
 
 export type OnlyNumberString<T> = {
-  [key in keyof T as T[key] extends string | number ? key : never]: T[key];
+  [key in keyof T as NonNullable<T[key]> extends string | number ? key : never]: T[key];
 };
 
 export type OnlyNumber<T> = {
-  [key in keyof T as T[key] extends number ? key : never]: T[key];
+  [key in keyof T as NonNullable<T[key]> extends number ? key : never]: T[key];
 };
 
 export type Join<K, P> = K extends string
