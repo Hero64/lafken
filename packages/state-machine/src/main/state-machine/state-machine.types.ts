@@ -908,9 +908,10 @@ export type InitialStateType<T> =
   | WaitStateSeconds<T>
   | ChoiceState<T>
   | ParallelState<T>
-  | MapState<T>;
+  | MapState<T>
+  | PassState<T>;
 
-export type StateTypes<T> = PassState<T> | FailState | SucceedState | InitialStateType<T>;
+export type StateTypes<T> = FailState | SucceedState | InitialStateType<T>;
 export type RetryCatchTypes<T> = LambdaStateMetadata | ParallelState<T> | MapState<T>;
 
 export interface StateProps<T> extends CatchAndRetry<T> {
