@@ -28,7 +28,30 @@ export interface DlqProps {
   retentionPeriod?: number;
 }
 
-export interface InternalStandardProps {
+export interface SourceMappingProps {
+  /**
+   * Maximum number of messages to retrieve in a single batch.
+   *
+   * Only applicable when consuming messages with a Lambda or batch processor.
+   */
+  batchSize?: number;
+  /**
+   * Maximum batching window in seconds.
+   *
+   * Defines the maximum amount of time to gather messages into a batch
+   * before sending them to the consumer.
+   */
+  maxBatchingWindow?: number;
+  /**
+   * Maximum concurrency for Lambda consumers.
+   *
+   * Specifies the maximum number of Lambda functions that
+   * can process messages from the queue concurrently.
+   */
+  maxConcurrency?: number;
+}
+
+export interface InternalStandardProps extends SourceMappingProps {
   /**
    * Marks the queue as an external resource.
    *
@@ -65,27 +88,6 @@ export interface InternalStandardProps {
    */
   visibilityTimeout?: number;
 
-  /**
-   * Maximum number of messages to retrieve in a single batch.
-   *
-   * Only applicable when consuming messages with a Lambda or batch processor.
-   */
-  batchSize?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  /**
-   * Maximum concurrency for Lambda consumers.
-   *
-   * Specifies the maximum number of Lambda functions that
-   * can process messages from the queue concurrently.
-   */
-  maxConcurrency?: number;
-
-  /**
-   * Maximum batching window in seconds.
-   *
-   * Defines the maximum amount of time to gather messages into a batch
-   * before sending them to the consumer.
-   */
-  maxBatchingWindow?: number;
   /**
    * Lambda configuration for processing messages from this queue.
    */
@@ -136,7 +138,7 @@ export interface InternalStandardProps {
   dlq?: DlqProps;
 }
 
-export interface ExternalQueueProps {
+export interface ExternalQueueProps extends SourceMappingProps {
   /**
    * Marks the queue as an external resource.
    *
