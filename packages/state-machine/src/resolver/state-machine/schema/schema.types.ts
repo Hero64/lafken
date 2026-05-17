@@ -108,9 +108,9 @@ export interface MapTask {
   ItemBatcher?: ItemBatcher;
   Items?: any[] | string;
   ItemSelector?: string | Record<string, any>;
-  MaxConcurrency?: number;
+  MaxConcurrency?: number | string;
   ToleratedFailurePercentage?: number | string;
-  ToleratedFailureCount?: number;
+  ToleratedFailureCount?: number | string;
   Output?: string | Record<string, any>;
   Assign?: Record<string, any>;
   Next?: string;
