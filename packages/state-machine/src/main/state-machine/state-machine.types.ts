@@ -650,8 +650,13 @@ export interface MapStateBase<T> extends CatchAndRetry<T> {
    *
    * Specifies the maximum number of items that the `Map` state
    * will process in parallel at the same time.
+   * Can be provided as a number or a JSONata expression.
+   * @example
+   * {
+   *   maxCurrency: '{% $states.input.concurrency %}'
+   * }
    */
-  maxCurrency?: number;
+  maxCurrency?: number | JsonAtaString;
   /**
    * Item selector.
    *
@@ -703,14 +708,23 @@ export interface MapStateBase<T> extends CatchAndRetry<T> {
   /**
    * Specifies the maximum percentage of items in the distributed map
    * that are allowed to fail before the entire operation is considered unsuccessful.
-   *
+   * Can be provided as a number or a JSONata expression.
+   * @example
+   * {
+   *   toleratedFailurePercentage: '{% $states.input.failurePercentage %}'
+   * }
    */
-  toleratedFailurePercentage?: number;
+  toleratedFailurePercentage?: number | JsonAtaString;
   /**
    * Specifies the maximum number of items that can fail during the
    * distributed map execution before the entire operation is considered unsuccessful.
+   * Can be provided as a number or a JSONata expression.
+   * @example
+   * {
+   *   toleratedFailureCount: '{% $states.input.failureCount %}'
+   * }
    */
-  toleratedFailureCount?: number;
+  toleratedFailureCount?: number | JsonAtaString;
   /**
    * End state indicator.
    *
@@ -819,8 +833,13 @@ export interface MapDistributed<T> extends MapStateBase<T> {
    * Max Items Per Batch
    *
    * Defines the maximum number of items to be processed per batch in a Map state execution.
+   * Can be provided as a number or a JSONata expression.
+   * @example
+   * {
+   *   maxItemsPerBatch: '{% $states.input.batchSize %}'
+   * }
    */
-  maxItemsPerBatch?: number;
+  maxItemsPerBatch?: number | JsonAtaString;
 }
 
 type MapState<T> = MapInline<T> | MapDistributed<T>;
