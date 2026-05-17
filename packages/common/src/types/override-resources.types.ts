@@ -66,6 +66,12 @@ export type ScheduleReferenceNames = ResourceScopeKeys<
 export type LambdaNames = ResourceScopeKeys<SharedResourceNames, 'lambda'>;
 export type LambdaReferenceNames = ResourceScopeKeys<SharedReferenceResources, 'lambda'>;
 
+export type KinesisStreamNames = ResourceScopeKeys<SharedResourceNames, 'kinesis'>;
+export type KinesisStreamReferenceNames = ResourceScopeKeys<
+  SharedReferenceResources,
+  'kinesis'
+>;
+
 export type RegisterNamespaces =
   | 'api'
   | 'bucket'
@@ -80,5 +86,6 @@ export type RegisterNamespaces =
   | 'event-bus'
   | 'event-rule'
   | 'lambda'
+  | 'kinesis'
   | 'role'
   | (string & {});

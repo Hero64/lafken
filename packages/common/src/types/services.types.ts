@@ -9,7 +9,8 @@ export type ServicesName =
   | 'state_machine'
   | 'kms'
   | 'ssm'
-  | 'event';
+  | 'event'
+  | 'kinesis';
 
 interface PermissionService<T extends ServicesName | 'custom', P extends string> {
   type: T;
@@ -106,6 +107,14 @@ export type EventPermissions =
   | 'PutEvents'
   | 'PutRule';
 
+export type KinesisPermissions =
+  | 'PutRecord'
+  | 'PutRecords'
+  | 'GetRecords'
+  | 'GetShardIterator'
+  | 'DescribeStream'
+  | 'ListStreams';
+
 export type Services =
   | ServicesName
   | PermissionService<'dynamodb', DynamoPermissions>
@@ -117,6 +126,7 @@ export type Services =
   | PermissionService<'kms', KMSPermissions>
   | PermissionService<'ssm', SSMPermissions>
   | PermissionService<'event', EventPermissions>
+  | PermissionService<'kinesis', KinesisPermissions>
   | (PermissionService<'custom', string> & { serviceName: string });
 
 export type ServiceFunction = (props: GetResourceProps) => Services[];
