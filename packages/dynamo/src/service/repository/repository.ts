@@ -1,5 +1,6 @@
 import type { ClassResource } from '@lafken/common';
 import type { DynamoIndex, TablePartition } from '../../main/table';
+import { InMemoryCache } from '../cache/in-memory-cache';
 import { client, getClientWithXRay } from '../client/client';
 import type { QueryBuilderProps } from '../query-builder/base/base.types';
 import { BatchGetBuilder } from '../query-builder/batch-get/batch-get';
@@ -47,21 +48,27 @@ export const createRepository = <E extends ClassResource>(
     sortKey
   );
 
+  const cache = new InMemoryCache();
+
   return {
-    findOne(inputProps: QueryOneProps<E>) {
+    findOne(inputProps: QueryOneProps<E>, cacheTtl?: number) {
       return new FindOneBuilder({
         ...queryBuilderProps,
         indexes,
+        cache,
+        cacheTtl,
         inputProps: {
           ...inputProps,
           limit: 1,
         },
       });
     },
-    findAll(inputProps: QueryProps<E>) {
+    findAll(inputProps: QueryProps<E>, cacheTtl?: number) {
       return new FindAllBuilder({
         ...queryBuilderProps,
         indexes,
+        cache,
+        cacheTtl,
         inputProps,
       });
     },
@@ -96,6 +103,7 @@ export const createRepository = <E extends ClassResource>(
       return new GetItemBuilder({
         ...queryBuilderProps,
         key,
+        cache,
         options,
       });
     },

@@ -25,8 +25,8 @@ import type { UpdateBuilder } from '../query-builder/update/update';
 import type { UpsertBuilder } from '../query-builder/upsert/upsert';
 
 export type RepositoryReturn<E extends ClassResource> = {
-  findOne(inputProps: QueryOneProps<E>): FindOneBuilder<E>;
-  findAll(inputProps: QueryProps<E>): FindAllBuilder<E>;
+  findOne(inputProps: QueryOneProps<E>, cacheTtl?: number): FindOneBuilder<E>;
+  findAll(inputProps: QueryProps<E>, cacheTtl?: number): FindAllBuilder<E>;
   scan(inputProps?: FindProps<E>): ScanBuilder<E>;
   upsert(item: Item<E>, inputProps?: UpsertProps<E>): UpsertBuilder<E>;
   create(item: Item<E>): CreateBuilder<E>;

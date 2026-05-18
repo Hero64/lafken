@@ -24,10 +24,20 @@ export class GetItemBuilder<E extends ClassResource> extends QueryBuilderBase<E>
   }
 
   private async exec(): Promise<InstanceType<E> | undefined> {
-    const command = new GetItemCommand(this.command);
-    const { Item } = await this.queryOptions.client.send(command);
+    const { cache, options, modelProps } = this.queryOptions;
+    const fetch = async () => {
+      const { Item } = await this.queryOptions.client.send(
+        new GetItemCommand(this.command)
+      );
+      return Item ? (unmarshall(Item) as InstanceType<E>) : undefined;
+    };
 
-    return Item ? (unmarshall(Item) as InstanceType<E>) : undefined;
+    if (cache && options?.cacheTtl) {
+      const key = JSON.stringify({ table: modelProps.name, key: this.queryOptions.key });
+      return cache.getOrSet(key, fetch, options.cacheTtl);
+    }
+
+    return fetch();
   }
 
   protected prepare() {

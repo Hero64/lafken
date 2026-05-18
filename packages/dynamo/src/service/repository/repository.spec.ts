@@ -11,7 +11,16 @@ import {
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {
   Field,
   PartitionKey,
@@ -724,6 +733,105 @@ describe('Dynamo Service', () => {
       const result = await userRepository.batchGet([{ email: EMAIL, name: 'example1' }]);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('CACHE', () => {
+    const ITEM = {
+      email: { S: EMAIL },
+      name: { S: 'example1' },
+      age: { N: '30' },
+      lastName: { S: 'Doe' },
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      dynamoClient
+        .on(QueryCommand)
+        .resolves({ Items: [ITEM] })
+        .on(GetItemCommand)
+        .resolves({ Item: ITEM });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      dynamoClient.reset();
+    });
+
+    describe('findOne', () => {
+      it('Should query DynamoDB only once for the same key within TTL', async () => {
+        const inputProps = { keyCondition: { partition: { email: EMAIL } } };
+
+        await userRepository.findOne(inputProps, 60);
+        await userRepository.findOne(inputProps, 60);
+
+        expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(1);
+      });
+
+      it('Should query DynamoDB again after TTL expires', async () => {
+        const inputProps = { keyCondition: { partition: { email: EMAIL } } };
+
+        await userRepository.findOne(inputProps, 60);
+        vi.advanceTimersByTime(61_000);
+        await userRepository.findOne(inputProps, 60);
+
+        expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(2);
+      });
+
+      it('Should query DynamoDB for different key conditions independently', async () => {
+        await userRepository.findOne(
+          { keyCondition: { partition: { email: EMAIL } } },
+          60
+        );
+        await userRepository.findOne(
+          { keyCondition: { partition: { email: 'other@example.com' } } },
+          60
+        );
+
+        expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(2);
+      });
+    });
+
+    describe('findAll', () => {
+      it('Should query DynamoDB only once for the same key within TTL', async () => {
+        const inputProps = { keyCondition: { partition: { email: EMAIL } } };
+
+        await userRepository.findAll(inputProps, 60);
+        await userRepository.findAll(inputProps, 60);
+
+        expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(1);
+      });
+
+      it('Should query DynamoDB again after TTL expires', async () => {
+        const inputProps = { keyCondition: { partition: { email: EMAIL } } };
+
+        await userRepository.findAll(inputProps, 60);
+        vi.advanceTimersByTime(61_000);
+        await userRepository.findAll(inputProps, 60);
+
+        expect(dynamoClient.commandCalls(QueryCommand)).toHaveLength(2);
+      });
+    });
+
+    describe('getItem', () => {
+      it('Should call DynamoDB only once for the same key within TTL', async () => {
+        const key = { email: EMAIL, name: 'example1' };
+
+        await userRepository.getItem(key, { cacheTtl: 60 });
+        await userRepository.getItem(key, { cacheTtl: 60 });
+
+        expect(dynamoClient.commandCalls(GetItemCommand)).toHaveLength(1);
+      });
+
+      it('Should call DynamoDB again after TTL expires', async () => {
+        const key = { email: EMAIL, name: 'example1' };
+
+        await userRepository.getItem(key, { cacheTtl: 60 });
+        vi.advanceTimersByTime(61_000);
+        await userRepository.getItem(key, { cacheTtl: 60 });
+
+        expect(dynamoClient.commandCalls(GetItemCommand)).toHaveLength(2);
+      });
     });
   });
 
