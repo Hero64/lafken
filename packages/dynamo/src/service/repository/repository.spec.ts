@@ -1,7 +1,9 @@
 import 'reflect-metadata';
 import {
+  BatchGetItemCommand,
   BatchWriteItemCommand,
   DeleteItemCommand,
+  GetItemCommand,
   PutItemCommand,
   QueryCommand,
   ScanCommand,
@@ -529,6 +531,199 @@ describe('Dynamo Service', () => {
       });
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('GET ITEM', () => {
+    beforeAll(() => {
+      dynamoClient.on(GetItemCommand).resolves({});
+    });
+
+    afterAll(() => {
+      dynamoClient.reset();
+    });
+
+    it('Should send GetItemCommand with correct key', async () => {
+      await userRepository.getItem({
+        email: EMAIL,
+        name: 'example1',
+      });
+
+      expect(
+        dynamoClient.commandCalls(GetItemCommand, {
+          TableName: 'users',
+          Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should return undefined when item does not exist', async () => {
+      dynamoClient.on(GetItemCommand).resolves({ Item: undefined });
+
+      const result = await userRepository.getItem({
+        email: EMAIL,
+        name: 'example1',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('Should send GetItemCommand with consistentRead', async () => {
+      dynamoClient.on(GetItemCommand).resolves({});
+
+      await userRepository.getItem(
+        { email: EMAIL, name: 'example1' },
+        { consistentRead: true }
+      );
+
+      expect(
+        dynamoClient.commandCalls(GetItemCommand, {
+          TableName: 'users',
+          Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+          ConsistentRead: true,
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should send GetItemCommand with projection', async () => {
+      dynamoClient.on(GetItemCommand).resolves({});
+
+      await userRepository.getItem(
+        { email: EMAIL, name: 'example1' },
+        { projection: ['email', 'age'] }
+      );
+
+      expect(
+        dynamoClient.commandCalls(GetItemCommand, {
+          TableName: 'users',
+          Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+          ProjectionExpression: 'email, age',
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should return the item when it exists', async () => {
+      dynamoClient.on(GetItemCommand).resolves({
+        Item: {
+          email: { S: 'example1@example.com' },
+          name: { S: 'example1' },
+          lastName: { S: 'Doe' },
+          age: { N: '30' },
+        },
+      });
+
+      const result = await userRepository.getItem({
+        email: EMAIL,
+        name: 'example1',
+      });
+
+      expect(result).toEqual({
+        email: 'example1@example.com',
+        name: 'example1',
+        lastName: 'Doe',
+        age: 30,
+      });
+    });
+  });
+
+  describe('BATCH GET', () => {
+    beforeAll(() => {
+      dynamoClient.on(BatchGetItemCommand).resolves({});
+    });
+
+    afterAll(() => {
+      dynamoClient.reset();
+    });
+
+    it('Should send BatchGetItemCommand with correct keys', async () => {
+      await userRepository.batchGet([
+        { email: 'example1@example.com', name: 'example1' },
+        { email: 'example2@example.com', name: 'example2' },
+      ]);
+
+      expect(
+        dynamoClient.commandCalls(BatchGetItemCommand, {
+          RequestItems: {
+            users: {
+              Keys: [
+                { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
+                { email: { S: 'example2@example.com' }, name: { S: 'example2' } },
+              ],
+            },
+          },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should send BatchGetItemCommand with consistentRead', async () => {
+      await userRepository.batchGet([{ email: EMAIL, name: 'example1' }], {
+        consistentRead: true,
+      });
+
+      expect(
+        dynamoClient.commandCalls(BatchGetItemCommand, {
+          RequestItems: {
+            users: {
+              Keys: [{ email: { S: 'example1@example.com' }, name: { S: 'example1' } }],
+              ConsistentRead: true,
+            },
+          },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should send BatchGetItemCommand with projection', async () => {
+      await userRepository.batchGet([{ email: EMAIL, name: 'example1' }], {
+        projection: ['email', 'age'],
+      });
+
+      expect(
+        dynamoClient.commandCalls(BatchGetItemCommand, {
+          RequestItems: {
+            users: {
+              Keys: [{ email: { S: 'example1@example.com' }, name: { S: 'example1' } }],
+              ProjectionExpression: 'email, age',
+            },
+          },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('Should return parsed items', async () => {
+      dynamoClient.on(BatchGetItemCommand).resolves({
+        Responses: {
+          users: [
+            {
+              email: { S: 'example1@example.com' },
+              name: { S: 'example1' },
+              age: { N: '30' },
+            },
+            {
+              email: { S: 'example2@example.com' },
+              name: { S: 'example2' },
+              age: { N: '25' },
+            },
+          ],
+        },
+      });
+
+      const result = await userRepository.batchGet([
+        { email: 'example1@example.com', name: 'example1' },
+        { email: 'example2@example.com', name: 'example2' },
+      ]);
+
+      expect(result).toEqual([
+        { email: 'example1@example.com', name: 'example1', age: 30 },
+        { email: 'example2@example.com', name: 'example2', age: 25 },
+      ]);
+    });
+
+    it('Should return empty array when no items found', async () => {
+      dynamoClient.on(BatchGetItemCommand).resolves({ Responses: {} });
+
+      const result = await userRepository.batchGet([{ email: EMAIL, name: 'example1' }]);
+
+      expect(result).toEqual([]);
     });
   });
 
