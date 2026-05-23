@@ -7,6 +7,18 @@ import type {
   StringField,
 } from '@lafken/common';
 
+/**
+ * Top-level string fields available on every SQS record that can be
+ * extracted with `@Param({ source: 'record' })`.
+ */
+export type SQSRecordField =
+  | 'messageId'
+  | 'receiptHandle'
+  | 'md5OfBody'
+  | 'eventSource'
+  | 'eventSourceARN'
+  | 'awsRegion';
+
 export interface ParamAttributeProps extends Omit<FieldProps, 'type'> {
   /**
    * Attribute source.
@@ -78,10 +90,35 @@ export interface ParamBodyParsedProps extends Omit<FieldProps, 'type'> {
   type?: StringConstructor | Function | [Function];
 }
 
+export interface ParamRecordProps extends Omit<FieldProps, 'type' | 'name'> {
+  /**
+   * Record source.
+   *
+   * Extracts a top-level field directly from the raw SQS record object
+   * (e.g. `messageId`, `receiptHandle`, `awsRegion`).
+   */
+  source: 'record';
+  /**
+   * SQS record field name.
+   *
+   * Specifies which top-level property of the SQS record to extract.
+   * Defaults to the decorated property name when omitted.
+   */
+  name?: SQSRecordField;
+  /**
+   * Attribute type.
+   *
+   * All SQS record metadata fields are strings, so only `String`
+   * is accepted here.
+   */
+  type?: StringConstructor;
+}
+
 export type ParamProps =
   | ParamAttributeProps
   | ParamBodyUnparsedProps
-  | ParamBodyParsedProps;
+  | ParamBodyParsedProps
+  | ParamRecordProps;
 
 export type Source = Exclude<ParamProps['source'], undefined>;
 
@@ -106,9 +143,14 @@ export interface QueueArrayParam extends Omit<ArrayField, 'items'>, QueueParamBa
   items: QueueParamMetadata;
 }
 
+export interface QueueRecordParam extends StringField, QueueParamBase {
+  source: 'record';
+}
+
 export type QueueParamMetadata =
   | QueueStringParam
   | QueueNumberParam
   | QueueBooleanParam
   | QueueObjectParam
-  | QueueArrayParam;
+  | QueueArrayParam
+  | QueueRecordParam;

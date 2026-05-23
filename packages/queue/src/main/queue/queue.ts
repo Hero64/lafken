@@ -56,6 +56,13 @@ const getValueFormBody = (param: QueueParamMetadata, record: SQSRecord) => {
   return JSON.parse(String(value))?.[param.name];
 };
 
+const getValueFromRecord = (
+  param: QueueParamMetadata,
+  record: SQSRecord
+): string | undefined => {
+  return (record as any)[param.name];
+};
+
 const argumentParser: Partial<LambdaArgumentsType> = {
   [LambdaArgumentTypes.event]: ({ event, methodName, target }) => {
     const queueEvent: SQSEvent = event;
@@ -76,10 +83,13 @@ const argumentParser: Partial<LambdaArgumentsType> = {
         continue;
       }
       for (const param of paramsByHandler.properties) {
-        attributes[param.destinationName] =
-          param.source === 'attribute'
-            ? getValueFromAttribute(param, record)
-            : getValueFormBody(param, record);
+        if (param.source === 'attribute') {
+          attributes[param.destinationName] = getValueFromAttribute(param, record);
+        } else if (param.source === 'record') {
+          attributes[param.destinationName] = getValueFromRecord(param, record);
+        } else {
+          attributes[param.destinationName] = getValueFormBody(param, record);
+        }
       }
       data.push(attributes);
     }

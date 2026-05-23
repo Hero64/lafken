@@ -107,4 +107,49 @@ describe('Event Decorator', () => {
       expect(response[0].body).toBeDefined();
     });
   });
+
+  describe('Param decorator with source: record', () => {
+    let testQueue: ClassResource;
+
+    beforeAll(() => {
+      @Payload()
+      class RecordEvent {
+        @Param({ source: 'record' })
+        messageId: string;
+
+        @Param({ source: 'record', name: 'awsRegion' })
+        region: string;
+      }
+
+      @Queue()
+      class TestRecordQueue {
+        @Fifo({ contentBasedDeduplication: true })
+        handle(@Event(RecordEvent) events: RecordEvent[]) {
+          return events;
+        }
+      }
+
+      testQueue = TestRecordQueue;
+    });
+
+    it('Should extract messageId and aliased awsRegion from SQS record', async () => {
+      const queue = new testQueue();
+      const event = {
+        Records: [
+          {
+            messageId: 'msg-123',
+            awsRegion: 'us-east-1',
+            body: '{}',
+            messageAttributes: {},
+          },
+        ],
+      } as unknown as any;
+
+      const response = await (queue as any).handle(event);
+
+      expect(response).toBeInstanceOf(Array);
+      expect(response[0].messageId).toBe('msg-123');
+      expect(response[0].region).toBe('us-east-1');
+    });
+  });
 });
