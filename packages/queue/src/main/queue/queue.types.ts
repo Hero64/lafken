@@ -151,6 +151,10 @@ export interface ExternalQueueProps extends SourceMappingProps {
    *
    */
   queueName: string | ((props: GetResourceProps) => string);
+  /**
+   * Lambda configuration for processing messages from this queue.
+   */
+  lambda?: LambdaProps;
 }
 
 export interface InternalFifoProps extends InternalStandardProps {
