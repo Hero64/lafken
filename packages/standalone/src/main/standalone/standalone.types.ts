@@ -1,4 +1,9 @@
-import type { LambdaMetadata, LambdaProps, ServicesValues } from '@lafken/common';
+import type {
+  LambdaMetadata,
+  LambdaProps,
+  LambdaReferenceNames,
+  ServicesValues,
+} from '@lafken/common';
 
 export const RESOURCE_TYPE = 'standalone';
 
@@ -37,7 +42,7 @@ export interface HandlerProps {
     roleRef?: string;
   };
 
-  lambda?: LambdaProps;
+  lambda?: Omit<LambdaProps, 'ref'>;
 
   /**
    * Registers this Lambda function as a named global reference, allowing other
@@ -46,7 +51,9 @@ export interface HandlerProps {
    * @example
    * ref: 'myHandler'
    */
-  ref?: string;
+  ref?: LambdaReferenceNames;
 }
 
-export interface HandlerMetadata extends Omit<HandlerProps, 'name'>, LambdaMetadata {}
+export interface HandlerMetadata
+  extends Omit<HandlerProps, 'name'>,
+    Omit<LambdaMetadata, 'lambda'> {}
