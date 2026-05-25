@@ -275,6 +275,16 @@ export interface LambdaProps {
    */
   outputs?: ResourceOutputType<LambdaOutputAttributes>;
   /**
+   * Custom function name for the Lambda.
+   *
+   * When provided, this name will be used as the Lambda function name instead
+   * of the auto-generated one derived from the handler id and context.
+   * Useful when the Lambda must match a pre-existing or externally defined name.
+   *
+   * Must be unique within the AWS account and region.
+   */
+  functionName?: string;
+  /**
    * Registers this Lambda as a named global reference.
    *
    * Allows other resources to look up this function by name via

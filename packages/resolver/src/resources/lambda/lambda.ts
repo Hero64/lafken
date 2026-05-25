@@ -50,12 +50,9 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       scope,
     });
     let environmentValues = environments?.getValues() || undefined;
-    const handlerName = LambdaHandler.buildFunctionName(
-      id,
-      appContext,
-      moduleContext,
-      props.suffix
-    );
+    const handlerName =
+      props.lambda?.functionName ??
+      LambdaHandler.buildFunctionName(id, appContext, moduleContext, props.suffix);
 
     super(
       scope,
