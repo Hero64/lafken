@@ -74,7 +74,7 @@ export class UpdateBuilder<
       setExpression = this.setValues(setValues, true, [], this.expressionGroupCounter++);
     }
     if (Object.keys(replaceValues).length > 0) {
-      setExpression += ` ${this.setValues(replaceValues, false, [], this.expressionGroupCounter++)}`;
+      setExpression += `${setExpression ? ',' : ''} ${this.setValues(replaceValues, false, [], this.expressionGroupCounter++)}`;
     }
 
     const removeExpression = this.removeValues(removeValues);

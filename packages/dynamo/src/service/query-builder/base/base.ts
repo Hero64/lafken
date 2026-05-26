@@ -104,6 +104,9 @@ export class QueryBuilderBase<E extends ClassResource> {
     const filterExpression: string[] = [];
     let index = 0;
     for (const key in filter) {
+      if ((filter as any)[key] === undefined) {
+        continue;
+      }
       switch (key) {
         case 'OR': {
           const orFilter = filter as OrFilter<T>;
