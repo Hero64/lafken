@@ -53,7 +53,7 @@ const getValueFormBody = (param: QueueParamMetadata, record: SQSRecord) => {
     return value;
   }
 
-  return JSON.parse(String(value))?.[param.name];
+  return JSON.parse(String(value));
 };
 
 const getValueFromRecord = (
