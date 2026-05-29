@@ -132,6 +132,9 @@ export const createRepository = <E extends ClassResource>(
         keys,
       });
     },
+    clearCache() {
+      cache.clear();
+    },
     sendRawCommand<T = unknown>(
       command: Parameters<typeof queryBuilderProps.client.send>[0]
     ) {
