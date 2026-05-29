@@ -15,6 +15,10 @@ export class InMemoryCache {
     this.store.set(key, { value, expiry: Date.now() + ttlSeconds * 1000 });
   }
 
+  clear(): void {
+    this.store.clear();
+  }
+
   async getOrSet<T>(
     key: string,
     fetcher: () => Promise<T>,

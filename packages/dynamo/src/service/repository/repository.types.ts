@@ -42,4 +42,5 @@ export type RepositoryReturn<E extends ClassResource> = {
   bulkCreate(items: Item<E>[]): BulkCreateBuilder<E>;
   bulkDelete(keys: TablePartition<Item<E>>[]): BulkDeleteBuilder<E>;
   sendRawCommand<T = unknown>(command: Parameters<DynamoDBClient['send']>[0]): Promise<T>;
+  clearCache(): void;
 };

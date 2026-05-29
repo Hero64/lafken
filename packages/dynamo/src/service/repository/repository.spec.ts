@@ -756,6 +756,7 @@ describe('Dynamo Service', () => {
     afterEach(() => {
       vi.useRealTimers();
       dynamoClient.reset();
+      userRepository.clearCache();
     });
 
     describe('findOne', () => {

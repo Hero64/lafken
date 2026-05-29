@@ -104,9 +104,6 @@ export class QueryBuilderBase<E extends ClassResource> {
     const filterExpression: string[] = [];
     let index = 0;
     for (const key in filter) {
-      if ((filter as any)[key] === undefined) {
-        continue;
-      }
       switch (key) {
         case 'OR': {
           const orFilter = filter as OrFilter<T>;
@@ -134,11 +131,13 @@ export class QueryBuilderBase<E extends ClassResource> {
           break;
         }
         default: {
+          const keyFilter = (filter as unknown as Filter<T>)[key as keyof T] as Filter<T>;
+          if (keyFilter === undefined) {
+            continue;
+          }
           const currentKeyNames = [...names, key];
           const keyName = currentKeyNames.join('.#');
           const keyValue = `${currentKeyNames.join('_')}_${counter}_${index}`;
-
-          const keyFilter = (filter as unknown as Filter<T>)[key as keyof T] as Filter<T>;
 
           if (typeof keyFilter === 'object') {
             const keys = Object.keys(keyFilter || {});
