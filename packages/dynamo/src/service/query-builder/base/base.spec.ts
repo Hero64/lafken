@@ -73,6 +73,94 @@ describe('Query builder base', () => {
       );
     });
 
+    it('should omit undefined partition attributes and build expression with defined keys only', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: undefined,
+              },
+              sort: {
+                age: 12,
+              },
+            },
+            {
+              name: 'partial_partition_index',
+              type: 'global',
+              partitionKey: new Set(['name']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual('#name = :name and #age = :age');
+    });
+
+    it('should omit undefined sort attributes and build expression with defined keys only', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: 'test@test.com',
+              },
+              sort: {
+                age: 12,
+                foo: undefined,
+              },
+            },
+            {
+              name: 'partial_sort_index',
+              type: 'global',
+              partitionKey: new Set(['name', 'email']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual(
+        '#name = :name and #email = :email and #age = :age'
+      );
+    });
+
+    it('should omit undefined attributes in both partition and sort keys', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: undefined,
+              },
+              sort: {
+                age: 12,
+                foo: undefined,
+              },
+            },
+            {
+              name: 'partial_multi_index',
+              type: 'global',
+              partitionKey: new Set(['name']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual('#name = :name and #age = :age');
+    });
+
     it('should throw error to invalid multi attribute selection', () => {
       class QueryBuilder extends QueryBuilderBase<any> {
         public getConditionExpression() {
