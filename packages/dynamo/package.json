@@ -67,7 +67,6 @@
     "@aws-sdk/client-dynamodb": "^3.1062.0",
     "@aws-sdk/util-dynamodb": "^3.996.2",
     "@lafken/resolver": "workspace:*",
-    "aws-xray-sdk": "^3.12.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
