@@ -57,10 +57,7 @@ export const createRepository = <E extends ClassResource>(
         indexes,
         cache,
         cacheTtl,
-        inputProps: {
-          ...inputProps,
-          limit: 1,
-        },
+        inputProps,
       });
     },
     findAll(inputProps: QueryProps<E>, cacheTtl?: number) {
