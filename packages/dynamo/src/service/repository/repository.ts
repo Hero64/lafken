@@ -1,7 +1,7 @@
 import type { ClassResource } from '@lafken/common';
 import type { DynamoIndex, TablePartition } from '../../main/table';
 import { InMemoryCache } from '../cache/in-memory-cache';
-import { client, getClientWithXRay } from '../client/client';
+import { client } from '../client/client';
 import type { QueryBuilderProps } from '../query-builder/base/base.types';
 import { BatchGetBuilder } from '../query-builder/batch-get/batch-get';
 import type { BatchGetOptions } from '../query-builder/batch-get/batch-get.types';
@@ -35,7 +35,7 @@ export const createRepository = <E extends ClassResource>(
   const { modelProps, partitionKey, sortKey, fields } = getModelInformation(model);
 
   const queryBuilderProps: QueryBuilderProps<E> = {
-    client: modelProps.tracing ? getClientWithXRay() : client,
+    client,
     fields,
     modelProps,
     partitionKey,
