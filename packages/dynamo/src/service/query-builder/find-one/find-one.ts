@@ -5,7 +5,6 @@ import type { FindOneBuilderProps } from './find-one.types';
 export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
   constructor(protected queryOptions: FindOneBuilderProps<E>) {
     super(queryOptions);
-    this.find();
   }
 
   public then<T>(

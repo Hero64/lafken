@@ -60,13 +60,6 @@ export class FindBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
     const { Items = [], LastEvaluatedKey } = await this.queryOptions.client.send(command);
     const resultData = Items.map((item) => unmarshall(item)) as E[];
 
-    if (input.Limit === 1) {
-      return {
-        data: [resultData[0]],
-        cursor: LastEvaluatedKey ? unmarshall(LastEvaluatedKey) : undefined,
-      };
-    }
-
     const items = data.concat(resultData);
     if (LastEvaluatedKey && (!input.Limit || items.length < input.Limit)) {
       return this.runQuery(

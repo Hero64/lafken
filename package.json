@@ -16,11 +16,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
-    "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^21.0.1",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
     "@types/node": "25.9.1",
     "husky": "9.1.7",
-    "lint-staged": "17.0.5",
+    "lint-staged": "17.0.7",
     "turbo": "2.9.16",
     "typescript": "6.0.3"
   },

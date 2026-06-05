@@ -54,14 +54,20 @@ export class DynamoIndexes {
       return index;
     }
 
-    const partitionKeys = Object.keys(partition);
-    const sortKeys = Object.keys(sort || {});
+    const partitionKeys = Object.keys(partition).filter(
+      (key) => partition[key] !== undefined
+    );
+    const sortKeys = Object.keys(sort || {}).filter((key) => sort?.[key] !== undefined);
 
     if (partitionKeys.length > 1 || sortKeys.length > 1) {
       return this.getGlobalIndex(new Set(partitionKeys), new Set(sortKeys));
     }
 
-    if (this.partitionKey === partitionKeys[0] && this.sortKey !== sortKeys[0]) {
+    if (
+      this.partitionKey === partitionKeys[0] &&
+      this.sortKey !== sortKeys[0] &&
+      sortKeys[0] !== undefined
+    ) {
       const index = this.getLocalIndex(sortKeys[0]);
 
       if (index) {

@@ -32,6 +32,10 @@ export class QueryBuilderBase<E extends ClassResource> {
     const partitionFilters: string[] = [];
 
     for (const key in partition) {
+      if (partition[key] === undefined) {
+        continue;
+      }
+
       partitionFilters.push(
         this.resolveFilter({
           expressionName: key,
@@ -74,6 +78,10 @@ export class QueryBuilderBase<E extends ClassResource> {
     }
 
     for (const key in sortValues) {
+      if (sortValues[key] === undefined) {
+        continue;
+      }
+
       let filterExpressionKey: FilterResolverTypes = 'equal';
 
       let sortValue = sort[key];
