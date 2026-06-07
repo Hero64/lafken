@@ -19,7 +19,6 @@ describe('Cron rule', () => {
       name: 'RuleTest',
       originalName: 'RuleTest',
       type: 'EVENT',
-      minify: undefined,
     });
   });
 

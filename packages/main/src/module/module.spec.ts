@@ -61,7 +61,7 @@ describe('Module', () => {
       memory: 100,
       runtime: 20,
       timeout: 30,
-      minify: undefined,
+      bundler: undefined,
     });
   });
 

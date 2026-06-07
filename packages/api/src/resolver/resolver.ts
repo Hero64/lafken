@@ -51,14 +51,17 @@ export class ApiResolver implements ResolverType {
   }
 
   public async create(module: AppModule, resource: ClassResource) {
-    const minify = getContextValueByScope(module, 'minify');
+    const contextBundler = getContextValueByScope(module, 'bundler');
 
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
-      minify: metadata.minify ?? minify,
+      bundler: {
+        ...metadata.bundler,
+        minify: metadata.bundler?.minify ?? contextBundler?.minify,
+      },
       className: metadata.originalName,
       methods: handlers
         .filter((handler) => !handler.integration)

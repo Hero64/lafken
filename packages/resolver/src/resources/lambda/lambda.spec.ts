@@ -35,7 +35,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -65,7 +65,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -116,7 +116,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -148,7 +148,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -179,7 +179,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -213,7 +213,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -259,7 +259,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -294,7 +294,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -328,7 +328,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -349,7 +349,7 @@ describe('Lambda handler', () => {
       filename: 'index',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',

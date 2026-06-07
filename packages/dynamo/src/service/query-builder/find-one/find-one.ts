@@ -17,7 +17,10 @@ export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
   private async exec(): Promise<InstanceType<E> | undefined> {
     const { cache, cacheTtl, modelProps, inputProps } = this.queryOptions;
     const fetch = async () => {
-      const { data } = await this.runQuery(this.command);
+      const { data } = await this.runQuery({
+        ...this.command,
+        Limit: inputProps.filter !== undefined ? undefined : 1,
+      });
       return (data as E[])?.[0] as InstanceType<E> | undefined;
     };
 
