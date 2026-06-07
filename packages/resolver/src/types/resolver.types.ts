@@ -1,4 +1,4 @@
-import type { ClassResource, LambdaProps } from '@lafken/common';
+import type { BundlerConfig, ClassResource, LambdaProps } from '@lafken/common';
 import type { TerraformStack } from 'cdktn';
 import type { Construct } from 'constructs';
 
@@ -29,7 +29,7 @@ export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags' | 'function
 
 export interface GlobalContext extends Omit<LambdaGlobalConfig, 'services'> {
   contextCreator: string;
-  minify?: boolean;
+  bundler?: BundlerConfig;
 }
 
 export enum ContextName {

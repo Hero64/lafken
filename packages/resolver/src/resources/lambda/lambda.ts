@@ -99,6 +99,13 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   }
 
   private static resolveContextValues(props: CommonContextProps): ResolvedLambdaContext {
+    const { lambda, appContext, moduleContext } = props;
+    const mergedLayers = [
+      ...(appContext?.layers ?? []),
+      ...(moduleContext?.layers ?? []),
+      ...(lambda?.layers ?? []),
+    ];
+
     return {
       runtime: LambdaHandler.getCurrentOrContextValue({
         key: 'runtime',
@@ -124,6 +131,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       }),
       timeout: LambdaHandler.getCurrentOrContextValue({ key: 'timeout', ...props }),
       memory: LambdaHandler.getCurrentOrContextValue({ key: 'memory', ...props }),
+      layers: mergedLayers.length > 0 ? mergedLayers : undefined,
     };
   }
 
@@ -158,6 +166,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       architectures: ctx.architecture ? [ctx.architecture] : undefined,
       reservedConcurrentExecutions: ctx.reservedConcurrency,
       ephemeralStorage: ctx.ephemeralStorage ? { size: ctx.ephemeralStorage } : undefined,
+      layers: ctx.layers,
       tracingConfig: {
         mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
       },
@@ -243,7 +252,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   }
 
   private static getCurrentOrContextValue<
-    T extends keyof Omit<GlobalContext, 'contextCreator' | 'minify'>,
+    T extends keyof Omit<GlobalContext, 'contextCreator' | 'bundler'>,
   >(props: GetCurrentOrContextValueProps<T>) {
     const { lambda = {}, appContext, moduleContext, key, defaultValue } = props;
 

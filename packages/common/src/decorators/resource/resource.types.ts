@@ -2,6 +2,29 @@ export enum ResourceReflectKeys {
   resource = 'resource',
 }
 
+export interface BundlerConfig {
+  /**
+   * Enables minification for this resource's Lambda bundle.
+   *
+   * When `true`, the bundled code will be minified to reduce deployment
+   * package size and improve cold start times.
+   */
+  minify?: boolean;
+  /**
+   * Additional packages to exclude from the rolldown bundle.
+   *
+   * Specifies extra package names or patterns that should be treated as
+   * external during bundling. The default externals (`@aws-sdk/*`, `aws-lambda`,
+   * `node:*`) are always included — this list is merged on top of them.
+   *
+   * Values from the app, module, and resource levels are all accumulated.
+   *
+   * @example
+   * externalPackages: ['my-shared-lib', /^@my-org\//]
+   */
+  externalPackages?: (string | RegExp)[];
+}
+
 export interface ResourceProps {
   /**
    * Resource name.
@@ -11,21 +34,20 @@ export interface ResourceProps {
    */
   name?: string;
   /**
-   * Resource minify
+   * Bundler configuration for this resource.
    *
-   * Specifies whether the code should be minified when the resource is processed
-   *
-   * @default true
+   * Groups build-time settings that control how the Lambda code is bundled
+   * by rolldown. Includes minification and external package exclusions.
    */
-  minify?: boolean;
+  bundler?: BundlerConfig;
 }
 
-export interface ResourceMetadata extends Required<Omit<ResourceProps, 'minify'>> {
+export interface ResourceMetadata extends Required<Omit<ResourceProps, 'bundler'>> {
   type: string;
   filename: string;
   foldername: string;
   originalName: string;
-  minify?: boolean;
+  bundler?: BundlerConfig;
 }
 
 export interface ResourceDecoratorProps<T> {

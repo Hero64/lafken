@@ -71,7 +71,7 @@ describe('Queue', () => {
         name: 'queue',
         originalName: 'queue',
         type: 'QUEUE',
-        minify: undefined,
+        bundler: undefined,
       },
       classResource: TestQueue,
     });
@@ -116,7 +116,7 @@ describe('Queue', () => {
         name: 'queue',
         originalName: 'queue',
         type: 'QUEUE',
-        minify: undefined,
+        bundler: undefined,
       },
       classResource: TestQueue,
     });
@@ -162,7 +162,7 @@ describe('Queue', () => {
           name: 'queue',
           originalName: 'queue',
           type: 'QUEUE',
-          minify: undefined,
+          bundler: undefined,
         },
         classResource: TestQueue,
       });
@@ -185,7 +185,7 @@ describe('Queue', () => {
           name: 'queue',
           originalName: 'queue',
           type: 'QUEUE',
-          minify: undefined,
+          bundler: undefined,
         },
         classResource: TestQueue,
       });

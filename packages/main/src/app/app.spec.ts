@@ -69,7 +69,7 @@ describe('App', () => {
       enableTrace: true,
       memory: 2000,
       runtime: 20,
-      minify: undefined,
+      bundler: undefined,
     });
   });
 

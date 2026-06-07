@@ -3,6 +3,7 @@ import { basename, dirname, extname, join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktn';
 import { createSha256 } from '../../../utils';
+import { getAppContext, getModuleContext } from '../../../utils/context.utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
   AddLambdaProps,
@@ -23,7 +24,7 @@ class LambdaAssets {
         metadata: {
           filename,
           foldername,
-          minify: props.minify,
+          bundler: props.bundler,
           afterBuild: props.afterBuild,
         },
         resources: {},
@@ -79,13 +80,24 @@ class LambdaAssets {
       recursive: true,
     });
 
+    const appContext = getAppContext(scope);
+    const moduleContext = getModuleContext(scope);
+    const external: (string | RegExp)[] = [
+      /^@aws-sdk/,
+      'aws-lambda',
+      /^node:/,
+      ...(appContext?.bundler?.externalPackages ?? []),
+      ...(moduleContext?.bundler?.externalPackages ?? []),
+      ...(metadata.bundler?.externalPackages ?? []),
+    ];
+
     await (async () => {
       const { build } = await import('rolldown');
 
       await build({
         input: prebuildPath,
         platform: 'node',
-        external: [/^@aws-sdk/, 'aws-lambda', /^node:/],
+        external,
         treeshake: {
           moduleSideEffects: false,
         },
@@ -101,7 +113,7 @@ class LambdaAssets {
           dir: outputPath,
           entryFileNames: 'index.js',
           chunkFileNames: '[name].js',
-          minify: metadata.minify,
+          minify: metadata.bundler?.minify,
           comments: {
             legal: false,
             jsdoc: false,

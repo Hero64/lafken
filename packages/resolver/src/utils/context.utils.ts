@@ -22,7 +22,7 @@ export const getContextValueByScope = <T extends keyof GlobalContext>(
   value: T
 ) => {
   const appContext = getAppContext(scope);
-  const moduleContext = getAppContext(scope);
+  const moduleContext = getModuleContext(scope);
 
   return getContextValue(value, appContext, moduleContext);
 };

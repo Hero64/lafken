@@ -21,7 +21,7 @@ describe('Lambda Assets', () => {
       filename: 'handler',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
 
     const prebuildPath = '/tmp/handler.js';
@@ -32,7 +32,7 @@ describe('Lambda Assets', () => {
       metadata: {
         filename: 'handler',
         foldername: '/tmp',
-        minify: false,
+        bundler: { minify: false },
       },
       resources: {
         Testing: {
@@ -50,7 +50,7 @@ describe('Lambda Assets', () => {
       filename: 'handler',
       className: 'Testing',
       methods: ['foo', 'bar'],
-      minify: false,
+      bundler: { minify: false },
     });
 
     const lambda = new LambdaFunction(stack, 'test-handler', {
