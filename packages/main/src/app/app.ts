@@ -26,7 +26,7 @@ export class AppStack extends TerraformStack {
       contextName: ContextName.app,
       globalConfig: props.globalConfig?.lambda,
       contextCreator: props.name,
-      minify: props.globalConfig?.minify,
+      bundler: props.globalConfig?.bundler,
     });
     new AwsProvider(this, 'AWS', props.awsProviderConfig);
 

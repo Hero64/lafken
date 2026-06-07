@@ -135,7 +135,10 @@ export class Schema {
         filename: this.resourceMetadata.filename,
         className: this.resourceMetadata.originalName,
         methods: handlers.map((handler) => handler.name),
-        minify: this.resourceMetadata.minify ?? minify,
+        bundler: {
+          ...this.resourceMetadata.bundler,
+          minify: this.resourceMetadata.bundler?.minify ?? minify,
+        },
       });
     }
   }

@@ -23,7 +23,7 @@ export class StackModule extends Construct {
       contextName: ContextName.module,
       globalConfig: props.globalConfig?.lambda,
       contextCreator: props.name,
-      minify: props.globalConfig?.minify,
+      bundler: props.globalConfig?.bundler,
     });
     this.createRole();
   }

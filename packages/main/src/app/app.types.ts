@@ -1,5 +1,5 @@
 import type { AwsProviderConfig } from '@cdktn/provider-aws/lib/provider';
-import type { ServicesValues } from '@lafken/common';
+import type { BundlerConfig, ServicesValues } from '@lafken/common';
 import type { LambdaGlobalConfig, ResolverType } from '@lafken/resolver';
 import type { S3BackendConfig } from 'cdktn';
 import type { StackModule } from '../module';
@@ -39,14 +39,17 @@ export interface GlobalConfig {
    */
   tags?: Record<string, string>;
   /**
-   * Enables minification for all Lambda function bundles.
+   * Bundler configuration applied to all Lambda function bundles.
    *
-   * When set to `true`, the bundled Lambda code will be minified
-   * to reduce deployment package size and improve cold start times.
+   * Groups build-time settings for rolldown: minification and external
+   * package exclusions. Values are merged with module-level and
+   * resource-level bundler config — resource takes precedence for `minify`,
+   * while `externalPackages` accumulates across all levels.
    *
-   * @default undefined
+   * @example
+   * bundler: { minify: true, externalPackages: ['my-shared-lib'] }
    */
-  minify?: boolean;
+  bundler?: BundlerConfig;
 }
 
 export interface CreateAppProps {

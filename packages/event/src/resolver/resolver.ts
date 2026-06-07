@@ -77,14 +77,17 @@ export class EventRuleResolver implements ResolverType {
   }
 
   public create(module: AppModule, resource: ClassResource) {
-    const minify = getContextValueByScope(module, 'minify');
+    const contextBundler = getContextValueByScope(module, 'bundler');
 
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<EventRuleMetadata>(resource);
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
-      minify: metadata.minify ?? minify,
+      bundler: {
+        ...metadata.bundler,
+        minify: metadata.bundler?.minify ?? contextBundler?.minify,
+      },
       className: metadata.originalName,
       methods: handlers.map((handler) => handler.name),
     });

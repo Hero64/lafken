@@ -24,6 +24,9 @@ const sqsClient = new SQSClient();
 @Api({
   path: '/pokemon',
   auth: false,
+  bundler: {
+    minify: true,
+  },
 })
 export class PokeApi {
   @Get({

@@ -7,6 +7,7 @@ import { ApiGatewayUsagePlan } from '@cdktn/provider-aws/lib/api-gateway-usage-p
 import { ApiGatewayUsagePlanKey } from '@cdktn/provider-aws/lib/api-gateway-usage-plan-key';
 
 import {
+  type BundlerConfig,
   type ClassResource,
   getMetadataPrototypeByKey,
   getResourceMetadata,
@@ -45,14 +46,14 @@ export class AuthorizerFactory {
   private authResources: TerraformResource[] = [];
   private defaultAuthorizer?: MethodAuthorizer;
   private usagePlans: ApiGatewayUsagePlan[] = [];
-  private globalMinify: boolean | undefined = false;
+  private globalBundler: BundlerConfig | undefined = undefined;
 
   constructor(
     private scope: RestApi,
     authorizerResources: ClassResource[],
     private props: AuthorizerFactoryProps
   ) {
-    this.globalMinify = getContextValueByScope(scope, 'minify');
+    this.globalBundler = getContextValueByScope(scope, 'bundler');
     const { defaultAuthorizer } = props;
 
     if (defaultAuthorizer) {
@@ -189,7 +190,10 @@ export class AuthorizerFactory {
       className: metadata.originalName,
       filename: metadata.filename,
       foldername: metadata.foldername,
-      minify: metadata.minify ?? this.globalMinify,
+      bundler: {
+        ...metadata.bundler,
+        minify: metadata.bundler?.minify ?? this.globalBundler?.minify,
+      },
       methods: [handler.name],
       afterBuild: async (outputPath) => {
         const authorizer = this.authorizerMetadata[id] as AuthorizerDataCustom;

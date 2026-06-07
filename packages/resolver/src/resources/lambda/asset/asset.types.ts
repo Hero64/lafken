@@ -3,7 +3,7 @@ import type { ResourceMetadata } from '@lafken/common';
 import type { Construct } from 'constructs';
 
 interface BaseAsset
-  extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'minify'> {}
+  extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'bundler'> {}
 
 export interface AssetResource {
   className: string;
@@ -26,7 +26,7 @@ export interface BuildAssetProps {
   metadata: Omit<AssetMetadata, 'className' | 'methods'>;
 }
 
-export interface AddLambdaProps extends Omit<BaseAsset, 'minify'> {
+export interface AddLambdaProps extends Omit<BaseAsset, 'bundler'> {
   lambda: LambdaFunction;
   scope: Construct;
 }

@@ -374,7 +374,7 @@ export interface ApiProps extends ResourceProps {
 }
 
 export interface ApiResourceMetadata
-  extends Required<Omit<ApiProps, 'minify'>>,
+  extends Required<Omit<ApiProps, 'bundler'>>,
     ResourceMetadata {}
 
 export interface ApiLambdaMetadata extends LambdaMetadata {

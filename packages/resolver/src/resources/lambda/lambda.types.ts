@@ -16,6 +16,7 @@ export interface ResolvedLambdaContext {
   reservedConcurrency?: GlobalContext['reservedConcurrency'];
   timeout?: GlobalContext['timeout'];
   memory?: GlobalContext['memory'];
+  layers?: string[];
 }
 
 export interface LambdaHandlerProps
@@ -42,7 +43,7 @@ export interface CommonContextProps {
 }
 
 export interface GetCurrentOrContextValueProps<
-  T extends keyof Omit<GlobalContext, 'contextCreator'>,
+  T extends keyof Omit<GlobalContext, 'contextCreator' | 'bundler'>,
 > extends CommonContextProps {
   key: T;
   defaultValue?: GlobalContext[T];
