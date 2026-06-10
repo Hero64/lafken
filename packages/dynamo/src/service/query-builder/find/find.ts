@@ -34,7 +34,7 @@ export class FindBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
     let filterExpression: string | undefined;
     if (filter) {
       const expression = this.getFilterExpression(filter || {});
-      filterExpression = expression;
+      filterExpression = expression || undefined;
     }
 
     this.command = {

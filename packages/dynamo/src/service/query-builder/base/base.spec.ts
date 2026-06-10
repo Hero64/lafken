@@ -241,6 +241,56 @@ describe('Query builder base', () => {
         '#age BETWEEN :age_1_0_0 and :age_1_0_1 and contains(#email, :email_1_1) and (#name in (:name_2_0_0,:name_2_0_1,:name_2_0_2) or attribute_not_exists(#other))'
       );
     });
+
+    it('should omit attributes whose value is undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            name: undefined,
+            age: { notEqual: undefined },
+            email: {
+              contains: '@gmail.com',
+            },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('contains(#email, :email_1_1)');
+    });
+
+    it('should omit a nested filter group when all of its attributes are undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            address: {
+              city: undefined,
+            },
+            email: {
+              contains: '@gmail.com',
+            },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('contains(#email, :email_1_1)');
+      expect(qb.getQueryFilter()).not.toContain('#address');
+    });
+
+    it('should return an empty expression when all attributes are undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            name: undefined,
+            age: { notEqual: undefined },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('');
+    });
   });
 
   describe('Attribute and Names', () => {
