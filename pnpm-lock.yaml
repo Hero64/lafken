@@ -99,6 +99,9 @@ importers:
       '@lafken/resolver':
         specifier: workspace:*
         version: link:../resolver
+      '@types/aws-lambda':
+        specifier: ^8.10.161
+        version: 8.10.161
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -115,9 +118,6 @@ importers:
       '@swc/helpers':
         specifier: ^0.5.23
         version: 0.5.23
-      '@types/aws-lambda':
-        specifier: ^8.10.161
-        version: 8.10.161
       '@vitest/runner':
         specifier: ^4.1.8
         version: 4.1.8
