@@ -1,6 +1,6 @@
 {
   "name": "@lafken/api",
-  "version": "0.12.16",
+  "version": "0.12.17",
   "private": false,
   "description": "Define AWS REST APIs using TypeScript decorators - declarative, type-safe infrastructure for API Gateway",
   "keywords": [
@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
+    "@types/aws-lambda": "^8.10.161",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
@@ -65,7 +66,6 @@
     "@lafken/common": "workspace:*",
     "@swc/core": "^1.15.40",
     "@swc/helpers": "^0.5.23",
-    "@types/aws-lambda": "^8.10.161",
     "@vitest/runner": "^4.1.8",
     "cdktn": "^0.23.2",
     "cdktn-vitest": "^1.0.0",
