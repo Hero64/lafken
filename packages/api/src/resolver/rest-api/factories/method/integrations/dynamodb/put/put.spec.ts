@@ -103,7 +103,7 @@ describe('Dynamo put integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Item": { "foo": { "S": "bar" },"bar": { "S": "foo" },"list": { "L": [{ "N": "1" },{ "N": "2" },{ "N": "3" },{ "N": "4" },{ "N": "5" }] },"user": { "M": { "name": { "S": "test" },"isAdmin": { "BOOL": true },"address": { "L": [{ "M": { "city": { "S": "springfield" } } }] } } } }}',
+          '{"TableName": "test","Item": { #set($comma = "") $comma"foo": { "S": "bar" } #set($comma = ",")$comma"bar": { "S": "foo" } #set($comma = ",")$comma"list": { "L": [{ "N": "1" },{ "N": "2" },{ "N": "3" },{ "N": "4" },{ "N": "5" }] } #set($comma = ",")$comma"user": { "M": { #set($comma = "") $comma"name": { "S": "test" } #set($comma = ",")$comma"isAdmin": { "BOOL": true } #set($comma = ",")$comma"address": { "L": [{ "M": { #set($comma = "") $comma"city": { "S": "springfield" } #set($comma = ",") } }] } #set($comma = ",") } } #set($comma = ",") }}',
       },
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:dynamodb:action/PutItem',
     });
@@ -160,7 +160,7 @@ describe('Dynamo put integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "${aws_dynamodb_table.test.id}","Item": { "name": { "S": "foo" },"date": { "S": "$context.requestTimeEpoch" } }}',
+          '{"TableName": "${aws_dynamodb_table.test.id}","Item": { #set($comma = "") $comma"name": { "S": "foo" } #set($comma = ",")$comma"date": { "S": "$context.requestTimeEpoch" } #set($comma = ",") }}',
       },
     });
   });
