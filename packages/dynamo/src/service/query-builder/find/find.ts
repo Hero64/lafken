@@ -47,7 +47,7 @@ export class FindBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
         : undefined,
       Limit: limit,
       ScanIndexForward: sortDirection === 'asc',
-      ProjectionExpression: projection === 'ALL' ? undefined : projection.join(', '),
+      ProjectionExpression: this.getProjectionExpression(projection),
       ...this.getAttributesAndNames(),
     };
   }

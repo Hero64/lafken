@@ -606,7 +606,8 @@ describe('Dynamo Service', () => {
         dynamoClient.commandCalls(GetItemCommand, {
           TableName: 'users',
           Key: { email: { S: 'example1@example.com' }, name: { S: 'example1' } },
-          ProjectionExpression: 'email, age',
+          ProjectionExpression: '#email, #age',
+          ExpressionAttributeNames: { '#email': 'email', '#age': 'age' },
         })
       ).toHaveLength(1);
     });
@@ -691,7 +692,8 @@ describe('Dynamo Service', () => {
           RequestItems: {
             users: {
               Keys: [{ email: { S: 'example1@example.com' }, name: { S: 'example1' } }],
-              ProjectionExpression: 'email, age',
+              ProjectionExpression: '#email, #age',
+              ExpressionAttributeNames: { '#email': 'email', '#age': 'age' },
             },
           },
         })

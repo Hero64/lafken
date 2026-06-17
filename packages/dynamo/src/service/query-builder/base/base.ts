@@ -206,6 +206,20 @@ export class QueryBuilderBase<E extends ClassResource> {
     return filterExpression.join(` ${union} `);
   }
 
+  protected getProjectionExpression(projection?: (string | number | symbol)[] | 'ALL') {
+    if (!projection || projection === 'ALL') {
+      return undefined;
+    }
+
+    return projection
+      .map((attribute) => {
+        const name = String(attribute);
+        this.attributeNames[`#${name}`] = name;
+        return `#${name}`;
+      })
+      .join(', ');
+  }
+
   protected getAttributesAndNames() {
     return {
       ExpressionAttributeNames:
