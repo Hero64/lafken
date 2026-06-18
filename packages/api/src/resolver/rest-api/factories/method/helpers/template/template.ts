@@ -197,6 +197,9 @@ export class TemplateHelper {
     let comma = '';
     if (type === 'Object') {
       for (const objectKey in value) {
+        const { field: propertyField, path: propertyPath } = resolveValue(
+          value[objectKey]
+        );
         const fieldTemplate = this.generateTemplateByObject(
           {
             value: value[objectKey],
@@ -207,10 +210,20 @@ export class TemplateHelper {
           },
           false
         );
-        template += `${comma}${quoteType}${objectKey}${quoteType}: ${fieldTemplate}`;
-        comma = ',';
+        const key = `${quoteType}${objectKey}${quoteType}`;
+        const propertyTemplate = `$comma${key}: ${fieldTemplate} #set($comma = ",")`;
+
+        template +=
+          propertyField && propertyField.required === false
+            ? this.validateTemplateArgument(
+                [propertyPath as string],
+                propertyField,
+                propertyTemplate,
+                true
+              )
+            : propertyTemplate;
       }
-      template = `{ ${template} }`;
+      template = `{ #set($comma = "") ${template} }`;
 
       return parseObjectValue(template, type, isRoot, false);
     }
