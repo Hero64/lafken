@@ -316,13 +316,29 @@ export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps 
   action: KinesisIntegrationActions;
 }
 
+export interface MockIntegrationServiceProps extends ApiIntegrationBaseProps {
+  /**
+   * Method integration type.
+   *
+   * Indicates whether this API method will use a direct AWS service
+   * integration to respond. If this property is not set, the method
+   * will use the Lambda function directly as its backend.
+   *
+   * The `'mock'` integration does not call any backend. Instead, the
+   * value returned by the method is transformed into the response
+   * template that API Gateway returns directly.
+   */
+  integration: 'mock';
+}
+
 export type ApiLambdaProps =
   | ApiLambdaIntegrationProps
   | BucketIntegrationServiceProps
   | StateMachineIntegrationServiceProps
   | DynamoDbIntegrationServiceProps
   | QueueIntegrationServiceProps
-  | KinesisIntegrationServiceProps;
+  | KinesisIntegrationServiceProps
+  | MockIntegrationServiceProps;
 
 export interface ApiProps extends ResourceProps {
   /**

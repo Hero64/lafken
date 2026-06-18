@@ -31,7 +31,7 @@ const createMethodDecorator = (method: Method) =>
       let action: string | undefined;
       let additionalServices: ServicesValues | undefined;
       if (params.integration) {
-        action = params.action;
+        action = 'action' in params ? params.action : undefined;
         additionalServices = params.additionalServices;
       }
 

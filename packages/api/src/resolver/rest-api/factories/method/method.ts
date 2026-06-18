@@ -14,6 +14,7 @@ import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
 import type { Integration, IntegrationProps } from './integrations/integration.types';
 import { KinesisIntegration } from './integrations/kinesis/kinesis';
 import { LambdaIntegration } from './integrations/lambda/lambda';
+import { MockIntegration } from './integrations/mock/mock';
 import { QueueIntegration } from './integrations/queue/queue';
 import { BucketIntegration } from './integrations/s3/bucket';
 import { StateMachineIntegration } from './integrations/state-machine/state-machine';
@@ -152,6 +153,10 @@ export class MethodFactory {
       }
       case 'dynamodb': {
         integration = new DynamoDbIntegration(props);
+        break;
+      }
+      case 'mock': {
+        integration = new MockIntegration(props);
         break;
       }
       default: {
