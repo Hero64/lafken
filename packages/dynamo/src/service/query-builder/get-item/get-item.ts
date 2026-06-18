@@ -43,14 +43,16 @@ export class GetItemBuilder<E extends ClassResource> extends QueryBuilderBase<E>
   protected prepare() {
     const { consistentRead, projection } = this.queryOptions.options ?? {};
 
+    const projectionExpression = this.getProjectionExpression(projection);
+
     this.command = {
       TableName: this.queryOptions.modelProps.name,
       Key: marshall(this.queryOptions.key as Record<string, string>, {
         removeUndefinedValues: true,
       }),
       ConsistentRead: consistentRead,
-      ProjectionExpression:
-        projection && projection !== 'ALL' ? projection.join(', ') : undefined,
+      ProjectionExpression: projectionExpression,
+      ExpressionAttributeNames: projectionExpression ? this.attributeNames : undefined,
     };
   }
 }

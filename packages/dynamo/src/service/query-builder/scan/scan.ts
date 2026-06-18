@@ -43,7 +43,7 @@ export class ScanBuilder<E extends ClassResource> extends QueryBuilderBase<E> {
         ? marshall(cursor, { removeUndefinedValues: true })
         : undefined,
       Limit: limit,
-      ProjectionExpression: projection === 'ALL' ? undefined : projection.join(', '),
+      ProjectionExpression: this.getProjectionExpression(projection),
       ...this.getAttributesAndNames(),
     };
   }

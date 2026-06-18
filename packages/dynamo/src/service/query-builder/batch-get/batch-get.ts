@@ -59,8 +59,7 @@ export class BatchGetBuilder<E extends ClassResource> extends QueryBuilderBase<E
 
   protected prepare() {
     const { consistentRead, projection } = this.queryOptions.options ?? {};
-    const projectionExpression =
-      projection && projection !== 'ALL' ? projection.join(', ') : undefined;
+    const projectionExpression = this.getProjectionExpression(projection);
 
     const chunkedKeys = this.chunkKeys(this.queryOptions.keys, 100);
 
@@ -73,6 +72,9 @@ export class BatchGetBuilder<E extends ClassResource> extends QueryBuilderBase<E
             ),
             ConsistentRead: consistentRead,
             ProjectionExpression: projectionExpression,
+            ExpressionAttributeNames: projectionExpression
+              ? this.attributeNames
+              : undefined,
           },
         },
       });
