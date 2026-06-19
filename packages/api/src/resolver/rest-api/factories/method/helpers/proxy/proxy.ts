@@ -21,6 +21,10 @@ export class ProxyHelper {
           return true;
         }
 
+        if (prop === 'then') {
+          return undefined;
+        }
+
         const newPath = path ? `${path}.${prop}` : prop;
         return this.createEvent(newPath);
       },
