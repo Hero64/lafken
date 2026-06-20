@@ -49,10 +49,24 @@ describe('Handler', () => {
     namedHandler() {}
 
     @HandlerDecorator({
-      invocator: { principalRole: 'lambda.amazonaws.com' },
+      invoke: {
+        role: { principal: 'lambda.amazonaws.com', ref: 'serviceHandlerRole' },
+      },
       ref: 'serviceHandler',
     })
     serviceHandler() {}
+
+    @HandlerDecorator({
+      invoke: {
+        permission: {
+          principal: 'apigateway.amazonaws.com',
+          sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+          sourceAccount: '123456789012',
+        },
+      },
+      ref: 'permissionHandler',
+    })
+    permissionHandler() {}
   }
 
   const metadata: ResourceMetadata = getResourceMetadata(TestStandalone);
@@ -64,6 +78,9 @@ describe('Handler', () => {
   ) as HandlerMetadata;
   const serviceHandlerMeta = handlers.find(
     (h) => h.name === 'serviceHandler'
+  ) as HandlerMetadata;
+  const permissionHandlerMeta = handlers.find(
+    (h) => h.name === 'permissionHandler'
   ) as HandlerMetadata;
 
   it('should register itself globally', () => {
@@ -94,7 +111,7 @@ describe('Handler', () => {
     );
   });
 
-  it('should not create a role when invocatorService is not provided', () => {
+  it('should not create a role when invoke.role is not provided', () => {
     const { module } = setupTestingStackWithModule();
 
     new Handler(module, 'myHandler-TestStandalone', {
@@ -105,7 +122,7 @@ describe('Handler', () => {
     expect(Role).not.toHaveBeenCalled();
   });
 
-  it('should register the invoke role globally', () => {
+  it('should register the invoke role under invoke.role.ref', () => {
     const { module } = setupTestingStackWithModule();
 
     new Handler(module, 'serviceHandler-TestStandalone', {
@@ -114,7 +131,26 @@ describe('Handler', () => {
     });
 
     const roleInstance = vi.mocked(Role).mock.results[0].value;
-    expect(roleInstance.register).toHaveBeenCalledWith('lambda', 'serviceHandler');
+    expect(roleInstance.register).toHaveBeenCalledWith('lambda', 'serviceHandlerRole');
+  });
+
+  it('should forward invoke.permission to the LambdaHandler', () => {
+    const { module } = setupTestingStackWithModule();
+
+    new Handler(module, 'permissionHandler-TestStandalone', {
+      handlerMetadata: permissionHandlerMeta,
+      resourceMetadata: metadata,
+    });
+
+    expect(LambdaHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      'permissionHandler-TestStandalone',
+      expect.objectContaining({
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: expect.any(Function),
+        sourceAccount: '123456789012',
+      })
+    );
   });
 
   it('should include the contextCreator in the role name', () => {

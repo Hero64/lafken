@@ -70,35 +70,51 @@ By default the method name is used as the Lambda handler identifier. Override it
 handlePayment() { }
 ```
 
-### Invoke Role
+### Invoke
 
-Configure an IAM role that grants another principal permission to invoke the Lambda. When `invocator` is provided, a dedicated invoke role is created and attached to the function:
+Configure how other principals are allowed to invoke the Lambda through the `invoke` option. It supports two complementary mechanisms:
+
+- `permission` — grants a service principal direct invoke permission via a resource-based policy (`aws lambda add-permission`). This is the usual mechanism for push-based invokers such as API Gateway, EventBridge or SNS.
+- `role` — creates a dedicated IAM role another principal can assume to obtain `lambda:InvokeFunction` on this function (caller-side, identity-based access such as API Gateway integration credentials or cross-account calls).
 
 ```typescript
 @Handler({
-  invocator: {
-    principalRole: 'apigateway.amazonaws.com',
-    services: [
-      {
-        type: 'execute-api',
-        permissions: ['Invoke'],
-        resources: ['*'],
-      },
-    ],
-    roleRef: 'processOrderInvokeRole',
+  invoke: {
+    permission: {
+      principal: 'apigateway.amazonaws.com',
+      sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+    },
+    role: {
+      principal: 'apigateway.amazonaws.com',
+      services: [
+        {
+          type: 'lambda',
+          permissions: ['InvokeFunction'],
+          resources: ['*'],
+        },
+      ],
+      ref: 'processOrderInvokeRole',
+    },
   },
 })
 processOrder() { }
 ```
 
-#### Invocator Options
+#### `invoke.permission` Options
 
-| Option               | Type             | Description                                                                 |
-| -------------------- | ---------------- | --------------------------------------------------------------------------- |
-| `principalRole`      | `string`         | AWS service or account ARN allowed to assume the role                       |
-| `principalPermission`| `string`         | Permission level for the principal                                          |
-| `services`           | `ServicesValues` | Additional IAM policy statements to include in the role                     |
-| `roleRef`            | `string`         | Name to register the created role as a global reference                     |
+| Option          | Type                                          | Description                                                                 |
+| --------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| `principal`     | `string`                                      | Service principal allowed to invoke the function (e.g. `apigateway.amazonaws.com`) |
+| `sourceArn`     | `string \| ((props) => string)`               | Restricts invocation to a specific source ARN. A callback can reference another resource's ARN |
+| `sourceAccount` | `string`                                      | Restricts invocation to a specific source AWS account                       |
+
+#### `invoke.role` Options
+
+| Option      | Type             | Description                                                  |
+| ----------- | ---------------- | ---------------------------------------------------------- |
+| `principal` | `string`         | Trust principal allowed to assume the invoke role          |
+| `services`  | `ServicesValues` | Additional IAM policy statements to attach to the role     |
+| `ref`       | `string`         | Name to register the created role as a global reference    |
 
 ### Global References
 
@@ -139,17 +155,23 @@ import { Standalone, Handler } from '@lafken/standalone/main';
 export class PaymentFunctions {
   @Handler({
     name: 'process-payment',
+    description: 'Processes a payment request',
     ref: 'processPaymentLambda',
-    invocator: {
-      principalRole: 'apigateway.amazonaws.com',
-      services: [
-        {
-          type: 'execute-api',
-          permissions: ['Invoke'],
-          resources: ['*'],
-        },
-      ],
-      roleRef: 'processPaymentInvokeRole',
+    invoke: {
+      permission: {
+        principal: 'apigateway.amazonaws.com',
+      },
+      role: {
+        principal: 'apigateway.amazonaws.com',
+        services: [
+          {
+            type: 'lambda',
+            permissions: ['InvokeFunction'],
+            resources: ['*'],
+          },
+        ],
+        ref: 'processPaymentInvokeRole',
+      },
     },
     lambda: {
       timeout: 30,
