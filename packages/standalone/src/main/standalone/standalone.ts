@@ -32,13 +32,19 @@ export const Standalone = createResourceDecorator({
  * myHandler() {}
  *
  * @example
- * // Custom name + invoke role for API Gateway
+ * // Custom name + invoke permission for API Gateway
  * @Handler({
  *   name: 'my-handler',
- *   invocator: {
- *     principal: 'apigateway.amazonaws.com',
- *     services: (props) => [{ type: 'execute-api', permissions: ['Invoke'], resources: [props.arn] }],
- *     roleRef: 'myHandlerInvokeRole',
+ *   invoke: {
+ *     permission: {
+ *       principal: 'apigateway.amazonaws.com',
+ *       sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+ *     },
+ *     role: {
+ *       principal: 'apigateway.amazonaws.com',
+ *       services: [{ type: 'lambda', permissions: ['InvokeFunction'], resources: ['*'] }],
+ *       ref: 'myHandlerInvokeRole',
+ *     },
  *   },
  *   ref: 'myHandler',
  * })

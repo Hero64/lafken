@@ -18,7 +18,12 @@ import {
 import { dependable } from 'cdktn';
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
-import { getAppContext, getExternalValues, getModuleContext } from '../../utils';
+import {
+  getAppContext,
+  getExternalValues,
+  getModuleContext,
+  resolveCallbackResource,
+} from '../../utils';
 import { Environment } from '../environment/environment';
 import { ResourceOutput } from '../output/output';
 import { lafkenResource } from '../resource';
@@ -181,14 +186,33 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       return;
     }
 
-    new LambdaPermission(this, 'permission', {
+    const sourceArn =
+      typeof props.sourceArn === 'function'
+        ? resolveCallbackResource(this, props.sourceArn)
+        : props.sourceArn;
+
+    const permission = new LambdaPermission(this, 'permission', {
       functionName: name,
       action: 'lambda:InvokeFunction',
       principal: props.principal,
-      sourceArn: props.sourceArn,
+      sourceArn: sourceArn || undefined,
       sourceAccount: props.sourceAccount,
       dependsOn: [this],
     });
+
+    if (typeof props.sourceArn === 'function' && !sourceArn) {
+      const sourceArnCallback = props.sourceArn;
+
+      this.onResolve(() => {
+        const resolved = resolveCallbackResource(this, sourceArnCallback);
+
+        if (!resolved) {
+          throw new Error('sourceArn not found, please check the resource ref');
+        }
+
+        permission.sourceArn = resolved;
+      });
+    }
   }
 
   private addAlias(functionName: string, aliasConfig?: AliasConfig) {

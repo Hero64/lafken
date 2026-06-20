@@ -1,4 +1,5 @@
 import type {
+  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   ResourceMetadata,
@@ -25,7 +26,7 @@ export interface LambdaHandlerProps
   filename: string;
   suffix?: string;
   principal?: string;
-  sourceArn?: string;
+  sourceArn?: string | ((props: GetResourceProps) => string);
   sourceAccount?: string;
 }
 

@@ -412,6 +412,46 @@ export interface GetResourceProps {
    * unresolved token values.
    */
   token: TerraformToken;
+
+  /**
+   * AWS account ID where the stack is being deployed, resolved at deployment
+   * time from the caller credentials (e.g. `'123456789012'`).
+   *
+   * Useful for building ARNs or scoping resource access to the current account.
+   *
+   * @example
+   * // Compose an ARN with the current account
+   * fn.format('arn:%s:iam::%s:role/my-role', [partition, accountId])
+   */
+  accountId: string;
+
+  /**
+   * ARN associated with the caller credentials used during deployment.
+   */
+  callerArn: string;
+
+  /**
+   * AWS region name where the stack is being deployed (e.g. `'us-east-1'`).
+   *
+   * Useful for region-specific configuration or building region-aware ARNs.
+   */
+  region: string;
+
+  /**
+   * AWS partition the stack is deployed in (e.g. `'aws'`, `'aws-cn'`,
+   * `'aws-us-gov'`).
+   *
+   * Required for building ARNs that work across standard, China, and GovCloud
+   * partitions.
+   */
+  partition: string;
+
+  /**
+   * Base DNS domain for the current AWS partition (e.g. `'amazonaws.com'`).
+   *
+   * Useful for building service endpoints that differ across partitions.
+   */
+  dnsSuffix: string;
 }
 
 export type GetExternalValues = Omit<GetResourceProps, 'getResourceValue'>;
