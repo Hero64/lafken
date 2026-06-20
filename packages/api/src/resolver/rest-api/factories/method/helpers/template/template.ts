@@ -176,7 +176,7 @@ export class TemplateHelper {
     if (field) {
       const fieldTemplate = this.generateTemplate({
         field: field,
-        currentValue: path,
+        currentValue: field.name || path,
         quoteType,
         ...templateOptions,
       });

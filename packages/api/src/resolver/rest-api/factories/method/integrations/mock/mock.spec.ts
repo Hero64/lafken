@@ -9,6 +9,7 @@ import {
   ApiRequest,
   ApiResponse,
   BodyParam,
+  ContextParam,
   Event,
   Get,
   Post,
@@ -41,6 +42,15 @@ describe('Mock integration', () => {
     maybe: string;
   }
 
+  @ApiRequest()
+  class ContextMockRequest {
+    @ContextParam({ name: 'authorizer.email' })
+    email: string;
+
+    @QueryParam({ name: 'page-number' })
+    page: string;
+  }
+
   @ApiResponse({ defaultCode: 202 })
   class CustomMockResponse {
     @ResField()
@@ -68,6 +78,24 @@ describe('Mock integration', () => {
         foo: 'foo',
         other: e.other,
         name: e.name,
+      };
+    }
+
+    @Post({
+      integration: 'mock',
+    })
+    mockReturnEvent(@Event(MockRequest) e: MockRequest) {
+      return e;
+    }
+
+    @Post({
+      integration: 'mock',
+    })
+    mockWithContext(@Event(ContextMockRequest) e: ContextMockRequest) {
+      return {
+        foo: 'foo',
+        email: e.email,
+        page: e.page,
       };
     }
 
@@ -145,6 +173,22 @@ describe('Mock integration', () => {
     });
   });
 
+  it('should resolve params using their configured name instead of the property name', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, TestingApi, 'mockWithContext');
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '201',
+      response_templates: {
+        'application/json':
+          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"email": "$context.authorizer.email" #set($comma = ",")$comma"page": "$input.params(\'page-number\')" #set($comma = ",") }',
+      },
+    });
+  });
+
   it('should use the status code defined in the response model', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();
 
@@ -168,6 +212,22 @@ describe('Mock integration', () => {
       response_templates: {
         'application/json': '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",") }',
       },
+    });
+  });
+
+  it('should resolve a mock that returns the event directly', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, TestingApi, 'mockReturnEvent');
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
+      type: 'MOCK',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '201',
     });
   });
 
