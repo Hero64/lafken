@@ -22,8 +22,11 @@ export class Handler extends GlobalLambdaHandler {
       foldername: resourceMetadata.foldername,
       name: handlerMetadata.name,
       originalName: resourceMetadata.originalName,
+      description: handlerMetadata.description,
       lambda: handlerMetadata.lambda,
-      principal: handlerMetadata?.invocator?.principalPermission,
+      principal: handlerMetadata.invoke?.permission?.principal,
+      sourceArn: handlerMetadata.invoke?.permission?.sourceArn,
+      sourceAccount: handlerMetadata.invoke?.permission?.sourceAccount,
     });
 
     this.createInvokeRole(id);
@@ -34,23 +37,21 @@ export class Handler extends GlobalLambdaHandler {
   }
 
   private createInvokeRole(id: string) {
-    const { invocator = {} } = this.props.handlerMetadata;
-    const { principalPermission: _exclude, ...rolePermissions } = invocator;
+    const { role } = this.props.handlerMetadata.invoke ?? {};
 
-    if (Object.values(rolePermissions).length === 0) {
+    if (!role) {
       return;
     }
 
     const appContext = getAppContext(this);
 
-    const role = new Role(this, 'handler-role', {
+    const invokeRole = new Role(this, 'handler-role', {
       name: `${appContext.contextCreator}-${id.toLocaleLowerCase()}-invoke-role`,
-      principal: rolePermissions.principalRole,
+      principal: role.principal,
       services: (props) => [
-        ...(Array.isArray(rolePermissions.services) ||
-        rolePermissions.services === undefined
-          ? rolePermissions.services || []
-          : rolePermissions.services(props)),
+        ...(Array.isArray(role.services) || role.services === undefined
+          ? role.services || []
+          : role.services(props)),
         {
           type: 'lambda',
           permissions: ['InvokeFunction'],
@@ -59,8 +60,8 @@ export class Handler extends GlobalLambdaHandler {
       ],
     });
 
-    if (this.props.handlerMetadata.ref) {
-      role.register('lambda', this.props.handlerMetadata.ref);
+    if (role.ref) {
+      invokeRole.register('lambda', role.ref);
     }
   }
 }

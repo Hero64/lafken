@@ -2,6 +2,7 @@ import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
+import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
 import { type TerraformStack, Testing } from 'cdktn';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -373,5 +374,58 @@ describe('Lambda handler', () => {
 
     const parsed = JSON.parse(synthesized);
     expect(parsed.resource.aws_lambda_provisioned_concurrency_config).toBeUndefined();
+  });
+
+  it('should create an invoke permission with a static source arn', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      bundler: { minify: false },
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      principal: 'apigateway.amazonaws.com',
+      sourceArn: 'arn:aws:execute-api:us-east-1:123456789012:abc/*',
+      sourceAccount: '123456789012',
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(LambdaPermission, {
+      action: 'lambda:InvokeFunction',
+      principal: 'apigateway.amazonaws.com',
+      source_arn: 'arn:aws:execute-api:us-east-1:123456789012:abc/*',
+      source_account: '123456789012',
+    });
+  });
+
+  it('should resolve a source arn provided as a callback', () => {
+    lambdaAssets.initializeMetadata({
+      foldername: '/temp',
+      filename: 'index',
+      className: 'Testing',
+      methods: ['foo', 'bar'],
+      bundler: { minify: false },
+    });
+    new LambdaHandler(stack, 'test', {
+      filename: 'index',
+      name: 'lambda-test',
+      foldername: '/temp',
+      originalName: 'test',
+      principal: 'apigateway.amazonaws.com',
+      sourceArn: ({ getSSMValue }) => getSSMValue('/api/source-arn'),
+    });
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+    const permission = Object.values(parsed.resource.aws_lambda_permission)[0] as any;
+
+    expect(permission.principal).toBe('apigateway.amazonaws.com');
+    expect(permission.source_arn).toContain('aws_ssm_parameter');
   });
 });
