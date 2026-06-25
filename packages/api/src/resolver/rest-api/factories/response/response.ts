@@ -60,7 +60,7 @@ export class ResponseFactory {
                 'application/json': response.template,
               }
             : undefined,
-          dependsOn: [integration],
+          dependsOn: [integration, methodResponse],
         }
       );
 
