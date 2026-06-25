@@ -1,6 +1,6 @@
 {
   "name": "@lafken/common",
-  "version": "0.12.24",
+  "version": "0.12.25",
   "private": false,
   "description": "Lafken utilities - TypeScript decorator factories and metadata reflection for infrastructure-as-code decorators",
   "keywords": [
