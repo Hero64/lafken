@@ -31,7 +31,17 @@ export class Cron extends lafkenResource.make(SchedulerSchedule) {
     super(scope, `${handler.name}-cron`, {
       name: handler.name,
       scheduleExpression: Cron.buildScheduleExpression(handler.schedule),
-      flexibleTimeWindow: { mode: 'OFF' },
+      scheduleExpressionTimezone: handler.timezone,
+      description: handler.description,
+      state: handler.state?.toUpperCase(),
+      startDate: handler.startDate,
+      endDate: handler.endDate,
+      flexibleTimeWindow: handler.flexibleWindowMinutes
+        ? {
+            mode: 'FLEXIBLE',
+            maximumWindowInMinutes: handler.flexibleWindowMinutes,
+          }
+        : { mode: 'OFF' },
       target: {
         arn: lambdaHandler.arn,
         roleArn: schedulerRole.arn,
