@@ -53,6 +53,63 @@ export interface EventCronProps {
    */
   schedule: string | ScheduleTime;
   /**
+   * Timezone in which the schedule expression is evaluated.
+   *
+   * Accepts an IANA timezone name (e.g. `'America/Santiago'`, `'UTC'`).
+   * If omitted, the schedule is evaluated in UTC.
+   *
+   * Maps to the `scheduleExpressionTimezone` attribute of the EventBridge
+   * Scheduler resource. Note that the timezone is independent from the cron
+   * expression itself.
+   *
+   * @example
+   * timezone: 'America/Santiago'
+   */
+  timezone?: string;
+  /**
+   * Human-readable description of the schedule.
+   *
+   * Useful for documentation purposes; shown in the AWS console.
+   */
+  description?: string;
+  /**
+   * State of the schedule.
+   *
+   * Allows pausing the schedule without deleting it:
+   * - `'enabled'` (default): the schedule is active.
+   * - `'disabled'`: the schedule will not trigger its target.
+   */
+  state?: 'enabled' | 'disabled';
+  /**
+   * Date and time, in ISO 8601 format, after which the schedule can begin
+   * invoking its target.
+   *
+   * @example
+   * startDate: '2026-07-01T00:00:00Z'
+   */
+  startDate?: string;
+  /**
+   * Date and time, in ISO 8601 format, before which the schedule can invoke
+   * its target. After this point the schedule stops triggering.
+   *
+   * @example
+   * endDate: '2026-12-31T23:59:59Z'
+   */
+  endDate?: string;
+  /**
+   * Maximum flexible time window, in minutes, within which the schedule can be
+   * invoked.
+   *
+   * When provided, the schedule runs in `FLEXIBLE` mode and EventBridge may
+   * invoke the target at any point inside this window (useful to spread load
+   * and avoid thundering-herd effects). If omitted, the schedule runs in `OFF`
+   * mode and triggers at the exact scheduled time.
+   *
+   * @example
+   * flexibleWindowMinutes: 15
+   */
+  flexibleWindowMinutes?: number;
+  /**
    * Defines which EventBridge Scheduler attributes should be exported.
    *
    * Supported attributes are based on Terraform `aws_scheduler_schedule`
