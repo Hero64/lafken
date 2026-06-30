@@ -7,11 +7,11 @@ import type {
 type ScheduleExpressions = number | '*' | '?' | (string & {});
 
 /**
- * Attributes that can be exported from an EventBridge schedule rule resource.
+ * Attributes that can be exported from an EventBridge Scheduler resource.
  *
- * Based on Terraform `aws_cloudwatch_event_rule` attribute reference:
- * - `arn`: The Amazon Resource Name (ARN) of the rule.
- * - `id`: The name of the rule.
+ * Based on Terraform `aws_scheduler_schedule` attribute reference:
+ * - `arn`: The Amazon Resource Name (ARN) of the schedule.
+ * - `id`: The name of the schedule.
  */
 export type ScheduleOutputAttributes = 'arn' | 'id';
 
@@ -53,12 +53,12 @@ export interface EventCronProps {
    */
   schedule: string | ScheduleTime;
   /**
-   * Defines which EventBridge schedule rule attributes should be exported.
+   * Defines which EventBridge Scheduler attributes should be exported.
    *
-   * Supported attributes are based on Terraform `aws_cloudwatch_event_rule`
+   * Supported attributes are based on Terraform `aws_scheduler_schedule`
    * attribute reference:
-   * - `arn`: The Amazon Resource Name (ARN) of the rule.
-   * - `id`: The name of the rule.
+   * - `arn`: The Amazon Resource Name (ARN) of the schedule.
+   * - `id`: The name of the schedule.
    *
    * Each selected attribute can be exported through SSM Parameter Store (`type: 'ssm'`)
    * or Terraform outputs (`type: 'output'`).

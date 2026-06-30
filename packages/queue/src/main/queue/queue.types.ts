@@ -1,4 +1,5 @@
 import type {
+  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   QueueNames,
@@ -27,7 +28,38 @@ export interface DlqProps {
   retentionPeriod?: number;
 }
 
-export interface StandardProps {
+export interface SourceMappingProps {
+  /**
+   * Maximum number of messages to retrieve in a single batch.
+   *
+   * Only applicable when consuming messages with a Lambda or batch processor.
+   */
+  batchSize?: number;
+  /**
+   * Maximum batching window in seconds.
+   *
+   * Defines the maximum amount of time to gather messages into a batch
+   * before sending them to the consumer.
+   */
+  maxBatchingWindow?: number;
+  /**
+   * Maximum concurrency for Lambda consumers.
+   *
+   * Specifies the maximum number of Lambda functions that
+   * can process messages from the queue concurrently.
+   */
+  maxConcurrency?: number;
+}
+
+export interface InternalStandardProps extends SourceMappingProps {
+  /**
+   * Marks the queue as an external resource.
+   *
+   * When set to `true`, the SQS queue is not created by the framework.
+   * Instead, it references an existing queue by `queueName`. The Lambda
+   * handler and event source mapping are still created.
+   */
+  isExternal?: false;
   /**
    * Delivery delay in seconds.
    *
@@ -56,27 +88,6 @@ export interface StandardProps {
    */
   visibilityTimeout?: number;
 
-  /**
-   * Maximum number of messages to retrieve in a single batch.
-   *
-   * Only applicable when consuming messages with a Lambda or batch processor.
-   */
-  batchSize?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  /**
-   * Maximum concurrency for Lambda consumers.
-   *
-   * Specifies the maximum number of Lambda functions that
-   * can process messages from the queue concurrently.
-   */
-  maxConcurrency?: number;
-
-  /**
-   * Maximum batching window in seconds.
-   *
-   * Defines the maximum amount of time to gather messages into a batch
-   * before sending them to the consumer.
-   */
-  maxBatchingWindow?: number;
   /**
    * Lambda configuration for processing messages from this queue.
    */
@@ -127,7 +138,26 @@ export interface StandardProps {
   dlq?: DlqProps;
 }
 
-export interface FifoProps extends StandardProps {
+export interface ExternalQueueProps extends SourceMappingProps {
+  /**
+   * Marks the queue as an external resource.
+   *
+   * When set to `true`, the SQS queue is not created by the framework.
+   * Instead, it references an existing queue by `queueName`. The Lambda
+   * handler and event source mapping are still created.
+   */
+  isExternal: true;
+  /**
+   *
+   */
+  queueName: string | ((props: GetResourceProps) => string);
+  /**
+   * Lambda configuration for processing messages from this queue.
+   */
+  lambda?: LambdaProps;
+}
+
+export interface InternalFifoProps extends InternalStandardProps {
   /**
    * Enable content-based deduplication.
    *
@@ -139,9 +169,13 @@ export interface FifoProps extends StandardProps {
   contentBasedDeduplication?: boolean;
 }
 
+export type StandardProps = InternalStandardProps | ExternalQueueProps;
+export type FifoProps = InternalFifoProps | ExternalQueueProps;
+
 export interface QueueLambdaMetadata
   extends LambdaMetadata,
-    Omit<FifoProps, 'queueName'> {
-  queueName: string;
+    Omit<InternalFifoProps, 'queueName' | 'isExternal'> {
+  queueName: ExternalQueueProps['queueName'];
   isFifo: boolean;
+  isExternal: boolean;
 }

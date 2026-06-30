@@ -275,9 +275,7 @@ describe('TemplateHelper', () => {
           currentValue: 'tags',
         } as any);
 
-        expect(result).toBe(
-          '[#foreach($item0 in $input.path(\'$.tags\')) "$item0" #if($foreach.hasNext),#end #end]'
-        );
+        expect(result).toBe(`$input.json('$.tags')`);
       });
 
       it('should generate template for array of objects', () => {
@@ -307,10 +305,7 @@ describe('TemplateHelper', () => {
           currentValue: 'users',
         } as any);
 
-        expect(result).toContain("[#foreach($item0 in $input.path('$.users'))");
-        expect(result).toContain('{ #set($comma = "")');
-        expect(result).toContain('"name": "$item0.name"');
-        expect(result).toContain('#if($foreach.hasNext),#end #end]');
+        expect(result).toBe(`$input.json('$.users')`);
       });
     });
 

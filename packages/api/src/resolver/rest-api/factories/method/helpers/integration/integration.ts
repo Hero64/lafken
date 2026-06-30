@@ -1,4 +1,5 @@
-import { ResolveResources, Role } from '@lafken/resolver';
+import { getExternalValues, ResolveResources, Role } from '@lafken/resolver';
+import type { Construct } from 'constructs';
 import type { ResponseArrayField, ResponseObjectMetadata } from '../../../../../../main';
 import type { ResponseHandler } from '../response/response.types';
 import type { ResponseTemplateHelper } from '../response-template/response-template';
@@ -24,7 +25,10 @@ export class IntegrationHelper {
     return role;
   }
 
-  public generateIntegrationOptions(module?: string): IntegrationOption {
+  public generateIntegrationOptions(
+    scope: Construct,
+    module?: string
+  ): IntegrationOption {
     const resolveResource = new ResolveResources();
 
     return {
@@ -40,6 +44,7 @@ export class IntegrationHelper {
         getCurrentDate() {
           return '$context.requestTimeEpoch';
         },
+        ...getExternalValues(scope),
       },
       resolveResource,
     };

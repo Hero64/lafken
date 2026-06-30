@@ -1,5 +1,4 @@
-import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
+import { SchedulerSchedule } from '@cdktn/provider-aws/lib/scheduler-schedule';
 import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
@@ -40,10 +39,10 @@ describe('Cron', () => {
   const metadata: ResourceMetadata = getResourceMetadata(TestEvent);
   const handlers = getResourceHandlerMetadata<EventCronMetadata>(TestEvent);
 
-  it('should create an eventbridge schedule', async () => {
+  it('should create an eventbridge scheduler schedule', async () => {
     const { stack, module } = setupTestingStackWithModule();
 
-    new CronResolver(module, 'cron', {
+    new CronResolver(module, 'cron-TestEvent', {
       handler: handlers[0],
       resourceMetadata: metadata,
     });
@@ -58,17 +57,17 @@ describe('Cron', () => {
         name: 'cron',
         foldername: metadata.foldername,
         suffix: 'event',
+        principal: 'scheduler.amazonaws.com',
       })
     );
 
-    expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+    expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
       name: 'cron',
       schedule_expression: 'cron(* 11 10 * ? *)',
-    });
-
-    expect(synthesized).toHaveResourceWithProperties(CloudwatchEventTarget, {
-      arn: 'test-function',
-      rule: '${aws_cloudwatch_event_rule.testing_cron-cron_3E870998.name}',
+      flexible_time_window: { mode: 'OFF' },
+      target: expect.objectContaining({
+        arn: 'test-function',
+      }),
     });
   });
 });

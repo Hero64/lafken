@@ -74,7 +74,7 @@ describe('Dynamo put integration', () => {
           name: 'foo',
           date: getCurrentDate(),
         },
-        tableName: getResourceValue('test', 'id'),
+        tableName: getResourceValue('dynamo::test', 'id'),
       };
     }
 

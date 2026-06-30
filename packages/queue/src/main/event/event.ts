@@ -46,12 +46,15 @@ export const Payload = createPayloadDecorator({
  * Property decorator that maps a class field to a value extracted
  * from an SQS message.
  *
- * By default the value is read from a **message attribute** whose name
- * matches the property. Set `source: 'body'` to extract it from the
- * message body instead, and optionally enable `parse: true` to
- * JSON-parse the body before extraction.
+ * - `source: 'attribute'` (default) — reads a **message attribute** whose
+ *   name matches the property (or the `name` option).
+ * - `source: 'body'` — reads from the raw message body string; set
+ *   `parse: true` to JSON-parse it and pick the matching key.
+ * - `source: 'record'` — reads a top-level SQS record field such as
+ *   `messageId`, `receiptHandle`, `awsRegion`, etc. The `name` option
+ *   can override which record field is read.
  *
- * @param props - Optional extraction configuration (source, type, parse).
+ * @param props - Optional extraction configuration (source, type, parse, name).
  *
  * @example
  * ```ts
@@ -62,6 +65,12 @@ export const Payload = createPayloadDecorator({
  *
  *   @Param({ source: 'body', parse: true })
  *   content: NotificationContent;
+ *
+ *   @Param({ source: 'record' })
+ *   messageId: string;
+ *
+ *   @Param({ source: 'record', name: 'messageId' })
+ *   sqsId: string;
  * }
  * ```
  */

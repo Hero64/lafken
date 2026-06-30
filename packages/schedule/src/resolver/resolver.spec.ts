@@ -1,5 +1,4 @@
-import { CloudwatchEventRule } from '@cdktn/provider-aws/lib/cloudwatch-event-rule';
-import { CloudwatchEventTarget } from '@cdktn/provider-aws/lib/cloudwatch-event-target';
+import { SchedulerSchedule } from '@cdktn/provider-aws/lib/scheduler-schedule';
 import { enableBuildEnvVariable } from '@lafken/common';
 import {
   type AppModule,
@@ -39,12 +38,13 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'dailyJob',
         schedule_expression: 'cron(0 12 * * ? *)',
-      });
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventTarget, {
-        arn: 'test-function',
+        flexible_time_window: { mode: 'OFF' },
+        target: expect.objectContaining({
+          arn: 'test-function',
+        }),
       });
     });
 
@@ -61,7 +61,7 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'morningJob',
         schedule_expression: 'cron(30 8 * * ? *)',
       });
@@ -80,7 +80,7 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'monthlyJob',
         schedule_expression: 'cron(0 0 1 * ? *)',
       });
@@ -99,7 +99,7 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'weeklyJob',
         schedule_expression: 'cron(0 9 ? * MON *)',
       });
@@ -121,11 +121,11 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'jobA',
         schedule_expression: 'cron(0 8 * * ? *)',
       });
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'jobB',
         schedule_expression: 'cron(0 20 * * ? *)',
       });
@@ -148,12 +148,13 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventTarget, {
-        arn: 'test-function',
-        retry_policy: {
-          maximum_retry_attempts: 3,
-          maximum_event_age_in_seconds: 7200,
-        },
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
+        target: expect.objectContaining({
+          retry_policy: {
+            maximum_retry_attempts: 3,
+            maximum_event_age_in_seconds: 7200,
+          },
+        }),
       });
     });
 
@@ -178,7 +179,7 @@ describe('schedule resolver', () => {
       resolver.create(module as unknown as AppModule, TestSchedule);
 
       const synthesized = Testing.synth(stack);
-      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+      expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
         name: 'specificJob',
         schedule_expression: 'cron(0 6 15 3 ? 2026)',
       });
@@ -205,7 +206,7 @@ describe('schedule resolver', () => {
           name: 'handler',
           schedule: '0 0 * * ? *',
           suffix: 'event',
-          principal: 'events.amazonaws.com',
+          principal: 'scheduler.amazonaws.com',
         })
       );
     });

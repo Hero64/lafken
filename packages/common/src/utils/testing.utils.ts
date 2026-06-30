@@ -6,14 +6,26 @@ import {
 import type { ClassResource } from '../types';
 import { isBuildEnvironment } from './build-env.utils';
 
-type InstanceMethod<
+export type InstanceMethod<
   T extends ClassResource,
   M extends keyof InstanceType<T>,
 > = InstanceType<T>[M] extends (...args: any[]) => any ? InstanceType<T>[M] : never;
 
-interface ExecuteLambdaProps<T extends ClassResource, M extends keyof InstanceType<T>> {
+export interface ExecuteLambdaProps<
+  T extends ClassResource,
+  M extends keyof InstanceType<T>,
+> {
   method: M;
   params?: Parameters<InstanceMethod<T, M>>;
+}
+
+export interface ExecuteLambdaWithEventProps<
+  T extends ClassResource,
+  M extends keyof InstanceType<T>,
+> {
+  method: M;
+  event: unknown;
+  context?: unknown;
 }
 
 export const executeLambda = async <
@@ -51,4 +63,24 @@ export const executeLambda = async <
   });
 
   return (instance as any)[methodName](event, context);
+};
+
+export const executeLambdaWithEvent = async <
+  T extends ClassResource,
+  M extends keyof InstanceType<T>,
+>(
+  classResource: T,
+  props: ExecuteLambdaWithEventProps<T, M>
+): Promise<Awaited<ReturnType<InstanceMethod<T, M>>>> => {
+  if (!isBuildEnvironment()) {
+    throw new Error(
+      'executeLambda: Build environment is not enabled. ' +
+        'Call enableBuildEnvVariable() before defining decorated classes.'
+    );
+  }
+
+  const instance = new classResource() as InstanceType<T>;
+  const methodName = props.method as string;
+
+  return (instance as any)[methodName](props.event, props.context);
 };

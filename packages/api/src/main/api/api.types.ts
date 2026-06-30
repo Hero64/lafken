@@ -297,12 +297,32 @@ export interface QueueIntegrationServiceProps extends ApiIntegrationBaseProps {
   action: QueueIntegrationActions;
 }
 
+export type KinesisIntegrationActions = 'PutRecord';
+
+export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps {
+  /**
+   * Method integration type.
+   *
+   * Indicates whether this API method will use a direct AWS service
+   * integration to respond without Lambda.
+   */
+  integration: 'kinesis';
+  /**
+   * Kinesis integration action.
+   *
+   * Currently the only supported action is:
+   * - `'PutRecord'` – puts a single record into the configured stream.
+   */
+  action: KinesisIntegrationActions;
+}
+
 export type ApiLambdaProps =
   | ApiLambdaIntegrationProps
   | BucketIntegrationServiceProps
   | StateMachineIntegrationServiceProps
   | DynamoDbIntegrationServiceProps
-  | QueueIntegrationServiceProps;
+  | QueueIntegrationServiceProps
+  | KinesisIntegrationServiceProps;
 
 export interface ApiProps extends ResourceProps {
   /**

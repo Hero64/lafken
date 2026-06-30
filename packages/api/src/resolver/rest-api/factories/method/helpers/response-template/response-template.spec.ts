@@ -194,7 +194,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"tags": [#foreach($item0 in $input.path('$.tags')) "$item0" #if($foreach.hasNext),#end #end] #set($comma = ",") }`
+        `{ #set($comma = "") $comma"tags": $input.json('$.tags') #set($comma = ",") }`
       );
     });
 
@@ -221,7 +221,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"items": [#foreach($item0 in $input.path('$.items')) { #set($comma = "") $comma"id": "$item0.id" #set($comma = ",")$comma"qty": $item0.qty #set($comma = ",") } #if($foreach.hasNext),#end #end] #set($comma = ",") }`
+        `{ #set($comma = "") $comma"items": $input.json('$.items') #set($comma = ",") }`
       );
     });
 
@@ -278,7 +278,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"users": [#foreach($item0 in $input.path('$.users')) { #set($comma = "") $comma"fullName": "$item.firstName $item.lastName" #set($comma = ",") } #if($foreach.hasNext),#end #end] #set($comma = ",") }`
+        `{ #set($comma = "") $comma"users": $input.json('$.users') #set($comma = ",") }`
       );
     });
   });
@@ -312,7 +312,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"title": "$input.path('$.title')" #set($comma = ",")$comma"count": $input.path('$.count') #set($comma = ",")$comma"ref": "$input.path('$.meta.ref')" #set($comma = ",")$comma"ids": [#foreach($item0 in $input.path('$.ids')) $item0 #if($foreach.hasNext),#end #end] #set($comma = ",") }`
+        `{ #set($comma = "") $comma"title": "$input.path('$.title')" #set($comma = ",")$comma"count": $input.path('$.count') #set($comma = ",")$comma"ref": "$input.path('$.meta.ref')" #set($comma = ",")$comma"ids": $input.json('$.ids') #set($comma = ",") }`
       );
     });
   });
@@ -335,9 +335,7 @@ describe('ResponseTemplateHelper', () => {
         },
       };
 
-      expect(helper.buildTemplate(response)).toBe(
-        `[#foreach($item0 in $input.path('$')) { #set($comma = "") $comma"id": "$item0.id" #set($comma = ",")$comma"qty": $item0.qty #set($comma = ",") } #if($foreach.hasNext),#end #end]`
-      );
+      expect(helper.buildTemplate(response)).toBe(`$input.json('$')`);
     });
 
     it('should use template override on a root array', () => {

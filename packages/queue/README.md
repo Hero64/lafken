@@ -20,7 +20,7 @@ import { Queue, Standard, Payload, Param, Event } from '@lafken/queue/main';
 // 1. Define the message payload
 @Payload()
 export class OrderMessage {
-  @Param({ source: 'body', parse: true })
+  @Param({ source: 'attribute' })
   orderId: string;
 
   @Param({ source: 'body', parse: true })
@@ -31,8 +31,10 @@ export class OrderMessage {
 @Queue()
 export class OrderQueue {
   @Standard({ batchSize: 5, visibilityTimeout: 60 })
-  processOrder(@Event(OrderMessage) message: OrderMessage) {
-    console.log(`Processing order ${message.orderId}`);
+  processOrder(@Event(OrderMessage) messages: OrderMessage[]) {
+    for (const message of messages) {
+      console.log(`Processing order ${message.orderId}`);
+    }
   }
 }
 
@@ -50,7 +52,7 @@ createApp({
 });
 ```
 
-Each `@Standard` or `@Fifo` method becomes an independent Lambda function with its own SQS queue and event source mapping.
+Each `@Standard` or `@Fifo` method becomes an independent Lambda function with its own SQS queue and event source mapping. The handler always receives an **array** of mapped payload objects — one per SQS record in the batch.
 
 ## Features
 
@@ -82,8 +84,9 @@ Use the `@Standard` decorator to create a standard (non-FIFO) SQS queue consumer
   visibilityTimeout: 120,
   maxConcurrency: 5,
 })
-generateReport(@Event(ReportMessage) message: ReportMessage) {
+generateReport(@Event(ReportMessage) messages: ReportMessage[]) {
   // Process up to 10 messages per invocation
+  for (const message of messages) { ... }
 }
 ```
 
@@ -113,8 +116,9 @@ Use the `@Fifo` decorator for FIFO (First-In-First-Out) queues. FIFO queues guar
   contentBasedDeduplication: true,
   batchSize: 1,
 })
-processPayment(@Event(PaymentMessage) message: PaymentMessage) {
+processPayment(@Event(PaymentMessage) messages: PaymentMessage[]) {
   // Messages are processed in exact send order
+  for (const message of messages) { ... }
 }
 ```
 
@@ -136,31 +140,63 @@ import { Payload, Param } from '@lafken/queue/main';
 
 @Payload()
 export class TaskMessage {
-  @Param({ source: 'attribute', type: String })
+  @Param({ source: 'attribute' })
   correlationId: string;
+
+  @Param({ source: 'attribute', type: Number })
+  priority: number;
 
   @Param({ source: 'body', parse: true })
   taskName: string;
-
-  @Param({ source: 'body', parse: true })
-  priority: number;
 }
 ```
 
 #### @Param Options
 
-| Option   | Type                      | Default       | Description                                      |
-| -------- | ------------------------- | ------------- | ------------------------------------------------ |
-| `source` | `'attribute' \| 'body'`   | `'attribute'` | Where to extract the value from the SQS record   |
-| `parse`  | `boolean`                 | `false`       | JSON-parse the message body before extraction     |
-| `type`   | `String \| Number \| ...` | inferred      | Data type of the extracted value                  |
-| `name`   | `string`                  | property name | Override the field name used for extraction       |
+| Option   | Type                                       | Default       | Description                                              |
+| -------- | ------------------------------------------ | ------------- | -------------------------------------------------------- |
+| `source` | `'attribute' \| 'body' \| 'record'`        | `'attribute'` | Where to extract the value from the SQS record           |
+| `parse`  | `boolean`                                  | `false`       | JSON-parse the message body before extraction (`'body'` only) |
+| `type`   | `String \| Number \| ...`                  | inferred      | Data type of the extracted value                         |
+| `name`   | `string`                                   | property name | Override the source field name used for extraction       |
 
-- **`source: 'attribute'`** — reads from SQS message attributes (supports `String` and `Number` types)
-- **`source: 'body'`** — reads from the message body. Set `parse: true` to JSON-parse the body and extract a specific field
+- **`source: 'attribute'`** — reads from SQS message attributes (supports `String` and `Number` types).
+- **`source: 'body'`** — reads from the message body. Set `parse: true` to JSON-parse the body and extract a specific key by property name.
+- **`source: 'record'`** — reads a top-level SQS record field such as `messageId`, `receiptHandle`, `awsRegion`, etc. The `name` option accepts only valid `SQSRecordField` values and defaults to the property name.
 
-> [!NOTE]
-> Only one `@Param` with `source: 'body'` and `parse: false` (raw body) is allowed per handler.
+> [!IMPORTANT]
+> Only **one** `@Param` with `source: 'body'` is allowed per payload class.
+
+#### `source: 'record'` — SQS Record Fields
+
+Use `source: 'record'` to bind SQS envelope metadata (e.g. the message identifier or region) directly to a payload property. The available fields are:
+
+| Field            | Description                                         |
+| ---------------- | --------------------------------------------------- |
+| `messageId`      | Unique identifier assigned by SQS to the message   |
+| `receiptHandle`  | Token used to delete or extend message visibility   |
+| `md5OfBody`      | MD5 digest of the message body                      |
+| `eventSource`    | Always `"aws:sqs"`                                  |
+| `eventSourceARN` | ARN of the source SQS queue                         |
+| `awsRegion`      | AWS region where the queue resides                  |
+
+```typescript
+import { Payload, Param } from '@lafken/queue/main';
+
+@Payload()
+export class AuditMessage {
+  // property name matches record field → no 'name' needed
+  @Param({ source: 'record' })
+  messageId: string;
+
+  // alias: property 'region' extracts record.awsRegion
+  @Param({ source: 'record', name: 'awsRegion' })
+  region: string;
+
+  @Param({ source: 'attribute' })
+  userId: string;
+}
+```
 
 #### @Field Decorator
 
@@ -181,7 +217,7 @@ export class SimpleMessage {
 
 ### Consuming Messages
 
-Bind a typed payload to a handler method using the `@Event` parameter decorator. Pass the payload class so the framework can automatically extract and map fields from the SQS record at runtime:
+Bind a typed payload to a handler method using the `@Event` parameter decorator. Pass the payload class so the framework can automatically extract and map fields from every SQS record in the batch. The handler always receives an **array** of mapped objects:
 
 ```typescript
 import { Queue, Standard, Event } from '@lafken/queue/main';
@@ -189,8 +225,10 @@ import { Queue, Standard, Event } from '@lafken/queue/main';
 @Queue()
 export class AlertQueue {
   @Standard({ queueName: 'alerts', batchSize: 5 })
-  processAlert(@Event(AlertMessage) alert: AlertMessage) {
-    console.log(`Alert from ${alert.source}: ${alert.message}`);
+  processAlert(@Event(AlertMessage) alerts: AlertMessage[]) {
+    for (const alert of alerts) {
+      console.log(`Alert from ${alert.source}: ${alert.message}`);
+    }
   }
 }
 ```
@@ -224,7 +262,7 @@ await QueueService.sendMessage({
 | ------------------- | ---------------------------------- | -------------------------------------------------- |
 | `url`               | `string`                           | Full SQS queue URL                                 |
 | `body`              | `any`                              | Message body (automatically JSON-stringified)      |
-| `attributes`        | `Record<string, string \| number>` | SQS message attributes                            |
+| `attributes`        | `Record<string, string \| number>` | SQS message attributes                             |
 | `delay`             | `number`                           | Delay in seconds before the message becomes visible |
 | `groupId`           | `string`                           | Message group ID (FIFO queues only)                |
 | `deduplicationId`   | `string`                           | Deduplication ID (FIFO queues only)                |

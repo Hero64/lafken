@@ -12,6 +12,7 @@ import { ResponseTemplateHelper } from './helpers/response-template/response-tem
 import { TemplateHelper } from './helpers/template/template';
 import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
 import type { Integration, IntegrationProps } from './integrations/integration.types';
+import { KinesisIntegration } from './integrations/kinesis/kinesis';
 import { LambdaIntegration } from './integrations/lambda/lambda';
 import { QueueIntegration } from './integrations/queue/queue';
 import { BucketIntegration } from './integrations/s3/bucket';
@@ -143,6 +144,10 @@ export class MethodFactory {
       }
       case 'queue': {
         integration = new QueueIntegration(props);
+        break;
+      }
+      case 'kinesis': {
+        integration = new KinesisIntegration(props);
         break;
       }
       case 'dynamodb': {

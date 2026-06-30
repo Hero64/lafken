@@ -1,9 +1,9 @@
 import type { ClassResource } from '@lafken/common';
 import { FindBuilder } from '../find/find';
-import type { FindBuilderProps } from '../find/find.types';
+import type { FindOneBuilderProps } from './find-one.types';
 
 export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
-  constructor(protected queryOptions: FindBuilderProps<E>) {
+  constructor(protected queryOptions: FindOneBuilderProps<E>) {
     super(queryOptions);
     this.find();
   }
@@ -16,8 +16,17 @@ export class FindOneBuilder<E extends ClassResource> extends FindBuilder<E> {
   }
 
   private async exec(): Promise<InstanceType<E> | undefined> {
-    const { data } = await this.runQuery(this.command);
+    const { cache, cacheTtl, modelProps, inputProps } = this.queryOptions;
+    const fetch = async () => {
+      const { data } = await this.runQuery(this.command);
+      return (data as E[])?.[0] as InstanceType<E> | undefined;
+    };
 
-    return (data as E[])?.[0] as InstanceType<E> | undefined;
+    if (cache && cacheTtl) {
+      const key = JSON.stringify({ table: modelProps.name, inputProps });
+      return cache.getOrSet(key, fetch, cacheTtl);
+    }
+
+    return fetch();
   }
 }

@@ -2,7 +2,9 @@ import type {
   AvailableReference,
   BucketNames,
   DynamoTableNames,
+  GetExternalValues,
   GetResourceValue,
+  KinesisStreamNames,
   OnlyNumberString,
   OnlyOne,
   QueueNames,
@@ -28,7 +30,8 @@ import type {
  * }
  * ```
  */
-export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'> {
+export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'>
+  extends GetExternalValues {
   /**
    * Retrieves a registered resource attribute (e.g. ARN or ID) by its scoped identifier.
    *
@@ -343,4 +346,55 @@ export interface QueueSendMessageIntegrationResponse {
   attributes?: Partial<Record<string, string | number>>;
   /** Optional message body payload. Can be a plain string or a full `@Event` object. */
   body?: any;
+  groupId?: string;
+  deduplicationId?: string;
+}
+
+/**
+ * Option helper injected via `@IntegrationOptions()` for Kinesis integrations.
+ *
+ * @example
+ * ```typescript
+ * @Post({ integration: 'kinesis', action: 'PutRecord' })
+ * putRecord(
+ *   @IntegrationOptions() { getResourceValue }: KinesisIntegrationOption
+ * ): KinesisPutRecordIntegrationResponse {
+ *   return {
+ *     streamName: getResourceValue('kinesis::events', 'name'),
+ *     data: 'hello',
+ *     partitionKey: 'my-key',
+ *   };
+ * }
+ * ```
+ */
+export type KinesisIntegrationOption = IntegrationOptionBase<
+  AvailableReference,
+  'id' | 'arn' | 'name'
+>;
+
+/**
+ * Response shape for the Kinesis PutRecord integration.
+ * Specifies the target stream, record data, and partition key.
+ *
+ * @example
+ * ```typescript
+ * @Post({ integration: 'kinesis', action: 'PutRecord' })
+ * putRecord(): KinesisPutRecordIntegrationResponse {
+ *   return {
+ *     streamName: 'my-stream',
+ *     data: { userId: '123', action: 'created' },
+ *     partitionKey: 'user-123',
+ *   };
+ * }
+ * ```
+ */
+export interface KinesisPutRecordIntegrationResponse {
+  /** The Kinesis stream name to put the record into. */
+  streamName: KinesisStreamNames;
+  /** The record data payload. Can be a plain value or a full `@Event` object — will be base64 encoded. */
+  data: unknown;
+  /** Partition key used to route the record to a shard. Can be a literal or an `@Event` parameter. */
+  partitionKey: string;
+  /** Optional sequence number for ordering within the same shard. */
+  sequenceNumberForOrdering?: string;
 }

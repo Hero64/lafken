@@ -25,7 +25,7 @@ export interface AppModule extends Construct {
   id: string;
 }
 
-export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags'> {}
+export interface LambdaGlobalConfig extends Omit<LambdaProps, 'tags' | 'functionName'> {}
 
 export interface GlobalContext extends Omit<LambdaGlobalConfig, 'services'> {
   contextCreator: string;

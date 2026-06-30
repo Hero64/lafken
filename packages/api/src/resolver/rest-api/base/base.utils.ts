@@ -63,4 +63,9 @@ export const logFormatValues: Record<StageLogGroupFormatKeys, string> = {
   status: '$context.status',
   protocol: '$context.protocol',
   responseLength: '$context.responseLength',
+  integrationStatus: '$context.integration.status',
+  integrationError: '$context.integration.error',
+  integrationLatency: '$context.integration.latency',
+  errorMessage: '$context.error.message',
+  errorResponseType: '$context.error.responseType',
 };

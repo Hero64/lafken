@@ -11,7 +11,8 @@ import {
   type ResolverType,
 } from '@lafken/resolver';
 import { type QueueLambdaMetadata, RESOURCE_TYPE } from '../main';
-import { Queue } from './queue/queue';
+import { ExternalQueue } from './queue/external/external';
+import { InternalQueue } from './queue/internal/internal';
 
 export class QueueResolver implements ResolverType {
   public type = RESOURCE_TYPE;
@@ -29,7 +30,16 @@ export class QueueResolver implements ResolverType {
     });
 
     for (const handler of handlers) {
-      new Queue(module, `${metadata.name}-${handler.name}`, {
+      if (handler.isExternal) {
+        new ExternalQueue(module, `${metadata.name}-${handler.name}`, {
+          resourceMetadata: metadata,
+          classResource: resource,
+          handler,
+        });
+        return;
+      }
+
+      new InternalQueue(module, `${metadata.name}-${handler.name}`, {
         resourceMetadata: metadata,
         classResource: resource,
         handler,

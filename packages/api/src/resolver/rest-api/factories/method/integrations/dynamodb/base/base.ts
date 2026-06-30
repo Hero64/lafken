@@ -90,8 +90,9 @@ export class DynamoBaseIntegration<T> implements Integration {
     const { classResource, handler, proxyHelper, integrationHelper } = this.props;
 
     const resource: InitializedClass<R> = new classResource();
-    const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions('dynamo');
+    const { options, resolveResource } = integrationHelper.generateIntegrationOptions(
+      this.props.restApi
+    );
     const integrationResponse = await resource[handler.name](
       proxyHelper.createEvent(),
       options

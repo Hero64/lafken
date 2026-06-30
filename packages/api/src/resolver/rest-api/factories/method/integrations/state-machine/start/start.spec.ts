@@ -189,7 +189,7 @@ describe('State machine start integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"input": "{ \\"foo\\": \\"$util.escapeJavaScript($input.path(\'$.foo\'))\\",\\"ids\\": [#foreach($item0 in $input.path(\'$.ids\')) $item0 #if($foreach.hasNext),#end #end] }","stateMachineArn": "$input.params().path.get(\'name\')"}',
+          '{"input": "{ \\"foo\\": \\"$util.escapeJavaScript($input.path(\'$.foo\'))\\",\\"ids\\": $input.json(\'$.ids\') }","stateMachineArn": "$input.params().path.get(\'name\')"}',
       },
     });
   });

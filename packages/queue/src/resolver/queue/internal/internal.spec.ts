@@ -4,8 +4,8 @@ import { enableBuildEnvVariable } from '@lafken/common';
 import { LambdaHandler, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
-import { Event, Fifo, Param, Payload, Queue, Standard } from '../../main';
-import { Queue as QueueResolver } from './queue';
+import { Event, Fifo, Param, Payload, Queue, Standard } from '../../../main';
+import { InternalQueue } from './internal';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@lafken/resolver')>();
@@ -58,11 +58,12 @@ describe('Queue', () => {
   it('should create a fifo queue integration without file creation', () => {
     const { stack, module } = setupTestingStackWithModule();
 
-    new QueueResolver(module, 'fifo', {
+    new InternalQueue(module, 'fifo', {
       handler: {
         name: 'fifo',
         queueName: 'fifo',
         isFifo: true,
+        isExternal: false,
       },
       resourceMetadata: {
         filename: 'test.js',
@@ -102,11 +103,12 @@ describe('Queue', () => {
 
   it('should create a standard queue integration without file creation', () => {
     const { stack, module } = setupTestingStackWithModule();
-    new QueueResolver(module, 'standard', {
+    new InternalQueue(module, 'standard', {
       handler: {
         name: 'standard',
         isFifo: false,
         queueName: 'standard',
+        isExternal: false,
       },
       resourceMetadata: {
         filename: 'test.js',
@@ -147,11 +149,12 @@ describe('Queue', () => {
   it('should throw error with invalid attribute event param', () => {
     const { module } = setupTestingStackWithModule();
     expect(() => {
-      new QueueResolver(module, 'standard', {
+      new InternalQueue(module, 'standard', {
         handler: {
           name: 'paramTypeError',
           isFifo: false,
           queueName: 'standard',
+          isExternal: false,
         },
         resourceMetadata: {
           filename: 'test.js',
@@ -169,11 +172,12 @@ describe('Queue', () => {
   it('should throw error with invalid body event', () => {
     const { module } = setupTestingStackWithModule();
     expect(() => {
-      new QueueResolver(module, 'standard', {
+      new InternalQueue(module, 'standard', {
         handler: {
           name: 'bodyError',
           isFifo: false,
           queueName: 'standard',
+          isExternal: false,
         },
         resourceMetadata: {
           filename: 'test.js',

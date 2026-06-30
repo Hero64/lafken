@@ -107,6 +107,7 @@ const defaultPermissions: Record<ServicesName, string[]> = {
     'PutEvents',
     'PutRule',
   ],
+  kinesis: ['PutRecord', 'PutRecords'],
 };
 
 export const mapServicesName: Partial<Record<ServicesName, string>> = {

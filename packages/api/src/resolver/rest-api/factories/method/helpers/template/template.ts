@@ -35,6 +35,9 @@ export class TemplateHelper {
       if (field.directTemplateValue) {
         return field.directTemplateValue;
       }
+      if (field.source === 'body') {
+        return `$input.json('$${currentValue ? `.${currentValue}` : ''}')`;
+      }
       let forVariableName = `$item${index}`;
       const start = `#foreach(${forVariableName} in ${value})`;
       const end = '#if($foreach.hasNext),#end #end';

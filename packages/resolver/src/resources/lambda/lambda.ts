@@ -50,12 +50,9 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       scope,
     });
     let environmentValues = environments?.getValues() || undefined;
-    const handlerName = LambdaHandler.buildFunctionName(
-      id,
-      appContext,
-      moduleContext,
-      props.suffix
-    );
+    const handlerName =
+      props.lambda?.functionName ??
+      LambdaHandler.buildFunctionName(id, appContext, moduleContext, props.suffix);
 
     super(
       scope,
@@ -139,7 +136,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     const sfx = suffix ? `-${suffix}` : '';
 
     return `${kebabCase(
-      `${id}-${moduleContext?.contextCreator || appContext.contextCreator}`
+      `${id}${moduleContext?.contextCreator ? `-${moduleContext.contextCreator}` : '-'}${appContext.contextCreator}`
     ).slice(0, 63 - sfx.length)}${sfx}`.toLowerCase();
   }
 
