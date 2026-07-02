@@ -39,7 +39,9 @@ const createMethodDecorator = (method: Method) =>
 
       const responseParams = getEventFields(
         RESPONSE_PREFIX,
-        responseHandler.response
+        responseHandler.response,
+        undefined,
+        true
       ) as ResponseFieldMetadata;
 
       return {
