@@ -270,8 +270,13 @@ export type ApiDefaultResponseType =
   | 'unsupportedMediaType'
   | 'wafFiltered';
 
+export class ApiGatewayResponse {
+  statusCode: number;
+  template: Record<string, string>;
+}
+
 export type ApiDefaultResponse = Partial<
-  Record<ApiDefaultResponseType, Record<string, string>>
+  Record<ApiDefaultResponseType, Record<string, string> | ApiGatewayResponse>
 >;
 
 export interface BaseApiProps {

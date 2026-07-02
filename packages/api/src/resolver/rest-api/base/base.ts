@@ -6,11 +6,12 @@ import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
 import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
 import type { Construct } from 'constructs';
-import type {
-  ApiDefaultResponseType,
-  BaseApiProps,
-  RestApi,
-  Stage,
+import {
+  type ApiDefaultResponseType,
+  ApiGatewayResponse,
+  type BaseApiProps,
+  type RestApi,
+  type Stage,
 } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
 import { DocsFactory } from '../factories/docs/docs.factories';
@@ -223,12 +224,20 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           continue;
         }
 
+        let statusCode = apiResponseStatusCode[key];
+        let template = response;
+
+        if (response instanceof ApiGatewayResponse) {
+          statusCode = response.statusCode;
+          template = response.template;
+        }
+
         new ApiGatewayGatewayResponse(restApi, `${apiProps.name}-${responseKey}`, {
           restApiId: restApi.id,
           responseType: apiResponseName[key],
-          statusCode: apiResponseStatusCode[key]?.toString(),
+          statusCode: statusCode?.toString(),
           responseTemplates: {
-            'application/json': JSON.stringify(response),
+            'application/json': JSON.stringify(template),
           },
           dependsOn: [restApi],
         });
