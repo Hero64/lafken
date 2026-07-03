@@ -1,6 +1,6 @@
 {
   "name": "@lafken/dynamo",
-  "version": "0.12.27",
+  "version": "0.12.28",
   "private": false,
   "description": "Define DynamoDB tables using TypeScript decorators - type-safe, declarative infrastructure with Lafken",
   "keywords": [
