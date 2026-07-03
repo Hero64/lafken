@@ -37,7 +37,8 @@ export const getPrimitiveType = (type: AllowedTypes): PrimitiveTypes | undefined
 export const getEventFields = (
   prefix: string,
   target?: AllowedTypes,
-  name: string = 'event'
+  name: string = 'event',
+  disablePropertiesValidation: boolean = false
 ): BaseFieldMetadata | undefined => {
   if (!target) {
     return undefined;
@@ -50,13 +51,15 @@ export const getEventFields = (
       type: target,
     },
     prefix,
+    disablePropertiesValidation,
   });
 };
 
 const getObjectMetadata = (
   metadata: Pick<BaseFieldMetadata, 'destinationName' | 'name'>,
   payloadClass: ClassResource,
-  prefix: string
+  prefix: string,
+  disablePropertiesValidation: boolean = false
 ): FieldMetadata => {
   const payloadMetadata = getMetadataByKey<PayloadMetadata>(
     payloadClass,
@@ -71,7 +74,7 @@ const getObjectMetadata = (
     createFieldName(prefix, FieldProperties.field)
   );
 
-  if (!properties?.length) {
+  if (!disablePropertiesValidation && !properties?.length) {
     throw new Error(`should include Field properties in ${payloadClass.name} class`);
   }
 
@@ -84,7 +87,8 @@ const getObjectMetadata = (
 };
 
 const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
-  const { fieldProps, destinationName, type, prefix } = props;
+  const { fieldProps, destinationName, type, prefix, disablePropertiesValidation } =
+    props;
 
   const metadata: Pick<BaseFieldMetadata, 'destinationName' | 'name'> = {
     destinationName,
@@ -101,7 +105,12 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
 
   if (fieldProps?.type !== undefined) {
     if (typeof fieldProps.type === 'function' && !primitiveType) {
-      return getObjectMetadata(metadata, fieldProps.type as ClassResource, prefix);
+      return getObjectMetadata(
+        metadata,
+        fieldProps.type as ClassResource,
+        prefix,
+        disablePropertiesValidation
+      );
     }
 
     if (Array.isArray(fieldProps.type)) {
@@ -122,7 +131,8 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
               destinationName: 'Object',
             },
             fieldProps.type[0] as ClassResource,
-            prefix
+            prefix,
+            disablePropertiesValidation
           );
         }
       }
@@ -157,6 +167,7 @@ export const createFieldDecorator =
   <T extends FieldProps, M>({
     prefix,
     enableInLambdaInvocation,
+    disablePropertiesValidation,
     getMetadata,
   }: CreateFieldDecoratorProps<T, M>) =>
   (props?: T) =>
@@ -184,6 +195,7 @@ export const createFieldDecorator =
             type: parentMetadata.forceType ?? props?.type,
           },
           prefix,
+          disablePropertiesValidation,
         }),
       },
     ];
