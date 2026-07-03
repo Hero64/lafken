@@ -7,7 +7,7 @@ export const apiResponseStatusCode: Record<ApiDefaultResponseType, number | unde
   accessDenied: 401,
   apiConfigurationError: 500,
   authorizerConfigurationError: 500,
-  authorizerFailure: 500,
+  authorizerFailure: 401,
   badRequestBody: 400,
   badRequestParameters: 500,
   default4xx: undefined,

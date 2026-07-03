@@ -22,7 +22,6 @@ export class ResponseFactory {
   ) {
     for (const response of responses) {
       const responseName = `${baseName}-${response.statusCode}`;
-
       const methodResponse = new ApiGatewayMethodResponse(
         this.scope,
         `${responseName}-method-response`,
@@ -33,15 +32,17 @@ export class ResponseFactory {
           statusCode: response.statusCode,
           responseParameters: response.methodParameters,
           dependsOn: [method, integration],
-          responseModels: response.field
-            ? {
-                'application/json': this.scope.modelFactory.getModel({
-                  field: response.field,
-                  defaultModelName: `${responseName}Model`,
-                  dependsOn: [method, integration],
-                }).name,
-              }
-            : undefined,
+          responseModels:
+            response.field &&
+            (response.field.type !== 'Object' || response.field.properties !== undefined)
+              ? {
+                  'application/json': this.scope.modelFactory.getModel({
+                    field: response.field,
+                    defaultModelName: `${responseName}Model`,
+                    dependsOn: [method, integration],
+                  }).name,
+                }
+              : undefined,
         }
       );
 
@@ -63,7 +64,6 @@ export class ResponseFactory {
           dependsOn: [integration, methodResponse],
         }
       );
-
       this.responses.push(methodResponse, integrationResponse);
     }
   }
