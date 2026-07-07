@@ -59,17 +59,13 @@ export interface EventRuleBaseProps {
 }
 
 export type S3DetailType = 'Object Created' | 'Object Deleted';
-export type S3ObjectKey = {
-  prefix?: string;
-  suffix?: string;
-};
 
 export interface S3Detail {
   bucket?: {
     name: BucketNames[];
   };
   object?: {
-    key?: (S3ObjectKey | string)[];
+    key?: EventBridgePattern[];
   };
 }
 
@@ -174,7 +170,15 @@ export interface EventS3RuleProps extends EventRuleBaseProps {
 
 type PrefixPattern = { prefix: string };
 type SuffixPattern = { suffix: string };
-type AnythingButPattern = { 'anything-but': string | string[] };
+type AnythingButPattern = {
+  'anything-but':
+    | string
+    | string[]
+    | PrefixPattern
+    | SuffixPattern
+    | EqualsIgnoreCasePattern
+    | Wildcard;
+};
 type NumericPattern = {
   numeric:
     | ['=' | '>' | '>=' | '<' | '<=', number]
@@ -182,6 +186,7 @@ type NumericPattern = {
 };
 type ExistsPattern = { exists: boolean };
 type EqualsIgnoreCasePattern = { 'equals-ignore-case': string };
+type Wildcard = { wildcard: string };
 
 export type EventBridgePattern =
   | string
@@ -192,7 +197,8 @@ export type EventBridgePattern =
   | AnythingButPattern
   | NumericPattern
   | ExistsPattern
-  | EqualsIgnoreCasePattern;
+  | EqualsIgnoreCasePattern
+  | Wildcard;
 
 export type DynamoAttributeFilter = EventBridgePattern | EventBridgePattern[];
 export type DynamoAttributeFilters = Record<string, DynamoAttributeFilter>;
