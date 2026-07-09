@@ -34,7 +34,6 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
     } = getModelInformation(props.classResource);
 
     const { globalIndexes, localIndexes, indexAttributes } = InternalTable.getIndexes(
-      scope,
       modelProps.indexes,
       sortKeyName
     );
@@ -174,7 +173,6 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
   }
 
   private static getIndexes(
-    scope: Construct,
     indexes: (DynamoIndex<any> & Partial<ReadWriteCapacity>)[] = [],
     sortKeyName?: string
   ) {
