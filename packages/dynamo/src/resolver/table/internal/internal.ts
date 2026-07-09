@@ -3,6 +3,7 @@ import {
   DynamodbTable,
   type DynamodbTableAttribute,
   type DynamodbTableGlobalSecondaryIndex,
+  type DynamodbTableGlobalSecondaryIndexKeySchema,
   type DynamodbTableLocalSecondaryIndex,
 } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { PipesPipe } from '@cdktn/provider-aws/lib/pipes-pipe';
@@ -172,6 +173,10 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
     }
   }
 
+  private static toKeys(key: PropertyKey | PropertyKey[]): string[] {
+    return Array.isArray(key) ? key.map((k) => k.toString()) : [key.toString()];
+  }
+
   private static getIndexes(
     indexes: (DynamoIndex<any> & Partial<ReadWriteCapacity>)[] = [],
     sortKeyName?: string
@@ -207,15 +212,50 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
         continue;
       }
 
-      indexAttributes.add(index.partitionKey.toString());
-      if (index.sortKey) {
-        indexAttributes.add(index.sortKey.toString());
+      const partitionKeys = InternalTable.toKeys(index.partitionKey);
+      const sortKeys = index.sortKey ? InternalTable.toKeys(index.sortKey) : [];
+
+      for (const attribute of [...partitionKeys, ...sortKeys]) {
+        indexAttributes.add(attribute);
+      }
+
+      const isMultiAttribute = partitionKeys.length > 1 || sortKeys.length > 1;
+
+      if (isMultiAttribute) {
+        if (partitionKeys.length > 4 || sortKeys.length > 4) {
+          throw new Error(
+            `A multi-attribute index supports up to 4 partition and 4 sort attributes. Check the index "${index.name}".`
+          );
+        }
+
+        globalIndexes.push({
+          name: index.name,
+          keySchema: [
+            ...partitionKeys.map(
+              (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
+                attributeName,
+                keyType: 'HASH',
+              })
+            ),
+            ...sortKeys.map(
+              (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
+                attributeName,
+                keyType: 'RANGE',
+              })
+            ),
+          ],
+          projectionType,
+          nonKeyAttributes,
+          readCapacity: index.readCapacity,
+          writeCapacity: index.writeCapacity,
+        });
+        continue;
       }
 
       globalIndexes.push({
         name: index.name,
-        hashKey: index.partitionKey.toString(),
-        rangeKey: index.sortKey ? index.sortKey.toString() : undefined,
+        hashKey: partitionKeys[0],
+        rangeKey: sortKeys[0],
         projectionType,
         nonKeyAttributes,
         readCapacity: index.readCapacity,

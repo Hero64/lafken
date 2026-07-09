@@ -210,4 +210,59 @@ describe('InternalTable', () => {
       });
     }).toThrow();
   });
+
+  it('should create a table with a multi-attribute global secondary index', () => {
+    @Model({
+      indexes: [
+        {
+          name: 'multi_attribute_index',
+          partitionKey: ['name', 'email'],
+          sortKey: ['age', 'other'],
+        },
+      ],
+    })
+    class Test {
+      @PartitionKey(String)
+      name: PrimaryPartition<string>;
+
+      @Field()
+      email: string;
+
+      @Field()
+      age: number;
+
+      @Field()
+      other: string;
+    }
+
+    const { stack } = setupApp();
+
+    new InternalTable(stack, {
+      classResource: Test,
+    });
+
+    const synthesized = Testing.synth(stack);
+    expect(synthesized).toHaveResourceWithProperties(DynamodbTable, {
+      name: 'Test',
+      hash_key: 'name',
+      global_secondary_index: [
+        {
+          name: 'multi_attribute_index',
+          projection_type: 'ALL',
+          key_schema: [
+            { attribute_name: 'name', key_type: 'HASH' },
+            { attribute_name: 'email', key_type: 'HASH' },
+            { attribute_name: 'age', key_type: 'RANGE' },
+            { attribute_name: 'other', key_type: 'RANGE' },
+          ],
+        },
+      ],
+      attribute: [
+        { name: 'name', type: 'S' },
+        { name: 'email', type: 'S' },
+        { name: 'age', type: 'N' },
+        { name: 'other', type: 'S' },
+      ],
+    });
+  });
 });
