@@ -115,9 +115,10 @@ export interface EventDefaultRuleProps extends EventRuleBaseProps {
      * Additional filtering criteria on the event payload.
      *
      * Optional object specifying conditions on event attributes to further
-     * filter which events trigger the rule.
+     * filter which events trigger the rule. Supports nested fields and the
+     * `$or` operator to match across multiple fields.
      */
-    detail?: any;
+    detail?: EventDetail;
   };
 }
 
@@ -168,37 +169,134 @@ export interface EventS3RuleProps extends EventRuleBaseProps {
   };
 }
 
-type PrefixPattern = { prefix: string };
-type SuffixPattern = { suffix: string };
+/**
+ * Matches string values regardless of character casing.
+ *
+ * @example { 'equals-ignore-case': 'alice' }
+ */
+type EqualsIgnoreCasePattern = { 'equals-ignore-case': string };
+/**
+ * Matches values that begin with the given prefix. The prefix can also be
+ * matched ignoring character casing.
+ *
+ * @example { prefix: 'us-' }
+ * @example { prefix: { 'equals-ignore-case': 'eventb' } }
+ */
+type PrefixPattern = { prefix: string | EqualsIgnoreCasePattern };
+/**
+ * Matches values that end with the given suffix. The suffix can also be
+ * matched ignoring character casing.
+ *
+ * @example { suffix: '.png' }
+ * @example { suffix: { 'equals-ignore-case': '.png' } }
+ */
+type SuffixPattern = { suffix: string | EqualsIgnoreCasePattern };
+/**
+ * Matches string values using the wildcard character (`*`).
+ *
+ * @example { wildcard: 'dir/*.png' }
+ */
+type Wildcard = { wildcard: string };
+/**
+ * Matches IPv4 or IPv6 addresses using CIDR notation.
+ *
+ * @example { cidr: '10.0.0.0/24' }
+ */
+type CidrPattern = { cidr: string };
+/**
+ * Matches everything except the specified value(s). Supports strings and
+ * numbers, single values or lists, and can be combined with `prefix`,
+ * `suffix`, `wildcard` and `equals-ignore-case`.
+ *
+ * @example { 'anything-but': 'initializing' }
+ * @example { 'anything-but': ['stopped', 'overloaded'] }
+ * @example { 'anything-but': [100, 200, 300] }
+ * @example { 'anything-but': { prefix: 'init' } }
+ * @example { 'anything-but': { suffix: ['.txt', '.rtf'] } }
+ * @example { 'anything-but': { wildcard: 'lib*' } }
+ * @example { 'anything-but': { 'equals-ignore-case': 'initializing' } }
+ */
 type AnythingButPattern = {
   'anything-but':
     | string
     | string[]
-    | PrefixPattern
-    | SuffixPattern
-    | EqualsIgnoreCasePattern
-    | Wildcard;
+    | number
+    | number[]
+    | { prefix: string | string[] }
+    | { suffix: string | string[] }
+    | { wildcard: string | string[] }
+    | { 'equals-ignore-case': string | string[] };
 };
+/**
+ * Matches numeric values using comparison operators, optionally as a range.
+ *
+ * @example { numeric: ['=', 100] }
+ * @example { numeric: ['>', 10, '<=', 20] }
+ */
 type NumericPattern = {
   numeric:
     | ['=' | '>' | '>=' | '<' | '<=', number]
     | ['>' | '>=', number, '<' | '<=', number];
 };
+/**
+ * Matches based on the presence (`true`) or absence (`false`) of a field.
+ *
+ * @example { exists: true }
+ */
 type ExistsPattern = { exists: boolean };
-type EqualsIgnoreCasePattern = { 'equals-ignore-case': string };
-type Wildcard = { wildcard: string };
 
 export type EventBridgePattern =
   | string
   | number
   | boolean
+  | null
   | PrefixPattern
   | SuffixPattern
   | AnythingButPattern
   | NumericPattern
   | ExistsPattern
   | EqualsIgnoreCasePattern
-  | Wildcard;
+  | Wildcard
+  | CidrPattern;
+
+/**
+ * A single field's matching criteria: either one pattern or a list of patterns.
+ * A list behaves as an OR between the listed values.
+ *
+ * @example ['Credit', 'Debit']
+ * @example [{ prefix: 'us-' }]
+ */
+export type EventFieldPattern = EventBridgePattern | EventBridgePattern[];
+
+/**
+ * Filtering criteria on the event payload.
+ *
+ * Maps field names to their matching patterns. Fields can be nested, and the
+ * `$or` operator can be used to match if *any* of the grouped conditions are
+ * met, across one or more fields.
+ *
+ * @example
+ * {
+ *   $or: [
+ *     { location: ['New York'] },
+ *     { day: ['Monday'] },
+ *   ],
+ * }
+ */
+export interface EventDetail {
+  /**
+   * Matches if *any* of the grouped field conditions are met, across one or
+   * more fields. Each entry is an independent set of field patterns.
+   *
+   * @example
+   * $or: [
+   *   { 'c-count': [{ numeric: ['>', 0, '<=', 5] }] },
+   *   { 'd-count': [{ numeric: ['<', 10] }] },
+   * ]
+   */
+  $or?: EventDetail[];
+  [field: string]: EventFieldPattern | EventDetail | EventDetail[] | undefined;
+}
 
 export type DynamoAttributeFilter = EventBridgePattern | EventBridgePattern[];
 export type DynamoAttributeFilters = Record<string, DynamoAttributeFilter>;
