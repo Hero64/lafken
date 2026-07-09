@@ -1,36 +1,48 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
-import { LambdaHandler } from '@lafken/resolver';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type { XAmazonIntegration } from '../../../openapi/openapi.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
+import { buildRequestTemplates, createLambdaHandler } from './lambda.utils';
 
 export class LambdaIntegration implements Integration {
   constructor(private props: IntegrationProps) {}
 
-  create() {
-    const {
-      scope,
-      handler,
-      resourceMetadata,
-      restApi,
-      apiGatewayMethod,
-      responseHelper,
-      paramHelper,
-      templateHelper,
-    } = this.props;
+  /**
+   * Openapi-mode builder: emits the lambda `x-amazon-apigateway-integration`
+   * fragment and the operation responses. The lambda function/permission are
+   * still created as real resources.
+   */
+  createOpenApi(): OpenApiIntegrationResult {
+    const { restApi, resourceMetadata, handler, responseHelper } = this.props;
 
-    const lambdaHandler = new LambdaHandler(
-      scope,
-      `${handler.name}-${resourceMetadata.name}`,
-      {
-        ...handler,
-        description: handler.summary || handler.description,
-        originalName: resourceMetadata.originalName,
-        filename: resourceMetadata.filename,
-        foldername: resourceMetadata.foldername,
-        principal: 'apigateway.amazonaws.com',
-        sourceArn: `${restApi.executionArn}/*/*`,
-        suffix: 'api',
-      }
-    );
+    const lambdaHandler = createLambdaHandler(this.props);
+    const baseName = `${resourceMetadata.name}-${handler.name}`;
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        responseHelper.handlerResponse,
+        baseName
+      );
+
+    const integration: XAmazonIntegration = {
+      type: 'aws',
+      httpMethod: 'POST',
+      uri: lambdaHandler.invokeArn,
+      requestTemplates: buildRequestTemplates(this.props),
+      responses: integrationResponses,
+    };
+
+    return { integration, responses: operationResponses };
+  }
+
+  create() {
+    const { handler, resourceMetadata, restApi, apiGatewayMethod, responseHelper } =
+      this.props;
+
+    const lambdaHandler = createLambdaHandler(this.props);
 
     const integration = new ApiGatewayIntegration(
       restApi,
@@ -43,13 +55,7 @@ export class LambdaIntegration implements Integration {
         uri: lambdaHandler.invokeArn,
         integrationHttpMethod: 'POST',
         dependsOn: [apiGatewayMethod, lambdaHandler],
-        requestTemplates: paramHelper.params
-          ? {
-              'application/json': templateHelper.generateTemplate({
-                field: paramHelper.params,
-              }),
-            }
-          : undefined,
+        requestTemplates: buildRequestTemplates(this.props),
       }
     );
 

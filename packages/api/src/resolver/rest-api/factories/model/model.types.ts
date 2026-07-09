@@ -60,8 +60,24 @@ export interface FullJsonSchema extends JsonSchema {
 
 export interface CreateModelResponse {
   model?: ApiGatewayModel;
+  /**
+   * Component reference and name populated in openapi mode (no `ApiGatewayModel`
+   * construct is created; the schema is registered as `#/components/schemas`).
+   */
+  ref?: string;
+  name?: string;
   schema: JsonSchema;
   fullSchema: FullJsonSchema;
+}
+
+/**
+ * Result of resolving a request/response model: `name` is the model/component
+ * name, `ref` is the `$ref` to use inside a body (apigateway URL in resource
+ * mode, `#/components/schemas/...` in openapi mode).
+ */
+export interface ModelRef {
+  name: string;
+  ref: string;
 }
 
 export interface GetModelProps {

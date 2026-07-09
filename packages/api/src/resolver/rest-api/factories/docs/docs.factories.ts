@@ -16,6 +16,10 @@ export class DocsFactory {
   }
 
   public createDoc({ id, location, properties }: CreateDocProps) {
+    if (this.scope.openapiFactory.isEnabled) {
+      return undefined;
+    }
+
     const propertiesString = JSON.stringify(properties);
     this.properties.push(propertiesString);
 

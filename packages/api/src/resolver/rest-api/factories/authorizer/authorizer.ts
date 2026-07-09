@@ -28,6 +28,7 @@ import {
   PERMISSION_DEFINITION_FILE,
 } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import type { SecuritySchemeObject, XAmazonAuthorizer } from '../openapi/openapi.types';
 import type {
   AuthorizerData,
   AuthorizerDataApiKey,
@@ -37,6 +38,8 @@ import type {
   AuthPermissions,
   GetAuthorizerProps,
 } from './authorizer.types';
+
+const API_KEY_SCHEME = 'api_key';
 
 const LafkenAuthorizer = lafkenResource.make(ApiGatewayAuthorizer);
 
@@ -69,6 +72,71 @@ export class AuthorizerFactory {
         metadata,
         type: metadata.type as ApiAuthorizerType,
       };
+    }
+  }
+
+  private get isOpenApi() {
+    return this.scope.openapiFactory.isEnabled;
+  }
+
+  /**
+   * Openapi-mode counterpart of {@link getAuthorizerProps}: ensures the
+   * authorizer is registered as a `securityScheme` (creating any real side
+   * resources such as the custom-authorizer lambda) and returns the operation
+   * `security` requirement.
+   */
+  public getOperationSecurity(
+    props: GetAuthorizerProps
+  ): Array<Record<string, string[]>> | undefined {
+    const { authorizer, fullPath, method } = props;
+    if (
+      authorizer === false ||
+      (!authorizer?.authorizerName && !this.defaultAuthorizer)
+    ) {
+      return undefined;
+    }
+
+    const authorizerMethod: MethodAuthorizer = {
+      authorizerName:
+        authorizer?.authorizerName || this.defaultAuthorizer?.authorizerName,
+      scopes: authorizer?.scopes,
+    };
+    const id = authorizerMethod.authorizerName as string;
+
+    const authorizerMetadata = this.authorizerMetadata[id];
+    if (!authorizerMetadata) {
+      throw new Error(`authorized ${id} not found`);
+    }
+
+    switch (authorizerMetadata.type) {
+      case ApiAuthorizerType.custom: {
+        if (!this.authorizerIds[id]) {
+          this.createCustomAuthorizer(id, authorizerMetadata as AuthorizerDataCustom);
+        }
+        const customAuthorizerMetadata = authorizerMetadata as AuthorizerDataCustom;
+        const authorizerPath = fullPath?.[0] === '/' ? fullPath : `/${fullPath}`;
+        if (authorizer?.scopes?.length) {
+          customAuthorizerMetadata.pathScopes ??= {};
+          customAuthorizerMetadata.pathScopes[authorizerPath] ??= {};
+          customAuthorizerMetadata.pathScopes[authorizerPath][method] = authorizer.scopes;
+        }
+        return [{ [id]: authorizerMethod.scopes ?? [] }];
+      }
+      case ApiAuthorizerType.cognito: {
+        if (!this.authorizerIds[id]) {
+          this.createCognitoAuthorizer(authorizerMetadata as AuthorizerDataCognito);
+        }
+        return [{ [id]: authorizerMethod.scopes ?? [] }];
+      }
+      case ApiAuthorizerType.apiKey: {
+        if (!this.authorizerIds[id]) {
+          this.createApiKeyAuthorizer(authorizerMetadata as AuthorizerDataApiKey);
+        }
+        return [{ [API_KEY_SCHEME]: [] }];
+      }
+      default: {
+        throw new Error('authorizer type  not defined');
+      }
     }
   }
 
@@ -221,14 +289,39 @@ export class AuthorizerFactory {
       }
     );
 
+    const identitySource = metadata.header
+      ? `method.request.header.${metadata.header}`
+      : undefined;
+
+    if (this.isOpenApi) {
+      this.scope.openapiFactory.addSecurityScheme(metadata.name, {
+        type: 'apiKey',
+        name: metadata.header || 'Authorization',
+        in: 'header',
+        'x-amazon-apigateway-authtype': 'custom',
+        'x-amazon-apigateway-authorizer': {
+          type: 'request',
+          authorizerUri: lambdaHandler.invokeArn,
+          identitySource,
+          // API Gateway's OpenAPI import rejects a REQUEST authorizer whose
+          // result cache is enabled (TTL > 0, the default is 300) without an
+          // identity source. When there is no identity source, disable caching
+          // so the import succeeds and the lambda is always invoked.
+          authorizerResultTtlInSeconds: identitySource
+            ? metadata.authorizerResultTtlInSeconds
+            : 0,
+        },
+      });
+      this.authorizerIds[metadata.name] = metadata.name;
+      return;
+    }
+
     const authorizer = new ApiGatewayAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
       restApiId: this.scope.id,
       authorizerUri: lambdaHandler.invokeArn,
       type: 'REQUEST',
-      identitySource: metadata.header
-        ? `method.request.header.${metadata.header}`
-        : undefined,
+      identitySource,
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
       dependsOn: [lambdaHandler],
     });
@@ -240,6 +333,37 @@ export class AuthorizerFactory {
   }
 
   private createCognitoAuthorizer({ metadata }: AuthorizerDataCognito) {
+    if (this.isOpenApi) {
+      const xAuthorizer: XAmazonAuthorizer = {
+        type: 'cognito_user_pools',
+        providerARNs: [],
+      };
+      const scheme: SecuritySchemeObject = {
+        type: 'apiKey',
+        name: 'Authorization',
+        in: 'header',
+        'x-amazon-apigateway-authtype': 'cognito_user_pools',
+        'x-amazon-apigateway-authorizer': xAuthorizer,
+      };
+      this.scope.openapiFactory.addSecurityScheme(metadata.name, scheme);
+
+      const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
+      if (userPoolArn) {
+        xAuthorizer.providerARNs = [userPoolArn];
+      } else {
+        this.scope.openapiFactory.addDeferred(() => {
+          const resolvedArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
+          if (!resolvedArn) {
+            throw new Error('userPoolArn not found, please check user pool ref');
+          }
+          xAuthorizer.providerARNs = [resolvedArn];
+        });
+      }
+
+      this.authorizerIds[metadata.name] = metadata.name;
+      return;
+    }
+
     const authorizer = new LafkenAuthorizer(this.scope, `${metadata.name}-auth`, {
       name: metadata.name,
       restApiId: this.scope.id,
@@ -272,6 +396,14 @@ export class AuthorizerFactory {
   }
 
   private createApiKeyAuthorizer({ metadata }: AuthorizerDataApiKey) {
+    if (this.isOpenApi) {
+      this.scope.openapiFactory.addSecurityScheme(API_KEY_SCHEME, {
+        type: 'apiKey',
+        name: 'x-api-key',
+        in: 'header',
+      });
+    }
+
     const { createUsagePlan = true } = metadata;
 
     if (!createUsagePlan) {

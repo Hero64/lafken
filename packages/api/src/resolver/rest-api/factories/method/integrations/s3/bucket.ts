@@ -1,34 +1,36 @@
 import type { BucketIntegrationActions } from '../../../../../../main';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
 import { DeleteIntegration } from './delete/delete';
 import { DownloadIntegration } from './download/download';
 import { UploadIntegration } from './upload/upload';
 
 export class BucketIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
-  async create() {
-    const { handler } = this.props;
 
-    const action = handler.action as BucketIntegrationActions;
+  create() {
+    return this.resolve().create();
+  }
 
-    let integrationResolver: Integration | undefined;
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    return this.resolve().createOpenApi!();
+  }
+
+  private resolve(): Integration {
+    const action = this.props.handler.action as BucketIntegrationActions;
 
     switch (action) {
       case 'Download':
-        integrationResolver = new DownloadIntegration(this.props);
-        break;
+        return new DownloadIntegration(this.props);
       case 'Upload':
-        integrationResolver = new UploadIntegration(this.props);
-        break;
+        return new UploadIntegration(this.props);
       case 'Delete':
-        integrationResolver = new DeleteIntegration(this.props);
-        break;
+        return new DeleteIntegration(this.props);
+      default:
+        throw new Error('Integration method not found');
     }
-
-    if (!integrationResolver) {
-      throw new Error('Integration method not found');
-    }
-
-    return integrationResolver.create();
   }
 }

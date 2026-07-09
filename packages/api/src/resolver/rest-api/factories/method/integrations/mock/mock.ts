@@ -2,13 +2,63 @@ import type {
   InitializedClass,
   Integration,
   IntegrationProps,
+  OpenApiIntegrationResult,
 } from '../integration.types';
-import { LafkenIntegration } from '../integration.utils';
+import { LafkenIntegration, toXAmazonIntegration } from '../integration.utils';
 
 export class MockIntegration implements Integration {
   constructor(private props: IntegrationProps) {}
 
   async create() {
+    const { restApi, apiGatewayMethod } = this.props;
+
+    const { name, statusCode, responseHandlers } = await this.resolveResponse();
+
+    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'MOCK',
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': `{"statusCode": ${statusCode}}`,
+      },
+    });
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      integration,
+      responseHandlers,
+      name
+    );
+
+    return integration;
+  }
+
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    const { restApi } = this.props;
+
+    const { name, statusCode, responseHandlers } = await this.resolveResponse();
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(responseHandlers, name);
+
+    const integration = toXAmazonIntegration(
+      {
+        type: 'MOCK',
+        passthroughBehavior: 'WHEN_NO_TEMPLATES',
+        requestTemplates: {
+          'application/json': `{"statusCode": ${statusCode}}`,
+        },
+      },
+      integrationResponses
+    );
+
+    return { integration, responses: operationResponses };
+  }
+
+  private async resolveResponse() {
     const {
       classResource,
       handler,
@@ -16,7 +66,6 @@ export class MockIntegration implements Integration {
       paramHelper,
       templateHelper,
       restApi,
-      apiGatewayMethod,
       resourceMetadata,
       integrationHelper,
       responseHelper,
@@ -38,27 +87,11 @@ export class MockIntegration implements Integration {
     });
 
     const [successResponse] = responseHelper.handlerResponse;
-    const statusCode = successResponse.statusCode;
 
-    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
-      httpMethod: apiGatewayMethod.httpMethod,
-      resourceId: apiGatewayMethod.resourceId,
-      restApiId: restApi.id,
-      type: 'MOCK',
-      passthroughBehavior: 'WHEN_NO_TEMPLATES',
-      dependsOn: [apiGatewayMethod],
-      requestTemplates: {
-        'application/json': `{"statusCode": ${statusCode}}`,
-      },
-    });
-
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      [{ ...successResponse, template: responseTemplate }],
-      name
-    );
-
-    return integration;
+    return {
+      name,
+      statusCode: successResponse.statusCode,
+      responseHandlers: [{ ...successResponse, template: responseTemplate }],
+    };
   }
 }

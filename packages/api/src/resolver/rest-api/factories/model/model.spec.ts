@@ -97,7 +97,9 @@ describe('Model factory', () => {
       },
     });
 
-    expect(modelA).toBe(modelB);
+    expect(modelA.name).toBeDefined();
+    expect(modelB.name).toBeDefined();
+    expect(restApi.modelFactory.resources).toHaveLength(1);
   });
 
   it('should create a sub-models', () => {
