@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import Stream from 'node:stream';
 import { isBuildEnvironment } from '../../utils';
 import { type AllowedTypes, getEventFields } from '../field';
 import {
@@ -13,6 +14,7 @@ import {
 const argumentsByType: LambdaArgumentsType = {
   [LambdaArgumentTypes.event]: ({ event }) => event,
   [LambdaArgumentTypes.context]: ({ context }) => context,
+  [LambdaArgumentTypes.responseStream]: ({ responseStream }) => responseStream,
 };
 
 export const reflectArgumentMethod = (
@@ -63,13 +65,29 @@ export const createLambdaDecorator =
       ...argumentParser,
     };
 
-    descriptor.value = async function (event: any, context: any) {
+    descriptor.value = async function (
+      event: any,
+      responseStreamOrContext: any,
+      lambdaContext: any
+    ) {
       if (!isBuildEnvironment() && event && validateEvent) {
         validateEvent(target, methodName, event);
       }
 
+      const responseStream =
+        responseStreamOrContext instanceof Stream ? responseStreamOrContext : undefined;
+
+      const context =
+        responseStream === undefined ? responseStreamOrContext : lambdaContext;
+
       const methodArguments = (lambdaArguments?.[methodName] || []).map((argumentType) =>
-        mapArgumentMethod[argumentType]({ event, context, methodName, target })
+        mapArgumentMethod[argumentType]({
+          event,
+          context,
+          methodName,
+          target,
+          responseStream,
+        })
       );
 
       const response = await originalValue.apply(this, methodArguments);
@@ -119,3 +137,8 @@ export const createEventDecorator =
 export const Context = () => (target: any, methodName: string, _number: number) => {
   reflectArgumentMethod(target, methodName, LambdaArgumentTypes.context);
 };
+
+export const ResponseStreaming =
+  () => (target: any, methodName: string, _number: number) => {
+    reflectArgumentMethod(target, methodName, LambdaArgumentTypes.responseStream);
+  };

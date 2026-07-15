@@ -231,6 +231,9 @@ importers:
 
   packages/common:
     dependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.161
+        version: 8.10.161
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
