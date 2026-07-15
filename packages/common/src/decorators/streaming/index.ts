@@ -1,2 +1,2 @@
-export * from './awslambda.types';
 export * from './streaming';
+export * from './streaming.types';
