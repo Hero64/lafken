@@ -5,6 +5,7 @@ import type {
   IntegrationProps,
   OpenApiIntegrationResult,
 } from '../integration.types';
+import { isStreamingHandler } from '../integration.utils';
 import { buildRequestTemplates, createLambdaHandler } from './lambda.utils';
 
 export class LambdaIntegration implements Integration {
@@ -33,6 +34,7 @@ export class LambdaIntegration implements Integration {
       uri: lambdaHandler.invokeArn,
       requestTemplates: buildRequestTemplates(this.props),
       responses: integrationResponses,
+      responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
     };
 
     return { integration, responses: operationResponses };
@@ -53,6 +55,7 @@ export class LambdaIntegration implements Integration {
         restApiId: restApi.id,
         type: 'AWS',
         uri: lambdaHandler.invokeArn,
+        responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
         integrationHttpMethod: 'POST',
         dependsOn: [apiGatewayMethod, lambdaHandler],
         requestTemplates: buildRequestTemplates(this.props),

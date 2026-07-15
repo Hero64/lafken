@@ -1,5 +1,5 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, Streaming } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
@@ -48,6 +48,10 @@ describe('lambda integration', () => {
 
     @Get()
     lambdaHandler3(@Event(Data) _e: Data) {}
+
+    @Streaming()
+    @Get()
+    lambdaHandlerStreaming() {}
   }
   it('should create a lambda integration with default options', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();
@@ -127,5 +131,65 @@ describe('lambda integration', () => {
       },
       uri: 'invokeArn',
     });
+  });
+
+  it('sets response_transfer_mode to STREAM for a handler decorated with @Streaming()', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, TestingApi, 'lambdaHandlerStreaming');
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
+      type: 'AWS',
+      uri: 'invokeArn',
+      response_transfer_mode: 'STREAM',
+    });
+  });
+
+  it('does not set response_transfer_mode for a non-streaming handler', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, TestingApi, 'lambdaHandler1');
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).not.toHaveResourceWithProperties(ApiGatewayIntegration, {
+      response_transfer_mode: 'STREAM',
+    });
+  });
+
+  it('emits responseTransferMode in the openapi integration fragment for a streaming handler', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    await initializeMethod(restApi, stack, TestingApi, 'lambdaHandlerStreaming');
+    restApi.createStageDeployment();
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+    const api = Object.values(parsed.resource.aws_api_gateway_rest_api)[0] as {
+      body: string;
+    };
+    const doc = JSON.parse(api.body);
+
+    expect(
+      doc.paths['/'].get['x-amazon-apigateway-integration'].responseTransferMode
+    ).toBe('STREAM');
+  });
+
+  it('does not emit responseTransferMode in the openapi integration fragment for a non-streaming handler', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    await initializeMethod(restApi, stack, TestingApi, 'lambdaHandler1');
+    restApi.createStageDeployment();
+
+    const synthesized = Testing.synth(stack);
+    const parsed = JSON.parse(synthesized);
+    const api = Object.values(parsed.resource.aws_api_gateway_rest_api)[0] as {
+      body: string;
+    };
+    const doc = JSON.parse(api.body);
+
+    expect(
+      doc.paths['/'].get['x-amazon-apigateway-integration'].responseTransferMode
+    ).toBeUndefined();
   });
 });

@@ -23,6 +23,7 @@ import type {
   OpenApiIntegrationProps,
   OpenApiIntegrationResult,
 } from './integrations/integration.types';
+import { isStreamingHandler } from './integrations/integration.utils';
 import { KinesisIntegration } from './integrations/kinesis/kinesis';
 import { LambdaIntegration } from './integrations/lambda/lambda';
 import { MockIntegration } from './integrations/mock/mock';
@@ -239,6 +240,12 @@ export class MethodFactory {
   }
 
   private selectIntegration(props: IntegrationProps): Integration {
+    if (props.handler.integration && isStreamingHandler(props)) {
+      throw new Error(
+        `Handler "${props.handler.name}" in resource "${props.resourceMetadata.name}" is decorated with @Streaming(), which is only supported by the default Lambda integration, but it is configured to use the "${props.handler.integration}" integration.`
+      );
+    }
+
     switch (props.handler.integration) {
       case 'bucket':
         return new BucketIntegration(props);
