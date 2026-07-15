@@ -1,7 +1,7 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, Streaming } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
@@ -84,6 +84,19 @@ describe('Api Method', () => {
         partitionKey: {
           name: 'test',
         },
+      };
+    }
+
+    @Streaming()
+    @Get({
+      path: 'bucket-streaming',
+      integration: 'bucket',
+      action: 'Download',
+    })
+    invalidStreamingBucketIntegration(): BucketIntegrationResponse {
+      return {
+        bucket: 'test',
+        object: 'test.json',
       };
     }
   }
@@ -198,5 +211,13 @@ describe('Api Method', () => {
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:dynamodb:action/Query',
     });
+  });
+
+  it('throws when a handler using a non-lambda integration is decorated with @Streaming()', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await expect(
+      initializeMethod(restApi, stack, TestingApi, 'invalidStreamingBucketIntegration')
+    ).rejects.toThrow(/@Streaming\(\)/);
   });
 });
