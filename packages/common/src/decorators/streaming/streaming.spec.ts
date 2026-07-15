@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LAFKEN_CONTEXT } from '../../constants/env.constants';
-import { enableBuildEnvVariable } from '../../utils';
+import { enableBuildEnvVariable, getMetadataPrototypeByKey } from '../../utils';
 import { createStreamingDecorator, Streaming } from './streaming';
+import { type StreamingMethods, StreamingReflectKeys } from './streaming.types';
 
 describe('Streaming decorator', () => {
   const streamifyResponse = vi.fn((handler) => handler);
@@ -62,5 +63,45 @@ describe('Streaming decorator', () => {
 
     expect(streamifyResponse).not.toHaveBeenCalled();
     expect(Test.prototype.handler()).toBe('original');
+  });
+
+  it('records the handler as streaming in reflect-metadata during synth/build', () => {
+    enableBuildEnvVariable();
+    delete (globalThis as any).awslambda;
+
+    class Test {
+      @Streaming()
+      streamingHandler() {}
+
+      plainHandler() {}
+    }
+
+    const streamingMethods = getMetadataPrototypeByKey<StreamingMethods>(
+      Test,
+      StreamingReflectKeys.streaming
+    );
+
+    expect(streamingMethods).toEqual({ streamingHandler: true });
+    expect(streamingMethods.plainHandler).toBeUndefined();
+  });
+
+  it('accumulates metadata across multiple streaming handlers on the same class', () => {
+    enableBuildEnvVariable();
+    delete (globalThis as any).awslambda;
+
+    class Test {
+      @Streaming()
+      first() {}
+
+      @Streaming()
+      second() {}
+    }
+
+    const streamingMethods = getMetadataPrototypeByKey<StreamingMethods>(
+      Test,
+      StreamingReflectKeys.streaming
+    );
+
+    expect(streamingMethods).toEqual({ first: true, second: true });
   });
 });

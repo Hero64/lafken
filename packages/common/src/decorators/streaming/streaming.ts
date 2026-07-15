@@ -1,5 +1,6 @@
+import 'reflect-metadata';
 import { isBuildEnvironment } from '../../utils';
-import './awslambda.types';
+import { type StreamingMethods, StreamingReflectKeys } from './streaming.types';
 
 /**
  * Method decorator factory that marks a Lambda handler as a response-streaming
@@ -12,6 +13,11 @@ import './awslambda.types';
  *
  * The decorated method's signature changes accordingly, from
  * `(event, context)` to `(event, responseStream, context)`.
+ *
+ * During synth it also records, per method name, that the handler is a
+ * streaming one under `StreamingReflectKeys.streaming` on the class
+ * prototype, so a resolver can read it (e.g. via `getMetadataPrototypeByKey`)
+ * to configure the Lambda's Function URL invoke mode.
  *
  * Must be the outermost decorator on the method (declared above any other
  * method decorator) so that the marker `awslambda.streamifyResponse` sets on
@@ -35,8 +41,17 @@ import './awslambda.types';
  * }
  */
 export const createStreamingDecorator =
-  () => () => (_target: any, _methodName: string, descriptor: PropertyDescriptor) => {
+  () => () => (target: any, methodName: string, descriptor: PropertyDescriptor) => {
     if (isBuildEnvironment()) {
+      const streamingMethods: StreamingMethods =
+        Reflect.getMetadata(StreamingReflectKeys.streaming, target) || {};
+
+      Reflect.defineMetadata(
+        StreamingReflectKeys.streaming,
+        { ...streamingMethods, [methodName]: true },
+        target
+      );
+
       return descriptor;
     }
 
