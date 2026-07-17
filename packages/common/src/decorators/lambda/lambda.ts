@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import Stream from 'node:stream';
 import { isBuildEnvironment } from '../../utils';
 import { type AllowedTypes, getEventFields } from '../field';
 import {
@@ -65,17 +64,17 @@ export const createLambdaDecorator =
       ...argumentParser,
     };
 
-    descriptor.value = async function (
-      event: any,
-      responseStreamOrContext: any,
-      lambdaContext: any
-    ) {
+    descriptor.value = async function (...args: any[]) {
+      const [event, responseStreamOrContext, lambdaContext] = args;
+
       if (!isBuildEnvironment() && event && validateEvent) {
         validateEvent(target, methodName, event);
       }
 
       const responseStream =
-        responseStreamOrContext instanceof Stream ? responseStreamOrContext : undefined;
+        typeof responseStreamOrContext?.write === 'function'
+          ? responseStreamOrContext
+          : undefined;
 
       const context =
         responseStream === undefined ? responseStreamOrContext : lambdaContext;

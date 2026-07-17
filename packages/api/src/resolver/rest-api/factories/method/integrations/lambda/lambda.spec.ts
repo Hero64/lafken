@@ -150,7 +150,9 @@ describe('lambda integration', () => {
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
       type: 'AWS_PROXY',
-      uri: 'invokeArn',
+      // STREAM requires invoking the Lambda through InvokeWithResponseStream,
+      // so the uri must target the response-streaming invocation path.
+      uri: expect.stringContaining('response-streaming-invocations'),
       response_transfer_mode: 'STREAM',
     });
     expect(synthesized).not.toHaveResourceWithProperties(ApiGatewayIntegration, {
@@ -188,6 +190,7 @@ describe('lambda integration', () => {
     expect(fragment.type).toBe('aws_proxy');
     expect(fragment.responseTransferMode).toBe('STREAM');
     expect(fragment.requestTemplates).toBeUndefined();
+    expect(fragment.uri).toContain('response-streaming-invocations');
   });
 
   it('does not emit responseTransferMode in the openapi integration fragment for a non-streaming handler', async () => {
