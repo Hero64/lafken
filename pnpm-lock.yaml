@@ -84,6 +84,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.1062.0
         version: 3.1062.0
+      '@types/aws-lambda':
+        specifier: ^8.10.161
+        version: 8.10.161
       cdktn-cli:
         specifier: ^0.23.2
         version: 0.23.2(cdktn@0.23.2(constructs@10.6.0))(jsii-pacmak@1.128.0(jsii-rosetta@5.9.39))(jsii@5.9.44)
@@ -231,6 +234,9 @@ importers:
 
   packages/common:
     dependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.161
+        version: 8.10.161
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2

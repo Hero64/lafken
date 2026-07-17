@@ -36,6 +36,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@types/aws-lambda": "^8.10.161",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {

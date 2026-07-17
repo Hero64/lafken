@@ -7,35 +7,28 @@ import { getAppContext, getModuleContext } from '../../../utils/context.utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
   AddLambdaProps,
-  AssetMetadata,
   AssetProps,
   BuildAssetProps,
+  InitializeAssetProps,
 } from './asset.types';
 
 class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
-  public initializeMetadata(props: AssetMetadata) {
-    const { filename, foldername, className, methods } = props;
+  public initializeMetadata(props: InitializeAssetProps) {
+    const { asset, resource } = props;
+    const { filename, foldername } = asset;
 
     const prebuildPath = this.getPrebuildPath(foldername, filename);
     if (!this.lambdaAssets[prebuildPath]) {
       this.lambdaAssets[prebuildPath] = {
-        metadata: {
-          filename,
-          foldername,
-          bundler: props.bundler,
-          afterBuild: props.afterBuild,
-        },
+        metadata: asset,
         resources: {},
         lambdas: [],
       };
     }
 
-    this.lambdaAssets[prebuildPath].resources[className] = {
-      className,
-      methods,
-    };
+    this.lambdaAssets[prebuildPath].resources[resource.className] = resource;
   }
 
   public addLambda(props: AddLambdaProps) {

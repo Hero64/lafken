@@ -10,8 +10,8 @@ import {
   type AppModule,
   type AppStack,
   getContextValueByScope,
+  initLambdaAssetMetadata,
   lafkenResource,
-  lambdaAssets,
   type ResolverType,
   ResourceOutput,
 } from '@lafken/resolver';
@@ -81,16 +81,7 @@ export class EventRuleResolver implements ResolverType {
 
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<EventRuleMetadata>(resource);
-    lambdaAssets.initializeMetadata({
-      foldername: metadata.foldername,
-      filename: metadata.filename,
-      bundler: {
-        ...metadata.bundler,
-        minify: metadata.bundler?.minify ?? contextBundler?.minify,
-      },
-      className: metadata.originalName,
-      methods: handlers.map((handler) => handler.name),
-    });
+    initLambdaAssetMetadata({ metadata, handlers, contextBundler });
 
     for (const handler of handlers) {
       const id = `${handler.name}-${metadata.name}`;

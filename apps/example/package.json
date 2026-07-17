@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-sqs": "^3.1062.0",
+    "@types/aws-lambda": "^8.10.161",
     "cdktn-cli": "^0.23.2",
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.1.8"
