@@ -6,7 +6,7 @@ import {
 import {
   type AppModule,
   getContextValueByScope,
-  lambdaAssets,
+  initLambdaAssetMetadata,
   type ResolverType,
 } from '@lafken/resolver';
 
@@ -25,16 +25,7 @@ export class StateMachineResolver implements ResolverType {
     const metadata = getResourceMetadata<StateMachineResourceMetadata>(resource);
     const handlers = getResourceHandlerMetadata<LambdaStateMetadata>(resource);
 
-    lambdaAssets.initializeMetadata({
-      foldername: metadata.foldername,
-      filename: metadata.filename,
-      className: metadata.originalName,
-      methods: handlers.map((handler) => handler.name),
-      bundler: {
-        ...metadata.bundler,
-        minify: metadata.bundler?.minify ?? contextBundler?.minify,
-      },
-    });
+    initLambdaAssetMetadata({ metadata, handlers, contextBundler });
 
     const stateMachine = new StateMachine(module, metadata.name, {
       minify: metadata.bundler?.minify ?? contextBundler?.minify,

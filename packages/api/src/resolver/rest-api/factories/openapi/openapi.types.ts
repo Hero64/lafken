@@ -55,6 +55,7 @@ export interface XAmazonIntegration {
   requestTemplates?: Record<string, string>;
   requestParameters?: Record<string, string>;
   responses?: Record<string, XAmazonIntegrationResponse>;
+  responseTransferMode?: string;
 }
 
 export interface OperationObject {

@@ -13,7 +13,7 @@ describe('LafkenBuildPlugin', () => {
       exports: [
         {
           className: 'Testing',
-          methods: ['foo', 'bar'],
+          methods: [{ name: 'foo' }, { name: 'bar' }],
         },
       ],
       removeAttributes: [],
@@ -27,6 +27,30 @@ describe('LafkenBuildPlugin', () => {
     );
     expect(response?.code).toContain(
       'exports.bar_Testing = TestingInstance.bar.bind(TestingInstance);'
+    );
+  });
+
+  it('wraps streaming handlers with awslambda.streamifyResponse', async () => {
+    const inputFile = path.join(tempDir, 'input.js');
+
+    const plugin = LafkenBuildPlugin({
+      filename: inputFile,
+      exports: [
+        {
+          className: 'Testing',
+          methods: [{ name: 'stream', streaming: true }, { name: 'plain' }],
+        },
+      ],
+      removeAttributes: [],
+    });
+
+    const response = plugin.transform('class Testing {}', inputFile);
+
+    expect(response?.code).toContain(
+      'exports.stream_Testing = awslambda.streamifyResponse(TestingInstance.stream.bind(TestingInstance));'
+    );
+    expect(response?.code).toContain(
+      'exports.plain_Testing = TestingInstance.plain.bind(TestingInstance);'
     );
   });
 });

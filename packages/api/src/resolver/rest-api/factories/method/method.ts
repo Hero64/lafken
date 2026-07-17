@@ -1,6 +1,8 @@
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { getMetadataPrototypeByKey } from '@lafken/common';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
+import { EVENT_PROXY_METADATA_KEY } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
 import type { ModelRef } from '../model/model.types';
 import type { OperationObject } from '../openapi/openapi.types';
@@ -23,6 +25,7 @@ import type {
   OpenApiIntegrationProps,
   OpenApiIntegrationResult,
 } from './integrations/integration.types';
+import { isStreamingHandler } from './integrations/integration.utils';
 import { KinesisIntegration } from './integrations/kinesis/kinesis';
 import { LambdaIntegration } from './integrations/lambda/lambda';
 import { MockIntegration } from './integrations/mock/mock';
@@ -51,6 +54,8 @@ export class MethodFactory {
     const proxyHelper = new ProxyHelper();
     const integrationHelper = new IntegrationHelper();
     const responseTemplateHelper = new ResponseTemplateHelper();
+
+    this.validateIntegrationType(props, paramHelper);
 
     const fullPath = this.cleanPath(`/${resourceMetadata.path}/${handler.path}`) || '/';
     paramHelper.validateParamsInPath(fullPath);
@@ -238,7 +243,52 @@ export class MethodFactory {
     return this.selectIntegration(props).create();
   }
 
+  private validateIntegrationType(props: CreateMethodProps, paramHelper: ParamHelper) {
+    const { handler, resourceMetadata, classResource } = props;
+
+    // Only the default Lambda integration honours `integrationType`.
+    if (handler.integration) {
+      return;
+    }
+
+    const integrationType = handler.integrationType ?? 'aws';
+    const isProxy = integrationType === 'aws-proxy';
+    const where = `Handler "${handler.name}" in resource "${resourceMetadata.name}"`;
+
+    const usesProxyEvent = Boolean(
+      getMetadataPrototypeByKey<Record<string, boolean>>(
+        classResource,
+        EVENT_PROXY_METADATA_KEY
+      )?.[handler.name]
+    );
+    const usesEvent = Boolean(paramHelper.params) && !usesProxyEvent;
+
+    if (isStreamingHandler(props) && !isProxy) {
+      throw new Error(
+        `${where} is decorated with @Streaming(), which requires integrationType: 'aws-proxy'.`
+      );
+    }
+
+    if (isProxy && usesEvent) {
+      throw new Error(
+        `${where} uses integrationType: 'aws-proxy'; use @EventProxy() instead of @Event() to receive the raw APIGatewayProxyEvent.`
+      );
+    }
+
+    if (!isProxy && usesProxyEvent) {
+      throw new Error(
+        `${where} uses @EventProxy(), which requires integrationType: 'aws-proxy'.`
+      );
+    }
+  }
+
   private selectIntegration(props: IntegrationProps): Integration {
+    if (props.handler.integration && isStreamingHandler(props)) {
+      throw new Error(
+        `Handler "${props.handler.name}" in resource "${props.resourceMetadata.name}" is decorated with @Streaming(), which is only supported by the default Lambda integration, but it is configured to use the "${props.handler.integration}" integration.`
+      );
+    }
+
     switch (props.handler.integration) {
       case 'bucket':
         return new BucketIntegration(props);

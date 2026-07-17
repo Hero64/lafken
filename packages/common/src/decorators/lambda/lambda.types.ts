@@ -319,6 +319,7 @@ export enum LambdaReflectKeys {
 export enum LambdaArgumentTypes {
   event = 'event',
   context = 'context',
+  responseStream = 'responseStream',
 }
 
 export type CallbackParam = (error: boolean | null, response?: any) => void;
@@ -334,6 +335,7 @@ export type LambdaArgumentsType = Record<
     context: any;
     methodName: string;
     target: any;
+    responseStream?: any;
   }) => any
 >;
 

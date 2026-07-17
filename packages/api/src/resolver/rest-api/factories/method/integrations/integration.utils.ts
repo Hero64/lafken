@@ -1,11 +1,36 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
+import {
+  getMetadataPrototypeByKey,
+  type StreamingMethods,
+  StreamingReflectKeys,
+} from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import type {
   XAmazonIntegration,
   XAmazonIntegrationResponse,
 } from '../../openapi/openapi.types';
+import type { IntegrationProps } from './integration.types';
 
 export const LafkenIntegration = lafkenResource.make(ApiGatewayIntegration);
+
+/**
+ * Whether the handler behind this method was decorated with `@Streaming()`.
+ * Only the default Lambda integration knows how to run a response-streaming
+ * handler; other integrations (bucket, queue, mock, ...) never invoke a
+ * Lambda directly and so cannot support it.
+ */
+export const isStreamingHandler = (
+  props: Pick<IntegrationProps, 'classResource' | 'handler'>
+): boolean => {
+  const { classResource, handler } = props;
+
+  const streamingMethods = getMetadataPrototypeByKey<StreamingMethods>(
+    classResource,
+    StreamingReflectKeys.streaming
+  );
+
+  return Boolean(streamingMethods?.[handler.name]);
+};
 
 /**
  * Backend portion of an `ApiGatewayIntegration` config, shared by the resource
