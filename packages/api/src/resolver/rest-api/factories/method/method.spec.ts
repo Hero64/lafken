@@ -7,8 +7,12 @@ import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
 import {
   Api,
+  ApiRequest,
+  BodyParam,
   type BucketIntegrationResponse,
   type DynamoQueryIntegrationResponse,
+  Event,
+  EventProxy,
   Get,
   type QueueSendMessageIntegrationResponse,
   type StateMachineStartIntegrationResponse,
@@ -31,6 +35,13 @@ vi.mock('@lafken/resolver', async (importOriginal) => {
 
 describe('Api Method', () => {
   enableBuildEnvVariable();
+
+  @ApiRequest()
+  class ProxyBody {
+    @BodyParam()
+    name: string;
+  }
+
   @Api()
   class TestingApi {
     @Get({
@@ -99,6 +110,20 @@ describe('Api Method', () => {
         object: 'test.json',
       };
     }
+
+    @Streaming()
+    @Get({ path: 'streaming-without-proxy' })
+    streamingWithoutProxy() {}
+
+    @Get({ path: 'aws-proxy-with-event', integrationType: 'aws-proxy' })
+    awsProxyWithEvent(@Event(ProxyBody) _e: ProxyBody) {}
+
+    @Get({ path: 'proxy-event-on-aws' })
+    proxyEventOnAws(@EventProxy(ProxyBody) _e: ProxyBody) {}
+
+    @Streaming()
+    @Get({ path: 'valid-streaming', integrationType: 'aws-proxy' })
+    validStreaming(@EventProxy(ProxyBody) _e: ProxyBody) {}
   }
 
   it('should create a lambda integration method', async () => {
@@ -219,5 +244,41 @@ describe('Api Method', () => {
     await expect(
       initializeMethod(restApi, stack, TestingApi, 'invalidStreamingBucketIntegration')
     ).rejects.toThrow(/@Streaming\(\)/);
+  });
+
+  it('throws when @Streaming() is used without integrationType aws-proxy', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await expect(
+      initializeMethod(restApi, stack, TestingApi, 'streamingWithoutProxy')
+    ).rejects.toThrow(/aws-proxy/);
+  });
+
+  it('throws when @Event() is used with integrationType aws-proxy', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await expect(
+      initializeMethod(restApi, stack, TestingApi, 'awsProxyWithEvent')
+    ).rejects.toThrow(/@EventProxy\(\)/);
+  });
+
+  it('throws when @EventProxy() is used without integrationType aws-proxy', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await expect(
+      initializeMethod(restApi, stack, TestingApi, 'proxyEventOnAws')
+    ).rejects.toThrow(/@EventProxy\(\)/);
+  });
+
+  it('creates an AWS_PROXY integration for a valid streaming + @EventProxy handler', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, TestingApi, 'validStreaming');
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
+      type: 'AWS_PROXY',
+      response_transfer_mode: 'STREAM',
+    });
   });
 });
