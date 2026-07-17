@@ -4,39 +4,123 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@aws-sdk/client-dynamodb':
+      specifier: ^3.1090.0
+      version: 3.1090.0
+    '@aws-sdk/client-s3':
+      specifier: ^3.1090.0
+      version: 3.1090.0
+    '@aws-sdk/client-sqs':
+      specifier: ^3.1090.0
+      version: 3.1090.0
+    '@aws-sdk/util-dynamodb':
+      specifier: ^3.996.7
+      version: 3.996.7
+    '@biomejs/biome':
+      specifier: 2.5.4
+      version: 2.5.4
+    '@cdktn/provider-aws':
+      specifier: ^24.11.0
+      version: 24.11.0
+    '@commitlint/cli':
+      specifier: ^21.2.1
+      version: 21.2.1
+    '@commitlint/config-conventional':
+      specifier: ^21.2.0
+      version: 21.2.0
+    '@swc/core':
+      specifier: ^1.15.43
+      version: 1.15.43
+    '@swc/helpers':
+      specifier: ^0.5.23
+      version: 0.5.23
+    '@types/aws-lambda':
+      specifier: ^8.10.162
+      version: 8.10.162
+    '@types/node':
+      specifier: 26.1.1
+      version: 26.1.1
+    '@vitest/runner':
+      specifier: ^4.1.10
+      version: 4.1.10
+    aws-sdk-client-mock:
+      specifier: ^4.1.0
+      version: 4.1.0
+    cdktn:
+      specifier: ^0.23.4
+      version: 0.23.4
+    cdktn-cli:
+      specifier: ^0.23.4
+      version: 0.23.4
+    cdktn-vitest:
+      specifier: ^1.0.0
+      version: 1.0.0
+    constructs:
+      specifier: ^10.7.0
+      version: 10.7.0
+    dayjs:
+      specifier: 1.11.21
+      version: 1.11.21
+    husky:
+      specifier: 9.1.7
+      version: 9.1.7
+    lint-staged:
+      specifier: 17.0.8
+      version: 17.0.8
+    reflect-metadata:
+      specifier: ^0.2.2
+      version: 0.2.2
+    rolldown:
+      specifier: 1.2.0
+      version: 1.2.0
+    turbo:
+      specifier: 2.10.5
+      version: 2.10.5
+    typescript:
+      specifier: 7.0.2
+      version: 7.0.2
+    unplugin-swc:
+      specifier: ^1.5.9
+      version: 1.5.9
+    vitest:
+      specifier: ^4.1.10
+      version: 4.1.10
+
 importers:
 
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: 2.5.4
+        specifier: 'catalog:'
         version: 2.5.4
       '@commitlint/cli':
-        specifier: ^21.2.1
+        specifier: 'catalog:'
         version: 21.2.1(@types/node@26.1.1)(conventional-commits-parser@7.1.0)(typescript@7.0.2)
       '@commitlint/config-conventional':
-        specifier: ^21.2.0
+        specifier: 'catalog:'
         version: 21.2.0
       '@types/node':
-        specifier: 26.1.1
+        specifier: 'catalog:'
         version: 26.1.1
       husky:
-        specifier: 9.1.7
+        specifier: 'catalog:'
         version: 9.1.7
       lint-staged:
-        specifier: 17.0.8
+        specifier: 'catalog:'
         version: 17.0.8
       turbo:
-        specifier: 2.10.5
+        specifier: 'catalog:'
         version: 2.10.5
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
 
   apps/example:
     dependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/api':
         specifier: workspace:*
@@ -72,29 +156,29 @@ importers:
         specifier: workspace:*
         version: link:../../packages/state-machine
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       dayjs:
-        specifier: 1.11.21
+        specifier: 'catalog:'
         version: 1.11.21
     devDependencies:
       '@aws-sdk/client-sqs':
-        specifier: ^3.1090.0
+        specifier: 'catalog:'
         version: 3.1090.0
       '@types/aws-lambda':
-        specifier: ^8.10.162
+        specifier: 'catalog:'
         version: 8.10.162
       cdktn-cli:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(cdktn@0.23.4(constructs@10.7.0))(jsii-pacmak@1.128.0(jsii-rosetta@5.9.56))(jsii@5.9.44)
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/api:
@@ -103,44 +187,44 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       '@types/aws-lambda':
-        specifier: ^8.10.162
+        specifier: 'catalog:'
         version: 8.10.162
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/auth:
@@ -149,41 +233,41 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/bucket:
@@ -192,127 +276,127 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1090.0
+        specifier: 'catalog:'
         version: 3.1090.0
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/common:
     dependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.162
+        specifier: 'catalog:'
         version: 8.10.162
       reflect-metadata:
-        specifier: 0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/dynamo:
     dependencies:
       '@aws-sdk/client-dynamodb':
-        specifier: ^3.1090.0
+        specifier: 'catalog:'
         version: 3.1090.0
       '@aws-sdk/util-dynamodb':
-        specifier: ^3.996.7
+        specifier: 'catalog:'
         version: 3.996.7(@aws-sdk/client-dynamodb@3.1090.0)
       '@lafken/resolver':
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       aws-sdk-client-mock:
-        specifier: ^4.1.0
+        specifier: 'catalog:'
         version: 4.1.0
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/event:
@@ -321,41 +405,41 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/main:
@@ -364,109 +448,109 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/queue:
     dependencies:
       '@aws-sdk/client-sqs':
-        specifier: ^3.1090.0
+        specifier: 'catalog:'
         version: 3.1090.0
       '@lafken/resolver':
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@types/aws-lambda':
-        specifier: ^8.10.162
+        specifier: 'catalog:'
         version: 8.10.162
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/resolver:
     dependencies:
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
       rolldown:
-        specifier: 1.2.0
+        specifier: 'catalog:'
         version: 1.2.0
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/schedule:
@@ -475,41 +559,41 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/standalone:
@@ -518,41 +602,41 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/state-machine:
@@ -561,41 +645,41 @@ importers:
         specifier: workspace:*
         version: link:../resolver
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
       '@cdktn/provider-aws':
-        specifier: ^24.11.0
+        specifier: 'catalog:'
         version: 24.11.0(cdktn@0.23.4(constructs@10.7.0))(constructs@10.7.0)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
       '@swc/core':
-        specifier: ^1.15.43
+        specifier: 'catalog:'
         version: 1.15.43(@swc/helpers@0.5.23)
       '@swc/helpers':
-        specifier: ^0.5.23
+        specifier: 'catalog:'
         version: 0.5.23
       '@vitest/runner':
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10
       cdktn:
-        specifier: ^0.23.4
+        specifier: 'catalog:'
         version: 0.23.4(constructs@10.7.0)
       cdktn-vitest:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0(cdktn@0.23.4(constructs@10.7.0))(vitest@4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0)))
       constructs:
-        specifier: ^10.7.0
+        specifier: 'catalog:'
         version: 10.7.0
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unplugin-swc:
-        specifier: ^1.5.9
+        specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.43(@swc/helpers@0.5.23))(rollup@4.62.2)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@26.1.1)(vite@7.3.1(@types/node@26.1.1)(jiti@2.6.1)(yaml@2.9.0))
 
 packages:
@@ -3221,7 +3305,7 @@ snapshots:
   '@babel/generator@7.29.1':
     dependencies:
       '@babel/parser': 7.29.7
-      '@babel/types': 7.29.0
+      '@babel/types': 7.29.7
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
       jsesc: 3.1.0
@@ -3238,7 +3322,7 @@ snapshots:
     dependencies:
       '@babel/code-frame': 7.29.7
       '@babel/parser': 7.29.7
-      '@babel/types': 7.29.0
+      '@babel/types': 7.29.7
 
   '@babel/types@7.29.0':
     dependencies:
@@ -4710,7 +4794,7 @@ snapshots:
       semver: 7.8.5
       spdx-license-list: 6.11.0
       xmlbuilder: 15.1.1
-      yargs: 17.7.2
+      yargs: 17.7.3
 
   jsii-reflect@1.139.0:
     dependencies:
@@ -4752,7 +4836,7 @@ snapshots:
       sort-json: 2.0.1
       spdx-license-list: 6.11.0
       typescript: 5.9.3
-      yargs: 17.7.2
+      yargs: 17.7.3
     transitivePeerDependencies:
       - supports-color
 
