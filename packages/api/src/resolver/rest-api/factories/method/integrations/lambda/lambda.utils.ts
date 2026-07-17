@@ -20,6 +20,20 @@ export const createLambdaHandler = (props: OpenApiIntegrationProps) => {
   });
 };
 
+/**
+ * API Gateway integration URI that invokes the Lambda through the
+ * `InvokeWithResponseStream` action (required by AWS when
+ * `responseTransferMode` is `STREAM`). The standard `invoke_arn` targets the
+ * classic `Invoke` action (`/2015-03-31/.../invocations`); response streaming
+ * needs the `/2021-11-15/.../response-streaming-invocations` path instead.
+ *
+ * Built as a plain string from simple attribute tokens (region + function ARN)
+ * so it also serializes correctly inside the OpenAPI `body` document, which
+ * cannot embed Terraform function calls such as `replace()`.
+ */
+export const streamingInvokeUri = (regionRef: string, functionArn: string) =>
+  `arn:aws:apigateway:${regionRef}:lambda:path/2021-11-15/functions/${functionArn}/response-streaming-invocations`;
+
 export const buildRequestTemplates = (props: OpenApiIntegrationProps) => {
   const { paramHelper, templateHelper } = props;
 

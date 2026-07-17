@@ -16,7 +16,7 @@ class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
   public initializeMetadata(props: AssetMetadata) {
-    const { filename, foldername, className, methods } = props;
+    const { filename, foldername, className, methods, streamingMethods } = props;
 
     const prebuildPath = this.getPrebuildPath(foldername, filename);
     if (!this.lambdaAssets[prebuildPath]) {
@@ -35,6 +35,7 @@ class LambdaAssets {
     this.lambdaAssets[prebuildPath].resources[className] = {
       className,
       methods,
+      streamingMethods,
     };
   }
 

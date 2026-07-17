@@ -29,4 +29,29 @@ describe('LafkenBuildPlugin', () => {
       'exports.bar_Testing = TestingInstance.bar.bind(TestingInstance);'
     );
   });
+
+  it('wraps streaming handlers with awslambda.streamifyResponse', async () => {
+    const inputFile = path.join(tempDir, 'input.js');
+
+    const plugin = LafkenBuildPlugin({
+      filename: inputFile,
+      exports: [
+        {
+          className: 'Testing',
+          methods: ['stream', 'plain'],
+          streamingMethods: ['stream'],
+        },
+      ],
+      removeAttributes: [],
+    });
+
+    const response = plugin.transform('class Testing {}', inputFile);
+
+    expect(response?.code).toContain(
+      'exports.stream_Testing = awslambda.streamifyResponse(TestingInstance.stream.bind(TestingInstance));'
+    );
+    expect(response?.code).toContain(
+      'exports.plain_Testing = TestingInstance.plain.bind(TestingInstance);'
+    );
+  });
 });

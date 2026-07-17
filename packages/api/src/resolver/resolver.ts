@@ -1,7 +1,10 @@
 import {
   type ClassResource,
+  getMetadataPrototypeByKey,
   getResourceHandlerMetadata,
   getResourceMetadata,
+  type StreamingMethods,
+  StreamingReflectKeys,
 } from '@lafken/common';
 import {
   type AppModule,
@@ -55,6 +58,17 @@ export class ApiResolver implements ResolverType {
 
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
+
+    const lambdaMethods = handlers
+      .filter((handler) => !handler.integration)
+      .map((handler) => handler.name);
+
+    const streamingByMethod =
+      getMetadataPrototypeByKey<StreamingMethods>(
+        resource,
+        StreamingReflectKeys.streaming
+      ) ?? {};
+
     lambdaAssets.initializeMetadata({
       foldername: metadata.foldername,
       filename: metadata.filename,
@@ -63,9 +77,8 @@ export class ApiResolver implements ResolverType {
         minify: metadata.bundler?.minify ?? contextBundler?.minify,
       },
       className: metadata.originalName,
-      methods: handlers
-        .filter((handler) => !handler.integration)
-        .map((handler) => handler.name),
+      methods: lambdaMethods,
+      streamingMethods: lambdaMethods.filter((name) => streamingByMethod[name]),
     });
 
     const apiNames = Object.keys(this.apis);

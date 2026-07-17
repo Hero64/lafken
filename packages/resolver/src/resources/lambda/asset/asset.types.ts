@@ -8,6 +8,13 @@ interface BaseAsset
 export interface AssetResource {
   className: string;
   methods: string[];
+  /**
+   * Names of the methods (subset of `methods`) that were decorated with
+   * `@Streaming`. Their exported handlers are wrapped with
+   * `awslambda.streamifyResponse` at build time so the Lambda runtime treats
+   * them as response-streaming handlers.
+   */
+  streamingMethods?: string[];
 }
 
 export interface AssetMetadata extends BaseAsset, AssetResource {

@@ -4,33 +4,21 @@ import { type StreamingMethods, StreamingReflectKeys } from './streaming.types';
 
 /**
  * Method decorator factory that marks a Lambda handler as a response-streaming
- * handler by wrapping it with `awslambda.streamifyResponse`.
+ * handler.
  *
- * `awslambda` is a global injected by the AWS Lambda Node.js runtime only when
- * the function actually executes there; it does not exist during synth (the
- * plain Node process that reads decorator metadata to generate Terraform), so
- * the wrapping is skipped in that environment and only applied at real runtime.
+ * It only records, per method name, that the handler is a streaming one under
+ * `StreamingReflectKeys.streaming` on the class prototype (during synth). The
+ * actual `awslambda.streamifyResponse` wrapping is applied later by the build
+ * step, when the handler is exported as the Lambda entry point, so the
+ * streaming marker ends up on the final exported function (a decorator wrap
+ * would be dropped by `Function.prototype.bind` when the handler is bound to
+ * its instance at export time).
  *
- * The decorated method's signature changes accordingly, from
- * `(event, context)` to `(event, responseStream, context)`.
- *
- * During synth it also records, per method name, that the handler is a
- * streaming one under `StreamingReflectKeys.streaming` on the class
- * prototype, so a resolver can read it (e.g. via `getMetadataPrototypeByKey`)
- * to configure the Lambda's Function URL invoke mode.
- *
- * Must be the outermost decorator on the method (declared above any other
- * method decorator) so that the marker `awslambda.streamifyResponse` sets on
- * the returned function ends up on the final exported handler — AWS detects
- * streaming handlers by inspecting that exact function object. Declaring it
- * as the innermost decorator would let an outer decorator (e.g. one built
- * from `createLambdaDecorator`) replace `descriptor.value` afterwards,
- * discarding that marker.
- *
+ * The decorated method's runtime signature is `(event, responseStream, context)`.
  * When combined with a method decorator built from `createLambdaDecorator`
- * (e.g. `Handler`), that decorator's generated wrapper detects the incoming
- * `responseStream` via `instanceof Stream` and forwards it to any parameter
- * decorated with `ResponseStreaming()`.
+ * (e.g. `Get`/`Handler`), that decorator's generated wrapper detects the
+ * incoming `responseStream` via `instanceof Stream` and forwards it to any
+ * parameter decorated with `ResponseStreaming()`.
  *
  * @example
  * @Streaming()
@@ -51,12 +39,8 @@ export const createStreamingDecorator =
         { ...streamingMethods, [methodName]: true },
         target
       );
-
-      return descriptor;
     }
 
-    const originalValue = descriptor.value;
-    descriptor.value = awslambda.streamifyResponse(originalValue);
     return descriptor;
   };
 

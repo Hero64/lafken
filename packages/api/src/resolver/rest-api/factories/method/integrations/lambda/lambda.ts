@@ -6,7 +6,11 @@ import type {
   OpenApiIntegrationResult,
 } from '../integration.types';
 import { isStreamingHandler } from '../integration.utils';
-import { buildRequestTemplates, createLambdaHandler } from './lambda.utils';
+import {
+  buildRequestTemplates,
+  createLambdaHandler,
+  streamingInvokeUri,
+} from './lambda.utils';
 
 export class LambdaIntegration implements Integration {
   constructor(private props: IntegrationProps) {}
@@ -19,6 +23,7 @@ export class LambdaIntegration implements Integration {
   createOpenApi(): OpenApiIntegrationResult {
     const { restApi, resourceMetadata, handler, responseHelper } = this.props;
     const isProxy = handler.integrationType === 'aws-proxy';
+    const isStreaming = isStreamingHandler(this.props);
 
     const lambdaHandler = createLambdaHandler(this.props);
     const baseName = `${resourceMetadata.name}-${handler.name}`;
@@ -32,10 +37,12 @@ export class LambdaIntegration implements Integration {
     const integration: XAmazonIntegration = {
       type: isProxy ? 'aws_proxy' : 'aws',
       httpMethod: 'POST',
-      uri: lambdaHandler.invokeArn,
+      uri: isStreaming
+        ? streamingInvokeUri(restApi.regionRef, lambdaHandler.arn)
+        : lambdaHandler.invokeArn,
       requestTemplates: isProxy ? undefined : buildRequestTemplates(this.props),
       responses: isProxy ? undefined : integrationResponses,
-      responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
+      responseTransferMode: isStreaming ? 'STREAM' : undefined,
     };
 
     return { integration, responses: operationResponses };
@@ -45,6 +52,7 @@ export class LambdaIntegration implements Integration {
     const { handler, resourceMetadata, restApi, apiGatewayMethod, responseHelper } =
       this.props;
     const isProxy = handler.integrationType === 'aws-proxy';
+    const isStreaming = isStreamingHandler(this.props);
 
     const lambdaHandler = createLambdaHandler(this.props);
 
@@ -56,8 +64,10 @@ export class LambdaIntegration implements Integration {
         resourceId: apiGatewayMethod.resourceId,
         restApiId: restApi.id,
         type: isProxy ? 'AWS_PROXY' : 'AWS',
-        uri: lambdaHandler.invokeArn,
-        responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
+        uri: isStreaming
+          ? streamingInvokeUri(restApi.regionRef, lambdaHandler.arn)
+          : lambdaHandler.invokeArn,
+        responseTransferMode: isStreaming ? 'STREAM' : undefined,
         integrationHttpMethod: 'POST',
         dependsOn: [apiGatewayMethod, lambdaHandler],
         requestTemplates: isProxy ? undefined : buildRequestTemplates(this.props),
