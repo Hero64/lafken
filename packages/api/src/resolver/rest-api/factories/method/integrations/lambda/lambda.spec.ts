@@ -1,9 +1,18 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
+import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
+import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import { enableBuildEnvVariable, Streaming } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
-import { Api, ApiRequest, BodyParam, Event, Get } from '../../../../../../main';
+import {
+  Api,
+  ApiRequest,
+  BodyParam,
+  Event,
+  EventProxy,
+  Get,
+} from '../../../../../../main';
 import {
   initializeMethod,
   setupInternalTestingRestApi,
@@ -50,8 +59,8 @@ describe('lambda integration', () => {
     lambdaHandler3(@Event(Data) _e: Data) {}
 
     @Streaming()
-    @Get()
-    lambdaHandlerStreaming() {}
+    @Get({ integrationType: 'aws-proxy' })
+    lambdaHandlerStreaming(@EventProxy(Data) _e: Data) {}
   }
   it('should create a lambda integration with default options', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();
@@ -133,17 +142,22 @@ describe('lambda integration', () => {
     });
   });
 
-  it('sets response_transfer_mode to STREAM for a handler decorated with @Streaming()', async () => {
+  it('creates an AWS_PROXY streaming integration without request templates or responses', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();
 
     await initializeMethod(restApi, stack, TestingApi, 'lambdaHandlerStreaming');
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
-      type: 'AWS',
+      type: 'AWS_PROXY',
       uri: 'invokeArn',
       response_transfer_mode: 'STREAM',
     });
+    expect(synthesized).not.toHaveResourceWithProperties(ApiGatewayIntegration, {
+      request_templates: expect.anything(),
+    });
+    expect(synthesized).not.toHaveResource(ApiGatewayIntegrationResponse);
+    expect(synthesized).not.toHaveResource(ApiGatewayMethodResponse);
   });
 
   it('does not set response_transfer_mode for a non-streaming handler', async () => {
@@ -157,7 +171,7 @@ describe('lambda integration', () => {
     });
   });
 
-  it('emits responseTransferMode in the openapi integration fragment for a streaming handler', async () => {
+  it('emits an aws_proxy streaming fragment with responseTransferMode in openapi mode', async () => {
     const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
 
     await initializeMethod(restApi, stack, TestingApi, 'lambdaHandlerStreaming');
@@ -169,10 +183,11 @@ describe('lambda integration', () => {
       body: string;
     };
     const doc = JSON.parse(api.body);
+    const fragment = doc.paths['/'].get['x-amazon-apigateway-integration'];
 
-    expect(
-      doc.paths['/'].get['x-amazon-apigateway-integration'].responseTransferMode
-    ).toBe('STREAM');
+    expect(fragment.type).toBe('aws_proxy');
+    expect(fragment.responseTransferMode).toBe('STREAM');
+    expect(fragment.requestTemplates).toBeUndefined();
   });
 
   it('does not emit responseTransferMode in the openapi integration fragment for a non-streaming handler', async () => {

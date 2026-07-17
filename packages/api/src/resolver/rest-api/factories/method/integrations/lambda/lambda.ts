@@ -18,6 +18,7 @@ export class LambdaIntegration implements Integration {
    */
   createOpenApi(): OpenApiIntegrationResult {
     const { restApi, resourceMetadata, handler, responseHelper } = this.props;
+    const isProxy = handler.integrationType === 'aws-proxy';
 
     const lambdaHandler = createLambdaHandler(this.props);
     const baseName = `${resourceMetadata.name}-${handler.name}`;
@@ -29,11 +30,11 @@ export class LambdaIntegration implements Integration {
       );
 
     const integration: XAmazonIntegration = {
-      type: 'aws',
+      type: isProxy ? 'aws_proxy' : 'aws',
       httpMethod: 'POST',
       uri: lambdaHandler.invokeArn,
-      requestTemplates: buildRequestTemplates(this.props),
-      responses: integrationResponses,
+      requestTemplates: isProxy ? undefined : buildRequestTemplates(this.props),
+      responses: isProxy ? undefined : integrationResponses,
       responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
     };
 
@@ -43,6 +44,7 @@ export class LambdaIntegration implements Integration {
   create() {
     const { handler, resourceMetadata, restApi, apiGatewayMethod, responseHelper } =
       this.props;
+    const isProxy = handler.integrationType === 'aws-proxy';
 
     const lambdaHandler = createLambdaHandler(this.props);
 
@@ -53,21 +55,25 @@ export class LambdaIntegration implements Integration {
         httpMethod: apiGatewayMethod.httpMethod,
         resourceId: apiGatewayMethod.resourceId,
         restApiId: restApi.id,
-        type: 'AWS',
+        type: isProxy ? 'AWS_PROXY' : 'AWS',
         uri: lambdaHandler.invokeArn,
         responseTransferMode: isStreamingHandler(this.props) ? 'STREAM' : undefined,
         integrationHttpMethod: 'POST',
         dependsOn: [apiGatewayMethod, lambdaHandler],
-        requestTemplates: buildRequestTemplates(this.props),
+        requestTemplates: isProxy ? undefined : buildRequestTemplates(this.props),
       }
     );
 
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      responseHelper.handlerResponse,
-      `${resourceMetadata.name}-${handler.name}`
-    );
+    // Proxy integrations forward the raw request and return the Lambda response
+    // verbatim, so integration/method response templates do not apply.
+    if (!isProxy) {
+      restApi.responseFactory.createResponses(
+        apiGatewayMethod,
+        integration,
+        responseHelper.handlerResponse,
+        `${resourceMetadata.name}-${handler.name}`
+      );
+    }
 
     return integration;
   }
