@@ -36,17 +36,17 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@types/aws-lambda": "^8.10.161",
+    "@types/aws-lambda": "^8.10.162",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@swc/core": "^1.15.40",
+    "@swc/core": "^1.15.43",
     "@swc/helpers": "^0.5.23",
-    "@vitest/runner": "^4.1.8",
+    "@vitest/runner": "^4.1.10",
     "cdktn-vitest": "^1.0.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "unplugin-swc": "^1.5.9",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=20.19"
