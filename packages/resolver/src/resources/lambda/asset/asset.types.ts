@@ -2,27 +2,33 @@ import type { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import type { ResourceMetadata } from '@lafken/common';
 import type { Construct } from 'constructs';
 
-interface BaseAsset
-  extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'bundler'> {}
+export interface HandlerMethod {
+  name: string;
+  /**
+   * When true, the exported handler is wrapped with
+   * `awslambda.streamifyResponse` at build time so the Lambda runtime treats it
+   * as a response-streaming handler.
+   */
+  streaming?: boolean;
+}
 
 export interface AssetResource {
   className: string;
-  methods: string[];
-  /**
-   * Names of the methods (subset of `methods`) that were decorated with
-   * `@Streaming`. Their exported handlers are wrapped with
-   * `awslambda.streamifyResponse` at build time so the Lambda runtime treats
-   * them as response-streaming handlers.
-   */
-  streamingMethods?: string[];
+  methods: HandlerMethod[];
 }
 
-export interface AssetMetadata extends BaseAsset, AssetResource {
+export interface AssetFileMetadata
+  extends Pick<ResourceMetadata, 'filename' | 'foldername' | 'bundler'> {
   afterBuild?: (outputPath: string) => void;
 }
 
+export interface InitializeAssetProps {
+  asset: AssetFileMetadata;
+  resource: AssetResource;
+}
+
 export interface AssetProps {
-  metadata: Omit<AssetMetadata, 'className' | 'methods'>;
+  metadata: AssetFileMetadata;
   resources: Record<string, AssetResource>;
   scope?: Construct;
   lambdas: LambdaFunction[];
@@ -30,10 +36,11 @@ export interface AssetProps {
 
 export interface BuildAssetProps {
   scope: Construct;
-  metadata: Omit<AssetMetadata, 'className' | 'methods'>;
+  metadata: AssetFileMetadata;
 }
 
-export interface AddLambdaProps extends Omit<BaseAsset, 'bundler'> {
+export interface AddLambdaProps
+  extends Pick<AssetFileMetadata, 'filename' | 'foldername'> {
   lambda: LambdaFunction;
   scope: Construct;
 }

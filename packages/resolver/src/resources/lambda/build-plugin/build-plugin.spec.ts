@@ -13,7 +13,7 @@ describe('LafkenBuildPlugin', () => {
       exports: [
         {
           className: 'Testing',
-          methods: ['foo', 'bar'],
+          methods: [{ name: 'foo' }, { name: 'bar' }],
         },
       ],
       removeAttributes: [],
@@ -38,8 +38,7 @@ describe('LafkenBuildPlugin', () => {
       exports: [
         {
           className: 'Testing',
-          methods: ['stream', 'plain'],
-          streamingMethods: ['stream'],
+          methods: [{ name: 'stream', streaming: true }, { name: 'plain' }],
         },
       ],
       removeAttributes: [],

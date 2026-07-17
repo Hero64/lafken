@@ -15,9 +15,9 @@ import {
 } from '@lafken/common';
 import {
   getContextValueByScope,
+  initLambdaAssetMetadata,
   LambdaHandler,
   lafkenResource,
-  lambdaAssets,
   resolveCallbackResource,
 } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
@@ -254,15 +254,10 @@ export class AuthorizerFactory {
       throw new Error('custom authorizer require a lambda handler');
     }
 
-    lambdaAssets.initializeMetadata({
-      className: metadata.originalName,
-      filename: metadata.filename,
-      foldername: metadata.foldername,
-      bundler: {
-        ...metadata.bundler,
-        minify: metadata.bundler?.minify ?? this.globalBundler?.minify,
-      },
-      methods: [handler.name],
+    initLambdaAssetMetadata({
+      metadata,
+      handlers: [handler],
+      contextBundler: this.globalBundler,
       afterBuild: async (outputPath) => {
         const authorizer = this.authorizerMetadata[id] as AuthorizerDataCustom;
 

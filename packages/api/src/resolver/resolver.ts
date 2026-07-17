@@ -10,7 +10,7 @@ import {
   type AppModule,
   type AppStack,
   getContextValueByScope,
-  lambdaAssets,
+  initLambdaAssetMetadata,
   type ResolverType,
 } from '@lafken/resolver';
 import { type ApiLambdaMetadata, type ApiResourceMetadata, RESOURCE_TYPE } from '../main';
@@ -59,9 +59,7 @@ export class ApiResolver implements ResolverType {
     const metadata: ApiResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(resource);
 
-    const lambdaMethods = handlers
-      .filter((handler) => !handler.integration)
-      .map((handler) => handler.name);
+    const lambdaMethods = handlers.filter((handler) => !handler.integration);
 
     const streamingByMethod =
       getMetadataPrototypeByKey<StreamingMethods>(
@@ -69,16 +67,11 @@ export class ApiResolver implements ResolverType {
         StreamingReflectKeys.streaming
       ) ?? {};
 
-    lambdaAssets.initializeMetadata({
-      foldername: metadata.foldername,
-      filename: metadata.filename,
-      bundler: {
-        ...metadata.bundler,
-        minify: metadata.bundler?.minify ?? contextBundler?.minify,
-      },
-      className: metadata.originalName,
-      methods: lambdaMethods,
-      streamingMethods: lambdaMethods.filter((name) => streamingByMethod[name]),
+    initLambdaAssetMetadata({
+      metadata,
+      contextBundler,
+      streamingByMethod,
+      handlers: lambdaMethods,
     });
 
     const apiNames = Object.keys(this.apis);

@@ -32,11 +32,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -62,11 +66,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with custom variables', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -113,11 +121,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with static vpc config', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -145,11 +157,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with vpc config from callback', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -176,11 +192,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with alias', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -210,11 +230,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with alias and provisioned concurrency', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -256,11 +280,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with logging config (text format + log group)', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -291,11 +319,15 @@ describe('Lambda handler', () => {
 
   it('should create a lambda function with logging config (json format + log levels)', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -325,11 +357,15 @@ describe('Lambda handler', () => {
 
   it('should not create a log group when loggingConfig is omitted', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -346,11 +382,15 @@ describe('Lambda handler', () => {
 
   it('should not create provisioned concurrency when provisionedExecutions is 0', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -378,11 +418,15 @@ describe('Lambda handler', () => {
 
   it('should create an invoke permission with a static source arn', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
@@ -406,11 +450,15 @@ describe('Lambda handler', () => {
 
   it('should resolve a source arn provided as a callback', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/temp',
-      filename: 'index',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      bundler: { minify: false },
+      asset: {
+        foldername: '/temp',
+        filename: 'index',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
     new LambdaHandler(stack, 'test', {
       filename: 'index',
