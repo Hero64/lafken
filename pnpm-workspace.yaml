@@ -42,3 +42,4 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - '@swc/core'
   - aws-sdk
+  - esbuild
