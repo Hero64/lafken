@@ -411,6 +411,24 @@ export interface RestApiProps extends BaseApiProps {
    * }
    */
   outputs?: ResourceOutputType<ApiOutputAttributes>;
+
+  /**
+   * Defines how the API Gateway REST API and its structure are created.
+   *
+   * - `resource` (default): each element (resources, methods, integrations,
+   *   models, validators, authorizers, docs) is created as an individual
+   *   Terraform resource. More granular, but slower to deploy on large APIs
+   *   because Terraform diffs and verifies every resource.
+   * - `openapi`: the whole API structure is assembled into a single OpenAPI 3.0
+   *   document (with `x-amazon-apigateway-*` extensions) and imported through
+   *   the REST API `body`, which speeds up deployment. Side resources that the
+   *   body only references —lambdas and permissions, IAM roles, usage plans and
+   *   API keys, gateway responses, log groups, deployment and stages— are still
+   *   created as regular Terraform resources.
+   *
+   * @default 'resource'
+   */
+  definition?: 'openapi' | 'resource';
 }
 
 export interface ExternalApiProps extends BaseApiProps {

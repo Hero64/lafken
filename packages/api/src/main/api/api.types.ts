@@ -134,6 +134,23 @@ export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
    */
   integration?: never;
   /**
+   * API Gateway Lambda integration type.
+   *
+   * Controls how API Gateway invokes the Lambda function backing this method:
+   * - `'aws'` (default): a non-proxy integration. API Gateway maps the request
+   *   into the shape declared via `@Event(...)` using a VTL request template
+   *   before invoking the Lambda, and maps the Lambda result back through the
+   *   response templates.
+   * - `'aws-proxy'`: a Lambda proxy integration. API Gateway forwards the raw
+   *   `APIGatewayProxyEvent` to the Lambda and returns its response verbatim
+   *   (no request/response templates). Required for response streaming
+   *   (`@Streaming`) and when the handler needs the complete HTTP event via
+   *   `@EventProxy(...)`.
+   *
+   * @default 'aws'
+   */
+  integrationType?: 'aws' | 'aws-proxy';
+  /**
    * Lambda configuration for the method.
    *
    * Specifies the properties and settings of the Lambda function
@@ -398,6 +415,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   method: Method;
   name: string;
   integration?: ApiLambdaProps['integration'];
+  integrationType?: 'aws' | 'aws-proxy';
   action?: string;
   lambda?: LambdaProps;
   response?: ResponseFieldMetadata;

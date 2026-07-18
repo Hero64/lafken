@@ -19,6 +19,7 @@ export class BatchWriteBuilder<E extends ClassResource> extends QueryBuilderBase
     return this.commands;
   }
 
+  // biome-ignore lint/suspicious/noConfusingVoidType: exec() resolves to void[] from Promise.all of void-returning commands
   public then<T>(resolve: (value: void[]) => T, reject: (reason: any) => T): Promise<T> {
     return this.exec().then(resolve, reject);
   }

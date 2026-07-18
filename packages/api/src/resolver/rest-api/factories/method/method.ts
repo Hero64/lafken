@@ -1,7 +1,15 @@
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { getMetadataPrototypeByKey } from '@lafken/common';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
+import { EVENT_PROXY_METADATA_KEY } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import type { ModelRef } from '../model/model.types';
+import type { OperationObject } from '../openapi/openapi.types';
+import {
+  corsToOptionsOperation,
+  paramsToOpenApiParameters,
+} from '../openapi/openapi.utils';
 import { CorsHelper } from './helpers/cors/cors';
 import { IntegrationHelper } from './helpers/integration/integration';
 import { ParamHelper } from './helpers/param/param';
@@ -11,7 +19,13 @@ import { ResponseHelper } from './helpers/response/response';
 import { ResponseTemplateHelper } from './helpers/response-template/response-template';
 import { TemplateHelper } from './helpers/template/template';
 import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
-import type { Integration, IntegrationProps } from './integrations/integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationProps,
+  OpenApiIntegrationResult,
+} from './integrations/integration.types';
+import { isStreamingHandler } from './integrations/integration.utils';
 import { KinesisIntegration } from './integrations/kinesis/kinesis';
 import { LambdaIntegration } from './integrations/lambda/lambda';
 import { MockIntegration } from './integrations/mock/mock';
@@ -41,21 +55,58 @@ export class MethodFactory {
     const integrationHelper = new IntegrationHelper();
     const responseTemplateHelper = new ResponseTemplateHelper();
 
+    this.validateIntegrationType(props, paramHelper);
+
     const fullPath = this.cleanPath(`/${resourceMetadata.path}/${handler.path}`) || '/';
     paramHelper.validateParamsInPath(fullPath);
 
-    const resourceId = this.scope.resourceFactory.getResource(fullPath);
     const validatorId = this.scope.validatorFactory.getValidator(
       requestHelper.getValidatorProperties()
     );
-    const authorizationProps = await this.scope.authorizerFactory.getAuthorizerProps({
+
+    const authorizerRequest = {
       fullPath,
       method: handler.method,
       authorizer: handler.auth ?? resourceMetadata.auth,
-    });
+    };
 
-    const modelName = this.resolveModelName(paramHelper);
+    const model = this.resolveModel(paramHelper);
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
+
+    const integrationProps: OpenApiIntegrationProps = {
+      ...props,
+      paramHelper,
+      proxyHelper,
+      responseHelper,
+      templateHelper,
+      integrationHelper,
+      responseTemplateHelper,
+      scope: module,
+      restApi: this.scope,
+    };
+
+    if (this.scope.openapiFactory.isEnabled) {
+      const security =
+        this.scope.authorizerFactory.getOperationSecurity(authorizerRequest);
+
+      await this.createOpenApiOperation({
+        fullPath,
+        handler,
+        resourceMetadata,
+        paramHelper,
+        validatorName: validatorId,
+        model,
+        integrationProps,
+        cors: props.cors,
+        security,
+      });
+      return;
+    }
+
+    const authorizationProps =
+      await this.scope.authorizerFactory.getAuthorizerProps(authorizerRequest);
+
+    const resourceId = this.scope.resourceFactory.getResource(fullPath);
 
     const method = new ApiGatewayMethod(this.scope, `${methodName}-method`, {
       ...authorizationProps,
@@ -64,9 +115,9 @@ export class MethodFactory {
       httpMethod: handler.method,
       requestParameters: requestHelper.getRequestParameters(),
       requestValidatorId: validatorId,
-      requestModels: modelName
+      requestModels: model
         ? {
-            'application/json': modelName,
+            'application/json': model.name,
           }
         : undefined,
     });
@@ -82,15 +133,7 @@ export class MethodFactory {
     }
 
     const integration = await this.integrateMethod({
-      ...props,
-      paramHelper,
-      proxyHelper,
-      responseHelper,
-      templateHelper,
-      integrationHelper,
-      responseTemplateHelper,
-      scope: module,
-      restApi: this.scope,
+      ...integrationProps,
       apiGatewayMethod: method,
     });
 
@@ -106,14 +149,82 @@ export class MethodFactory {
     this.addParamsDocumentation(docParams);
   }
 
-  private resolveModelName(paramHelper: ParamHelper): string | undefined {
+  private async createOpenApiOperation(ctx: {
+    fullPath: string;
+    handler: CreateMethodProps['handler'];
+    resourceMetadata: CreateMethodProps['resourceMetadata'];
+    paramHelper: ParamHelper;
+    validatorName?: string;
+    model?: ModelRef;
+    integrationProps: OpenApiIntegrationProps;
+    cors?: CreateMethodProps['cors'];
+    security?: Array<Record<string, string[]>>;
+  }) {
+    const {
+      fullPath,
+      handler,
+      resourceMetadata,
+      paramHelper,
+      validatorName,
+      model,
+      integrationProps,
+      cors,
+      security,
+    } = ctx;
+
+    const { integration, responses } = await this.integrateOpenApi(integrationProps);
+
+    const operation: OperationObject = {
+      summary: handler.summary,
+      description: handler.description,
+      tags: handler.tags || resourceMetadata.tags,
+      parameters: paramsToOpenApiParameters(paramHelper.paramsBySource),
+      requestBody: model
+        ? {
+            required: true,
+            content: { 'application/json': { schema: { $ref: model.ref } } },
+          }
+        : undefined,
+      responses:
+        Object.keys(responses).length > 0 ? responses : { '200': { description: 'OK' } },
+      security,
+      'x-amazon-apigateway-integration': integration,
+      'x-amazon-apigateway-request-validator': validatorName,
+    };
+
+    this.scope.openapiFactory.addOperation(fullPath, handler.method, operation);
+
+    if (cors) {
+      this.scope.openapiFactory.addOperation(
+        fullPath,
+        'OPTIONS',
+        corsToOptionsOperation(this.corsHelper.buildHeaders(cors))
+      );
+    }
+  }
+
+  private async integrateOpenApi(
+    props: OpenApiIntegrationProps
+  ): Promise<OpenApiIntegrationResult> {
+    const integration = this.selectIntegration(props as unknown as IntegrationProps);
+
+    if (!integration.createOpenApi) {
+      throw new Error(
+        `integration "${props.handler.integration}" is not supported in openapi definition mode`
+      );
+    }
+
+    return integration.createOpenApi();
+  }
+
+  private resolveModel(paramHelper: ParamHelper): ModelRef | undefined {
     if (!paramHelper.paramsBySource.body) {
       return undefined;
     }
 
     const payloadName = `${paramHelper.params.payload.id}Body`;
 
-    const model = this.scope.modelFactory.getModel({
+    return this.scope.modelFactory.getModel({
       field: {
         destinationName: 'body',
         name: 'body',
@@ -126,45 +237,74 @@ export class MethodFactory {
         properties: paramHelper.paramsBySource.body,
       },
     });
-
-    return model.name;
   }
 
   private async integrateMethod(props: IntegrationProps) {
-    const { handler } = props;
-    let integration: Integration | undefined;
+    return this.selectIntegration(props).create();
+  }
 
-    switch (handler.integration) {
-      case 'bucket': {
-        integration = new BucketIntegration(props);
-        break;
-      }
-      case 'state-machine': {
-        integration = new StateMachineIntegration(props);
-        break;
-      }
-      case 'queue': {
-        integration = new QueueIntegration(props);
-        break;
-      }
-      case 'kinesis': {
-        integration = new KinesisIntegration(props);
-        break;
-      }
-      case 'dynamodb': {
-        integration = new DynamoDbIntegration(props);
-        break;
-      }
-      case 'mock': {
-        integration = new MockIntegration(props);
-        break;
-      }
-      default: {
-        integration = new LambdaIntegration(props);
-      }
+  private validateIntegrationType(props: CreateMethodProps, paramHelper: ParamHelper) {
+    const { handler, resourceMetadata, classResource } = props;
+
+    // Only the default Lambda integration honours `integrationType`.
+    if (handler.integration) {
+      return;
     }
 
-    return integration.create();
+    const integrationType = handler.integrationType ?? 'aws';
+    const isProxy = integrationType === 'aws-proxy';
+    const where = `Handler "${handler.name}" in resource "${resourceMetadata.name}"`;
+
+    const usesProxyEvent = Boolean(
+      getMetadataPrototypeByKey<Record<string, boolean>>(
+        classResource,
+        EVENT_PROXY_METADATA_KEY
+      )?.[handler.name]
+    );
+    const usesEvent = Boolean(paramHelper.params) && !usesProxyEvent;
+
+    if (isStreamingHandler(props) && !isProxy) {
+      throw new Error(
+        `${where} is decorated with @Streaming(), which requires integrationType: 'aws-proxy'.`
+      );
+    }
+
+    if (isProxy && usesEvent) {
+      throw new Error(
+        `${where} uses integrationType: 'aws-proxy'; use @EventProxy() instead of @Event() to receive the raw APIGatewayProxyEvent.`
+      );
+    }
+
+    if (!isProxy && usesProxyEvent) {
+      throw new Error(
+        `${where} uses @EventProxy(), which requires integrationType: 'aws-proxy'.`
+      );
+    }
+  }
+
+  private selectIntegration(props: IntegrationProps): Integration {
+    if (props.handler.integration && isStreamingHandler(props)) {
+      throw new Error(
+        `Handler "${props.handler.name}" in resource "${props.resourceMetadata.name}" is decorated with @Streaming(), which is only supported by the default Lambda integration, but it is configured to use the "${props.handler.integration}" integration.`
+      );
+    }
+
+    switch (props.handler.integration) {
+      case 'bucket':
+        return new BucketIntegration(props);
+      case 'state-machine':
+        return new StateMachineIntegration(props);
+      case 'queue':
+        return new QueueIntegration(props);
+      case 'kinesis':
+        return new KinesisIntegration(props);
+      case 'dynamodb':
+        return new DynamoDbIntegration(props);
+      case 'mock':
+        return new MockIntegration(props);
+      default:
+        return new LambdaIntegration(props);
+    }
   }
 
   private cleanPath(path: string) {

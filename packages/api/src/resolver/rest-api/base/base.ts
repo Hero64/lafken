@@ -5,12 +5,14 @@ import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
 import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-identity';
 import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
+import { createSha256 } from '@lafken/resolver';
 import type { Construct } from 'constructs';
 import {
   type ApiDefaultResponseType,
   ApiGatewayResponse,
   type BaseApiProps,
   type RestApi,
+  type RestApiProps,
   type Stage,
 } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
@@ -18,6 +20,7 @@ import { DocsFactory } from '../factories/docs/docs.factories';
 import { MethodFactory } from '../factories/method/method';
 import type { CreateMethodProps } from '../factories/method/method.types';
 import { ModelFactory } from '../factories/model/model';
+import { OpenApiFactory } from '../factories/openapi/openapi';
 import { ResourceFactory } from '../factories/resource/resource';
 import { ResponseFactory } from '../factories/response/response';
 import { ValidatorFactory } from '../factories/validator/validator';
@@ -48,14 +51,17 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public responseFactory!: ResponseFactory;
     public docsFactory!: DocsFactory;
     public methodFactory!: MethodFactory;
+    public openapiFactory!: OpenApiFactory;
     public vpcIds: string[];
     public stages: ApiGatewayStage[] = [];
 
-    public initialize(props: BaseApiProps) {
+    public initialize(props: BaseApiProps & Pick<RestApiProps, 'definition'>) {
       apiProps = props;
+      const { definition = 'resource' } = props;
       createStages(props.stages);
 
       restApi = this as unknown as RestApi;
+      this.openapiFactory = new OpenApiFactory(restApi, definition === 'openapi');
       this.resourceFactory = new ResourceFactory(restApi);
       this.validatorFactory = new ValidatorFactory(restApi);
       this.authorizerFactory = new AuthorizerFactory(
@@ -79,6 +85,11 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         return;
       }
 
+      if (this.openapiFactory.isEnabled) {
+        this.openapiFactory.setDescription(apiProps.description);
+        return;
+      }
+
       this.docsFactory.createDoc({
         id: `${apiProps.name}-api`,
         location: {
@@ -97,6 +108,27 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         ...props,
         cors: apiProps.cors,
       });
+    }
+
+    public openApiRegion?: DataAwsRegion;
+
+    /**
+     * Region reference for integration ARNs. In "resource" mode it is the REST
+     * API's own `region` attribute (each integration is a separate resource, so
+     * the reference is cross-resource). In "openapi" mode that same reference
+     * would live inside the REST API's own `body`, producing a self-referential
+     * block, so a dedicated `aws_region` data source is used instead.
+     */
+    public get regionRef(): string {
+      if (!this.openapiFactory.isEnabled) {
+        return (this as unknown as { region: string }).region;
+      }
+
+      this.openApiRegion ??= new DataAwsRegion(
+        restApi,
+        `${apiProps.name}-openapi-region`
+      );
+      return this.openApiRegion.region;
     }
 
     public assignVpc() {
@@ -163,8 +195,22 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         apiResources.push(version);
       }
 
-      if (this.methodFactory.resources.length > 0) {
+      const body = this.openapiFactory.finalize();
+
+      const hasContent = this.openapiFactory.isEnabled
+        ? this.openapiFactory.hasOperations
+        : this.methodFactory.resources.length > 0;
+
+      if (hasContent) {
         apiResources.push(...this.assignVpc());
+
+        // In openapi mode the routes are created by importing the REST API
+        // `body`, not by separate method/integration resources. The deployment
+        // must therefore wait for the body import to finish before snapshotting
+        // the API, otherwise it captures an empty API.
+        if (this.openapiFactory.isEnabled) {
+          apiResources.push(restApi as unknown as (typeof apiResources)[number]);
+        }
 
         const deployment = new ApiGatewayDeployment(
           restApi,
@@ -173,7 +219,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
             restApiId: restApi.id,
             dependsOn: apiResources,
             triggers: {
-              redeployment: Date.now().toString(),
+              redeployment: body ? createSha256(body) : Date.now().toString(),
             },
             lifecycle: {
               createBeforeDestroy: true,

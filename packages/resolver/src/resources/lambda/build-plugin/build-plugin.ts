@@ -10,8 +10,17 @@ export const LafkenBuildPlugin = (props: LafkenBuildPluginProps) => {
         for (const exportResources of props.exports) {
           const instanceName = `${exportResources.className}Instance`;
           const instance = `const ${instanceName} = new ${exportResources.className}();`;
-          const exports = exportResources.methods.map((handler) => {
-            return `exports.${handler}_${exportResources.className} = ${instanceName}.${handler}.bind(${instanceName});`;
+          const exports = exportResources.methods.map((method) => {
+            const exportName = `${method.name}_${exportResources.className}`;
+            const boundHandler = `${instanceName}.${method.name}.bind(${instanceName})`;
+            // Streaming handlers are wrapped here (after binding) so the marker
+            // `awslambda.streamifyResponse` sets lands on the final exported
+            // function — the Lambda runtime inspects that exact object to detect
+            // response streaming.
+            const value = method.streaming
+              ? `awslambda.streamifyResponse(${boundHandler})`
+              : boundHandler;
+            return `exports.${exportName} = ${value};`;
           });
           exportContent += `\n${instance}\n${exports.join('\n')}\n`;
         }

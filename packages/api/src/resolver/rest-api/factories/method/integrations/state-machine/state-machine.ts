@@ -1,34 +1,36 @@
 import type { StateMachineIntegrationActions } from '../../../../../../main';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
 import { StartIntegration } from './start/start';
 import { StatusIntegration } from './status/status';
 import { StopIntegration } from './stop/stop';
 
 export class StateMachineIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
-  async create() {
-    const { handler } = this.props;
 
-    const action = handler.action as StateMachineIntegrationActions;
+  create() {
+    return this.resolve().create();
+  }
 
-    let integrationResolver: Integration | undefined;
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    return this.resolve().createOpenApi!();
+  }
+
+  private resolve(): Integration {
+    const action = this.props.handler.action as StateMachineIntegrationActions;
 
     switch (action) {
       case 'Start':
-        integrationResolver = new StartIntegration(this.props);
-        break;
+        return new StartIntegration(this.props);
       case 'Status':
-        integrationResolver = new StatusIntegration(this.props);
-        break;
+        return new StatusIntegration(this.props);
       case 'Stop':
-        integrationResolver = new StopIntegration(this.props);
-        break;
+        return new StopIntegration(this.props);
+      default:
+        throw new Error('Integration method not found');
     }
-
-    if (!integrationResolver) {
-      throw new Error('Integration method not found');
-    }
-
-    return integrationResolver.create();
   }
 }

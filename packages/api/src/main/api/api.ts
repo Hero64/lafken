@@ -54,6 +54,9 @@ const createMethodDecorator = (method: Method) =>
         response: responseParams,
         description: params.description,
         integration: params.integration,
+        integrationType: params.integration
+          ? undefined
+          : ((params as ApiLambdaIntegrationProps).integrationType ?? 'aws'),
         summary: params.summary,
         tags: params.tags,
         additionalServices,
