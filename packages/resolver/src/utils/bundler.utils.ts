@@ -32,10 +32,12 @@ export const initLambdaAssetMetadata = ({
   metadata,
   handlers,
   contextBundler,
+  afterBuild,
   streamingByMethod = {},
 }: InitLambdaAssetMetadataProps) => {
   lambdaAssets.initializeMetadata({
     asset: {
+      afterBuild,
       foldername: metadata.foldername,
       filename: metadata.filename,
       bundler: resolveBundler(metadata.bundler, contextBundler),
