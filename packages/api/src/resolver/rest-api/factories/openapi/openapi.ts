@@ -41,10 +41,6 @@ export class OpenApiFactory {
     this.paths[normalizedPath][method.toLowerCase()] = operation;
   }
 
-  public hasSchema(name: string) {
-    return this.schemas[name] !== undefined;
-  }
-
   public addSchema(name: string, schema: JsonSchema) {
     this.schemas[name] = schema;
     return this.getSchemaRef(name);
