@@ -14,11 +14,16 @@ import { type StreamingMethods, StreamingReflectKeys } from './streaming.types';
  * would be dropped by `Function.prototype.bind` when the handler is bound to
  * its instance at export time).
  *
- * The decorated method's runtime signature is `(event, responseStream, context)`.
- * When combined with a method decorator built from `createLambdaDecorator`
- * (e.g. `Get`/`Handler`), that decorator's generated wrapper detects the
- * incoming `responseStream` via `instanceof Stream` and forwards it to any
- * parameter decorated with `ResponseStreaming()`.
+ * The decorated method's runtime signature is `(event, responseStream, context)`
+ * instead of the usual `(event, context)`. When combined with a method decorator
+ * built from `createLambdaDecorator` (e.g. `Get`/`Handler`), that decorator's
+ * generated wrapper tells both signatures apart by checking whether the second
+ * argument exposes a `write` function: if it does it is treated as the response
+ * stream and forwarded to any parameter decorated with `ResponseStreaming()`,
+ * and `context` is read from the third argument; otherwise the second argument
+ * is the `context`. The check is structural rather than `instanceof Stream`
+ * because the runtime hands over its own stream implementation, which does not
+ * necessarily inherit from the `stream` module of this bundle.
  *
  * @example
  * @Streaming()
