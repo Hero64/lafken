@@ -30,7 +30,6 @@ describe('UpdateBuilder', () => {
 
       const command = builder.getCommand();
 
-      console.log(JSON.stringify(builder.getCommand(), null, 2));
       const values = command.ExpressionAttributeValues!;
       const rawValues = Object.fromEntries(
         Object.entries(values).map(([k, v]) => [k, (v as any).S ?? (v as any).N])

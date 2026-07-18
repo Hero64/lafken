@@ -122,7 +122,7 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
     if (typeof value === 'string') return 'S';
     if (typeof value === 'number') return 'N';
     if (typeof value === 'boolean') return 'BOOL';
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
       if ('numeric' in value) return 'N';
       if ('prefix' in value || 'suffix' in value || 'equals-ignore-case' in value)
         return 'S';

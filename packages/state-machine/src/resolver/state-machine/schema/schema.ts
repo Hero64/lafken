@@ -7,7 +7,7 @@ import {
   type LambdaMetadata,
   LambdaReflectKeys,
 } from '@lafken/common';
-import { lambdaAssets, resolveCallbackResource } from '@lafken/resolver';
+import { initLambdaAssetMetadata, resolveCallbackResource } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
 import {
@@ -130,15 +130,10 @@ export class Schema {
     );
 
     if (initializeAssets) {
-      lambdaAssets.initializeMetadata({
-        foldername: this.resourceMetadata.foldername,
-        filename: this.resourceMetadata.filename,
-        className: this.resourceMetadata.originalName,
-        methods: handlers.map((handler) => handler.name),
-        bundler: {
-          ...this.resourceMetadata.bundler,
-          minify: this.resourceMetadata.bundler?.minify ?? minify,
-        },
+      initLambdaAssetMetadata({
+        metadata: this.resourceMetadata,
+        handlers,
+        contextBundler: { minify },
       });
     }
   }

@@ -20,7 +20,7 @@ import { getBucketInformation } from './repository.utils';
 export const createRepository = <E extends ClassResource>(
   bucket: E
 ): RepositoryReturn<E> => {
-  const { name, tracing } = getBucketInformation<BucketProps>(bucket);
+  const { name } = getBucketInformation<BucketProps>(bucket);
 
   const bucketClient = client;
 

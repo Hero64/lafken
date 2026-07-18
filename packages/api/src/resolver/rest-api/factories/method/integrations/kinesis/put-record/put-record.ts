@@ -6,19 +6,100 @@ import type {
   InitializedClass,
   Integration,
   IntegrationProps,
+  OpenApiIntegrationResult,
 } from '../../integration.types';
-import { LafkenIntegration } from '../../integration.utils';
+import { LafkenIntegration, toXAmazonIntegration } from '../../integration.utils';
 
 export class PutRecordIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
 
   async create() {
+    const { restApi, apiGatewayMethod } = this.props;
+
+    const compute = await this.compute();
+
+    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: `arn:aws:apigateway:${restApi.regionRef}:kinesis:action/PutRecord`,
+      credentials: compute.role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestParameters: {
+        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+      },
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': compute.requestTemplate,
+      },
+    });
+
+    if (compute.resolveResource.hasUnresolved()) {
+      integration.onResolve(async () => {
+        integration.addOverride(
+          'request_templates.application/json',
+          await compute.rebuildTemplate()
+        );
+      });
+    }
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      integration,
+      compute.responseHandlers,
+      compute.name
+    );
+
+    return integration;
+  }
+
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    const { restApi } = this.props;
+
+    const compute = await this.compute();
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        compute.responseHandlers,
+        compute.name
+      );
+
+    const integration = toXAmazonIntegration(
+      {
+        type: 'AWS',
+        integrationHttpMethod: Method.POST,
+        uri: `arn:aws:apigateway:${restApi.regionRef}:kinesis:action/PutRecord`,
+        credentials: compute.role.arn,
+        passthroughBehavior: 'WHEN_NO_TEMPLATES',
+        requestParameters: {
+          'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+        },
+        requestTemplates: {
+          'application/json': compute.requestTemplate,
+        },
+      },
+      integrationResponses
+    );
+
+    if (compute.resolveResource.hasUnresolved()) {
+      restApi.openapiFactory.addDeferred(async () => {
+        integration.requestTemplates = {
+          'application/json': await compute.rebuildTemplate(),
+        };
+      });
+    }
+
+    return { integration, responses: operationResponses };
+  }
+
+  private async compute() {
     const {
       classResource,
       handler,
       proxyHelper,
       restApi,
-      apiGatewayMethod,
       resourceMetadata,
       integrationHelper,
       responseHelper,
@@ -46,54 +127,27 @@ export class PutRecordIntegration implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
-      httpMethod: apiGatewayMethod.httpMethod,
-      resourceId: apiGatewayMethod.resourceId,
-      restApiId: restApi.id,
-      type: 'AWS',
-      integrationHttpMethod: Method.POST,
-      uri: `arn:aws:apigateway:${restApi.region}:kinesis:action/PutRecord`,
-      credentials: role.arn,
-      passthroughBehavior: 'WHEN_NO_TEMPLATES',
-      requestParameters: {
-        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
-      },
-      dependsOn: [apiGatewayMethod],
-      requestTemplates: {
-        'application/json': resolveResource.hasUnresolved()
-          ? ''
-          : this.createTemplate(integrationResponse),
-      },
-    });
+    const rebuildTemplate = async () => {
+      const rebuilt = await resource[handler.name](proxyHelper.createEvent(), options);
+      if (resolveResource.hasUnresolved()) {
+        throw new Error(`unresolved dependencies in ${handler.name} integration`);
+      }
+      return this.createTemplate(rebuilt);
+    };
 
-    if (resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const integrationResponse = await resource[handler.name](
-          proxyHelper.createEvent(),
-          options
-        );
-        if (resolveResource.hasUnresolved()) {
-          throw new Error(`unresolved dependencies in ${handler.name} integration`);
-        }
-
-        integration.addOverride(
-          'request_templates.application/json',
-          this.createTemplate(integrationResponse)
-        );
-      });
-    }
-
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      integrationHelper.generateResponseTemplate(
+    return {
+      name,
+      role,
+      resolveResource,
+      requestTemplate: resolveResource.hasUnresolved()
+        ? ''
+        : this.createTemplate(integrationResponse),
+      responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      name
-    );
-
-    return integration;
+      rebuildTemplate,
+    };
   }
 
   private resolveStreamName(streamName: any): string {

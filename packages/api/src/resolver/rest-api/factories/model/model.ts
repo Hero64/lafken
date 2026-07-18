@@ -9,6 +9,7 @@ import type {
   FullJsonSchema,
   GetModelProps,
   JsonSchema,
+  ModelRef,
 } from './model.types';
 import { buildDocProperties, stripNonDraft4Fields } from './model.utils';
 
@@ -22,6 +23,7 @@ export const schemaTypeMap: Record<string, string> = {
 
 export class ModelFactory {
   private models: Record<string, ApiGatewayModel> = {};
+  private componentRefs: Record<string, ModelRef> = {};
 
   constructor(private scope: RestApi) {}
 
@@ -29,14 +31,41 @@ export class ModelFactory {
     return Object.values(this.models);
   }
 
-  public getModel({ field, defaultModelName, dependsOn }: GetModelProps) {
-    const { schema, fullSchema, model } = this.createModel(field);
+  private get isOpenApi() {
+    return this.scope.openapiFactory.isEnabled;
+  }
+
+  private objectRef(name: string) {
+    return this.isOpenApi
+      ? this.scope.openapiFactory.getSchemaRef(name)
+      : `https://apigateway.amazonaws.com/restapis/${this.scope.id}/models/${name}`;
+  }
+
+  private registeredObject(id: string): ModelRef | undefined {
+    if (this.isOpenApi) {
+      return this.componentRefs[id];
+    }
+
+    const model = this.models[id];
+    return model ? { name: model.name, ref: this.objectRef(model.name) } : undefined;
+  }
+
+  public getModel({ field, defaultModelName, dependsOn }: GetModelProps): ModelRef {
+    const { schema, fullSchema, model, ref, name } = this.createModel(field);
     if (model) {
-      return model;
+      return { name: model.name, ref: this.objectRef(model.name) };
+    }
+    if (ref && name) {
+      return { name, ref };
     }
 
     const modelName = defaultModelName || uuid();
     const capitalizedName = cleanAndCapitalize(modelName);
+
+    if (this.isOpenApi) {
+      const componentRef = this.scope.openapiFactory.addSchema(capitalizedName, schema);
+      return { name: capitalizedName, ref: componentRef };
+    }
 
     const newModel = new ApiGatewayModel(this.scope, defaultModelName || uuid(), {
       description:
@@ -52,7 +81,7 @@ export class ModelFactory {
 
     this.models[modelName] = newModel;
 
-    return newModel;
+    return { name: capitalizedName, ref: this.objectRef(capitalizedName) };
   }
 
   private validateMinMax(
@@ -136,13 +165,13 @@ export class ModelFactory {
     }
 
     if (field.type === 'Object') {
-      const model = this.models[field.payload.id];
-      if (model) {
-        const refSchema = {
-          $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.id}/models/${model.name}`,
-        };
+      const existing = this.registeredObject(field.payload.id);
+      if (existing) {
+        const refSchema = { $ref: existing.ref };
         return {
-          model,
+          model: this.models[field.payload.id],
+          ref: existing.ref,
+          name: existing.name,
           schema: refSchema,
           fullSchema: refSchema,
         };
@@ -155,9 +184,7 @@ export class ModelFactory {
       for (const property of field.properties) {
         const { schema, fullSchema, model } = this.createModel(property);
         if (model) {
-          const refSchema = {
-            $ref: `https://apigateway.amazonaws.com/restapis/${this.scope.id}/models/${model.name}`,
-          };
+          const refSchema = { $ref: this.objectRef(model.name) };
           properties[property.name] = refSchema;
           fullProperties[property.name] = refSchema;
         } else {
@@ -187,6 +214,13 @@ export class ModelFactory {
 
       const schema = stripNonDraft4Fields(fullSchema);
       const modelName = cleanAndCapitalize(field.payload.id);
+
+      if (this.isOpenApi) {
+        const ref = this.scope.openapiFactory.addSchema(modelName, schema);
+        this.componentRefs[field.payload.id] = { name: modelName, ref };
+        const refSchema = { $ref: ref };
+        return { ref, name: modelName, schema: refSchema, fullSchema: refSchema };
+      }
 
       const newModel = new ApiGatewayModel(this.scope, field.payload.id, {
         contentType: 'application/json',

@@ -1,34 +1,36 @@
 import type { DynamoDbIntegrationActions } from '../../../../../../main';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
 import { DeleteIntegration } from './delete/delete';
 import { PutIntegration } from './put/put';
 import { QueryIntegration } from './query/query';
 
 export class DynamoDbIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
-  async create() {
-    const { handler } = this.props;
 
-    const action = handler.action as DynamoDbIntegrationActions;
+  create() {
+    return this.resolve().create();
+  }
 
-    let integrationResolver: Integration | undefined;
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    return this.resolve().createOpenApi!();
+  }
+
+  private resolve(): Integration {
+    const action = this.props.handler.action as DynamoDbIntegrationActions;
 
     switch (action) {
       case 'Query':
-        integrationResolver = new QueryIntegration(this.props);
-        break;
+        return new QueryIntegration(this.props);
       case 'Put':
-        integrationResolver = new PutIntegration(this.props);
-        break;
+        return new PutIntegration(this.props);
       case 'Delete':
-        integrationResolver = new DeleteIntegration(this.props);
-        break;
+        return new DeleteIntegration(this.props);
+      default:
+        throw new Error('Integration method not found');
     }
-
-    if (!integrationResolver) {
-      throw new Error('Integration method not found');
-    }
-
-    return integrationResolver.create();
   }
 }
