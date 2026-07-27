@@ -4,15 +4,11 @@ import {
   createLambdaDecorator,
   createResourceDecorator,
   getEventFields,
-  LambdaReflectKeys,
   type ServicesValues,
 } from '@lafken/common';
-import { type ApiObjectMetadata, PARAM_PREFIX, type Source } from '../request';
+import type { Source } from '../request';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from '../response';
-import { objectToSchema } from '../schema/schema';
-import { response } from '../status';
 import { RESOURCE_TYPE } from '../type/type';
-import { SchemaValidator } from '../validator/validators';
 import {
   type ApiLambdaBaseProps,
   type ApiLambdaIntegrationProps,
@@ -63,7 +59,7 @@ const createMethodDecorator = (method: Method) =>
       } as ApiLambdaMetadata;
     },
     validateEvent: (target, methodName, event) => {
-      const eventByMethod =
+      /* const eventByMethod =
         Reflect.getMetadata(LambdaReflectKeys.event_class, target) || {};
 
       const eventClass = eventByMethod[methodName];
@@ -102,7 +98,7 @@ const createMethodDecorator = (method: Method) =>
 
       response(400, {
         message: validations.validationErrorString,
-      });
+      }); */
     },
   });
 
