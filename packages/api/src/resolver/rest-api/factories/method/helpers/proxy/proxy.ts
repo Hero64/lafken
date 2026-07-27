@@ -1,6 +1,20 @@
 import type { ApiParamMetadata } from '../../../../../../main';
-import type { ProxyResolveObjectKeyValue, ProxyValueResolver } from './proxy.types';
+import type {
+  ProxyResolveObjectKeyValue,
+  ProxySegment,
+  ProxyValueResolver,
+} from './proxy.types';
 import { getVariableFieldType } from './proxy.utils';
+
+/**
+ * Control character used to delimit a proxy path when the proxy is coerced to a
+ * string (e.g. inside a template literal like `` `data/${e.file}` ``). It lets us
+ * later recover which parts of the resulting string came from the event proxy and
+ * which are static literals. It is never expected to appear in real content.
+ */
+export const PROXY_MARKER = '\u0000';
+
+const stripMarkers = (value: string) => value.split(PROXY_MARKER).join('');
 
 export class ProxyHelper {
   createEvent = (path = '') => {
@@ -12,7 +26,7 @@ export class ProxyHelper {
               throw new Error(`Invalid path: "${path}" do not accept arrays.`);
             }
 
-            return () => path;
+            return () => `${PROXY_MARKER}${path}${PROXY_MARKER}`;
           }
           return undefined;
         }
@@ -31,12 +45,24 @@ export class ProxyHelper {
     });
   };
 
+  /**
+   * Split a value into ordered literal/proxy segments. Accepts a raw proxy
+   * (`e.file`), a plain literal (`'test.json'`) or a template literal that mixes
+   * both (`` `data/temp/${e.file}` ``). Proxy segments carry the event path.
+   */
+  segments(value: any): ProxySegment[] {
+    return `${value}`
+      .split(PROXY_MARKER)
+      .map((part, index) => ({ isProxy: index % 2 === 1, value: part }))
+      .filter((segment) => segment.isProxy || segment.value !== '');
+  }
+
   resolveProxyValue(
     value: any,
     fieldParamsPaths: Record<string, ApiParamMetadata>
   ): ProxyValueResolver {
     if (value.isProxy) {
-      const path = `${value}`;
+      const path = stripMarkers(`${value}`);
       const eventValue = fieldParamsPaths[path];
       if (!eventValue) {
         throw new Error(`The value for the path ${path} does not exist.`);
@@ -51,7 +77,7 @@ export class ProxyHelper {
     }
 
     return {
-      value,
+      value: typeof value === 'string' ? stripMarkers(value) : value,
       field: undefined,
       path: undefined,
       type: getVariableFieldType(value),
