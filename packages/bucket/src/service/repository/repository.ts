@@ -15,7 +15,7 @@ import type { ClassResource } from '@lafken/common';
 import type { BucketProps } from '../../main';
 import { client } from '../client/client';
 import type { InputWithoutBucket, RepositoryReturn } from './repository.types';
-import { getBucketInformation } from './repository.utils';
+import { getBucketInformation, parseCopySource } from './repository.utils';
 
 export const createRepository = <E extends ClassResource>(
   bucket: E
@@ -57,10 +57,10 @@ export const createRepository = <E extends ClassResource>(
       return bucketClient.send(command);
     },
     async moveObject(props: InputWithoutBucket<CopyObjectCommandInput>) {
+      const source = parseCopySource(props.CopySource);
+
       await this.copyObject(props);
-      await this.deleteObject({
-        Key: props.Key,
-      });
+      await bucketClient.send(new DeleteObjectCommand(source));
     },
     async listObjects(props: InputWithoutBucket<ListObjectsV2CommandInput>) {
       let allContents: ListObjectsV2CommandOutput['Contents'] = [];
