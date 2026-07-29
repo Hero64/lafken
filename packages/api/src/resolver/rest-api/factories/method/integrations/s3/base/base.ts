@@ -113,6 +113,9 @@ export class BucketBaseIntegration implements Integration {
 
     const name = `${resourceMetadata.name}-${handler.name}`;
 
+    const requestParameters: Record<string, string> = {};
+    const uri = this.getUri(integrationResponse, requestParameters);
+
     const role = integrationHelper.createRole({
       name,
       service,
@@ -144,8 +147,8 @@ export class BucketBaseIntegration implements Integration {
       name,
       role,
       resolveResource,
-      uri: this.getUri(integrationResponse),
-      requestParameters: this.createRequestParameters(integrationResponse),
+      uri,
+      requestParameters,
       responseHandlers: integrationHelper.generateResponseTemplate(
         responses,
         responseTemplateHelper
@@ -154,50 +157,55 @@ export class BucketBaseIntegration implements Integration {
     };
   }
 
-  private getPathParam(key: keyof BucketIntegrationResponse, value: any) {
-    if (value.isProxy) {
-      return `{${key}}`;
-    }
+  private getUri(
+    response: BucketIntegrationResponse,
+    requestParameters: Record<string, string> = {}
+  ) {
+    const bucket = this.buildPath('bucket', response.bucket, requestParameters);
+    const object = this.buildPath('object', response.object, requestParameters);
 
-    return value;
+    return `arn:aws:apigateway:${this.props.restApi.regionRef}:s3:path/${bucket}/${object}`;
   }
 
-  private getUri(response: BucketIntegrationResponse) {
-    return `arn:aws:apigateway:${this.props.restApi.regionRef}:s3:path/${this.getPathParam('bucket', response.bucket)}/${this.getPathParam('object', response.object)}`;
-  }
-
-  private createRequestParameters(integrationResponse: BucketIntegrationResponse) {
-    const requestParameters: Record<string, string> = {};
-    const bucketIntegration = this.getIntegrationRequestParams(
-      integrationResponse.bucket
-    );
-
-    const keyIntegration = this.getIntegrationRequestParams(integrationResponse.object);
-
-    if (bucketIntegration) {
-      requestParameters['integration.request.path.bucket'] = bucketIntegration;
-    }
-
-    if (keyIntegration) {
-      requestParameters['integration.request.path.object'] = keyIntegration;
-    }
-
-    return requestParameters;
-  }
-
-  private getIntegrationRequestParams(value: any) {
+  /**
+   * Build a URI path portion for a field, supporting values that mix static text
+   * with event proxies (e.g. `` `data/temp/${e.file}` ``). Each proxy segment is
+   * emitted as an API Gateway path override placeholder and mapped to its request
+   * source in `requestParameters`.
+   */
+  private buildPath(
+    field: 'bucket' | 'object',
+    value: any,
+    requestParameters: Record<string, string>
+  ) {
     if (value === undefined) {
-      return value;
+      return '';
     }
 
     const { proxyHelper, paramHelper } = this.props;
 
-    const { field, path } = proxyHelper.resolveProxyValue(value, paramHelper.pathParams);
+    let proxyIndex = 0;
 
-    if (!field) {
-      return undefined;
-    }
+    return proxyHelper
+      .segments(value)
+      .map((segment) => {
+        if (!segment.isProxy) {
+          return segment.value;
+        }
 
-    return `${methodParamMap[field.source || 'query']}.${path}`;
+        const paramName = proxyIndex === 0 ? field : `${field}${proxyIndex}`;
+        proxyIndex += 1;
+
+        const eventField = paramHelper.pathParams[segment.value];
+        if (!eventField) {
+          throw new Error(`The value for the path ${segment.value} does not exist.`);
+        }
+
+        requestParameters[`integration.request.path.${paramName}`] =
+          `${methodParamMap[eventField.source || 'query']}.${segment.value}`;
+
+        return `{${paramName}}`;
+      })
+      .join('');
   }
 }

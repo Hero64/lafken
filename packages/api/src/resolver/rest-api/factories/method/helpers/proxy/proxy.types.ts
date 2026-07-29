@@ -18,3 +18,13 @@ export type ProxyValueResolver = ValueResolverBase | ValueResolverField;
 export type ProxyResolveObjectKeyValue = ProxyValueResolver & {
   key: string;
 };
+
+/**
+ * A single piece of a value that mixes static literals with event proxies. When
+ * `isProxy` is true, `value` holds the event path (e.g. `file`); otherwise it is
+ * verbatim literal text.
+ */
+export interface ProxySegment {
+  isProxy: boolean;
+  value: string;
+}
