@@ -1,4 +1,5 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import type { ApiGatewayDocumentationVersion } from '@cdktn/provider-aws/lib/api-gateway-documentation-version';
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
@@ -54,6 +55,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public openapiFactory!: OpenApiFactory;
     public vpcIds: string[];
     public stages: ApiGatewayStage[] = [];
+    public openApiRegion?: DataAwsRegion;
 
     public initialize(props: BaseApiProps & Pick<RestApiProps, 'definition'>) {
       apiProps = props;
@@ -110,15 +112,6 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       });
     }
 
-    public openApiRegion?: DataAwsRegion;
-
-    /**
-     * Region reference for integration ARNs. In "resource" mode it is the REST
-     * API's own `region` attribute (each integration is a separate resource, so
-     * the reference is cross-resource). In "openapi" mode that same reference
-     * would live inside the REST API's own `body`, producing a self-referential
-     * block, so a dedicated `aws_region` data source is used instead.
-     */
     public get regionRef(): string {
       if (!this.openapiFactory.isEnabled) {
         return (this as unknown as { region: string }).region;
@@ -131,8 +124,32 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       return this.openApiRegion.region;
     }
 
+    public buildVpcPolicyStatement(resource: string) {
+      return {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Principal: '*',
+            Action: 'execute-api:Invoke',
+            Resource: resource,
+            Condition: {
+              StringEquals: {
+                'aws:SourceVpce': this.vpcIds,
+              },
+            },
+          },
+        ],
+      };
+    }
+
     public assignVpc() {
       if (!this.vpcIds || this.vpcIds.length === 0) {
+        return [];
+      }
+
+      if (this.openapiFactory.isEnabled) {
+        this.openapiFactory.setPolicy(this.buildVpcPolicyStatement('execute-api:/*'));
         return [];
       }
 
@@ -143,22 +160,11 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       const region = new DataAwsRegion(this, `${apiProps.name}-api-region`);
       const policy = new ApiGatewayRestApiPolicy(restApi, 'api-policy', {
         restApiId: restApi.id,
-        policy: JSON.stringify({
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Effect: 'Allow',
-              Principal: '*',
-              Action: 'execute-api:Invoke',
-              Resource: `arn:aws:execute-api:${region.region}:${identity.accountId}:${restApi.id}/*`,
-              Condition: {
-                StringEquals: {
-                  'aws:SourceVpce': this.vpcIds,
-                },
-              },
-            },
-          ],
-        }),
+        policy: JSON.stringify(
+          this.buildVpcPolicyStatement(
+            `arn:aws:execute-api:${region.region}:${identity.accountId}:${restApi.id}/*`
+          )
+        ),
         dependsOn: [restApi],
       });
 
@@ -195,70 +201,85 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         apiResources.push(version);
       }
 
-      const body = this.openapiFactory.finalize();
-
       const hasContent = this.openapiFactory.isEnabled
         ? this.openapiFactory.hasOperations
         : this.methodFactory.resources.length > 0;
 
       if (hasContent) {
         apiResources.push(...this.assignVpc());
-
-        // In openapi mode the routes are created by importing the REST API
-        // `body`, not by separate method/integration resources. The deployment
-        // must therefore wait for the body import to finish before snapshotting
-        // the API, otherwise it captures an empty API.
-        if (this.openapiFactory.isEnabled) {
-          apiResources.push(restApi as unknown as (typeof apiResources)[number]);
-        }
-
-        const deployment = new ApiGatewayDeployment(
-          restApi,
-          `${apiProps.name}-deployment`,
-          {
-            restApiId: restApi.id,
-            dependsOn: apiResources,
-            triggers: {
-              redeployment: body ? createSha256(body) : Date.now().toString(),
-            },
-            lifecycle: {
-              createBeforeDestroy: true,
-            },
-          }
-        );
-
-        for (const stageProp of stageProps) {
-          const accessLogGroup = this.assignCloudwatchLog(
-            stageProp.stageName,
-            stageProp.accessLogSettings
-          );
-
-          const stage = new ApiGatewayStage(restApi, `${stageProp.stageName}-stage`, {
-            ...(stageProp || {}),
-            deploymentId: deployment.id,
-            restApiId: restApi.id,
-            stageName: stageProp.stageName,
-            documentationVersion: version?.version,
-            accessLogSettings: accessLogGroup
-              ? {
-                  destinationArn: accessLogGroup.arn,
-                  format: JSON.stringify(
-                    stageProp.accessLogSettings?.formatKeys.reduce(
-                      (acc, key) => {
-                        acc[key] = logFormatValues[key];
-                        return acc;
-                      },
-                      {} as Record<string, string>
-                    )
-                  ),
-                }
-              : undefined,
-            dependsOn: [deployment],
-          });
-
-          this.stages.push(stage);
-        }
       }
+
+      const body = this.openapiFactory.finalize();
+
+      if (!hasContent) {
+        return;
+      }
+
+      if (this.openapiFactory.isEnabled) {
+        apiResources.push(restApi as unknown as (typeof apiResources)[number]);
+      }
+
+      const deployment = new ApiGatewayDeployment(
+        restApi,
+        `${apiProps.name}-deployment`,
+        {
+          restApiId: restApi.id,
+          dependsOn: apiResources,
+          triggers: {
+            redeployment: body ? createSha256(body) : Date.now().toString(),
+          },
+          lifecycle: {
+            createBeforeDestroy: true,
+          },
+        }
+      );
+
+      for (const stageProp of stageProps) {
+        this.stages.push(this.createStage(stageProp, deployment, version));
+      }
+    }
+
+    public createStage(
+      stageProp: Stage,
+      deployment: ApiGatewayDeployment,
+      version?: ApiGatewayDocumentationVersion
+    ) {
+      const accessLogGroup = this.assignCloudwatchLog(
+        stageProp.stageName,
+        stageProp.accessLogSettings
+      );
+
+      return new ApiGatewayStage(restApi, `${stageProp.stageName}-stage`, {
+        ...stageProp,
+        deploymentId: deployment.id,
+        restApiId: restApi.id,
+        stageName: stageProp.stageName,
+        documentationVersion: version?.version,
+        accessLogSettings: this.buildAccessLogSettings(accessLogGroup, stageProp),
+        dependsOn: [deployment],
+      });
+    }
+
+    public buildAccessLogSettings(
+      accessLogGroup: CloudwatchLogGroup | undefined,
+      stageProp: Stage
+    ) {
+      if (!accessLogGroup) {
+        return undefined;
+      }
+
+      const format = stageProp.accessLogSettings?.formatKeys.reduce(
+        (acc, key) => {
+          acc[key] = logFormatValues[key];
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      return {
+        destinationArn: accessLogGroup.arn,
+        format: JSON.stringify(format),
+      };
     }
 
     public addApiGatewayResponse() {
@@ -270,21 +291,27 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           continue;
         }
 
-        let statusCode = apiResponseStatusCode[key];
-        let template = response;
+        const isCustomResponse = response instanceof ApiGatewayResponse;
+        const statusCode = isCustomResponse
+          ? response.statusCode
+          : apiResponseStatusCode[key];
+        const template = isCustomResponse ? response.template : response;
+        const gatewayResponse = {
+          statusCode: statusCode?.toString(),
+          responseTemplates: {
+            'application/json': JSON.stringify(template),
+          },
+        };
 
-        if (response instanceof ApiGatewayResponse) {
-          statusCode = response.statusCode;
-          template = response.template;
+        if (this.openapiFactory.isEnabled) {
+          this.openapiFactory.setGatewayResponse(apiResponseName[key], gatewayResponse);
+          continue;
         }
 
         new ApiGatewayGatewayResponse(restApi, `${apiProps.name}-${responseKey}`, {
           restApiId: restApi.id,
           responseType: apiResponseName[key],
-          statusCode: statusCode?.toString(),
-          responseTemplates: {
-            'application/json': JSON.stringify(template),
-          },
+          ...gatewayResponse,
           dependsOn: [restApi],
         });
       }

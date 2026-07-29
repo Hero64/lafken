@@ -110,4 +110,11 @@ export interface OpenApiDocument {
   'x-amazon-apigateway-binary-media-types'?: string[];
   'x-amazon-apigateway-minimum-compression-size'?: number;
   'x-amazon-apigateway-api-key-source'?: string;
+  'x-amazon-apigateway-policy'?: Record<string, unknown>;
+  'x-amazon-apigateway-gateway-responses'?: Record<string, GatewayResponseObject>;
+}
+
+export interface GatewayResponseObject {
+  statusCode?: string;
+  responseTemplates?: Record<string, string>;
 }

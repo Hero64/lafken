@@ -1,10 +1,12 @@
 import { ApiGatewayAuthorizer } from '@cdktn/provider-aws/lib/api-gateway-authorizer';
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
+import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { enableBuildEnvVariable } from '@lafken/common';
@@ -95,6 +97,45 @@ describe('OpenApi definition mode', () => {
     expect(LambdaHandler).toHaveBeenCalled();
     expect(synth).toHaveResource(ApiGatewayDeployment);
     expect(synth).toHaveResource(ApiGatewayStage);
+  });
+
+  it('embeds the resource policy in the body instead of a separate policy resource for a private endpoint', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({
+      definition: 'openapi',
+      endpointConfiguration: {
+        type: 'private',
+        vpcEndpointIds: ['vpce-1234567890abcdef0'],
+      },
+    });
+    await initializeMethod(restApi, stack, OpenApiApi, 'list');
+    await initializeMethod(restApi, stack, OpenApiApi, 'create');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+
+    expect(synth).not.toHaveResource(ApiGatewayRestApiPolicy);
+    expect(synth).toContain('x-amazon-apigateway-policy');
+    expect(synth).toContain('execute-api:/*');
+    expect(synth).toContain('vpce-1234567890abcdef0');
+  });
+
+  it('embeds gateway responses in the body instead of separate response resources', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({
+      definition: 'openapi',
+      defaultResponses: {
+        unauthorized: { message: 'Unauthorized' },
+      },
+    });
+    await initializeMethod(restApi, stack, OpenApiApi, 'list');
+    await initializeMethod(restApi, stack, OpenApiApi, 'create');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+
+    expect(synth).not.toHaveResource(ApiGatewayGatewayResponse);
+    expect(synth).toContain('x-amazon-apigateway-gateway-responses');
+    expect(synth).toContain('UNAUTHORIZED');
+    expect(synth).toContain('Unauthorized');
   });
 });
 

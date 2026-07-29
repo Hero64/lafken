@@ -1,6 +1,7 @@
 import type { RestApi } from '../../../resolver.types';
 import type { JsonSchema } from '../model/model.types';
 import type {
+  GatewayResponseObject,
   OpenApiDocument,
   OperationObject,
   RequestValidatorObject,
@@ -24,6 +25,8 @@ export class OpenApiFactory {
   private minimumCompressionSize?: number;
   private apiKeySource?: string;
   private description?: string;
+  private policy?: Record<string, unknown>;
+  private gatewayResponses: Record<string, GatewayResponseObject> = {};
   private deferred: Array<() => void | Promise<void>> = [];
 
   constructor(
@@ -74,6 +77,14 @@ export class OpenApiFactory {
 
   public setDescription(description?: string) {
     this.description = description;
+  }
+
+  public setPolicy(policy: Record<string, unknown>) {
+    this.policy = policy;
+  }
+
+  public setGatewayResponse(responseType: string, response: GatewayResponseObject) {
+    this.gatewayResponses[responseType] = response;
   }
 
   /**
@@ -154,6 +165,12 @@ export class OpenApiFactory {
     }
     if (this.apiKeySource) {
       document['x-amazon-apigateway-api-key-source'] = this.apiKeySource;
+    }
+    if (this.policy) {
+      document['x-amazon-apigateway-policy'] = this.policy;
+    }
+    if (Object.keys(this.gatewayResponses).length > 0) {
+      document['x-amazon-apigateway-gateway-responses'] = this.gatewayResponses;
     }
 
     return document;
