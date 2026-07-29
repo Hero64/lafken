@@ -99,7 +99,7 @@ describe('OpenApi definition mode', () => {
     expect(synth).toHaveResource(ApiGatewayStage);
   });
 
-  it('embeds the resource policy in the body instead of a separate policy resource for a private endpoint', async () => {
+  it('sets the resource policy on the rest api and in the body instead of a separate policy resource for a private endpoint', async () => {
     const { restApi, stack } = setupInternalTestingRestApi({
       definition: 'openapi',
       endpointConfiguration: {
@@ -114,6 +114,9 @@ describe('OpenApi definition mode', () => {
     const synth = Testing.synth(stack);
 
     expect(synth).not.toHaveResource(ApiGatewayRestApiPolicy);
+    expect(synth).toHaveResourceWithProperties(ApiGatewayRestApi, {
+      policy: expect.stringContaining('vpce-1234567890abcdef0'),
+    });
     expect(synth).toContain('x-amazon-apigateway-policy');
     expect(synth).toContain('execute-api:/*');
     expect(synth).toContain('vpce-1234567890abcdef0');
