@@ -148,15 +148,16 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         return [];
       }
 
-      if (this.openapiFactory.isEnabled) {
-        this.openapiFactory.setPolicy(this.buildVpcPolicyStatement('execute-api:/*'));
-        return [];
-      }
-
       const identity = new DataAwsCallerIdentity(
         restApi,
         `${apiProps.name}-api-caller-identity`
       );
+
+      if (this.openapiFactory.isEnabled) {
+        this.assignOpenApiVpcPolicy(identity);
+        return [];
+      }
+
       const region = new DataAwsRegion(this, `${apiProps.name}-api-region`);
       const policy = new ApiGatewayRestApiPolicy(restApi, 'api-policy', {
         restApiId: restApi.id,
@@ -169,6 +170,37 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       });
 
       return [policy];
+    }
+
+    /**
+     * In openapi mode the policy is written twice, and neither write is
+     * redundant:
+     *
+     * - `x-amazon-apigateway-policy` in the body, so that a policy change alters
+     *   the body hash and forces a redeployment (a resource policy only takes
+     *   effect on a stage after a new deployment).
+     * - The REST API `policy` argument, because the provider re-applies that
+     *   argument right after the OpenAPI import. Without it the imported policy
+     *   is replaced by the stale value the provider reads back from state
+     *   (hashicorp/terraform-provider-aws#38515).
+     *
+     * A separate `aws_api_gateway_rest_api_policy` cannot be used here: it
+     * attaches the policy in a later graph step, and the deployment of a private
+     * API then fails with "Private REST API doesn't have a resource policy
+     * attached to it".
+     */
+    public assignOpenApiVpcPolicy(identity: DataAwsCallerIdentity) {
+      this.openapiFactory.setPolicy(this.buildVpcPolicyStatement('execute-api:/*'));
+
+      // The API id cannot be referenced from the API's own `policy` argument
+      // without creating a self-referential block, so the ARN is wildcarded. A
+      // resource policy only ever applies to the API it is attached to, so this
+      // grants exactly what the body statement expands to.
+      (restApi as unknown as { policy: string }).policy = JSON.stringify(
+        this.buildVpcPolicyStatement(
+          `arn:aws:execute-api:${this.regionRef}:${identity.accountId}:*/*`
+        )
+      );
     }
 
     public assignCloudwatchLog(stageName: string, props?: Stage['accessLogSettings']) {
