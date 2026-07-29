@@ -80,6 +80,18 @@ describe('Bucket upload integration', () => {
         object: e.object,
       };
     }
+
+    @Get({
+      path: 'upload/prefixed/{bucket}',
+      action: 'Upload',
+      integration: 'bucket',
+    })
+    uploadPrefixedEvent(@Event(Upload) e: Upload): BucketIntegrationResponse {
+      return {
+        bucket: e.bucket,
+        object: `data/temp/${e.object}`,
+      };
+    }
   }
 
   it('should create s3 integration', async () => {
@@ -201,6 +213,36 @@ describe('Bucket upload integration', () => {
       },
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:s3:path/{bucket}/{object}',
+    });
+  });
+
+  it('should create s3 integration concatenating a static prefix with an event prop', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const handlers = getResourceHandlerMetadata<ApiLambdaMetadata>(BucketIntegrationApi);
+    const resourceMetadata =
+      getResourceMetadata<ApiResourceMetadata>(BucketIntegrationApi);
+
+    const handler = handlers.find(
+      (h) => h.name === 'uploadPrefixedEvent'
+    ) as ApiLambdaMetadata;
+
+    await restApi.addMethod(stack, {
+      classResource: BucketIntegrationApi,
+      handler: handler,
+      resourceMetadata,
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
+      integration_http_method: 'PUT',
+      request_parameters: {
+        'integration.request.path.bucket': 'method.request.path.bucket',
+        'integration.request.path.object': 'method.request.querystring.object',
+      },
+      type: 'AWS',
+      uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:s3:path/{bucket}/data/temp/{object}',
     });
   });
 });
