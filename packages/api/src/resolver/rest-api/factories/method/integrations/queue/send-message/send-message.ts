@@ -12,6 +12,11 @@ import type {
 } from '../../integration.types';
 import { LafkenIntegration, toXAmazonIntegration } from '../../integration.utils';
 
+/** Quote type expected by sqs for the string keys and values of the message body. */
+const SQS_QUOTE_TYPE = '""';
+
+const unquote = (template: string) => template.replaceAll('"', '');
+
 export class SendMessageIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
 
@@ -185,6 +190,11 @@ export class SendMessageIntegration implements Integration {
       if (typeof value === 'string') {
         return `&MessageBody=$util.urlEncode("${value}")`;
       }
+
+      if (bodyResolver.type === 'Object' || bodyResolver.type === 'Array') {
+        return `&MessageBody=${this.createBodyObjectTemplate(value)}`;
+      }
+
       throw new Error('Body message only support event parameters');
     }
 
@@ -205,6 +215,54 @@ export class SendMessageIntegration implements Integration {
     }
 
     return `&MessageBody={"${bodyResolver.path}":$util.urlEncode($input.json('$.${bodyResolver.path}'))}`;
+  };
+
+  /**
+   * Builds the message body from a plain object/array literal, mixing static values
+   * and event fields. Only the leaf values are url encoded, the json structure is
+   * kept as is because it is already safe for the `x-www-form-urlencoded` payload.
+   * String keys and values are wrapped with the sqs quote type.
+   */
+  private createBodyObjectTemplate = (value: any) => {
+    const { proxyHelper, templateHelper, paramHelper } = this.props;
+
+    return templateHelper.generateTemplateByObject({
+      value,
+      quoteType: SQS_QUOTE_TYPE,
+      resolveValue: (currentValue) => {
+        const resolver = proxyHelper.resolveProxyValue(
+          currentValue,
+          paramHelper.pathParams
+        );
+
+        return resolver.field
+          ? // the template is generated from the event path to support nested fields
+            { ...resolver, field: { ...resolver.field, name: resolver.path as string } }
+          : resolver;
+      },
+      parseObjectValue: (template, fieldType, _isRoot, isField) => {
+        if (!isField) {
+          // static strings are encoded at runtime to keep the resource references
+          // untouched, they are only resolved once the stack is synthesized
+          return fieldType === 'String'
+            ? `${SQS_QUOTE_TYPE}$util.urlEncode('${unquote(template)}')${SQS_QUOTE_TYPE}`
+            : template;
+        }
+
+        // objects and arrays resolved as a single velocity expression are encoded as
+        // a whole, the ones built with velocity directives already encode their leaves
+        return (fieldType === 'Object' || fieldType === 'Array') &&
+          !template.includes('#')
+          ? `$util.urlEncode(${template})`
+          : template;
+      },
+      templateOptions: {
+        valueParser: (template, fieldType) =>
+          fieldType === 'String'
+            ? `${SQS_QUOTE_TYPE}$util.urlEncode(${unquote(template)})${SQS_QUOTE_TYPE}`
+            : template,
+      },
+    });
   };
 
   private getFieldAndParseTemplate = (fieldValue: any, encode = true) => {

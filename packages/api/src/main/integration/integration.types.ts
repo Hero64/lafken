@@ -318,7 +318,7 @@ export type QueueIntegrationOption = IntegrationOptionBase<
 
 /**
  * Response shape for the SQS SendMessage integration.
- * Specifies the target queue, optional message attributes, and body.
+ * Specifies the target queue, optional message attributes, body and FIFO settings.
  *
  * @example
  * ```typescript
@@ -336,17 +336,47 @@ export interface QueueSendMessageIntegrationResponse {
   /** The SQS queue name to send the message to. */
   queueName: QueueNames;
   /**
-   * Optional message attributes as key-value pairs.
+   * Optional message attributes as key-value pairs. Values can be static or event
+   * fields, the attribute data type is inferred from the value type.
    *
    * @example
    * ```typescript
-   * { attributes: { priority: 'high', retryCount: 3 } }
+   * { attributes: { priority: 'high', retryCount: 3, trainer: e.trainer } }
    * ```
    */
   attributes?: Partial<Record<string, string | number>>;
-  /** Optional message body payload. Can be a plain string or a full `@Event` object. */
+  /**
+   * Optional message body payload. Can be a plain string, a full `@Event` object or
+   * an object literal mixing static values and event fields.
+   *
+   * @example
+   * ```typescript
+   * { body: { name: e.name, level: e.level, source: 'pokedex' } }
+   * ```
+   */
   body?: any;
+  /**
+   * Tag that groups the messages of a FIFO queue, the messages sharing a group id
+   * are delivered in order. Required by FIFO queues and ignored by standard ones.
+   * Only static values are supported, event fields are not resolved.
+   *
+   * @example
+   * ```typescript
+   * { groupId: 'pokemon' }
+   * ```
+   */
   groupId?: string;
+  /**
+   * Token used by a FIFO queue to discard the messages sent more than once during
+   * the deduplication interval. It is not needed when the queue enables content
+   * based deduplication. Only static values are supported, event fields are not
+   * resolved.
+   *
+   * @example
+   * ```typescript
+   * { deduplicationId: 'create-pokemon' }
+   * ```
+   */
   deduplicationId?: string;
 }
 

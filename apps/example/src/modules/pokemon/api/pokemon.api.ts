@@ -139,7 +139,13 @@ export class PokeApi {
   ): Promise<QueueSendMessageIntegrationResponse> {
     return {
       queueName: getResourceValue('queue::create-pokemon', 'name'),
-      body: 'view pokedex',
+      body: {
+        name: 'view pokedex',
+        other: 1,
+        foo: {
+          bar: getResourceValue('queue::create-pokemon', 'name'),
+        },
+      },
     };
   }
 }
