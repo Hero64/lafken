@@ -4,6 +4,7 @@ import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
 import { EVENT_PROXY_METADATA_KEY } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import type { DocLocation, DocMethodProperties } from '../docs/docs.types';
 import type { ModelRef } from '../model/model.types';
 import type { OperationObject } from '../openapi/openapi.types';
 import {
@@ -99,6 +100,7 @@ export class MethodFactory {
         integrationProps,
         cors: props.cors,
         security,
+        methodName,
       });
       return;
     }
@@ -159,6 +161,7 @@ export class MethodFactory {
     integrationProps: OpenApiIntegrationProps;
     cors?: CreateMethodProps['cors'];
     security?: Array<Record<string, string[]>>;
+    methodName: string;
   }) {
     const {
       fullPath,
@@ -170,6 +173,7 @@ export class MethodFactory {
       integrationProps,
       cors,
       security,
+      methodName,
     } = ctx;
 
     const { integration, responses } = await this.integrateOpenApi(integrationProps);
@@ -201,6 +205,16 @@ export class MethodFactory {
         corsToOptionsOperation(this.corsHelper.buildHeaders(cors))
       );
     }
+
+    const docParams = {
+      handler,
+      resourceMetadata,
+      paramHelper,
+      methodName,
+      fullPath: `/${fullPath}`,
+    };
+    this.addMethodDocumentation(docParams);
+    this.addParamsDocumentation(docParams);
   }
 
   private async integrateOpenApi(
@@ -323,19 +337,23 @@ export class MethodFactory {
       return;
     }
 
-    this.scope.docsFactory.createDoc({
-      id: methodName,
-      location: {
-        type: 'METHOD',
-        method: handler.method,
-        path: fullPath,
-      },
-      properties: {
-        description: handler.description,
-        tags: handler.tags || resourceMetadata.tags,
-        summary: handler.summary,
-      },
-    });
+    const location: DocLocation = {
+      type: 'METHOD',
+      method: handler.method,
+      path: fullPath,
+    };
+    const properties: DocMethodProperties = {
+      description: handler.description,
+      tags: handler.tags || resourceMetadata.tags,
+      summary: handler.summary,
+    };
+
+    if (this.scope.openapiFactory.isEnabled) {
+      this.scope.openapiFactory.addDocumentationPart(location, properties);
+      return;
+    }
+
+    this.scope.docsFactory.createDoc({ id: methodName, location, properties });
   }
 
   private addParamsDocumentation(props: AddDocumentationProps) {
@@ -347,15 +365,21 @@ export class MethodFactory {
 
     for (const param of params) {
       const { source, type, destinationName, name, ...properties } = param;
+      const location: DocLocation = {
+        type: source === 'path' ? 'PATH_PARAMETER' : 'QUERY_PARAMETER',
+        method: handler.method,
+        name: param.name,
+        path: fullPath,
+      };
+
+      if (this.scope.openapiFactory.isEnabled) {
+        this.scope.openapiFactory.addDocumentationPart(location, properties);
+        continue;
+      }
 
       this.scope.docsFactory.createDoc({
         id: `${param.name}-${methodName}-${handler.method}`,
-        location: {
-          type: source === 'path' ? 'PATH_PARAMETER' : 'QUERY_PARAMETER',
-          method: handler.method,
-          name: param.name,
-          path: fullPath,
-        },
+        location,
         properties,
       });
     }

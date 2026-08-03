@@ -1,6 +1,8 @@
 import type { RestApi } from '../../../resolver.types';
+import type { DocLocation, DocProperties } from '../docs/docs.types';
 import type { JsonSchema } from '../model/model.types';
 import type {
+  DocumentationPartObject,
   GatewayResponseObject,
   OpenApiDocument,
   OperationObject,
@@ -27,6 +29,7 @@ export class OpenApiFactory {
   private description?: string;
   private policy?: Record<string, unknown>;
   private gatewayResponses: Record<string, GatewayResponseObject> = {};
+  private documentationParts: DocumentationPartObject[] = [];
   private deferred: Array<() => void | Promise<void>> = [];
 
   constructor(
@@ -85,6 +88,10 @@ export class OpenApiFactory {
 
   public setGatewayResponse(responseType: string, response: GatewayResponseObject) {
     this.gatewayResponses[responseType] = response;
+  }
+
+  public addDocumentationPart(location: DocLocation, properties: DocProperties) {
+    this.documentationParts.push({ location, properties });
   }
 
   /**
@@ -171,6 +178,12 @@ export class OpenApiFactory {
     }
     if (Object.keys(this.gatewayResponses).length > 0) {
       document['x-amazon-apigateway-gateway-responses'] = this.gatewayResponses;
+    }
+    if (this.documentationParts.length > 0) {
+      document['x-amazon-apigateway-documentation'] = {
+        version: '1.0',
+        documentationParts: this.documentationParts,
+      };
     }
 
     return document;
