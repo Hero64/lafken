@@ -193,6 +193,45 @@ describe('OpenApi definition mode - auth, cors and docs', () => {
     expect(authorizer.identitySource).toBeUndefined();
     expect(authorizer.authorizerResultTtlInSeconds).toBe(0);
   });
+
+  @Api({ tags: ['Users'] })
+  class DocsApi {
+    @Get({ path: 'users', summary: 'List users', description: 'Returns all users' })
+    list() {}
+  }
+
+  it('embeds tags/description/summary as x-amazon-apigateway-documentation so they survive API Gateway import/export', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+    await initializeMethod(restApi, stack, DocsApi, 'list');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+    expect(synth).toContain('x-amazon-apigateway-documentation');
+
+    const parsed = JSON.parse(synth);
+    const api = Object.values(parsed.resource.aws_api_gateway_rest_api)[0] as {
+      body: string;
+    };
+    const doc = JSON.parse(api.body);
+
+    expect(doc.paths['/users'].get.tags).toEqual(['Users']);
+    expect(doc.paths['/users'].get.summary).toBe('List users');
+    expect(doc.paths['/users'].get.description).toBe('Returns all users');
+
+    const methodPart = doc['x-amazon-apigateway-documentation'].documentationParts.find(
+      (part: { location: { type: string } }) => part.location.type === 'METHOD'
+    );
+    expect(methodPart.location).toMatchObject({
+      type: 'METHOD',
+      method: 'GET',
+      path: '/users',
+    });
+    expect(methodPart.properties).toMatchObject({
+      tags: ['Users'],
+      summary: 'List users',
+      description: 'Returns all users',
+    });
+  });
 });
 
 describe('OpenApi definition mode - AWS service integrations', () => {
