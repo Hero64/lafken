@@ -35,7 +35,149 @@ export interface MethodAuthorizer {
   scopes?: string[];
 }
 
+export type MethodLoggingLevel = 'off' | 'error' | 'info';
+
+export type UnauthorizedCacheControlHeaderStrategy =
+  | 'fail_with_403'
+  | 'succeed_with_response_header'
+  | 'succeed_without_response_header';
+
+export interface MethodSettings {
+  /**
+   * Indicates whether the API Gateway cache is encrypted.
+   *
+   * When enabled, the cache data for this method is encrypted at rest.
+   *
+   * @default false
+   */
+  cacheDataEncrypted?: boolean;
+  /**
+   * Time-to-live (TTL) for cached responses, in seconds.
+   *
+   * Specifies how long API Gateway caches the method response before
+   * forwarding the request to the backend again.
+   *
+   * @default 300
+   */
+  cacheTtlInSeconds?: number;
+  /**
+   * Indicates whether caching is enabled for the method.
+   *
+   * Requires a cache cluster to be configured on the stage.
+   *
+   * @default false
+   */
+  cachingEnabled?: boolean;
+  /**
+   * Enables full request and response data logging for the method.
+   *
+   * Captures the request and response payloads in CloudWatch Logs.
+   *
+   * @default false
+   */
+  dataTraceEnabled?: boolean;
+  /**
+   * Logging level for the method.
+   *
+   * Controls the verbosity of the logs written to CloudWatch Logs.
+   *
+   * @default "off"
+   */
+  loggingLevel?: MethodLoggingLevel;
+  /**
+   * Indicates whether CloudWatch metrics are enabled for the method.
+   *
+   * @default false
+   */
+  metricsEnabled?: boolean;
+  /**
+   * Whether authorization is required before honoring `Cache-Control`
+   * directives on the request.
+   *
+   * @default true
+   */
+  requireAuthorizationForCacheControl?: boolean;
+  /**
+   * The maximum number of requests that can be sent to the method in a
+   * short burst before throttling kicks in.
+   *
+   * This value only takes effect if the stage has throttling limits
+   * configured.
+   */
+  throttlingBurstLimit?: number;
+  /**
+   * The steady-state request rate limit, in requests per second, for
+   * the method.
+   *
+   * This value only takes effect if the stage has throttling limits
+   * configured.
+   */
+  throttlingRateLimit?: number;
+  /**
+   * Strategy used when a `Cache-Control` directive is sent without
+   * authorization and authorization is required.
+   *
+   * @default "succeed_without_response_header"
+   */
+  unauthorizedCacheControlHeaderStrategy?: UnauthorizedCacheControlHeaderStrategy;
+}
+
+export interface StageMethodSettings extends MethodSettings {
+  /**
+   * Stage name.
+   *
+   * Specifies the API Gateway stage this method settings block applies to.
+   * The stage must be configured in the `@Api` resolver (`stages` prop).
+   */
+  stageName: string;
+}
+
+export type MethodSettingsConfig = MethodSettings | StageMethodSettings[];
+
 export interface ApiLambdaBaseProps {
+  /**
+   * Method settings.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for this method at the stage level, rendered as
+   * `aws_api_gateway_method_settings` resources.
+   *
+   * Accepts either:
+   * - A single settings object, which is applied to **every** stage of the
+   *   REST API.
+   * - An array of stage-scoped settings, where each entry targets a specific
+   *   stage by name.
+   *
+   * @example
+   * // Apply to every stage
+   * {
+   *   methodSettings: {
+   *     cachingEnabled: true,
+   *     cacheTtlInSeconds: 300,
+   *     metricsEnabled: true,
+   *     loggingLevel: 'info',
+   *     throttlingRateLimit: 100,
+   *     throttlingBurstLimit: 50,
+   *   }
+   * }
+   *
+   * @example
+   * // Apply only to specific stages
+   * {
+   *   methodSettings: [
+   *     {
+   *       stageName: 'staging',
+   *       loggingLevel: 'error',
+   *     },
+   *     {
+   *       stageName: 'prod',
+   *       cachingEnabled: true,
+   *       metricsEnabled: true,
+   *     },
+   *   ]
+   * }
+   */
+  methodSettings?: MethodSettingsConfig;
   /**
    * Method path.
    *
@@ -391,6 +533,45 @@ export interface ApiProps extends ResourceProps {
    */
   apiGatewayName?: ApiNames;
   /**
+   * Method settings.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method** of this resource class, rendered as
+   * `aws_api_gateway_method_settings` resources.
+   *
+   * Each handler inherits this configuration and receives a concrete method
+   * settings entry, e.g. `@Api({ path: '/users' })` can produce
+   * `method_path = "users/POST"` and `method_path = "users/{id}/GET"`.
+   *
+   * Accepts either:
+   * - A single settings object, which is applied to **every** stage of the
+   *   REST API.
+   * - An array of stage-scoped settings, where each entry targets a specific
+   *   stage by name.
+   *
+   * Method-level `methodSettings` take precedence: a handler declaring its own
+   * settings does not inherit this class-level configuration.
+   *
+   * @example
+   * {
+   *   path: '/users',
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'info',
+   *   }
+   * }
+   *
+   * @example
+   * {
+   *   path: '/users',
+   *   methodSettings: [
+   *     { stageName: 'prod', cachingEnabled: true },
+   *     { stageName: 'dev', loggingLevel: 'error' },
+   *   ]
+   * }
+   */
+  methodSettings?: MethodSettingsConfig;
+  /**
    * OpenAPI tags.
    *
    * A list of tags applied at the class level that will be inherited by all
@@ -423,6 +604,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   summary?: string;
   tags?: string[];
   additionalServices?: ServicesValues;
+  methodSettings?: MethodSettingsConfig;
 }
 
 export enum Method {

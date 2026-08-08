@@ -8,6 +8,7 @@ import type {
   ResourceOutputType,
 } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
+import type { MethodSettings } from '../main';
 import type { ExternalRestApi } from './rest-api/external/external';
 import type { InternalRestApi } from './rest-api/internal/internal';
 
@@ -243,6 +244,28 @@ export interface Stage
      */
     formatKeys: StageLogGroupFormatKeys[];
   };
+  /**
+   * Default method settings for the stage.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method** of this stage, rendered as a single
+   * `aws_api_gateway_method_settings` resource holding the stage-wide
+   * wildcard method path.
+   *
+   * Settings declared on an `@Api` class or on a method override this
+   * default for the paths they target. Takes precedence over the
+   * `methodSettings` declared on the REST API.
+   *
+   * @example
+   * {
+   *   stageName: 'prod',
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'error',
+   *   }
+   * }
+   */
+  methodSettings?: MethodSettings;
 }
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
@@ -300,6 +323,28 @@ export interface BaseApiProps {
    * If not provided, a default stage named `api` is created.
    */
   stages?: Stage[];
+  /**
+   * Default method settings for the REST API.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method of every stage**, rendered as a single
+   * `aws_api_gateway_method_settings` resource per stage holding the
+   * stage-wide wildcard method path.
+   *
+   * A stage declaring its own `methodSettings` ignores this default, and
+   * settings declared on an `@Api` class or on a method override it for the
+   * paths they target.
+   *
+   * @example
+   * {
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'error',
+   *     throttlingRateLimit: 100,
+   *   }
+   * }
+   */
+  methodSettings?: MethodSettings;
   /**
    * Authorization configuration for the REST API.
    *

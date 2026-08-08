@@ -14,6 +14,8 @@ import {
   Event,
   EventProxy,
   Get,
+  PathParam,
+  Post,
   type QueueSendMessageIntegrationResponse,
   type StateMachineStartIntegrationResponse,
 } from '../../../../main';
@@ -40,6 +42,12 @@ describe('Api Method', () => {
   class ProxyBody {
     @BodyParam()
     name: string;
+  }
+
+  @ApiRequest()
+  class UserIdPayload {
+    @PathParam()
+    id: string;
   }
 
   @Api()
@@ -125,6 +133,40 @@ describe('Api Method', () => {
     @Get({ path: 'valid-streaming', integrationType: 'aws-proxy' })
     validStreaming(@EventProxy(ProxyBody) _e: ProxyBody) {}
   }
+
+  @Api({
+    path: '/users',
+    methodSettings: {
+      metricsEnabled: true,
+    },
+  })
+  class InheritedMethodSettingsApi {
+    @Post()
+    create() {}
+
+    @Get({ path: '/{id}' })
+    getById(@Event(UserIdPayload) _event: UserIdPayload) {}
+  }
+
+  it('inherits class method settings using each handler concrete path', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, InheritedMethodSettingsApi, 'create');
+    await initializeMethod(restApi, stack, InheritedMethodSettingsApi, 'getById');
+
+    expect(restApi.methodFactory.settings).toEqual([
+      {
+        methodName: 'InheritedMethodSettingsApi-create-post',
+        methodPath: 'users/POST',
+        settings: { metricsEnabled: true },
+      },
+      {
+        methodName: 'InheritedMethodSettingsApi-getById-get',
+        methodPath: 'users/{id}/GET',
+        settings: { metricsEnabled: true },
+      },
+    ]);
+  });
 
   it('should create a lambda integration method', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();

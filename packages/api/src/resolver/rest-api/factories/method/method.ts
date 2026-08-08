@@ -2,7 +2,11 @@ import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { getMetadataPrototypeByKey } from '@lafken/common';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
-import { EVENT_PROXY_METADATA_KEY } from '../../../../main';
+import {
+  EVENT_PROXY_METADATA_KEY,
+  type MethodSettingsConfig,
+  type StageMethodSettings,
+} from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
 import type { DocLocation, DocMethodProperties } from '../docs/docs.types';
 import type { ModelRef } from '../model/model.types';
@@ -33,16 +37,26 @@ import { MockIntegration } from './integrations/mock/mock';
 import { QueueIntegration } from './integrations/queue/queue';
 import { BucketIntegration } from './integrations/s3/bucket';
 import { StateMachineIntegration } from './integrations/state-machine/state-machine';
-import type { AddDocumentationProps, CreateMethodProps } from './method.types';
+import type {
+  AddDocumentationProps,
+  CreateMethodProps,
+  MethodSettingsEntry,
+  RegisterMethodSettingsProps,
+} from './method.types';
 
 export class MethodFactory {
   private methodResources: TerraformResource[] = [];
+  private methodSettings: MethodSettingsEntry[] = [];
   private corsHelper = new CorsHelper();
 
   constructor(private scope: RestApi) {}
 
   get resources() {
     return this.methodResources;
+  }
+
+  get settings() {
+    return this.methodSettings;
   }
 
   public async create(module: Construct, props: CreateMethodProps) {
@@ -73,6 +87,8 @@ export class MethodFactory {
 
     const model = this.resolveModel(paramHelper);
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
+
+    this.registerMethodSettings({ handler, resourceMetadata, fullPath, methodName });
 
     const integrationProps: OpenApiIntegrationProps = {
       ...props,
@@ -323,6 +339,59 @@ export class MethodFactory {
 
   private cleanPath(path: string) {
     return path.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
+  }
+
+  /**
+   * API Gateway keys method settings as `{resource_path}/{http_method}`, with
+   * the leading slash of the resource path trimmed, e.g. `/users/{id}` with
+   * `GET` becomes `users/{id}/GET`. The root resource keeps its slash, as
+   * trimming it would leave the resource path empty.
+   */
+  private buildMethodPath(fullPath: string, method: string) {
+    return fullPath === '/' ? `/${method}` : `${fullPath}/${method}`;
+  }
+
+  private normalizeMethodSettings(
+    methodName: string,
+    fullPath: string,
+    method: string,
+    methodSettings: MethodSettingsConfig
+  ): MethodSettingsEntry[] {
+    const methodPath = this.buildMethodPath(fullPath, method);
+
+    if (Array.isArray(methodSettings)) {
+      return methodSettings.map(({ stageName, ...settings }: StageMethodSettings) => ({
+        methodName,
+        methodPath,
+        stageName,
+        settings,
+      }));
+    }
+
+    return [{ methodName, methodPath, settings: methodSettings }];
+  }
+
+  /**
+   * Registers the method settings entries contributed by a handler.
+   *
+   * Class-level settings are inherited by every handler and are always
+   * rendered against that handler's concrete resource path and HTTP method.
+   * For example, `@Api({ path: '/users' })` produces `users/POST` and
+   * `users/{id}/GET`, never `users/*`. Handlers declaring their own settings
+   * take precedence over the class ones.
+   */
+  private registerMethodSettings(props: RegisterMethodSettingsProps) {
+    const { handler, resourceMetadata, fullPath, methodName } = props;
+    const classSettings = resourceMetadata.methodSettings;
+    const settings = handler.methodSettings ?? classSettings;
+
+    if (!settings) {
+      return;
+    }
+
+    this.methodSettings.push(
+      ...this.normalizeMethodSettings(methodName, fullPath, handler.method, settings)
+    );
   }
 
   private addMethodDocumentation(props: AddDocumentationProps) {

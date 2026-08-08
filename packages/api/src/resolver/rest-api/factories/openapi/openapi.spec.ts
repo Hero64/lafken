@@ -3,6 +3,7 @@ import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deploy
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { ApiGatewayMethodSettings } from '@cdktn/provider-aws/lib/api-gateway-method-settings';
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
@@ -139,6 +140,37 @@ describe('OpenApi definition mode', () => {
     expect(synth).toContain('x-amazon-apigateway-gateway-responses');
     expect(synth).toContain('UNAUTHORIZED');
     expect(synth).toContain('Unauthorized');
+  });
+
+  it('creates method settings resources alongside the openapi body', async () => {
+    @Api()
+    class OpenApiMethodSettingsApi {
+      @Get({
+        path: 'users',
+        methodSettings: {
+          cachingEnabled: true,
+          metricsEnabled: true,
+          loggingLevel: 'info',
+        },
+      })
+      list() {}
+    }
+
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+    await initializeMethod(restApi, stack, OpenApiMethodSettingsApi, 'list');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+
+    expect(synth).toHaveResourceWithProperties(ApiGatewayMethodSettings, {
+      method_path: 'users/GET',
+      stage_name: 'api',
+      settings: {
+        caching_enabled: true,
+        metrics_enabled: true,
+        logging_level: 'INFO',
+      },
+    });
   });
 });
 

@@ -60,6 +60,7 @@ const createMethodDecorator = (method: Method) =>
         summary: params.summary,
         tags: params.tags,
         additionalServices,
+        methodSettings: params.methodSettings,
       } as ApiLambdaMetadata;
     },
     validateEvent: (target, methodName, event) => {
@@ -133,10 +134,11 @@ const createMethodDecorator = (method: Method) =>
 export const Api = createResourceDecorator<ApiProps>({
   type: RESOURCE_TYPE,
   callerFileIndex: 5,
-  getMetadata: ({ path, auth, apiGatewayName, tags }) => ({
+  getMetadata: ({ path, auth, apiGatewayName, tags, methodSettings }) => ({
     auth,
     tags,
     apiGatewayName,
+    methodSettings,
     path: path || '/',
   }),
 });

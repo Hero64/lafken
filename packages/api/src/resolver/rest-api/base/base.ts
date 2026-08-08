@@ -1,6 +1,7 @@
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
 import type { ApiGatewayDocumentationVersion } from '@cdktn/provider-aws/lib/api-gateway-documentation-version';
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
+import { ApiGatewayMethodSettings } from '@cdktn/provider-aws/lib/api-gateway-method-settings';
 import { ApiGatewayRestApiPolicy } from '@cdktn/provider-aws/lib/api-gateway-rest-api-policy';
 import { ApiGatewayStage } from '@cdktn/provider-aws/lib/api-gateway-stage';
 import { CloudwatchLogGroup } from '@cdktn/provider-aws/lib/cloudwatch-log-group';
@@ -8,6 +9,7 @@ import { DataAwsCallerIdentity } from '@cdktn/provider-aws/lib/data-aws-caller-i
 import { DataAwsRegion } from '@cdktn/provider-aws/lib/data-aws-region';
 import { createSha256 } from '@lafken/resolver';
 import type { Construct } from 'constructs';
+import type { MethodSettings } from '../../../main';
 import {
   type ApiDefaultResponseType,
   ApiGatewayResponse,
@@ -25,9 +27,23 @@ import { OpenApiFactory } from '../factories/openapi/openapi';
 import { ResourceFactory } from '../factories/resource/resource';
 import { ResponseFactory } from '../factories/response/response';
 import { ValidatorFactory } from '../factories/validator/validator';
-import { apiResponseName, apiResponseStatusCode, logFormatValues } from './base.utils';
+import {
+  allMethodsPath,
+  apiResponseName,
+  apiResponseStatusCode,
+  formatMethodSettings,
+  logFormatValues,
+} from './base.utils';
 
 type Constructor = new (...args: any[]) => Construct;
+
+export interface CreateMethodSettingsProps {
+  stage: ApiGatewayStage;
+  stageName: string;
+  methodName: string;
+  methodPath: string;
+  settings: MethodSettings;
+}
 
 export function RestApiBase<TBase extends Constructor>(Base: TBase) {
   let apiProps!: BaseApiProps;
@@ -266,9 +282,80 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         }
       );
 
+      this.validateMethodSettingsStageNames();
+
       for (const stageProp of stageProps) {
-        this.stages.push(this.createStage(stageProp, deployment, version));
+        const stage = this.createStage(stageProp, deployment, version);
+        this.stages.push(stage);
+        this.createStageMethodSettings(stageProp, stage);
       }
+    }
+
+    public validateMethodSettingsStageNames() {
+      if (this.methodFactory.settings.length === 0) {
+        return;
+      }
+
+      const stageNames = new Set(stageProps.map((stage) => stage.stageName));
+      const declared = new Set<string>();
+
+      for (const { methodName, methodPath, stageName } of this.methodFactory.settings) {
+        if (stageName && !stageNames.has(stageName)) {
+          throw new Error(
+            `method settings for "${methodName}" reference stage "${stageName}" but that stage is not configured in the "${apiProps.name}" API`
+          );
+        }
+
+        const key = `${methodPath}::${stageName ?? '*'}`;
+
+        if (declared.has(key)) {
+          throw new Error(
+            `method settings for "${methodName}" declare "${methodPath}" more than once${stageName ? ` on stage "${stageName}"` : ''} in the "${apiProps.name}" API`
+          );
+        }
+
+        declared.add(key);
+      }
+    }
+
+    public createStageMethodSettings(stageProp: Stage, stage: ApiGatewayStage) {
+      const { stageName } = stageProp;
+      const stageSettings = stageProp.methodSettings ?? apiProps.methodSettings;
+
+      if (stageSettings) {
+        this.createMethodSettings({
+          stage,
+          stageName,
+          methodName: 'all-methods',
+          methodPath: allMethodsPath,
+          settings: stageSettings,
+        });
+      }
+
+      for (const { methodName, methodPath, settings, stageName: scopedStage } of this
+        .methodFactory.settings) {
+        if (scopedStage && scopedStage !== stageName) {
+          continue;
+        }
+
+        this.createMethodSettings({ stage, stageName, methodName, methodPath, settings });
+      }
+    }
+
+    public createMethodSettings(props: CreateMethodSettingsProps) {
+      const { stage, stageName, methodName, methodPath, settings } = props;
+
+      return new ApiGatewayMethodSettings(
+        restApi,
+        `${apiProps.name}-${stageName}-${methodName}-method-settings`,
+        {
+          restApiId: restApi.id,
+          stageName,
+          methodPath,
+          settings: formatMethodSettings(settings),
+          dependsOn: [stage],
+        }
+      );
     }
 
     public createStage(
@@ -281,8 +368,10 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         stageProp.accessLogSettings
       );
 
+      const { methodSettings: _methodSettings, ...stageConfig } = stageProp;
+
       return new ApiGatewayStage(restApi, `${stageProp.stageName}-stage`, {
-        ...stageProp,
+        ...stageConfig,
         deploymentId: deployment.id,
         restApiId: restApi.id,
         stageName: stageProp.stageName,

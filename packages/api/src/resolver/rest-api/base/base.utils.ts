@@ -1,3 +1,4 @@
+import type { MethodSettings } from '../../../main';
 import type {
   ApiDefaultResponseType,
   StageLogGroupFormatKeys,
@@ -69,3 +70,17 @@ export const logFormatValues: Record<StageLogGroupFormatKeys, string> = {
   errorMessage: '$context.error.message',
   errorResponseType: '$context.error.responseType',
 };
+
+/**
+ * Method path that API Gateway reserves for the settings applied to every
+ * method of a stage, as opposed to a `{resource_path}/{http_method}` override.
+ */
+export const allMethodsPath = '*/*';
+
+/** Converts the lower-case public API values to API Gateway's enum syntax. */
+export const formatMethodSettings = (settings: MethodSettings) => ({
+  ...settings,
+  loggingLevel: settings.loggingLevel?.toUpperCase(),
+  unauthorizedCacheControlHeaderStrategy:
+    settings.unauthorizedCacheControlHeaderStrategy?.toUpperCase(),
+});
