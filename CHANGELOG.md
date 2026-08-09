@@ -1,3 +1,12 @@
+## 0.14.0
+
+### Minor Changes
+
+- Add API method setting support
+- Fix x-documentation in openapi
+- Add support object bodies on the queue send message integration
+- Add secondary indexes using key schema
+
 ## 0.13.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@lafken/standalone",
-  "version": "0.13.4",
+  "version": "0.14.0",
   "private": false,
   "description": "Define Lambdas using TypeScript decorators - serverless event-driven infrastructure",
   "keywords": [
