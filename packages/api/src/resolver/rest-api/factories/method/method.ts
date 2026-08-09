@@ -2,8 +2,13 @@ import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { getMetadataPrototypeByKey } from '@lafken/common';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
-import { EVENT_PROXY_METADATA_KEY } from '../../../../main';
+import {
+  EVENT_PROXY_METADATA_KEY,
+  type MethodSettingsConfig,
+  type StageMethodSettings,
+} from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import type { DocLocation, DocMethodProperties } from '../docs/docs.types';
 import type { ModelRef } from '../model/model.types';
 import type { OperationObject } from '../openapi/openapi.types';
 import {
@@ -32,16 +37,26 @@ import { MockIntegration } from './integrations/mock/mock';
 import { QueueIntegration } from './integrations/queue/queue';
 import { BucketIntegration } from './integrations/s3/bucket';
 import { StateMachineIntegration } from './integrations/state-machine/state-machine';
-import type { AddDocumentationProps, CreateMethodProps } from './method.types';
+import type {
+  AddDocumentationProps,
+  CreateMethodProps,
+  MethodSettingsEntry,
+  RegisterMethodSettingsProps,
+} from './method.types';
 
 export class MethodFactory {
   private methodResources: TerraformResource[] = [];
+  private methodSettings: MethodSettingsEntry[] = [];
   private corsHelper = new CorsHelper();
 
   constructor(private scope: RestApi) {}
 
   get resources() {
     return this.methodResources;
+  }
+
+  get settings() {
+    return this.methodSettings;
   }
 
   public async create(module: Construct, props: CreateMethodProps) {
@@ -73,6 +88,8 @@ export class MethodFactory {
     const model = this.resolveModel(paramHelper);
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
 
+    this.registerMethodSettings({ handler, resourceMetadata, fullPath, methodName });
+
     const integrationProps: OpenApiIntegrationProps = {
       ...props,
       paramHelper,
@@ -99,6 +116,7 @@ export class MethodFactory {
         integrationProps,
         cors: props.cors,
         security,
+        methodName,
       });
       return;
     }
@@ -159,6 +177,7 @@ export class MethodFactory {
     integrationProps: OpenApiIntegrationProps;
     cors?: CreateMethodProps['cors'];
     security?: Array<Record<string, string[]>>;
+    methodName: string;
   }) {
     const {
       fullPath,
@@ -170,6 +189,7 @@ export class MethodFactory {
       integrationProps,
       cors,
       security,
+      methodName,
     } = ctx;
 
     const { integration, responses } = await this.integrateOpenApi(integrationProps);
@@ -201,6 +221,16 @@ export class MethodFactory {
         corsToOptionsOperation(this.corsHelper.buildHeaders(cors))
       );
     }
+
+    const docParams = {
+      handler,
+      resourceMetadata,
+      paramHelper,
+      methodName,
+      fullPath: `/${fullPath}`,
+    };
+    this.addMethodDocumentation(docParams);
+    this.addParamsDocumentation(docParams);
   }
 
   private async integrateOpenApi(
@@ -311,6 +341,59 @@ export class MethodFactory {
     return path.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
   }
 
+  /**
+   * API Gateway keys method settings as `{resource_path}/{http_method}`, with
+   * the leading slash of the resource path trimmed, e.g. `/users/{id}` with
+   * `GET` becomes `users/{id}/GET`. The root resource keeps its slash, as
+   * trimming it would leave the resource path empty.
+   */
+  private buildMethodPath(fullPath: string, method: string) {
+    return fullPath === '/' ? `/${method}` : `${fullPath}/${method}`;
+  }
+
+  private normalizeMethodSettings(
+    methodName: string,
+    fullPath: string,
+    method: string,
+    methodSettings: MethodSettingsConfig
+  ): MethodSettingsEntry[] {
+    const methodPath = this.buildMethodPath(fullPath, method);
+
+    if (Array.isArray(methodSettings)) {
+      return methodSettings.map(({ stageName, ...settings }: StageMethodSettings) => ({
+        methodName,
+        methodPath,
+        stageName,
+        settings,
+      }));
+    }
+
+    return [{ methodName, methodPath, settings: methodSettings }];
+  }
+
+  /**
+   * Registers the method settings entries contributed by a handler.
+   *
+   * Class-level settings are inherited by every handler and are always
+   * rendered against that handler's concrete resource path and HTTP method.
+   * For example, `@Api({ path: '/users' })` produces `users/POST` and
+   * `users/{id}/GET`, never `users/*`. Handlers declaring their own settings
+   * take precedence over the class ones.
+   */
+  private registerMethodSettings(props: RegisterMethodSettingsProps) {
+    const { handler, resourceMetadata, fullPath, methodName } = props;
+    const classSettings = resourceMetadata.methodSettings;
+    const settings = handler.methodSettings ?? classSettings;
+
+    if (!settings) {
+      return;
+    }
+
+    this.methodSettings.push(
+      ...this.normalizeMethodSettings(methodName, fullPath, handler.method, settings)
+    );
+  }
+
   private addMethodDocumentation(props: AddDocumentationProps) {
     const { handler, resourceMetadata, fullPath, methodName } = props;
 
@@ -323,19 +406,23 @@ export class MethodFactory {
       return;
     }
 
-    this.scope.docsFactory.createDoc({
-      id: methodName,
-      location: {
-        type: 'METHOD',
-        method: handler.method,
-        path: fullPath,
-      },
-      properties: {
-        description: handler.description,
-        tags: handler.tags || resourceMetadata.tags,
-        summary: handler.summary,
-      },
-    });
+    const location: DocLocation = {
+      type: 'METHOD',
+      method: handler.method,
+      path: fullPath,
+    };
+    const properties: DocMethodProperties = {
+      description: handler.description,
+      tags: handler.tags || resourceMetadata.tags,
+      summary: handler.summary,
+    };
+
+    if (this.scope.openapiFactory.isEnabled) {
+      this.scope.openapiFactory.addDocumentationPart(location, properties);
+      return;
+    }
+
+    this.scope.docsFactory.createDoc({ id: methodName, location, properties });
   }
 
   private addParamsDocumentation(props: AddDocumentationProps) {
@@ -347,15 +434,21 @@ export class MethodFactory {
 
     for (const param of params) {
       const { source, type, destinationName, name, ...properties } = param;
+      const location: DocLocation = {
+        type: source === 'path' ? 'PATH_PARAMETER' : 'QUERY_PARAMETER',
+        method: handler.method,
+        name: param.name,
+        path: fullPath,
+      };
+
+      if (this.scope.openapiFactory.isEnabled) {
+        this.scope.openapiFactory.addDocumentationPart(location, properties);
+        continue;
+      }
 
       this.scope.docsFactory.createDoc({
         id: `${param.name}-${methodName}-${handler.method}`,
-        location: {
-          type: source === 'path' ? 'PATH_PARAMETER' : 'QUERY_PARAMETER',
-          method: handler.method,
-          name: param.name,
-          path: fullPath,
-        },
+        location,
         properties,
       });
     }

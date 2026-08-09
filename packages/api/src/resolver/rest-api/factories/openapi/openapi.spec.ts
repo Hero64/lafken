@@ -3,6 +3,7 @@ import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deploy
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
+import { ApiGatewayMethodSettings } from '@cdktn/provider-aws/lib/api-gateway-method-settings';
 import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
@@ -140,6 +141,37 @@ describe('OpenApi definition mode', () => {
     expect(synth).toContain('UNAUTHORIZED');
     expect(synth).toContain('Unauthorized');
   });
+
+  it('creates method settings resources alongside the openapi body', async () => {
+    @Api()
+    class OpenApiMethodSettingsApi {
+      @Get({
+        path: 'users',
+        methodSettings: {
+          cachingEnabled: true,
+          metricsEnabled: true,
+          loggingLevel: 'info',
+        },
+      })
+      list() {}
+    }
+
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+    await initializeMethod(restApi, stack, OpenApiMethodSettingsApi, 'list');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+
+    expect(synth).toHaveResourceWithProperties(ApiGatewayMethodSettings, {
+      method_path: 'users/GET',
+      stage_name: 'api',
+      settings: {
+        caching_enabled: true,
+        metrics_enabled: true,
+        logging_level: 'INFO',
+      },
+    });
+  });
 });
 
 describe('OpenApi definition mode - auth, cors and docs', () => {
@@ -192,6 +224,45 @@ describe('OpenApi definition mode - auth, cors and docs', () => {
       doc.components.securitySchemes['custom-auth']['x-amazon-apigateway-authorizer'];
     expect(authorizer.identitySource).toBeUndefined();
     expect(authorizer.authorizerResultTtlInSeconds).toBe(0);
+  });
+
+  @Api({ tags: ['Users'] })
+  class DocsApi {
+    @Get({ path: 'users', summary: 'List users', description: 'Returns all users' })
+    list() {}
+  }
+
+  it('embeds tags/description/summary as x-amazon-apigateway-documentation so they survive API Gateway import/export', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+    await initializeMethod(restApi, stack, DocsApi, 'list');
+    restApi.createStageDeployment();
+
+    const synth = Testing.synth(stack);
+    expect(synth).toContain('x-amazon-apigateway-documentation');
+
+    const parsed = JSON.parse(synth);
+    const api = Object.values(parsed.resource.aws_api_gateway_rest_api)[0] as {
+      body: string;
+    };
+    const doc = JSON.parse(api.body);
+
+    expect(doc.paths['/users'].get.tags).toEqual(['Users']);
+    expect(doc.paths['/users'].get.summary).toBe('List users');
+    expect(doc.paths['/users'].get.description).toBe('Returns all users');
+
+    const methodPart = doc['x-amazon-apigateway-documentation'].documentationParts.find(
+      (part: { location: { type: string } }) => part.location.type === 'METHOD'
+    );
+    expect(methodPart.location).toMatchObject({
+      type: 'METHOD',
+      method: 'GET',
+      path: '/users',
+    });
+    expect(methodPart.properties).toMatchObject({
+      tags: ['Users'],
+      summary: 'List users',
+      description: 'Returns all users',
+    });
   });
 });
 

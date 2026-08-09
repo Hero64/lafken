@@ -122,10 +122,12 @@ describe('InternalTable', () => {
       hash_key: 'name',
       global_secondary_index: [
         {
-          hash_key: 'age',
           name: 'age_name_index',
           projection_type: 'ALL',
-          range_key: 'name',
+          key_schema: [
+            { attribute_name: 'age', key_type: 'HASH' },
+            { attribute_name: 'name', key_type: 'RANGE' },
+          ],
         },
       ],
       local_secondary_index: [

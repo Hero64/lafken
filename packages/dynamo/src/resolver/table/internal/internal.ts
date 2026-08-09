@@ -219,43 +219,28 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
         indexAttributes.add(attribute);
       }
 
-      const isMultiAttribute = partitionKeys.length > 1 || sortKeys.length > 1;
-
-      if (isMultiAttribute) {
-        if (partitionKeys.length > 4 || sortKeys.length > 4) {
-          throw new Error(
-            `A multi-attribute index supports up to 4 partition and 4 sort attributes. Check the index "${index.name}".`
-          );
-        }
-
-        globalIndexes.push({
-          name: index.name,
-          keySchema: [
-            ...partitionKeys.map(
-              (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
-                attributeName,
-                keyType: 'HASH',
-              })
-            ),
-            ...sortKeys.map(
-              (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
-                attributeName,
-                keyType: 'RANGE',
-              })
-            ),
-          ],
-          projectionType,
-          nonKeyAttributes,
-          readCapacity: index.readCapacity,
-          writeCapacity: index.writeCapacity,
-        });
-        continue;
+      if (partitionKeys.length > 4 || sortKeys.length > 4) {
+        throw new Error(
+          `A multi-attribute index supports up to 4 partition and 4 sort attributes. Check the index "${index.name}".`
+        );
       }
 
       globalIndexes.push({
         name: index.name,
-        hashKey: partitionKeys[0],
-        rangeKey: sortKeys[0],
+        keySchema: [
+          ...partitionKeys.map(
+            (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
+              attributeName,
+              keyType: 'HASH',
+            })
+          ),
+          ...sortKeys.map(
+            (attributeName): DynamodbTableGlobalSecondaryIndexKeySchema => ({
+              attributeName,
+              keyType: 'RANGE',
+            })
+          ),
+        ],
         projectionType,
         nonKeyAttributes,
         readCapacity: index.readCapacity,

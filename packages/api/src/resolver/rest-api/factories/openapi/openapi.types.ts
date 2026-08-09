@@ -1,3 +1,4 @@
+import type { DocLocation, DocProperties } from '../docs/docs.types';
 import type { JsonSchema } from '../model/model.types';
 
 /**
@@ -73,6 +74,16 @@ export interface OperationObject {
 
 export type PathItemObject = Partial<Record<string, OperationObject>>;
 
+export interface DocumentationPartObject {
+  location: DocLocation;
+  properties: DocProperties;
+}
+
+export interface XAmazonDocumentation {
+  version: string;
+  documentationParts: DocumentationPartObject[];
+}
+
 export interface XAmazonAuthorizer {
   type: 'request' | 'token' | 'cognito_user_pools';
   authorizerUri?: string;
@@ -112,6 +123,7 @@ export interface OpenApiDocument {
   'x-amazon-apigateway-api-key-source'?: string;
   'x-amazon-apigateway-policy'?: Record<string, unknown>;
   'x-amazon-apigateway-gateway-responses'?: Record<string, GatewayResponseObject>;
+  'x-amazon-apigateway-documentation'?: XAmazonDocumentation;
 }
 
 export interface GatewayResponseObject {

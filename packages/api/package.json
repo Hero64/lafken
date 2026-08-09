@@ -1,6 +1,6 @@
 {
   "name": "@lafken/api",
-  "version": "0.13.4",
+  "version": "0.14.0",
   "private": false,
   "description": "Define AWS REST APIs using TypeScript decorators - declarative, type-safe infrastructure for API Gateway",
   "keywords": [
@@ -78,7 +78,7 @@
     "@cdktn/provider-aws": ">=23.0.0",
     "@lafken/common": "workspace:*",
     "cdktn": ">=0.22.0",
-    "constructs": "^10.4.5"
+    "constructs": ">=10.7.0"
   },
   "engines": {
     "node": ">=20.19"

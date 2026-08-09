@@ -309,6 +309,7 @@ class ProductApi {
 import {
   Api,
   Post,
+  Event,
   IntegrationOptions,
   type QueueIntegrationOption,
   type QueueSendMessageIntegrationResponse,
@@ -328,6 +329,28 @@ class NotificationApi {
       body: { type: 'welcome', recipient: 'new-user' },
     };
   }
+}
+```
+
+The `body` accepts a plain string, the whole `@Event` object or an object literal that
+mixes static values and event fields, including nested ones:
+
+```typescript
+@Post({
+  path: '/{userId}',
+  integration: 'queue',
+  action: 'SendMessage',
+})
+enqueueUser(@Event(NotificationPayload) e: NotificationPayload): QueueSendMessageIntegrationResponse {
+  return {
+    queueName: 'notification-queue',
+    body: {
+      type: 'welcome',
+      userId: e.userId,
+      email: e.contact.email,
+      channels: e.channels,
+    },
+  };
 }
 ```
 
