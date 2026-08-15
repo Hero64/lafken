@@ -43,6 +43,9 @@
       "main": [
         "./lib/main/index.d.ts"
       ],
+      "service": [
+        "./lib/service/index.d.ts"
+      ],
       "resolver": [
         "./lib/resolver/index.d.ts"
       ]

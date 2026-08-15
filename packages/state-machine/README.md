@@ -148,9 +148,9 @@ import {
   StateMachine,
   State,
   Event,
+  IntegrationOptions,
   type IntegrationOptionsParams,
 } from '@lafken/state-machine/main';
-import { IntegrationOptions } from '@lafken/api/main';
 
 @StateMachine({
   startAt: 'saveItem',

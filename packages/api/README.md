@@ -240,7 +240,7 @@ class DocumentApi {
     @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
   ): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('project-documents', 'id'),
+      bucket: getResourceValue('bucket::project-documents', 'id'),
       object: 'report.pdf',
     };
   }
@@ -253,7 +253,7 @@ class DocumentApi {
     @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
   ): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('project-documents', 'id'),
+      bucket: getResourceValue('bucket::project-documents', 'id'),
       object: 'new-report.pdf',
     };
   }
@@ -283,7 +283,7 @@ class ProductApi {
     @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
   ): DynamoQueryIntegrationResponse {
     return {
-      tableName: getResourceValue('products-table', 'id'),
+      tableName: getResourceValue('dynamo::products-table', 'id'),
       partitionKey: { category: 'electronics' },
     };
   }
@@ -296,7 +296,7 @@ class ProductApi {
     @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
   ): DynamoPutIntegrationResponse {
     return {
-      tableName: getResourceValue('products-table', 'id'),
+      tableName: getResourceValue('dynamo::products-table', 'id'),
       data: { name: 'Keyboard', price: 75 },
     };
   }
@@ -325,7 +325,7 @@ class NotificationApi {
     @IntegrationOptions() { getResourceValue }: QueueIntegrationOption,
   ): QueueSendMessageIntegrationResponse {
     return {
-      queueName: getResourceValue('notification-queue', 'id'),
+      queueName: getResourceValue('queue::notification-queue', 'id'),
       body: { type: 'welcome', recipient: 'new-user' },
     };
   }
@@ -377,7 +377,7 @@ class WorkflowApi {
     @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
   ): StateMachineStartIntegrationResponse {
     return {
-      stateMachineArn: getResourceValue('processing-workflow', 'arn'),
+      stateMachineArn: getResourceValue('state-machine::processing-workflow', 'arn'),
       input: { step: 'begin' },
     };
   }
@@ -390,7 +390,7 @@ class WorkflowApi {
     @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
   ): StateMachineStatusIntegrationResponse {
     return {
-      executionArn: getResourceValue('processing-workflow', 'arn'),
+      executionArn: getResourceValue('state-machine::processing-workflow', 'arn'),
     };
   }
 }
