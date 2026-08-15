@@ -347,7 +347,7 @@ export class Schema {
       return '';
     }
 
-    return this.stateNames.createName(currentState.type);
+    return this.stateNames.createName(currentState.name ?? currentState.type);
   }
 
   private getIntegrationTask(

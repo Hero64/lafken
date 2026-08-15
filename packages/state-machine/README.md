@@ -88,6 +88,22 @@ You can also start with a declarative state instead of a Lambda task:
 export class DelayedWorkflow {}
 ```
 
+Declarative states receive a generated name based on their type (e.g. `pass`, `wait`, `wait-2`).
+You can provide a custom name with the `name` option, which is used as the state name in the
+Step Functions definition while keeping names unique within the state machine:
+
+```typescript
+@StateMachine({
+  startAt: {
+    type: 'wait',
+    name: 'initial-delay',
+    seconds: 5,
+    next: { type: 'succeed', name: 'done' },
+  },
+})
+export class DelayedWorkflow {}
+```
+
 ### Lambda Tasks
 
 The `@State` decorator turns a method into a Lambda-backed task within the state machine. Step Functions will invoke the Lambda automatically during execution.
