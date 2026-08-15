@@ -3,7 +3,7 @@ import { ApiGatewayDocumentationVersion } from '@cdktn/provider-aws/lib/api-gate
 import { createSha256 } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import type { RestApi } from '../../../resolver.types';
-import type { CreateDocProps } from './docs.types';
+import type { CreateDocProps, DocVersion } from './docs.types';
 
 export class DocsFactory {
   private docResources: TerraformResource[] = [];
@@ -34,20 +34,49 @@ export class DocsFactory {
   }
 
   public createVersion() {
-    if (this.properties.length === 0) {
+    const { version, dependencies = [] } = this.scope.openapiFactory.isEnabled
+      ? this.openApiVersion()
+      : this.resourceVersion();
+
+    if (!version) {
       return;
     }
-
-    const version = createSha256(this.properties.sort().join(''));
 
     const docVersion = new ApiGatewayDocumentationVersion(this.scope, 'doc-version', {
       restApiId: this.scope.id,
       version,
-      dependsOn: this.docResources,
+      dependsOn: dependencies,
     });
 
     this.docResources.push(docVersion);
 
     return docVersion;
+  }
+
+  private resourceVersion(): DocVersion {
+    if (this.properties.length === 0) {
+      return {};
+    }
+
+    return {
+      version: createSha256(this.properties.sort().join('')),
+      dependencies: this.docResources,
+    };
+  }
+
+  private openApiVersion(): DocVersion {
+    const parts = this.scope.openapiFactory.documentationPartsList;
+    if (parts.length === 0) {
+      return {};
+    }
+
+    return {
+      version: createSha256(
+        parts
+          .map((part) => JSON.stringify(part))
+          .sort()
+          .join('')
+      ),
+    };
   }
 }
