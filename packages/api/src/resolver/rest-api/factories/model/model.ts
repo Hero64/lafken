@@ -81,7 +81,7 @@ export class ModelFactory {
 
     this.models[modelName] = newModel;
 
-    return { name: capitalizedName, ref: this.objectRef(capitalizedName) };
+    return { name: newModel.name, ref: this.objectRef(newModel.name) };
   }
 
   private validateMinMax(

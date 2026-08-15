@@ -1,5 +1,6 @@
 import { ApiGatewayAuthorizer } from '@cdktn/provider-aws/lib/api-gateway-authorizer';
 import { ApiGatewayDeployment } from '@cdktn/provider-aws/lib/api-gateway-deployment';
+import { ApiGatewayDocumentationVersion } from '@cdktn/provider-aws/lib/api-gateway-documentation-version';
 import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
@@ -262,6 +263,12 @@ describe('OpenApi definition mode - auth, cors and docs', () => {
       tags: ['Users'],
       summary: 'List users',
       description: 'Returns all users',
+    });
+
+    expect(synth).toHaveResource(ApiGatewayDocumentationVersion);
+    expect(synth).toHaveResourceWithProperties(ApiGatewayStage, {
+      stage_name: 'api',
+      documentation_version: expect.any(String),
     });
   });
 });
