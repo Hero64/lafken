@@ -110,6 +110,7 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
         source: this.streamArn,
         target: defaultBus.arn,
         desiredState: 'RUNNING',
+        dependsOn: [role],
         sourceParameters: {
           dynamodbStreamParameters: {
             startingPosition: 'LATEST',
