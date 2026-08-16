@@ -3,6 +3,8 @@ import {
   Api,
   Delete,
   Event,
+  type EventBridgeIntegrationOption,
+  type EventBridgePutEventsIntegrationResponse,
   Get,
   IntegrationOptions,
   Post,
@@ -145,6 +147,24 @@ export class PokeApi {
         foo: {
           bar: getResourceValue('queue::create-pokemon', 'name'),
         },
+      },
+    };
+  }
+
+  @Post({
+    path: '/publish-event',
+    integration: 'event-bridge',
+    action: 'PutEvents',
+  })
+  async publishEvent(
+    @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
+  ): Promise<EventBridgePutEventsIntegrationResponse> {
+    return {
+      eventBusName: getResourceValue('event-bus::pokemon-bus', 'id'),
+      source: 'pokemons',
+      detailType: 'PokemonPublished',
+      detail: {
+        message: 'hello from the pokedex',
       },
     };
   }
