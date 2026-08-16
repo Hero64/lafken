@@ -15,6 +15,7 @@ declare module '@lafken/common' {
     queue: 'create-pokemon';
     dynamo: 'pokemons';
     'state-machine': 'get-pokemon';
+    'event-bus': 'pokemon-bus';
   }
 }
 

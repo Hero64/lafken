@@ -103,6 +103,52 @@ describe('State Machine', () => {
     });
   });
 
+  it('should use custom names for inline states', async () => {
+    @StateMachine({
+      startAt: {
+        type: 'wait',
+        name: 'initial-wait',
+        seconds: 2,
+        next: {
+          type: 'choice',
+          name: 'routing',
+          choices: [
+            {
+              condition: '{% $foo = 1 %}',
+              next: {
+                type: 'succeed',
+                name: 'done',
+              },
+            },
+            {
+              condition: '{% $foo = 2 %}',
+              next: {
+                type: 'pass',
+                name: 'noop',
+                end: true,
+              },
+            },
+          ],
+          default: {
+            type: 'pass',
+            name: 'noop',
+            end: true,
+          },
+        },
+      },
+    })
+    class TestingSM {}
+
+    const { stack } = await createStateMachine(TestingSM);
+
+    const synthesized = Testing.synth(stack);
+    expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
+      name: 'TestingSM',
+      definition:
+        '{"StartAt":"initial-wait","States":{"done":{"Type":"Succeed"},"noop":{"Type":"Pass","End":true},"noop-2":{"Type":"Pass","End":true},"routing":{"Type":"Choice","Choices":[{"Condition":"{% $foo = 1 %}","Next":"done"},{"Condition":"{% $foo = 2 %}","Next":"noop"}],"Default":"noop-2"},"initial-wait":{"Type":"Wait","Seconds":2,"Next":"routing"}},"QueryLanguage":"JSONata"}',
+    });
+  });
+
   it('should create a state machine with lambda functions', async () => {
     @Payload()
     class TestPayload {

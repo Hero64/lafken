@@ -4,9 +4,9 @@
 
 Lafken simplifies AWS infrastructure by letting you define resources with decorators in your TypeScript code. Focus on your application logic while Lafken automatically generates and manages all the infrastructure using Terraform.
 
-Lafken leverages [cdk-terrain](https://github.com/open-constructs/cdk-terrain) to transform application code into Terraform-based infrastructure.
+Lafken leverages [CDKTN](https://github.com/open-constructs/cdk-terrain) (formerly cdk-terrain) to transform application code into Terraform-based infrastructure.
 
-If you find Lafken useful, please consider supporting the cdk-terrain project. Your support helps us grow the ecosystem and continue building better tools together.
+If you find Lafken useful, please consider supporting the CDKTN project. Your support helps us grow the ecosystem and continue building better tools together.
 
 ##  Key Features
 
@@ -33,11 +33,18 @@ Or install in an existing TypeScript project:
 npm install @lafken/main @lafken/api @lafken/common
 ```
 
+> [!NOTE]
+> Lafken packages declare `cdktn`, `constructs`, and `@cdktn/provider-aws` as peer dependencies. If your package manager does not install them automatically (e.g. pnpm), add them explicitly:
+>
+> ```bash
+> npm install cdktn constructs @cdktn/provider-aws
+> ```
+
 ### System Requirements
 
 - Node.js >= 20.19
-- pnpm >= 10.20.0
-- TypeScript >= 5.0
+- pnpm >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
+- TypeScript >= 5.0 (with `experimentalDecorators` and `emitDecoratorMetadata` enabled)
 
 ## 📚 Core Concepts
 
@@ -66,14 +73,13 @@ Here's a complete serverless API:
 ### 1. Define Your Resource
 
 ```ts
-import { Api, Get, ApiRequest, PathParam  } from '@lafken/api/main';
+import { Api, Get, ApiRequest, PathParam, Event } from '@lafken/api/main';
 
 @ApiRequest()
 export class HelloRequestEvent {
   @PathParam()
-  name: number;
+  name: string;
 }
-
 
 @Api({
   path: '/hello'
@@ -223,12 +229,13 @@ Lafken is organized into focused packages. Here's what each does:
 | **@lafken/main** | Core engine - create apps and modules |
 | **@lafken/api** | REST APIs with API Gateway |
 | **@lafken/queue** | SQS queues and message processing |
-| **@lafken/event** | EventBridge event buses |
+| **@lafken/event** | EventBridge event rules and buses |
 | **@lafken/schedule** | Scheduled Lambda functions |
 | **@lafken/state-machine** | Step Functions workflows |
 | **@lafken/bucket** | S3 bucket management |
 | **@lafken/dynamo** | DynamoDB tables |
 | **@lafken/auth** | Cognito authentication |
+| **@lafken/standalone** | Standalone Lambda functions |
 | **@lafken/resolver** | Base utilities for creating resolvers |
 | **@lafken/common** | Decorators and type utilities |
 
@@ -237,12 +244,13 @@ Lafken is organized into focused packages. Here's what each does:
 - [Main Module](packages/main/README.md) - Application setup and configuration
 - [API Module](packages/api/README.md) - Create REST APIs
 - [Queue Module](packages/queue/README.md) - SQS queues and workers
-- [Event Module](packages/event/README.md) - EventBridge event buses
+- [Event Module](packages/event/README.md) - EventBridge event rules
 - [Schedule Module](packages/schedule/README.md) - Scheduled tasks
 - [State Machine Module](packages/state-machine/README.md) - Step Functions
 - [Bucket Module](packages/bucket/README.md) - S3 buckets
 - [Dynamo Module](packages/dynamo/README.md) - DynamoDB tables
 - [Auth Module](packages/auth/README.md) - Cognito setup
+- [Standalone Module](packages/standalone/README.md) - Standalone Lambda functions
 - [Resolver Module](packages/resolver/README.md) - Create custom resolvers
 - [Common Module](packages/common/README.md) - Utilities and decorators
 

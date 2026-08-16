@@ -95,6 +95,50 @@ describe('Response factory', () => {
     });
   });
 
+  it('should reference a primitive response model via terraform token', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'PUT',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [
+        {
+          statusCode: '200',
+          field: {
+            name: 'test',
+            destinationName: 'test',
+            type: 'Boolean',
+          },
+        },
+      ],
+      'PokeApiUpdatePokemon-200'
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayMethodResponse, {
+      response_models: {
+        'application/json':
+          '${aws_api_gateway_model.testing-api-api_PokeApiUpdatePokemon-200-200Model_2244AF2E.name}',
+      },
+      status_code: '200',
+    });
+  });
+
   it('should create multiple with properties', () => {
     const { restApi, stack } = setupInternalTestingRestApi();
 

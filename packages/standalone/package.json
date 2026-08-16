@@ -1,6 +1,6 @@
 {
   "name": "@lafken/standalone",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "private": false,
   "description": "Define Lambdas using TypeScript decorators - serverless event-driven infrastructure",
   "keywords": [
@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Hero64/lafken",
-    "directory": "packages/event"
+    "directory": "packages/standalone"
   },
   "license": "MIT",
   "author": "Aníbal Jorquera",

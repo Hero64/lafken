@@ -41,6 +41,10 @@ export class OpenApiFactory {
     return Object.keys(this.paths).length > 0;
   }
 
+  get documentationPartsList() {
+    return this.documentationParts;
+  }
+
   public addOperation(path: string, method: string, operation: OperationObject) {
     const normalizedPath = this.normalizePath(path);
     this.paths[normalizedPath] ??= {};

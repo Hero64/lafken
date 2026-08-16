@@ -2,6 +2,7 @@ import type {
   AvailableReference,
   BucketNames,
   DynamoTableNames,
+  EventBusNames,
   GetExternalValues,
   GetResourceValue,
   KinesisStreamNames,
@@ -427,4 +428,87 @@ export interface KinesisPutRecordIntegrationResponse {
   partitionKey: string;
   /** Optional sequence number for ordering within the same shard. */
   sequenceNumberForOrdering?: string;
+}
+
+/**
+ * Option helper injected via `@IntegrationOptions()` for EventBridge integrations.
+ *
+ * Resource identifiers follow the format `event-bus::busName`.
+ * Allows resolving event bus `id` (the bus name) or `arn`.
+ *
+ * @example
+ * ```typescript
+ * @Post({ integration: 'event-bridge', action: 'PutEvents' })
+ * publish(
+ *   @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
+ * ): EventBridgePutEventsIntegrationResponse {
+ *   return {
+ *     eventBusName: getResourceValue('event-bus::orders', 'id'),
+ *     source: 'orders',
+ *     detailType: 'OrderCreated',
+ *     detail: { orderId: '123' },
+ *   };
+ * }
+ * ```
+ */
+export type EventBridgeIntegrationOption = IntegrationOptionBase<
+  AvailableReference,
+  'id' | 'arn'
+>;
+
+/**
+ * Response shape for the EventBridge PutEvents integration.
+ * Publishes a single event entry to an event bus.
+ *
+ * @example
+ * ```typescript
+ * @Post({ integration: 'event-bridge', action: 'PutEvents' })
+ * publish(): EventBridgePutEventsIntegrationResponse {
+ *   return {
+ *     eventBusName: 'orders-bus',
+ *     source: 'orders',
+ *     detailType: 'OrderCreated',
+ *     detail: { orderId: '123', items: 2 },
+ *   };
+ * }
+ * ```
+ */
+export interface EventBridgePutEventsIntegrationResponse {
+  /**
+   * The EventBridge event bus name to publish the event to.
+   * Can be a literal or resolved with `getResourceValue('event-bus::name', 'id')`.
+   * When omitted, the default event bus is used.
+   */
+  eventBusName?: EventBusNames;
+  /**
+   * The source of the event, used to identify the service or application
+   * that published it. Can be a literal or an `@Event` parameter.
+   *
+   * @example
+   * ```typescript
+   * { source: 'orders' }
+   * ```
+   */
+  source: string;
+  /**
+   * The detail type of the event, used to distinguish events with
+   * different payload shapes. Can be a literal or an `@Event` parameter.
+   *
+   * @example
+   * ```typescript
+   * { detailType: 'OrderCreated' }
+   * ```
+   */
+  detailType: string;
+  /**
+   * The event payload, serialized as the `Detail` JSON string. Accepts a
+   * plain object literal mixing static values and `@Event` fields, including
+   * nested ones, or a full `@Event` object with body source parameters.
+   *
+   * @example
+   * ```typescript
+   * { detail: { orderId: e.orderId, status: 'created' } }
+   * ```
+   */
+  detail: any;
 }

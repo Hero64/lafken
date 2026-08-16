@@ -135,8 +135,8 @@ Pass any Lambda-specific settings through the `lambda` option:
 @Handler({
   lambda: {
     timeout: 30,
-    memorySize: 512,
-    environment: {
+    memory: 512,
+    env: {
       QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/...',
     },
   },
@@ -175,7 +175,7 @@ export class PaymentFunctions {
     },
     lambda: {
       timeout: 30,
-      memorySize: 256,
+      memory: 256,
     },
   })
   processPayment() { }
