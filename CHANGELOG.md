@@ -1,3 +1,16 @@
+## 0.14.1
+
+### Minor Changes
+
+- Add EventBridge integration with PutEvents support for API methods
+- Add state name support in state machines
+
+### Patch Changes
+
+- Fix OpenAPI docs version
+- Reference response models by terraform token
+- Make event pipe depend on its role
+
 ## 0.14.0
 
 ### Minor Changes
