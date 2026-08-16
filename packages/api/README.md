@@ -121,7 +121,7 @@ In `resource` mode the same information is stored as `aws_api_gateway_documentat
 
 #### Supported integrations
 
-All AWS service integrations work in both modes (`bucket`, `dynamodb`, `queue`, `state-machine`, and plain Lambda-backed methods). If an integration is not supported in `openapi` mode, deployment fails with a clear error.
+All AWS service integrations work in both modes (`bucket`, `dynamodb`, `queue`, `state-machine`, `event-bridge`, and plain Lambda-backed methods). If an integration is not supported in `openapi` mode, deployment fails with a clear error.
 
 ## Features
 
@@ -278,6 +278,7 @@ Supported integrations:
 | `dynamodb`       | `Query`, `Put`, `Delete`       |
 | `queue`          | `SendMessage`                  |
 | `state-machine`  | `Start`, `Stop`, `Status`      |
+| `event-bridge`   | `PutEvents`                    |
 
 #### S3 Bucket Integration
 
@@ -456,6 +457,62 @@ class WorkflowApi {
   }
 }
 ```
+
+#### EventBridge Integration
+
+```typescript
+import {
+  Api,
+  Post,
+  IntegrationOptions,
+  type EventBridgeIntegrationOption,
+  type EventBridgePutEventsIntegrationResponse,
+} from '@lafken/api/main';
+
+@Api({ path: '/events' })
+class EventApi {
+  @Post({
+    integration: 'event-bridge',
+    action: 'PutEvents',
+  })
+  publish(
+    @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption,
+  ): EventBridgePutEventsIntegrationResponse {
+    return {
+      eventBusName: getResourceValue('event-bus::orders-bus', 'id'),
+      source: 'orders',
+      detailType: 'OrderCreated',
+      detail: { orderId: '123' },
+    };
+  }
+}
+```
+
+The `detail` payload is serialized into the EventBridge `Detail` JSON string and
+can mix static values with `@Event` fields, including nested ones:
+
+```typescript
+@Post({
+  path: '/{orderId}',
+  integration: 'event-bridge',
+  action: 'PutEvents',
+})
+publishOrder(
+  @Event(OrderPayload) e: OrderPayload,
+): EventBridgePutEventsIntegrationResponse {
+  return {
+    eventBusName: 'orders-bus',
+    source: 'orders',
+    detailType: 'OrderCreated',
+    detail: {
+      orderId: e.orderId,
+      customer: e.customer.email,
+    },
+  };
+}
+```
+
+When `eventBusName` is omitted, the event is published to the default event bus.
 
 ### Responses
 

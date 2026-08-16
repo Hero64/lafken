@@ -23,6 +23,7 @@ import {
   CustomAuthorizer,
   type DynamoQueryIntegrationResponse,
   Event,
+  type EventBridgePutEventsIntegrationResponse,
   Get,
   type KinesisPutRecordIntegrationResponse,
   Post,
@@ -303,6 +304,16 @@ describe('OpenApi definition mode - AWS service integrations', () => {
       return { streamName: 'my-stream', data: 'hello', partitionKey: 'my-key' };
     }
 
+    @Post({ path: 'event-bridge', integration: 'event-bridge', action: 'PutEvents' })
+    eventBridge(): EventBridgePutEventsIntegrationResponse {
+      return {
+        eventBusName: 'orders-bus',
+        source: 'orders',
+        detailType: 'OrderCreated',
+        detail: { orderId: '123' },
+      };
+    }
+
     @Get({ path: 'dynamo', integration: 'dynamodb', action: 'Query' })
     dynamo(): DynamoQueryIntegrationResponse {
       return { tableName: 'test', partitionKey: { name: 'test' } };
@@ -312,7 +323,15 @@ describe('OpenApi definition mode - AWS service integrations', () => {
   it('emits x-amazon integrations for every backend and keeps IAM roles', async () => {
     const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
 
-    for (const name of ['mock', 'bucket', 'stateMachine', 'queue', 'kinesis', 'dynamo']) {
+    for (const name of [
+      'mock',
+      'bucket',
+      'stateMachine',
+      'queue',
+      'kinesis',
+      'eventBridge',
+      'dynamo',
+    ]) {
       await initializeMethod(restApi, stack, ServiceApi, name);
     }
     restApi.createStageDeployment();
@@ -331,6 +350,7 @@ describe('OpenApi definition mode - AWS service integrations', () => {
     expect(synth).toContain('states:action/Start');
     expect(synth).toContain('sqs:path');
     expect(synth).toContain('kinesis:action/PutRecord');
+    expect(synth).toContain('events:action/PutEvents');
     expect(synth).toContain('dynamodb:action/Query');
     expect(synth).toContain('mock');
 

@@ -475,6 +475,25 @@ export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps 
   action: KinesisIntegrationActions;
 }
 
+export type EventBridgeIntegrationActions = 'PutEvents';
+
+export interface EventBridgeIntegrationServiceProps extends ApiIntegrationBaseProps {
+  /**
+   * Method integration type.
+   *
+   * Indicates whether this API method will use a direct AWS service
+   * integration to respond without Lambda.
+   */
+  integration: 'event-bridge';
+  /**
+   * EventBridge integration action.
+   *
+   * Currently the only supported action is:
+   * - `'PutEvents'` – publishes one or more events to the configured event bus.
+   */
+  action: EventBridgeIntegrationActions;
+}
+
 export interface MockIntegrationServiceProps extends ApiIntegrationBaseProps {
   /**
    * Method integration type.
@@ -497,6 +516,7 @@ export type ApiLambdaProps =
   | DynamoDbIntegrationServiceProps
   | QueueIntegrationServiceProps
   | KinesisIntegrationServiceProps
+  | EventBridgeIntegrationServiceProps
   | MockIntegrationServiceProps;
 
 export interface ApiProps extends ResourceProps {

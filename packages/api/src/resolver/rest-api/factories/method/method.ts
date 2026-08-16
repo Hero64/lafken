@@ -24,6 +24,7 @@ import { ResponseHelper } from './helpers/response/response';
 import { ResponseTemplateHelper } from './helpers/response-template/response-template';
 import { TemplateHelper } from './helpers/template/template';
 import { DynamoDbIntegration } from './integrations/dynamodb/dynamodb';
+import { EventBridgeIntegration } from './integrations/event-bridge/event-bridge';
 import type {
   Integration,
   IntegrationProps,
@@ -328,6 +329,8 @@ export class MethodFactory {
         return new QueueIntegration(props);
       case 'kinesis':
         return new KinesisIntegration(props);
+      case 'event-bridge':
+        return new EventBridgeIntegration(props);
       case 'dynamodb':
         return new DynamoDbIntegration(props);
       case 'mock':
