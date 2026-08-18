@@ -1,3 +1,9 @@
+## 0.14.2
+
+### Patch Changes
+
+- Add bigint support in DynamoDB filters, key conditions and update operations (increment/decrement)
+
 ## 0.14.1
 
 ### Minor Changes
