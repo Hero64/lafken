@@ -30,7 +30,9 @@ export type OperationExpression<E> = OnlyOne<{
   between: [E, E];
 }>;
 
-export type InExpression<E extends string | number> = {
+type UnwrapBigInt<T> = NonNullable<T> extends BigInt ? bigint : NonNullable<T>;
+
+export type InExpression<E extends string | number | bigint> = {
   in: E[];
 };
 
@@ -54,11 +56,15 @@ export type CommonExpression<E> = OnlyOne<
 >;
 
 export type Filter<E> = {
-  [key in keyof E]?: NonNullable<E[key]> extends PrimaryPartition<number>
+  [key in keyof E]?: NonNullable<E[key]> extends PrimaryPartition<
+    number | bigint | BigInt
+  >
     ?
-        | NonNullable<E[key]>
+        | UnwrapBigInt<E[key]>
         | OnlyOne<
-            OperationExpression<number> & CommonExpression<number> & InExpression<number>
+            OperationExpression<number | bigint> &
+              CommonExpression<number | bigint> &
+              InExpression<number | bigint>
           >
     : NonNullable<E[key]> extends PrimaryPartition<string>
       ?
@@ -69,14 +75,21 @@ export type Filter<E> = {
                 CommonExpression<string> &
                 InExpression<string>
             >
-      : NonNullable<E[key]> extends string | number | boolean | Date | null
+      : NonNullable<E[key]> extends
+            | string
+            | number
+            | bigint
+            | BigInt
+            | boolean
+            | Date
+            | null
         ?
-            | NonNullable<E[key]>
-            | (NonNullable<E[key]> extends number
+            | UnwrapBigInt<E[key]>
+            | (NonNullable<E[key]> extends number | bigint | BigInt
                 ? OnlyOne<
-                    OperationExpression<number> &
-                      CommonExpression<number> &
-                      InExpression<number>
+                    OperationExpression<number | bigint> &
+                      CommonExpression<number | bigint> &
+                      InExpression<number | bigint>
                   >
                 : NonNullable<E[key]> extends boolean
                   ? CommonExpression<boolean>
@@ -104,17 +117,19 @@ export type SortDirectionType = 'asc' | 'desc';
 export type KeyCondition<E> = {
   partition: Partial<OnlyNumberString<E>>;
   sort?: {
-    [key in keyof E as E[key] extends number | string
+    [key in keyof E as E[key] extends number | string | bigint | BigInt
       ? key
-      : never]?: E[key] extends PrimaryPartition<number>
-      ? E[key] | OperationExpression<E[key]>
+      : never]?: E[key] extends PrimaryPartition<number | bigint | BigInt>
+      ? UnwrapBigInt<E[key]> | OperationExpression<UnwrapBigInt<E[key]>>
       : E[key] extends PrimaryPartition<string>
-        ? E[key] | OnlyOne<OperationExpression<E[key]> & StringExpression>
+        ?
+            | UnwrapBigInt<E[key]>
+            | OnlyOne<OperationExpression<UnwrapBigInt<E[key]>> & StringExpression>
         :
-            | E[key]
-            | (E[key] extends number
-                ? OperationExpression<E[key]>
-                : OnlyOne<OperationExpression<E[key]> | StringExpression>);
+            | UnwrapBigInt<E[key]>
+            | (E[key] extends number | bigint | BigInt
+                ? OperationExpression<UnwrapBigInt<E[key]>>
+                : OnlyOne<OperationExpression<UnwrapBigInt<E[key]>> | StringExpression>);
   };
 };
 
@@ -217,7 +232,14 @@ export interface QueryResponse<E extends Function> {
 }
 
 export type ObjectToBoolean<T> = {
-  [K in keyof T]?: T[K] extends number | string | boolean | Array<any> | Date
+  [K in keyof T]?: T[K] extends
+    | number
+    | string
+    | bigint
+    | BigInt
+    | boolean
+    | Array<any>
+    | Date
     ? true
     : ObjectToBoolean<T[K]> | true;
 };
@@ -227,22 +249,30 @@ interface ExistValue<T> {
 }
 
 interface NumericValues<T> extends ExistValue<T> {
-  incrementValue?: number;
-  decrementValue?: number;
+  incrementValue?: number | bigint;
+  decrementValue?: number | bigint;
 }
 
-export type NumericOrExist<T> = T extends number
-  ? number | OnlyOne<NumericValues<T>>
-  : T extends string | boolean | Array<any> | Date
-    ? T | ExistValue<T>
-    : (T & { ifNotExistValue?: never }) | (ExistValue<T> & { [K in keyof T]?: never });
+export type NumericOrExist<T> =
+  NonNullable<T> extends number | bigint | BigInt
+    ? UnwrapBigInt<T> | OnlyOne<NumericValues<UnwrapBigInt<T>>>
+    : T extends string | boolean | Array<any> | Date
+      ? T | ExistValue<T>
+      : (T & { ifNotExistValue?: never }) | (ExistValue<T> & { [K in keyof T]?: never });
 
 export type ReplaceValue<T> = {
   [K in keyof T]?: NumericOrExist<T[K]>;
 };
 
 export type DeepReplaceValue<T> = {
-  [K in keyof T]?: T[K] extends number | string | boolean | Array<any> | Date
+  [K in keyof T]?: NonNullable<T[K]> extends
+    | number
+    | string
+    | bigint
+    | BigInt
+    | boolean
+    | Array<any>
+    | Date
     ? NumericOrExist<T[K]>
     : ExistValue<T[K]> | DeepReplaceValue<T[K]>;
 };
