@@ -103,6 +103,57 @@ describe('UpdateBuilder', () => {
       expect(builder.getCommand().UpdateExpression).toMatch(/^SET /);
     });
 
+    it('should build a SET increment expression from a bigint setValue', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { partition: { id: '123' } },
+          setValues: { balance: { incrementValue: 5n } },
+        },
+      });
+
+      expect(builder.getCommand().UpdateExpression).toBe(
+        'SET #balance = #balance +  :balance_1_0'
+      );
+      expect(builder.getCommand().ExpressionAttributeValues).toEqual({
+        ':balance_1_0': { N: '5' },
+      });
+    });
+
+    it('should build a SET decrement expression from a bigint setValue', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { partition: { id: '123' } },
+          setValues: { balance: { decrementValue: 5n } },
+        },
+      });
+
+      expect(builder.getCommand().UpdateExpression).toBe(
+        'SET #balance = #balance -  :balance_1_0'
+      );
+      expect(builder.getCommand().ExpressionAttributeValues).toEqual({
+        ':balance_1_0': { N: '5' },
+      });
+    });
+
+    it('should preserve full precision when incrementing with a large bigint', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { partition: { id: '123' } },
+          setValues: { balance: { incrementValue: BigInt('87367642788436732676767') } },
+        },
+      });
+
+      expect(builder.getCommand().UpdateExpression).toBe(
+        'SET #balance = #balance +  :balance_1_0'
+      );
+      expect(builder.getCommand().ExpressionAttributeValues).toEqual({
+        ':balance_1_0': { N: '87367642788436732676767' },
+      });
+    });
+
     it('should build a combined SET expression from setValues and replaceValues', () => {
       const builder = new UpdateBuilder({
         ...getBaseProps(),
