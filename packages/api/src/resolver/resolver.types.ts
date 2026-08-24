@@ -8,6 +8,7 @@ import type {
   ResourceOutputType,
 } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
+import type { MethodSettings } from '../main';
 import type { ExternalRestApi } from './rest-api/external/external';
 import type { InternalRestApi } from './rest-api/internal/internal';
 
@@ -243,6 +244,28 @@ export interface Stage
      */
     formatKeys: StageLogGroupFormatKeys[];
   };
+  /**
+   * Default method settings for the stage.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method** of this stage, rendered as a single
+   * `aws_api_gateway_method_settings` resource holding the stage-wide
+   * wildcard method path.
+   *
+   * Settings declared on an `@Api` class or on a method override this
+   * default for the paths they target. Takes precedence over the
+   * `methodSettings` declared on the REST API.
+   *
+   * @example
+   * {
+   *   stageName: 'prod',
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'error',
+   *   }
+   * }
+   */
+  methodSettings?: MethodSettings;
 }
 
 export type ApiOutputAttributes = 'arn' | 'id' | 'executionArn';
@@ -270,8 +293,13 @@ export type ApiDefaultResponseType =
   | 'unsupportedMediaType'
   | 'wafFiltered';
 
+export class ApiGatewayResponse {
+  statusCode: number;
+  template: Record<string, string>;
+}
+
 export type ApiDefaultResponse = Partial<
-  Record<ApiDefaultResponseType, Record<string, string>>
+  Record<ApiDefaultResponseType, Record<string, string> | ApiGatewayResponse>
 >;
 
 export interface BaseApiProps {
@@ -295,6 +323,28 @@ export interface BaseApiProps {
    * If not provided, a default stage named `api` is created.
    */
   stages?: Stage[];
+  /**
+   * Default method settings for the REST API.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method of every stage**, rendered as a single
+   * `aws_api_gateway_method_settings` resource per stage holding the
+   * stage-wide wildcard method path.
+   *
+   * A stage declaring its own `methodSettings` ignores this default, and
+   * settings declared on an `@Api` class or on a method override it for the
+   * paths they target.
+   *
+   * @example
+   * {
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'error',
+   *     throttlingRateLimit: 100,
+   *   }
+   * }
+   */
+  methodSettings?: MethodSettings;
   /**
    * Authorization configuration for the REST API.
    *
@@ -406,6 +456,24 @@ export interface RestApiProps extends BaseApiProps {
    * }
    */
   outputs?: ResourceOutputType<ApiOutputAttributes>;
+
+  /**
+   * Defines how the API Gateway REST API and its structure are created.
+   *
+   * - `resource` (default): each element (resources, methods, integrations,
+   *   models, validators, authorizers, docs) is created as an individual
+   *   Terraform resource. More granular, but slower to deploy on large APIs
+   *   because Terraform diffs and verifies every resource.
+   * - `openapi`: the whole API structure is assembled into a single OpenAPI 3.0
+   *   document (with `x-amazon-apigateway-*` extensions) and imported through
+   *   the REST API `body`, which speeds up deployment. Side resources that the
+   *   body only references —lambdas and permissions, IAM roles, usage plans and
+   *   API keys, gateway responses, log groups, deployment and stages— are still
+   *   created as regular Terraform resources.
+   *
+   * @default 'resource'
+   */
+  definition?: 'openapi' | 'resource';
 }
 
 export interface ExternalApiProps extends BaseApiProps {

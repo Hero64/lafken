@@ -7,7 +7,7 @@ import {
 import {
   type AppModule,
   getContextValueByScope,
-  lambdaAssets,
+  initLambdaAssetMetadata,
   type ResolverType,
 } from '@lafken/resolver';
 import { type HandlerMetadata, RESOURCE_TYPE } from '../main';
@@ -17,17 +17,11 @@ export class StandaloneResolver implements ResolverType {
   public type = RESOURCE_TYPE;
 
   public create(module: AppModule, resource: ClassResource) {
-    const minify = getContextValueByScope(module, 'minify');
+    const contextBundler = getContextValueByScope(module, 'bundler');
 
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<HandlerMetadata>(resource);
-    lambdaAssets.initializeMetadata({
-      foldername: metadata.foldername,
-      filename: metadata.filename,
-      minify: metadata.minify ?? minify,
-      className: metadata.originalName,
-      methods: handlers.map((handler) => handler.name),
-    });
+    initLambdaAssetMetadata({ metadata, handlers, contextBundler });
 
     for (const handler of handlers) {
       new Handler(module, `${handler.name}-${metadata.name}`, {

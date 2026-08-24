@@ -6,7 +6,6 @@ import type { FindAllBuilderProps } from './find-all.types';
 export class FindAllBuilder<E extends ClassResource> extends FindBuilder<E> {
   constructor(protected queryOptions: FindAllBuilderProps<E>) {
     super(queryOptions);
-    this.find();
   }
 
   public then<T>(

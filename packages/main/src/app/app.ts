@@ -26,7 +26,7 @@ export class AppStack extends TerraformStack {
       contextName: ContextName.app,
       globalConfig: props.globalConfig?.lambda,
       contextCreator: props.name,
-      minify: props.globalConfig?.minify,
+      bundler: props.globalConfig?.bundler,
     });
     new AwsProvider(this, 'AWS', props.awsProviderConfig);
 
@@ -44,12 +44,13 @@ export class AppStack extends TerraformStack {
     await this.resolveModuleResources();
     await this.triggerHook(resolvers, 'afterCreate');
 
-    this.addAspectProperties();
-    await lafkenResource.resolve();
-    await lambdaAssets.createAssets();
     if (extend) {
       await extend(this);
     }
+
+    this.addAspectProperties();
+    await lafkenResource.resolve();
+    await lambdaAssets.createAssets();
   }
 
   private async triggerHook(

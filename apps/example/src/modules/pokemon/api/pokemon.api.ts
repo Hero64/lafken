@@ -3,6 +3,8 @@ import {
   Api,
   Delete,
   Event,
+  type EventBridgeIntegrationOption,
+  type EventBridgePutEventsIntegrationResponse,
   Get,
   IntegrationOptions,
   Post,
@@ -24,6 +26,9 @@ const sqsClient = new SQSClient();
 @Api({
   path: '/pokemon',
   auth: false,
+  bundler: {
+    minify: true,
+  },
 })
 export class PokeApi {
   @Get({
@@ -136,7 +141,31 @@ export class PokeApi {
   ): Promise<QueueSendMessageIntegrationResponse> {
     return {
       queueName: getResourceValue('queue::create-pokemon', 'name'),
-      body: 'view pokedex',
+      body: {
+        name: 'view pokedex',
+        other: 1,
+        foo: {
+          bar: getResourceValue('queue::create-pokemon', 'name'),
+        },
+      },
+    };
+  }
+
+  @Post({
+    path: '/publish-event',
+    integration: 'event-bridge',
+    action: 'PutEvents',
+  })
+  async publishEvent(
+    @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
+  ): Promise<EventBridgePutEventsIntegrationResponse> {
+    return {
+      eventBusName: getResourceValue('event-bus::pokemon-bus', 'id'),
+      source: 'pokemons',
+      detailType: 'PokemonPublished',
+      detail: {
+        message: 'hello from the pokedex',
+      },
     };
   }
 }

@@ -3,38 +3,32 @@ import { basename, dirname, extname, join } from 'node:path';
 import { cwd } from 'node:process';
 import { AssetType, TerraformAsset } from 'cdktn';
 import { createSha256 } from '../../../utils';
+import { getAppContext, getModuleContext } from '../../../utils/context.utils';
 import { LafkenBuildPlugin } from '../build-plugin/build-plugin';
 import type {
   AddLambdaProps,
-  AssetMetadata,
   AssetProps,
   BuildAssetProps,
+  InitializeAssetProps,
 } from './asset.types';
 
 class LambdaAssets {
   private lambdaAssets: Record<string, AssetProps> = {};
 
-  public initializeMetadata(props: AssetMetadata) {
-    const { filename, foldername, className, methods } = props;
+  public initializeMetadata(props: InitializeAssetProps) {
+    const { asset, resource } = props;
+    const { filename, foldername } = asset;
 
     const prebuildPath = this.getPrebuildPath(foldername, filename);
     if (!this.lambdaAssets[prebuildPath]) {
       this.lambdaAssets[prebuildPath] = {
-        metadata: {
-          filename,
-          foldername,
-          minify: props.minify,
-          afterBuild: props.afterBuild,
-        },
+        metadata: asset,
         resources: {},
         lambdas: [],
       };
     }
 
-    this.lambdaAssets[prebuildPath].resources[className] = {
-      className,
-      methods,
-    };
+    this.lambdaAssets[prebuildPath].resources[resource.className] = resource;
   }
 
   public addLambda(props: AddLambdaProps) {
@@ -79,13 +73,24 @@ class LambdaAssets {
       recursive: true,
     });
 
+    const appContext = getAppContext(scope);
+    const moduleContext = getModuleContext(scope);
+    const external: (string | RegExp)[] = [
+      /^@aws-sdk/,
+      'aws-lambda',
+      /^node:/,
+      ...(appContext?.bundler?.externalPackages ?? []),
+      ...(moduleContext?.bundler?.externalPackages ?? []),
+      ...(metadata.bundler?.externalPackages ?? []),
+    ];
+
     await (async () => {
       const { build } = await import('rolldown');
 
       await build({
         input: prebuildPath,
         platform: 'node',
-        external: [/^@aws-sdk/, 'aws-lambda', /^node:/],
+        external,
         treeshake: {
           moduleSideEffects: false,
         },
@@ -101,7 +106,7 @@ class LambdaAssets {
           dir: outputPath,
           entryFileNames: 'index.js',
           chunkFileNames: '[name].js',
-          minify: metadata.minify,
+          minify: metadata.bundler?.minify,
           comments: {
             legal: false,
             jsdoc: false,

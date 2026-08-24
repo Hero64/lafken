@@ -1,7 +1,11 @@
 import type { FieldTypes } from '@lafken/common';
 import { Method } from '../../../../../../../main';
-import type { InitializedClass, Integration } from '../../integration.types';
-import { LafkenIntegration } from '../../integration.utils';
+import type {
+  InitializedClass,
+  Integration,
+  OpenApiIntegrationResult,
+} from '../../integration.types';
+import { LafkenIntegration, toXAmazonIntegration } from '../../integration.utils';
 import type { DynamoIntegrationBaseProps } from './base.types';
 
 const mapDynamoType: Record<FieldTypes, string> = {
@@ -17,13 +21,87 @@ export class DynamoBaseIntegration<T> implements Integration {
   constructor(protected props: DynamoIntegrationBaseProps<T>) {}
 
   public async create() {
+    const { restApi, apiGatewayMethod } = this.props;
+
+    const compute = await this.compute();
+
+    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: compute.uri,
+      credentials: compute.role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestTemplates: {
+        'application/json': compute.requestTemplate,
+      },
+      dependsOn: [apiGatewayMethod],
+    });
+
+    if (compute.resolveResource.hasUnresolved()) {
+      integration.onResolve(async () => {
+        integration.addOverride(
+          'requestTemplates.application/json',
+          await compute.rebuildTemplate()
+        );
+      });
+    }
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      integration,
+      compute.responseHandlers,
+      compute.name
+    );
+
+    return integration;
+  }
+
+  public async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    const { restApi } = this.props;
+
+    const compute = await this.compute();
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        compute.responseHandlers,
+        compute.name
+      );
+
+    const integration = toXAmazonIntegration(
+      {
+        type: 'AWS',
+        integrationHttpMethod: Method.POST,
+        uri: compute.uri,
+        credentials: compute.role.arn,
+        passthroughBehavior: 'WHEN_NO_TEMPLATES',
+        requestTemplates: {
+          'application/json': compute.requestTemplate,
+        },
+      },
+      integrationResponses
+    );
+
+    if (compute.resolveResource.hasUnresolved()) {
+      restApi.openapiFactory.addDeferred(async () => {
+        integration.requestTemplates = {
+          'application/json': await compute.rebuildTemplate(),
+        };
+      });
+    }
+
+    return { integration, responses: operationResponses };
+  }
+
+  private async compute() {
     const {
       handler,
       restApi,
       service,
       action,
       resourceMetadata,
-      apiGatewayMethod,
       integrationHelper,
       responseHelper,
       responseTemplateHelper,
@@ -40,50 +118,28 @@ export class DynamoBaseIntegration<T> implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
-      httpMethod: apiGatewayMethod.httpMethod,
-      resourceId: apiGatewayMethod.resourceId,
-      restApiId: restApi.id,
-      type: 'AWS',
-      integrationHttpMethod: Method.POST,
+    const rebuildTemplate = async () => {
+      const rebuilt = await this.callIntegrationMethod<T>();
+      if (rebuilt.resolveResource.hasUnresolved()) {
+        throw new Error(`unresolved dependencies in ${handler.name} integration`);
+      }
+      return createTemplate(rebuilt.integrationResponse);
+    };
+
+    return {
+      name,
+      role,
+      resolveResource,
       uri: this.getUri(action),
-      credentials: role.arn,
-      passthroughBehavior: 'WHEN_NO_TEMPLATES',
-      requestTemplates: {
-        'application/json': resolveResource.hasUnresolved()
-          ? ''
-          : createTemplate(integrationResponse),
-      },
-      dependsOn: [apiGatewayMethod],
-    });
-
-    if (resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const { integrationResponse, resolveResource } =
-          await this.callIntegrationMethod<T>();
-
-        if (resolveResource.hasUnresolved()) {
-          throw new Error(`unresolved dependencies in ${handler.name} integration`);
-        }
-
-        integration.addOverride(
-          'requestTemplates.application/json',
-          createTemplate(integrationResponse)
-        );
-      });
-    }
-
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      integrationHelper.generateResponseTemplate(
+      requestTemplate: resolveResource.hasUnresolved()
+        ? ''
+        : createTemplate(integrationResponse),
+      responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      name
-    );
-
-    return integration;
+      rebuildTemplate,
+    };
   }
 
   protected async callIntegrationMethod<R>() {
@@ -106,7 +162,7 @@ export class DynamoBaseIntegration<T> implements Integration {
 
   private getUri(action: string) {
     const { restApi } = this.props;
-    return `arn:aws:apigateway:${restApi.region}:dynamodb:action/${action}`;
+    return `arn:aws:apigateway:${restApi.regionRef}:dynamodb:action/${action}`;
   }
 
   protected marshallField(template: string, type: FieldTypes) {

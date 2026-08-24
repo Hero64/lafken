@@ -70,6 +70,43 @@ describe('createRepository', () => {
     expect(command.input.Bucket).toBe('example');
   });
 
+  it('should copy the object and delete the source on move', async () => {
+    await repository.moveObject({
+      Key: 'moved/file.txt',
+      CopySource: '/example/original/file.txt',
+    });
+
+    const [copyCommand] = sendMock.mock.calls[0];
+    expect(copyCommand).toBeInstanceOf(CopyObjectCommand);
+    expect(copyCommand.input.Bucket).toBe('example');
+    expect(copyCommand.input.Key).toBe('moved/file.txt');
+
+    const [deleteCommand] = sendMock.mock.calls[1];
+    expect(deleteCommand).toBeInstanceOf(DeleteObjectCommand);
+    expect(deleteCommand.input.Bucket).toBe('example');
+    expect(deleteCommand.input.Key).toBe('original/file.txt');
+  });
+
+  it('should delete the source object from its own bucket on move', async () => {
+    await repository.moveObject({
+      Key: 'file.txt',
+      CopySource: 'other-bucket/nested%20folder/file.txt?versionId=v1',
+    });
+
+    const [deleteCommand] = sendMock.mock.calls[1];
+    expect(deleteCommand.input.Bucket).toBe('other-bucket');
+    expect(deleteCommand.input.Key).toBe('nested folder/file.txt');
+    expect(deleteCommand.input.VersionId).toBe('v1');
+  });
+
+  it('should reject a move with an invalid CopySource', async () => {
+    await expect(
+      repository.moveObject({ Key: 'file.txt', CopySource: 'file.txt' })
+    ).rejects.toThrow('Invalid CopySource');
+
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
   it('should list objects with pagination', async () => {
     sendMock
       .mockResolvedValueOnce({

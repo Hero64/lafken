@@ -1,13 +1,14 @@
-import type { GetExternalValues, GetResourceProps } from '@lafken/common';
+import type { GetExternalValues, GetResourceProps, OutputType } from '@lafken/common';
 import { Fn, Token } from 'cdktn';
 import type { Construct } from 'constructs';
 import { lafkenResource } from '../resources';
+import { contextFactory } from '../resources/context/context';
 import { ssmFactory } from '../resources/ssm/ssm';
 
 export class ResolveResources {
   private unresolved: string[] = [];
 
-  public getResourceValue(module: string, id: string, type: string) {
+  public getResourceValue(module: string, id: string, type: OutputType) {
     this.unresolved = [];
 
     const resource = lafkenResource.getResource(module, id);
@@ -17,12 +18,11 @@ export class ResolveResources {
       return '';
     }
 
-    const propertyValue = resource[type];
-    if (!propertyValue) {
+    if (!(type in resource)) {
       throw new Error(`property ${type} in ${module}::${id} not found`);
     }
 
-    return propertyValue;
+    return resource[type];
   }
 
   public hasUnresolved() {
@@ -37,6 +37,21 @@ export const getExternalValues = (scope: Construct): GetExternalValues => {
     },
     fn: Fn,
     token: Token,
+    get accountId() {
+      return contextFactory.getAccountId(scope);
+    },
+    get callerArn() {
+      return contextFactory.getCallerArn(scope);
+    },
+    get region() {
+      return contextFactory.getRegionName(scope);
+    },
+    get partition() {
+      return contextFactory.getPartitionName(scope);
+    },
+    get dnsSuffix() {
+      return contextFactory.getDnsSuffix(scope);
+    },
   };
 };
 
@@ -53,11 +68,7 @@ export const resolveCallbackResource = <T>(
         throw new Error(`resource value ${value} is not valid`);
       }
 
-      return resolveResources.getResourceValue(
-        moduleWithId[0],
-        moduleWithId[1],
-        type as string
-      );
+      return resolveResources.getResourceValue(moduleWithId[0], moduleWithId[1], type);
     },
     ...getExternalValues(scope),
   });

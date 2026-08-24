@@ -47,6 +47,53 @@ describe('API', () => {
     });
   });
 
+  describe('API Decorator method settings', () => {
+    it('should capture method settings from the Api props', () => {
+      @Api({
+        path: '/users',
+        methodSettings: {
+          metricsEnabled: true,
+          loggingLevel: 'info',
+        },
+      })
+      class ExampleApiMethodSettings {
+        @Get()
+        getExample() {}
+      }
+
+      const resource = Reflect.getMetadata(
+        ResourceReflectKeys.resource,
+        ExampleApiMethodSettings
+      );
+
+      expect(resource.path).toBe('/users');
+      expect(resource.methodSettings).toStrictEqual({
+        metricsEnabled: true,
+        loggingLevel: 'info',
+      });
+    });
+
+    it('should capture stage scoped method settings from the Api props', () => {
+      @Api({
+        path: '/users',
+        methodSettings: [{ stageName: 'prod', cachingEnabled: true }],
+      })
+      class ExampleApiStageMethodSettings {
+        @Get()
+        getExample() {}
+      }
+
+      const resource = Reflect.getMetadata(
+        ResourceReflectKeys.resource,
+        ExampleApiStageMethodSettings
+      );
+
+      expect(resource.methodSettings).toStrictEqual([
+        { stageName: 'prod', cachingEnabled: true },
+      ]);
+    });
+  });
+
   describe('METHOD decorator', () => {
     let handlers: ApiLambdaMetadata[];
 
@@ -70,6 +117,66 @@ describe('API', () => {
 
       expect(getHandler).toBeDefined();
       expect(getHandler.name).toBe('postLambda');
+    });
+
+    it('should capture method settings from the method props', () => {
+      @Api()
+      class ExampleMethodSettingsApi {
+        @Get({
+          methodSettings: {
+            cachingEnabled: true,
+            cacheTtlInSeconds: 300,
+            metricsEnabled: true,
+            loggingLevel: 'info',
+            throttlingRateLimit: 100,
+            throttlingBurstLimit: 50,
+          },
+        })
+        getExample() {}
+      }
+
+      const handlers = Reflect.getMetadata(
+        LambdaReflectKeys.handlers,
+        ExampleMethodSettingsApi.prototype
+      );
+
+      expect(handlers[0].methodSettings).toStrictEqual({
+        cachingEnabled: true,
+        cacheTtlInSeconds: 300,
+        metricsEnabled: true,
+        loggingLevel: 'info',
+        throttlingRateLimit: 100,
+        throttlingBurstLimit: 50,
+      });
+    });
+
+    it('should capture stage scoped method settings from the method props', () => {
+      @Api()
+      class ExampleStageMethodSettingsApi {
+        @Get({
+          methodSettings: [
+            {
+              stageName: 'prod',
+              metricsEnabled: true,
+              loggingLevel: 'info',
+            },
+          ],
+        })
+        getExample() {}
+      }
+
+      const handlers = Reflect.getMetadata(
+        LambdaReflectKeys.handlers,
+        ExampleStageMethodSettingsApi.prototype
+      );
+
+      expect(handlers[0].methodSettings).toStrictEqual([
+        {
+          stageName: 'prod',
+          metricsEnabled: true,
+          loggingLevel: 'info',
+        },
+      ]);
     });
   });
 

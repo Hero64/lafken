@@ -1,3 +1,46 @@
+## 0.14.2
+
+### Patch Changes
+
+- Add bigint support in DynamoDB filters, key conditions and update operations (increment/decrement)
+
+## 0.14.1
+
+### Minor Changes
+
+- Add EventBridge integration with PutEvents support for API methods
+- Add state name support in state machines
+
+### Patch Changes
+
+- Fix OpenAPI docs version
+- Reference response models by terraform token
+- Make event pipe depend on its role
+
+## 0.14.0
+
+### Minor Changes
+
+- Add API method setting support
+- Fix x-documentation in openapi
+- Add support object bodies on the queue send message integration
+- Add secondary indexes using key schema
+
+## 0.13.0
+
+### Minor Changes
+
+- Add OpenAPI specification generation for REST APIs
+- Add Lambda response streaming support with `@Streaming` handlers
+- Add `aws-proxy` integration type and `@EventProxy` for lambda methods
+- Add multi-attribute index support in DynamoDB tables
+- Add comparison operations to event rule patterns
+- Upgrade dependencies and migrate versions to pnpm catalog
+
+### Patch Changes
+
+- Forward `afterBuild` callback to lambda asset metadata
+
 ## 0.12.0
 
 ### Minor Changes

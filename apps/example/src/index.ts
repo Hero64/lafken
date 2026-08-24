@@ -18,14 +18,19 @@ createApp({
     lambda: {
       runtime: 24,
     },
-    minify: false,
+    bundler: {
+      minify: false,
+    },
   },
   name: 'pokemon-example',
   modules: [PokemonModule],
   resolvers: [
     new BucketResolver([PokemonBackupsBucket]),
     new DynamoResolver([Pokemon]),
-    new EventRuleResolver(),
+    new EventRuleResolver({
+      busName: 'pokemon-bus',
+      ref: 'pokemon-bus',
+    }),
     new QueueResolver(),
     new StateMachineResolver(),
     new StandaloneResolver(),

@@ -1,7 +1,13 @@
+import { Writable } from 'node:stream';
 import { describe, expect, it } from 'vitest';
 import { enableBuildEnvVariable, getResourceHandlerMetadata } from '../../utils';
 import { createFieldDecorator } from '../field';
-import { Context, createEventDecorator, createLambdaDecorator } from './lambda';
+import {
+  Context,
+  createEventDecorator,
+  createLambdaDecorator,
+  ResponseStreaming,
+} from './lambda';
 import {
   LambdaArgumentTypes,
   type LambdaMetadata,
@@ -125,6 +131,69 @@ describe('Lambda Decorators', () => {
         LambdaArgumentTypes.context,
         LambdaArgumentTypes.event,
       ]);
+    });
+  });
+
+  describe('Response streaming arguments', () => {
+    enableBuildEnvVariable();
+    const Lambda = createLambdaDecorator({
+      getLambdaMetadata: (props) => props,
+    });
+
+    it('treats the second argument as context in a classic 2-argument invocation', async () => {
+      let receivedContext: any;
+
+      class Test {
+        @Lambda()
+        test(@Context() context: any) {
+          receivedContext = context;
+        }
+      }
+
+      const context = { awsRequestId: 'classic-invocation' };
+      await (new Test().test as any)({}, context);
+
+      expect(receivedContext).toBe(context);
+    });
+
+    it('detects a Writable as the response stream in a 3-argument streaming invocation', async () => {
+      let receivedStream: any;
+      let receivedContext: any;
+
+      class Test {
+        @Lambda()
+        test(@ResponseStreaming() stream: any, @Context() context: any) {
+          receivedStream = stream;
+          receivedContext = context;
+        }
+      }
+
+      const responseStream = new Writable({ write: () => undefined });
+      const context = { awsRequestId: 'streaming-invocation' };
+
+      await (new Test().test as any)({}, responseStream, context);
+
+      expect(receivedStream).toBe(responseStream);
+      expect(receivedContext).toBe(context);
+    });
+
+    it('does not confuse a plain object second argument with a response stream', async () => {
+      let receivedStream: any;
+      let receivedContext: any;
+
+      class Test {
+        @Lambda()
+        test(@ResponseStreaming() stream: any, @Context() context: any) {
+          receivedStream = stream;
+          receivedContext = context;
+        }
+      }
+
+      const context = { awsRequestId: 'no-stream' };
+      await (new Test().test as any)({}, context);
+
+      expect(receivedStream).toBeUndefined();
+      expect(receivedContext).toBe(context);
     });
   });
 });

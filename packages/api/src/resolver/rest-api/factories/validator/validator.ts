@@ -20,6 +20,15 @@ export class ValidatorFactory {
     }
 
     const id = `${validateRequestBody}-${validateRequestParameters}`;
+
+    if (this.scope.openapiFactory.isEnabled) {
+      this.scope.openapiFactory.addRequestValidator(id, {
+        validateRequestBody: !!validateRequestBody,
+        validateRequestParameters: !!validateRequestParameters,
+      });
+      return id;
+    }
+
     if (this.requestValidators[id]) {
       return this.requestValidators[id].id;
     }

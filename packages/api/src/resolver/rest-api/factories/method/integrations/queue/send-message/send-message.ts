@@ -8,19 +8,105 @@ import type {
   InitializedClass,
   Integration,
   IntegrationProps,
+  OpenApiIntegrationResult,
 } from '../../integration.types';
-import { LafkenIntegration } from '../../integration.utils';
+import { LafkenIntegration, toXAmazonIntegration } from '../../integration.utils';
+
+/** Quote type expected by sqs for the string keys and values of the message body. */
+const SQS_QUOTE_TYPE = '""';
+
+const unquote = (template: string) => template.replaceAll('"', '');
 
 export class SendMessageIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
 
   async create() {
+    const { restApi, apiGatewayMethod } = this.props;
+
+    const compute = await this.compute();
+
+    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: Method.POST,
+      uri: compute.uri,
+      credentials: compute.role.arn,
+      passthroughBehavior: 'WHEN_NO_TEMPLATES',
+      requestParameters: {
+        'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'",
+      },
+      dependsOn: [apiGatewayMethod],
+      requestTemplates: {
+        'application/json': compute.requestTemplate,
+      },
+    });
+
+    if (compute.resolveResource.hasUnresolved()) {
+      integration.onResolve(async () => {
+        const rebuilt = await compute.rebuild();
+        integration.addOverride('uri', rebuilt.uri);
+        integration.addOverride('request_templates.application/json', rebuilt.template);
+      });
+    }
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      integration,
+      compute.responseHandlers,
+      compute.name
+    );
+
+    return integration;
+  }
+
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    const { restApi } = this.props;
+
+    const compute = await this.compute();
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        compute.responseHandlers,
+        compute.name
+      );
+
+    const integration = toXAmazonIntegration(
+      {
+        type: 'AWS',
+        integrationHttpMethod: Method.POST,
+        uri: compute.uri,
+        credentials: compute.role.arn,
+        passthroughBehavior: 'WHEN_NO_TEMPLATES',
+        requestParameters: {
+          'integration.request.header.Content-Type':
+            "'application/x-www-form-urlencoded'",
+        },
+        requestTemplates: {
+          'application/json': compute.requestTemplate,
+        },
+      },
+      integrationResponses
+    );
+
+    if (compute.resolveResource.hasUnresolved()) {
+      restApi.openapiFactory.addDeferred(async () => {
+        const rebuilt = await compute.rebuild();
+        integration.uri = rebuilt.uri;
+        integration.requestTemplates = { 'application/json': rebuilt.template };
+      });
+    }
+
+    return { integration, responses: operationResponses };
+  }
+
+  private async compute() {
     const {
       classResource,
       handler,
       proxyHelper,
       restApi,
-      apiGatewayMethod,
       resourceMetadata,
       integrationHelper,
       responseHelper,
@@ -48,55 +134,31 @@ export class SendMessageIntegration implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
-      httpMethod: apiGatewayMethod.httpMethod,
-      resourceId: apiGatewayMethod.resourceId,
-      restApiId: restApi.id,
-      type: 'AWS',
-      integrationHttpMethod: Method.POST,
+    const rebuild = async () => {
+      const rebuilt = await resource[handler.name](proxyHelper.createEvent(), options);
+      if (resolveResource.hasUnresolved()) {
+        throw new Error(`unresolved dependencies in ${handler.name} integration`);
+      }
+      return {
+        uri: this.getUri(rebuilt),
+        template: this.createTemplate(rebuilt),
+      };
+    };
+
+    return {
+      name,
+      role,
+      resolveResource,
       uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
-      credentials: role.arn,
-      passthroughBehavior: 'WHEN_NO_TEMPLATES',
-      requestParameters: {
-        'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'",
-      },
-      dependsOn: [apiGatewayMethod],
-      requestTemplates: {
-        'application/json': resolveResource.hasUnresolved()
-          ? ''
-          : this.createTemplate(integrationResponse),
-      },
-    });
-
-    if (resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const integrationResponse = await resource[handler.name](
-          proxyHelper.createEvent(),
-          options
-        );
-        if (resolveResource.hasUnresolved()) {
-          throw new Error(`unresolved dependencies in ${handler.name} integration`);
-        }
-
-        integration.addOverride('uri', this.getUri(integrationResponse));
-        integration.addOverride(
-          'request_templates.application/json',
-          this.createTemplate(integrationResponse)
-        );
-      });
-    }
-
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      integrationHelper.generateResponseTemplate(
+      requestTemplate: resolveResource.hasUnresolved()
+        ? ''
+        : this.createTemplate(integrationResponse),
+      responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      name
-    );
-
-    return integration;
+      rebuild,
+    };
   }
 
   private getUri(integrationResponse: QueueSendMessageIntegrationResponse) {
@@ -113,7 +175,7 @@ export class SendMessageIntegration implements Integration {
     );
     const accountId = identity.accountId;
 
-    return `arn:aws:apigateway:${restApi.region}:sqs:path/${accountId}/${queueName}`;
+    return `arn:aws:apigateway:${restApi.regionRef}:sqs:path/${accountId}/${queueName}`;
   }
 
   private resolveBody = (value: any) => {
@@ -128,6 +190,11 @@ export class SendMessageIntegration implements Integration {
       if (typeof value === 'string') {
         return `&MessageBody=$util.urlEncode("${value}")`;
       }
+
+      if (bodyResolver.type === 'Object' || bodyResolver.type === 'Array') {
+        return `&MessageBody=${this.createBodyObjectTemplate(value)}`;
+      }
+
       throw new Error('Body message only support event parameters');
     }
 
@@ -148,6 +215,54 @@ export class SendMessageIntegration implements Integration {
     }
 
     return `&MessageBody={"${bodyResolver.path}":$util.urlEncode($input.json('$.${bodyResolver.path}'))}`;
+  };
+
+  /**
+   * Builds the message body from a plain object/array literal, mixing static values
+   * and event fields. Only the leaf values are url encoded, the json structure is
+   * kept as is because it is already safe for the `x-www-form-urlencoded` payload.
+   * String keys and values are wrapped with the sqs quote type.
+   */
+  private createBodyObjectTemplate = (value: any) => {
+    const { proxyHelper, templateHelper, paramHelper } = this.props;
+
+    return templateHelper.generateTemplateByObject({
+      value,
+      quoteType: SQS_QUOTE_TYPE,
+      resolveValue: (currentValue) => {
+        const resolver = proxyHelper.resolveProxyValue(
+          currentValue,
+          paramHelper.pathParams
+        );
+
+        return resolver.field
+          ? // the template is generated from the event path to support nested fields
+            { ...resolver, field: { ...resolver.field, name: resolver.path as string } }
+          : resolver;
+      },
+      parseObjectValue: (template, fieldType, _isRoot, isField) => {
+        if (!isField) {
+          // static strings are encoded at runtime to keep the resource references
+          // untouched, they are only resolved once the stack is synthesized
+          return fieldType === 'String'
+            ? `${SQS_QUOTE_TYPE}$util.urlEncode('${unquote(template)}')${SQS_QUOTE_TYPE}`
+            : template;
+        }
+
+        // objects and arrays resolved as a single velocity expression are encoded as
+        // a whole, the ones built with velocity directives already encode their leaves
+        return (fieldType === 'Object' || fieldType === 'Array') &&
+          !template.includes('#')
+          ? `$util.urlEncode(${template})`
+          : template;
+      },
+      templateOptions: {
+        valueParser: (template, fieldType) =>
+          fieldType === 'String'
+            ? `${SQS_QUOTE_TYPE}$util.urlEncode(${unquote(template)})${SQS_QUOTE_TYPE}`
+            : template,
+      },
+    });
   };
 
   private getFieldAndParseTemplate = (fieldValue: any, encode = true) => {

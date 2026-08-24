@@ -7,7 +7,9 @@ export type DeepPartial<T> = T extends object
   : T;
 
 export type OnlyNumberString<T> = {
-  [key in keyof T as NonNullable<T[key]> extends string | number ? key : never]: T[key];
+  [key in keyof T as NonNullable<T[key]> extends string | number | bigint
+    ? key
+    : never]: NonNullable<T[key]> extends BigInt ? bigint : T[key];
 };
 
 export type OnlyNumber<T> = {

@@ -268,6 +268,16 @@ export interface LambdaProps {
    */
   loggingConfig?: LoggingConfig;
   /**
+   * Lambda layer ARNs to attach to the function.
+   *
+   * Specifies a list of Lambda layer ARNs that will be attached to the function.
+   * Layers from the app, module, and lambda levels are all merged together.
+   *
+   * @example
+   * ['arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1']
+   */
+  layers?: string[];
+  /**
    * Output configuration for the Lambda function.
    *
    * Defines which attributes should be exported to SSM Parameter Store or
@@ -309,6 +319,7 @@ export enum LambdaReflectKeys {
 export enum LambdaArgumentTypes {
   event = 'event',
   context = 'context',
+  responseStream = 'responseStream',
 }
 
 export type CallbackParam = (error: boolean | null, response?: any) => void;
@@ -324,6 +335,7 @@ export type LambdaArgumentsType = Record<
     context: any;
     methodName: string;
     target: any;
+    responseStream?: any;
   }) => any
 >;
 

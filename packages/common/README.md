@@ -338,13 +338,15 @@ The package provides augmentable interfaces that enable type-safe resource names
 ```typescript
 // In your lafken-types.d.ts
 declare module '@lafken/common' {
-  interface ModulesAvailable {
-    core: {
-      Queue: { 'email-queue': string };
-    };
+  // Resources defined in this application
+  interface SharedResourceNames {
+    dynamo: 'users-table';
+    queue: 'email-queue';
   }
-  interface DynamoTableAvailable {
-    'users-table': string;
+
+  // Resources from external stacks referenced by this application
+  interface SharedReferenceResources {
+    dynamo: 'shared-table';
   }
 }
 ```

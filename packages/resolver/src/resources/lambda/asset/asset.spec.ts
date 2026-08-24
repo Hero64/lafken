@@ -17,11 +17,15 @@ vi.mock('cdktn', async (importOriginal) => {
 describe('Lambda Assets', () => {
   it('should initialize asset metadata', () => {
     lambdaAssets.initializeMetadata({
-      foldername: '/tmp',
-      filename: 'handler',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      minify: false,
+      asset: {
+        foldername: '/tmp',
+        filename: 'handler',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
 
     const prebuildPath = '/tmp/handler.js';
@@ -32,12 +36,12 @@ describe('Lambda Assets', () => {
       metadata: {
         filename: 'handler',
         foldername: '/tmp',
-        minify: false,
+        bundler: { minify: false },
       },
       resources: {
         Testing: {
           className: 'Testing',
-          methods: ['foo', 'bar'],
+          methods: [{ name: 'foo' }, { name: 'bar' }],
         },
       },
     });
@@ -46,11 +50,15 @@ describe('Lambda Assets', () => {
   it('should create terraform asset', async () => {
     const { stack } = setupTestingStack();
     lambdaAssets.initializeMetadata({
-      foldername: '/tmp',
-      filename: 'handler',
-      className: 'Testing',
-      methods: ['foo', 'bar'],
-      minify: false,
+      asset: {
+        foldername: '/tmp',
+        filename: 'handler',
+        bundler: { minify: false },
+      },
+      resource: {
+        className: 'Testing',
+        methods: [{ name: 'foo' }, { name: 'bar' }],
+      },
     });
 
     const lambda = new LambdaFunction(stack, 'test-handler', {

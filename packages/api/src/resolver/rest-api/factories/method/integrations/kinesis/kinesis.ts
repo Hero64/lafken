@@ -1,27 +1,30 @@
 import type { KinesisIntegrationActions } from '../../../../../../main';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
 import { PutRecordIntegration } from './put-record/put-record';
 
 export class KinesisIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
 
-  async create() {
-    const { handler } = this.props;
+  create() {
+    return this.resolve().create();
+  }
 
-    const action = handler.action as KinesisIntegrationActions;
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    return this.resolve().createOpenApi!();
+  }
 
-    let integrationResolver: Integration | undefined;
+  private resolve(): Integration {
+    const action = this.props.handler.action as KinesisIntegrationActions;
 
     switch (action) {
       case 'PutRecord':
-        integrationResolver = new PutRecordIntegration(this.props);
-        break;
+        return new PutRecordIntegration(this.props);
+      default:
+        throw new Error('Integration method not found');
     }
-
-    if (!integrationResolver) {
-      throw new Error('Integration method not found');
-    }
-
-    return integrationResolver.create();
   }
 }

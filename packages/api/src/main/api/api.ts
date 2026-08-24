@@ -31,7 +31,7 @@ const createMethodDecorator = (method: Method) =>
       let action: string | undefined;
       let additionalServices: ServicesValues | undefined;
       if (params.integration) {
-        action = params.action;
+        action = 'action' in params ? params.action : undefined;
         additionalServices = params.additionalServices;
       }
 
@@ -39,7 +39,9 @@ const createMethodDecorator = (method: Method) =>
 
       const responseParams = getEventFields(
         RESPONSE_PREFIX,
-        responseHandler.response
+        responseHandler.response,
+        undefined,
+        true
       ) as ResponseFieldMetadata;
 
       return {
@@ -52,9 +54,13 @@ const createMethodDecorator = (method: Method) =>
         response: responseParams,
         description: params.description,
         integration: params.integration,
+        integrationType: params.integration
+          ? undefined
+          : ((params as ApiLambdaIntegrationProps).integrationType ?? 'aws'),
         summary: params.summary,
         tags: params.tags,
         additionalServices,
+        methodSettings: params.methodSettings,
       } as ApiLambdaMetadata;
     },
     validateEvent: (target, methodName, event) => {
@@ -128,10 +134,11 @@ const createMethodDecorator = (method: Method) =>
 export const Api = createResourceDecorator<ApiProps>({
   type: RESOURCE_TYPE,
   callerFileIndex: 5,
-  getMetadata: ({ path, auth, apiGatewayName, tags }) => ({
+  getMetadata: ({ path, auth, apiGatewayName, tags, methodSettings }) => ({
     auth,
     tags,
     apiGatewayName,
+    methodSettings,
     path: path || '/',
   }),
 });

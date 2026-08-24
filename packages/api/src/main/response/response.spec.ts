@@ -57,8 +57,9 @@ describe('Response', () => {
     expect(resource.name).toBe('TestResponse');
     expect(resource.responses?.[400]).toBeDefined();
     expect(resource.responses?.[400] as ApiObjectMetadata).toBeDefined();
-    expect(resource.responses?.[500]).toBeDefined();
-    expect((resource.responses?.[500] as ApiObjectMetadata).properties).toBeDefined();
+    const response500 = resource.responses?.[500] as ApiObjectMetadata;
+    expect(response500).toBeDefined();
+    expect(response500.properties).toBeDefined();
     expect(resource.responses?.[404]).toBeDefined();
   });
 

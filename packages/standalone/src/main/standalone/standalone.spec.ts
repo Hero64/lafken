@@ -22,9 +22,11 @@ describe('Standalone', () => {
     refHandler() {}
 
     @Handler({
-      invocator: {
-        principalRole: 'apigateway.amazonaws.com',
-        roleRef: 'myInvokeRole',
+      invoke: {
+        role: {
+          principal: 'apigateway.amazonaws.com',
+          ref: 'myInvokeRole',
+        },
       },
     })
     serviceHandler() {}
@@ -64,13 +66,15 @@ describe('Standalone', () => {
       expect(handler.ref).toBe('myRef');
     });
 
-    it('should store the invocator config when provided', () => {
+    it('should store the invoke config when provided', () => {
       const handler = handlers.find(
         (h) => h.name === 'serviceHandler'
       ) as HandlerMetadata;
-      expect(handler.invocator).toEqual({
-        principalRole: 'apigateway.amazonaws.com',
-        roleRef: 'myInvokeRole',
+      expect(handler.invoke).toEqual({
+        role: {
+          principal: 'apigateway.amazonaws.com',
+          ref: 'myInvokeRole',
+        },
       });
     });
   });

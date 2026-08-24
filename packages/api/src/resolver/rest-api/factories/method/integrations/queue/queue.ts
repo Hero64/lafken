@@ -1,26 +1,30 @@
 import type { QueueIntegrationActions } from '../../../../../../main';
-import type { Integration, IntegrationProps } from '../integration.types';
+import type {
+  Integration,
+  IntegrationProps,
+  OpenApiIntegrationResult,
+} from '../integration.types';
 import { SendMessageIntegration } from './send-message/send-message';
 
 export class QueueIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
-  async create() {
-    const { handler } = this.props;
 
-    const action = handler.action as QueueIntegrationActions;
+  create() {
+    return this.resolve().create();
+  }
 
-    let integrationResolver: Integration | undefined;
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    return this.resolve().createOpenApi!();
+  }
+
+  private resolve(): Integration {
+    const action = this.props.handler.action as QueueIntegrationActions;
 
     switch (action) {
       case 'SendMessage':
-        integrationResolver = new SendMessageIntegration(this.props);
-        break;
+        return new SendMessageIntegration(this.props);
+      default:
+        throw new Error('Integration method not found');
     }
-
-    if (!integrationResolver) {
-      throw new Error('Integration method not found');
-    }
-
-    return integrationResolver.create();
   }
 }

@@ -14,7 +14,7 @@ export class AppContext {
 
     scope.node.setContext(contextName, {
       ...contextData,
-      minify: props.minify,
+      bundler: props.bundler,
       contextCreator: props.contextCreator,
     });
   }

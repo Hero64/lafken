@@ -1,3 +1,4 @@
+export * from './context';
 export * from './environment';
 export * from './lambda';
 export * from './output';

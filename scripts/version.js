@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
+const { execSync } = require('node:child_process');
 
 // ---- CONFIG ----
 const PACKAGES_DIR = path.join(process.cwd(), 'packages');
@@ -20,6 +21,24 @@ const getAllPackageJsonFiles = () => {
     .readdirSync(PACKAGES_DIR)
     .map((dir) => path.join(PACKAGES_DIR, dir, 'package.json'))
     .filter((file) => fs.existsSync(file));
+};
+
+const getCurrentBranch = () => {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' }).trim();
+  } catch {
+    return '';
+  }
+};
+
+const getBranchVersion = (branch) => {
+  const match = branch.match(/\d+\.\d+\.\d+/);
+  return match ? match[0] : null;
+};
+
+const run = (cmd) => {
+  console.log(`\n$ ${cmd}\n`);
+  execSync(cmd, { stdio: 'inherit' });
 };
 
 const bumpVersion = (version, type) => {
@@ -59,7 +78,7 @@ const ask = (q, defaultValue) =>
 
     console.log(`\n📦 Current version: ${currentVersion}\n`);
 
-    const type = await ask('Select version bump (major/minor/patch/manual)', 'manual');
+    const type = await ask('Select version bump (major/minor/patch/manual)', 'patch');
 
     let newVersion;
 
@@ -113,6 +132,25 @@ const ask = (q, defaultValue) =>
     });
 
     console.log('\n🎉 All packages updated!');
+
+    // ---- RELEASE ----
+    const release = await ask('\n📦 Run release? (pnpm release) (y/n)', 'y');
+    if (['y', 'yes'].includes(release.toLowerCase())) {
+      run('pnpm release');
+    }
+
+    // ---- COMMIT ----
+    const branch = getCurrentBranch();
+    const branchVersion = getBranchVersion(branch);
+    const defaultMessage = `chore: bump to ${branchVersion || newVersion}`;
+
+    const doCommit = await ask('\n📝 Create commit? (y/n)', 'y');
+    if (['y', 'yes'].includes(doCommit.toLowerCase())) {
+      const message = await ask('Commit message', defaultMessage);
+      run('git add -A');
+      run(`git commit -m "${message}"`);
+      console.log('\n✅ Commit created!');
+    }
   } catch (err) {
     console.error('❌ Error:', err);
   } finally {

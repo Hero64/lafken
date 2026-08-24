@@ -146,7 +146,7 @@ describe('Queue Decorator', () => {
       const event = {
         Records: [
           {
-            body: JSON.stringify({ body: { foo: 'test', bar: 1 } }),
+            body: JSON.stringify({ foo: 'test', bar: 1 }),
             messageId: '1',
             messageAttributes: {
               name: {

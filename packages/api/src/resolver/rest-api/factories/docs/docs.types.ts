@@ -1,3 +1,5 @@
+import type { ITerraformDependable } from 'cdktn';
+
 export type DocLocationType =
   | 'API'
   | 'AUTHORIZER'
@@ -107,4 +109,9 @@ export interface CreateDocProps {
   id: string;
   location: DocLocation;
   properties: DocProperties;
+}
+
+export interface DocVersion {
+  version?: string;
+  dependencies?: ITerraformDependable[];
 }

@@ -1,6 +1,10 @@
 import type { BucketIntegrationResponse, Source } from '../../../../../../../main';
-import type { InitializedClass, Integration } from '../../integration.types';
-import { LafkenIntegration } from '../../integration.utils';
+import type {
+  InitializedClass,
+  Integration,
+  OpenApiIntegrationResult,
+} from '../../integration.types';
+import { LafkenIntegration, toXAmazonIntegration } from '../../integration.utils';
 import type { BucketIntegrationBaseProps } from './base.types';
 
 const methodParamMap: Record<Source, string> = {
@@ -16,14 +20,77 @@ export class BucketBaseIntegration implements Integration {
   constructor(protected props: BucketIntegrationBaseProps) {}
 
   async create() {
+    const { apiGatewayMethod, restApi, httpMethod } = this.props;
+
+    const compute = await this.compute();
+
+    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+      httpMethod: apiGatewayMethod.httpMethod,
+      resourceId: apiGatewayMethod.resourceId,
+      restApiId: restApi.id,
+      type: 'AWS',
+      integrationHttpMethod: httpMethod,
+      uri: compute.uri,
+      credentials: compute.role.arn,
+      requestParameters: compute.requestParameters,
+      dependsOn: [apiGatewayMethod],
+    });
+
+    restApi.responseFactory.createResponses(
+      apiGatewayMethod,
+      integration,
+      compute.responseHandlers,
+      compute.name
+    );
+
+    if (compute.resolveResource.hasUnresolved()) {
+      integration.onResolve(async () => {
+        const uri = await compute.rebuildUri();
+        integration.addOverride('uri', uri);
+      });
+    }
+
+    return integration;
+  }
+
+  async createOpenApi(): Promise<OpenApiIntegrationResult> {
+    const { restApi, httpMethod } = this.props;
+
+    const compute = await this.compute();
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        compute.responseHandlers,
+        compute.name
+      );
+
+    const integration = toXAmazonIntegration(
+      {
+        type: 'AWS',
+        integrationHttpMethod: httpMethod,
+        uri: compute.uri,
+        credentials: compute.role.arn,
+        requestParameters: compute.requestParameters,
+      },
+      integrationResponses
+    );
+
+    if (compute.resolveResource.hasUnresolved()) {
+      restApi.openapiFactory.addDeferred(async () => {
+        integration.uri = await compute.rebuildUri();
+      });
+    }
+
+    return { integration, responses: operationResponses };
+  }
+
+  private async compute() {
     const {
       classResource,
-      apiGatewayMethod,
       resourceMetadata,
       handler,
       proxyHelper,
       restApi,
-      httpMethod,
       paramHelper,
       responseHelper,
       integrationHelper,
@@ -46,6 +113,9 @@ export class BucketBaseIntegration implements Integration {
 
     const name = `${resourceMetadata.name}-${handler.name}`;
 
+    const requestParameters: Record<string, string> = {};
+    const uri = this.getUri(integrationResponse, requestParameters);
+
     const role = integrationHelper.createRole({
       name,
       service,
@@ -53,23 +123,7 @@ export class BucketBaseIntegration implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const integration = new LafkenIntegration(
-      restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
-      {
-        httpMethod: apiGatewayMethod.httpMethod,
-        resourceId: apiGatewayMethod.resourceId,
-        restApiId: restApi.id,
-        type: 'AWS',
-        integrationHttpMethod: httpMethod,
-        uri: this.getUri(integrationResponse),
-        credentials: role.arn,
-        requestParameters: this.createRequestParameters(integrationResponse),
-        dependsOn: [apiGatewayMethod],
-      }
-    );
     const responses = [...responseHelper.handlerResponse];
-
     responses[0].methodParameters = {
       'method.response.header.Content-Type': true,
       'method.response.header.Content-Disposition': true,
@@ -78,74 +132,80 @@ export class BucketBaseIntegration implements Integration {
       'method.response.header.Content-Type': 'integration.response.header.Content-Type',
     };
 
-    restApi.responseFactory.createResponses(
-      apiGatewayMethod,
-      integration,
-      integrationHelper.generateResponseTemplate(responses, responseTemplateHelper),
-      name
-    );
+    const rebuildUri = async () => {
+      const rebuilt: BucketIntegrationResponse = await resource[handler.name](
+        proxyHelper.createEvent(),
+        options
+      );
+      if (resolveResource.hasUnresolved()) {
+        throw new Error(`unresolved dependencies in ${handler.name} integration`);
+      }
+      return this.getUri(rebuilt);
+    };
 
-    if (resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const integrationResponse = await resource[handler.name](
-          proxyHelper.createEvent(),
-          options
-        );
-        if (resolveResource.hasUnresolved()) {
-          throw new Error(`unresolved dependencies in ${handler.name} integration`);
-        }
-
-        integration.addOverride('uri', this.getUri(integrationResponse));
-      });
-    }
-
-    return integration;
+    return {
+      name,
+      role,
+      resolveResource,
+      uri,
+      requestParameters,
+      responseHandlers: integrationHelper.generateResponseTemplate(
+        responses,
+        responseTemplateHelper
+      ),
+      rebuildUri,
+    };
   }
 
-  private getPathParam(key: keyof BucketIntegrationResponse, value: any) {
-    if (value.isProxy) {
-      return `{${key}}`;
-    }
+  private getUri(
+    response: BucketIntegrationResponse,
+    requestParameters: Record<string, string> = {}
+  ) {
+    const bucket = this.buildPath('bucket', response.bucket, requestParameters);
+    const object = this.buildPath('object', response.object, requestParameters);
 
-    return value;
+    return `arn:aws:apigateway:${this.props.restApi.regionRef}:s3:path/${bucket}/${object}`;
   }
 
-  private getUri(response: BucketIntegrationResponse) {
-    return `arn:aws:apigateway:${this.props.restApi.region}:s3:path/${this.getPathParam('bucket', response.bucket)}/${this.getPathParam('object', response.object)}`;
-  }
-
-  private createRequestParameters(integrationResponse: BucketIntegrationResponse) {
-    const requestParameters: Record<string, string> = {};
-    const bucketIntegration = this.getIntegrationRequestParams(
-      integrationResponse.bucket
-    );
-
-    const keyIntegration = this.getIntegrationRequestParams(integrationResponse.object);
-
-    if (bucketIntegration) {
-      requestParameters['integration.request.path.bucket'] = bucketIntegration;
-    }
-
-    if (keyIntegration) {
-      requestParameters['integration.request.path.object'] = keyIntegration;
-    }
-
-    return requestParameters;
-  }
-
-  private getIntegrationRequestParams(value: any) {
+  /**
+   * Build a URI path portion for a field, supporting values that mix static text
+   * with event proxies (e.g. `` `data/temp/${e.file}` ``). Each proxy segment is
+   * emitted as an API Gateway path override placeholder and mapped to its request
+   * source in `requestParameters`.
+   */
+  private buildPath(
+    field: 'bucket' | 'object',
+    value: any,
+    requestParameters: Record<string, string>
+  ) {
     if (value === undefined) {
-      return value;
+      return '';
     }
 
     const { proxyHelper, paramHelper } = this.props;
 
-    const { field, path } = proxyHelper.resolveProxyValue(value, paramHelper.pathParams);
+    let proxyIndex = 0;
 
-    if (!field) {
-      return undefined;
-    }
+    return proxyHelper
+      .segments(value)
+      .map((segment) => {
+        if (!segment.isProxy) {
+          return segment.value;
+        }
 
-    return `${methodParamMap[field.source || 'query']}.${path}`;
+        const paramName = proxyIndex === 0 ? field : `${field}${proxyIndex}`;
+        proxyIndex += 1;
+
+        const eventField = paramHelper.pathParams[segment.value];
+        if (!eventField) {
+          throw new Error(`The value for the path ${segment.value} does not exist.`);
+        }
+
+        requestParameters[`integration.request.path.${paramName}`] =
+          `${methodParamMap[eventField.source || 'query']}.${segment.value}`;
+
+        return `{${paramName}}`;
+      })
+      .join('');
   }
 }

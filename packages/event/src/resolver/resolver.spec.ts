@@ -192,6 +192,34 @@ describe('event resolver', () => {
       });
     });
 
+    it('should create an event rule with a $or pattern', async () => {
+      @EventRule()
+      class TestEvent {
+        @Rule({
+          pattern: {
+            source: 'my.service',
+            detail: {
+              $or: [{ status: ['active'] }, { level: [{ numeric: ['>', 5] }] }],
+            },
+          },
+        })
+        onEvent() {}
+      }
+
+      const { stack, module } = setupTestingStackWithModule();
+      const resolver = new EventRuleResolver();
+
+      await resolver.beforeCreate(stack as unknown as AppStack);
+      await resolver.create(module as unknown as AppModule, TestEvent);
+
+      const synthesized = Testing.synth(stack);
+      expect(synthesized).toHaveResourceWithProperties(CloudwatchEventRule, {
+        name: 'onEvent-TestEvent',
+        event_pattern:
+          '${jsonencode({"source" = ["my.service"], "detail" = {"$or" = [{"status" = ["active"]}, {"level" = [{"numeric" = [">", 5]}]}]}})}',
+      });
+    });
+
     it('should create an event rule with retry policy', async () => {
       @EventRule()
       class TestEvent {

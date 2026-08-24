@@ -115,12 +115,14 @@ describe('standalone resolver', () => {
       );
     });
 
-    it('should create a handler with invocatorService', () => {
+    it('should create a handler with an invoke permission', () => {
       @Standalone()
       class TestStandalone {
         @Handler({
-          invocator: {
-            principalPermission: 'lambda.amazonaws.com',
+          invoke: {
+            permission: {
+              principal: 'lambda.amazonaws.com',
+            },
           },
         })
         myHandler() {}

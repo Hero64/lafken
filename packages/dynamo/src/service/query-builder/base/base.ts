@@ -8,7 +8,7 @@ import type {
   QueryBuilderProps,
   ResolveFilterProps,
 } from './base.types';
-import { filterKeys, filterResolver } from './base.utils';
+import { filterKeys, filterResolver, notValueKeys } from './base.utils';
 
 export class QueryBuilderBase<E extends ClassResource> {
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: ''
@@ -32,6 +32,10 @@ export class QueryBuilderBase<E extends ClassResource> {
     const partitionFilters: string[] = [];
 
     for (const key in partition) {
+      if (partition[key] === undefined) {
+        continue;
+      }
+
       partitionFilters.push(
         this.resolveFilter({
           expressionName: key,
@@ -74,6 +78,10 @@ export class QueryBuilderBase<E extends ClassResource> {
     }
 
     for (const key in sortValues) {
+      if (sortValues[key] === undefined) {
+        continue;
+      }
+
       let filterExpressionKey: FilterResolverTypes = 'equal';
 
       let sortValue = sort[key];
@@ -111,11 +119,15 @@ export class QueryBuilderBase<E extends ClassResource> {
           for (const condition of orFilter.OR) {
             const expression = this.getFilterExpression(condition, names, 'and', counter);
             counter += 1;
-            orExpressions.push(expression);
+            if (expression) {
+              orExpressions.push(expression);
+            }
           }
 
-          const joined = orExpressions.join(' or ');
-          filterExpression.push(orExpressions.length > 1 ? `(${joined})` : joined);
+          if (orExpressions.length > 0) {
+            const joined = orExpressions.join(' or ');
+            filterExpression.push(orExpressions.length > 1 ? `(${joined})` : joined);
+          }
           break;
         }
         case 'AND': {
@@ -124,42 +136,58 @@ export class QueryBuilderBase<E extends ClassResource> {
           for (const condition of andFilter.AND) {
             const expression = this.getFilterExpression(condition, names, 'and', counter);
             counter += 1;
-            andExpressions.push(expression);
+            if (expression) {
+              andExpressions.push(expression);
+            }
           }
 
-          filterExpression.push(andExpressions.join(' and '));
+          if (andExpressions.length > 0) {
+            filterExpression.push(andExpressions.join(' and '));
+          }
           break;
         }
         default: {
+          const keyFilter = (filter as unknown as Filter<T>)[key as keyof T] as Filter<T>;
+          if (keyFilter === undefined) {
+            continue;
+          }
           const currentKeyNames = [...names, key];
           const keyName = currentKeyNames.join('.#');
           const keyValue = `${currentKeyNames.join('_')}_${counter}_${index}`;
-
-          const keyFilter = (filter as unknown as Filter<T>)[key as keyof T] as Filter<T>;
 
           if (typeof keyFilter === 'object') {
             const keys = Object.keys(keyFilter || {});
             const filterResolver = keys.find((key) => filterKeys.has(key));
 
             if (filterResolver) {
+              const filterValue = keyFilter[filterResolver as keyof Filter<T>];
+              if (
+                filterValue === undefined &&
+                !notValueKeys.has(filterResolver as FilterResolverTypes)
+              ) {
+                break;
+              }
+
               const expression = this.resolveFilter({
                 expressionName: keyName,
                 keyName: key,
                 filterExpressionKey: filterResolver as FilterResolverTypes,
                 expressionValue: keyValue,
-                value: keyFilter[filterResolver as keyof Filter<T>],
+                value: filterValue,
               });
 
               filterExpression.push(expression);
               break;
             }
-            this.attributeNames[`#${key}`] = key;
             const expression = this.getFilterExpression(
               keyFilter,
               currentKeyNames,
               union
             );
-            filterExpression.push(expression);
+            if (expression) {
+              this.attributeNames[`#${key}`] = key;
+              filterExpression.push(expression);
+            }
             break;
           }
           const expression = this.resolveFilter({
@@ -176,6 +204,20 @@ export class QueryBuilderBase<E extends ClassResource> {
     }
 
     return filterExpression.join(` ${union} `);
+  }
+
+  protected getProjectionExpression(projection?: (string | number | symbol)[] | 'ALL') {
+    if (!projection || projection === 'ALL') {
+      return undefined;
+    }
+
+    return projection
+      .map((attribute) => {
+        const name = String(attribute);
+        this.attributeNames[`#${name}`] = name;
+        return `#${name}`;
+      })
+      .join(', ');
   }
 
   protected getAttributesAndNames() {

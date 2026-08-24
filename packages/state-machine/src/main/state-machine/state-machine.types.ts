@@ -29,6 +29,24 @@ export type IntegrationMode = 'sync' | 'async' | 'token';
 
 type ObjectOrJsonAta = Record<string, any> | JsonAtaString;
 
+export interface StateName {
+  /**
+   * Custom state name.
+   *
+   * Specifies a custom name for the state in the state machine definition.
+   * If not provided, a name is generated automatically based on the state
+   * type (e.g. `pass`, `pass-2`, `wait`). Names are kept unique within the
+   * state machine, appending a numeric suffix when duplicated.
+   *
+   * @example
+   * {
+   *   type: 'pass',
+   *   name: 'my-pass-state',
+   * }
+   */
+  name?: string;
+}
+
 /**
  * Attributes that can be exported from a Step Functions state machine resource.
  *
@@ -211,7 +229,7 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
   ref?: StateMachineReferenceNames;
 }
 
-interface WaitStateBase<T> {
+interface WaitStateBase<T> extends StateName {
   /**
    * State type: Wait.
    *
@@ -329,7 +347,7 @@ interface ChoiceCondition<T> {
   next: StateTypes<T>;
 }
 
-export interface ChoiceState<T> {
+export interface ChoiceState<T> extends StateName {
   /**
    * State type: Choice.
    *
@@ -375,7 +393,7 @@ export interface ChoiceState<T> {
   default?: StateTypes<T>;
 }
 
-interface ParallelState<T> extends CatchAndRetry<T> {
+interface ParallelState<T> extends CatchAndRetry<T>, StateName {
   /**
    * State type: Parallel.
    *
@@ -466,7 +484,7 @@ interface ParallelState<T> extends CatchAndRetry<T> {
   next?: StateTypes<T>;
 }
 
-interface FailState {
+interface FailState extends StateName {
   type: 'fail';
   /**
    * Description about error cause, you can use an jsonata expression
@@ -497,7 +515,7 @@ interface FailState {
   error?: string;
 }
 
-interface SucceedState {
+interface SucceedState extends StateName {
   type: 'succeed';
   /**
    * State output transformation.
@@ -522,7 +540,7 @@ interface SucceedState {
   output?: ObjectOrJsonAta;
 }
 
-interface PassState<T> {
+interface PassState<T> extends StateName {
   type: 'pass';
   /**
    * Next state to execute.
@@ -583,7 +601,7 @@ interface PassState<T> {
   assign?: Record<string, any>;
 }
 
-export interface MapStateBase<T> extends CatchAndRetry<T> {
+export interface MapStateBase<T> extends CatchAndRetry<T>, StateName {
   /**
    * State type: Map.
    *

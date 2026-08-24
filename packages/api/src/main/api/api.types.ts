@@ -35,7 +35,149 @@ export interface MethodAuthorizer {
   scopes?: string[];
 }
 
+export type MethodLoggingLevel = 'off' | 'error' | 'info';
+
+export type UnauthorizedCacheControlHeaderStrategy =
+  | 'fail_with_403'
+  | 'succeed_with_response_header'
+  | 'succeed_without_response_header';
+
+export interface MethodSettings {
+  /**
+   * Indicates whether the API Gateway cache is encrypted.
+   *
+   * When enabled, the cache data for this method is encrypted at rest.
+   *
+   * @default false
+   */
+  cacheDataEncrypted?: boolean;
+  /**
+   * Time-to-live (TTL) for cached responses, in seconds.
+   *
+   * Specifies how long API Gateway caches the method response before
+   * forwarding the request to the backend again.
+   *
+   * @default 300
+   */
+  cacheTtlInSeconds?: number;
+  /**
+   * Indicates whether caching is enabled for the method.
+   *
+   * Requires a cache cluster to be configured on the stage.
+   *
+   * @default false
+   */
+  cachingEnabled?: boolean;
+  /**
+   * Enables full request and response data logging for the method.
+   *
+   * Captures the request and response payloads in CloudWatch Logs.
+   *
+   * @default false
+   */
+  dataTraceEnabled?: boolean;
+  /**
+   * Logging level for the method.
+   *
+   * Controls the verbosity of the logs written to CloudWatch Logs.
+   *
+   * @default "off"
+   */
+  loggingLevel?: MethodLoggingLevel;
+  /**
+   * Indicates whether CloudWatch metrics are enabled for the method.
+   *
+   * @default false
+   */
+  metricsEnabled?: boolean;
+  /**
+   * Whether authorization is required before honoring `Cache-Control`
+   * directives on the request.
+   *
+   * @default true
+   */
+  requireAuthorizationForCacheControl?: boolean;
+  /**
+   * The maximum number of requests that can be sent to the method in a
+   * short burst before throttling kicks in.
+   *
+   * This value only takes effect if the stage has throttling limits
+   * configured.
+   */
+  throttlingBurstLimit?: number;
+  /**
+   * The steady-state request rate limit, in requests per second, for
+   * the method.
+   *
+   * This value only takes effect if the stage has throttling limits
+   * configured.
+   */
+  throttlingRateLimit?: number;
+  /**
+   * Strategy used when a `Cache-Control` directive is sent without
+   * authorization and authorization is required.
+   *
+   * @default "succeed_without_response_header"
+   */
+  unauthorizedCacheControlHeaderStrategy?: UnauthorizedCacheControlHeaderStrategy;
+}
+
+export interface StageMethodSettings extends MethodSettings {
+  /**
+   * Stage name.
+   *
+   * Specifies the API Gateway stage this method settings block applies to.
+   * The stage must be configured in the `@Api` resolver (`stages` prop).
+   */
+  stageName: string;
+}
+
+export type MethodSettingsConfig = MethodSettings | StageMethodSettings[];
+
 export interface ApiLambdaBaseProps {
+  /**
+   * Method settings.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for this method at the stage level, rendered as
+   * `aws_api_gateway_method_settings` resources.
+   *
+   * Accepts either:
+   * - A single settings object, which is applied to **every** stage of the
+   *   REST API.
+   * - An array of stage-scoped settings, where each entry targets a specific
+   *   stage by name.
+   *
+   * @example
+   * // Apply to every stage
+   * {
+   *   methodSettings: {
+   *     cachingEnabled: true,
+   *     cacheTtlInSeconds: 300,
+   *     metricsEnabled: true,
+   *     loggingLevel: 'info',
+   *     throttlingRateLimit: 100,
+   *     throttlingBurstLimit: 50,
+   *   }
+   * }
+   *
+   * @example
+   * // Apply only to specific stages
+   * {
+   *   methodSettings: [
+   *     {
+   *       stageName: 'staging',
+   *       loggingLevel: 'error',
+   *     },
+   *     {
+   *       stageName: 'prod',
+   *       cachingEnabled: true,
+   *       metricsEnabled: true,
+   *     },
+   *   ]
+   * }
+   */
+  methodSettings?: MethodSettingsConfig;
   /**
    * Method path.
    *
@@ -133,6 +275,23 @@ export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
    * will use the Lambda function directly as its backend.
    */
   integration?: never;
+  /**
+   * API Gateway Lambda integration type.
+   *
+   * Controls how API Gateway invokes the Lambda function backing this method:
+   * - `'aws'` (default): a non-proxy integration. API Gateway maps the request
+   *   into the shape declared via `@Event(...)` using a VTL request template
+   *   before invoking the Lambda, and maps the Lambda result back through the
+   *   response templates.
+   * - `'aws-proxy'`: a Lambda proxy integration. API Gateway forwards the raw
+   *   `APIGatewayProxyEvent` to the Lambda and returns its response verbatim
+   *   (no request/response templates). Required for response streaming
+   *   (`@Streaming`) and when the handler needs the complete HTTP event via
+   *   `@EventProxy(...)`.
+   *
+   * @default 'aws'
+   */
+  integrationType?: 'aws' | 'aws-proxy';
   /**
    * Lambda configuration for the method.
    *
@@ -316,13 +475,49 @@ export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps 
   action: KinesisIntegrationActions;
 }
 
+export type EventBridgeIntegrationActions = 'PutEvents';
+
+export interface EventBridgeIntegrationServiceProps extends ApiIntegrationBaseProps {
+  /**
+   * Method integration type.
+   *
+   * Indicates whether this API method will use a direct AWS service
+   * integration to respond without Lambda.
+   */
+  integration: 'event-bridge';
+  /**
+   * EventBridge integration action.
+   *
+   * Currently the only supported action is:
+   * - `'PutEvents'` – publishes one or more events to the configured event bus.
+   */
+  action: EventBridgeIntegrationActions;
+}
+
+export interface MockIntegrationServiceProps extends ApiIntegrationBaseProps {
+  /**
+   * Method integration type.
+   *
+   * Indicates whether this API method will use a direct AWS service
+   * integration to respond. If this property is not set, the method
+   * will use the Lambda function directly as its backend.
+   *
+   * The `'mock'` integration does not call any backend. Instead, the
+   * value returned by the method is transformed into the response
+   * template that API Gateway returns directly.
+   */
+  integration: 'mock';
+}
+
 export type ApiLambdaProps =
   | ApiLambdaIntegrationProps
   | BucketIntegrationServiceProps
   | StateMachineIntegrationServiceProps
   | DynamoDbIntegrationServiceProps
   | QueueIntegrationServiceProps
-  | KinesisIntegrationServiceProps;
+  | KinesisIntegrationServiceProps
+  | EventBridgeIntegrationServiceProps
+  | MockIntegrationServiceProps;
 
 export interface ApiProps extends ResourceProps {
   /**
@@ -358,6 +553,45 @@ export interface ApiProps extends ResourceProps {
    */
   apiGatewayName?: ApiNames;
   /**
+   * Method settings.
+   *
+   * Configures API Gateway features (caching, logging, metrics and
+   * throttling) for **every method** of this resource class, rendered as
+   * `aws_api_gateway_method_settings` resources.
+   *
+   * Each handler inherits this configuration and receives a concrete method
+   * settings entry, e.g. `@Api({ path: '/users' })` can produce
+   * `method_path = "users/POST"` and `method_path = "users/{id}/GET"`.
+   *
+   * Accepts either:
+   * - A single settings object, which is applied to **every** stage of the
+   *   REST API.
+   * - An array of stage-scoped settings, where each entry targets a specific
+   *   stage by name.
+   *
+   * Method-level `methodSettings` take precedence: a handler declaring its own
+   * settings does not inherit this class-level configuration.
+   *
+   * @example
+   * {
+   *   path: '/users',
+   *   methodSettings: {
+   *     metricsEnabled: true,
+   *     loggingLevel: 'info',
+   *   }
+   * }
+   *
+   * @example
+   * {
+   *   path: '/users',
+   *   methodSettings: [
+   *     { stageName: 'prod', cachingEnabled: true },
+   *     { stageName: 'dev', loggingLevel: 'error' },
+   *   ]
+   * }
+   */
+  methodSettings?: MethodSettingsConfig;
+  /**
    * OpenAPI tags.
    *
    * A list of tags applied at the class level that will be inherited by all
@@ -374,7 +608,7 @@ export interface ApiProps extends ResourceProps {
 }
 
 export interface ApiResourceMetadata
-  extends Required<Omit<ApiProps, 'minify'>>,
+  extends Required<Omit<ApiProps, 'bundler'>>,
     ResourceMetadata {}
 
 export interface ApiLambdaMetadata extends LambdaMetadata {
@@ -382,6 +616,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   method: Method;
   name: string;
   integration?: ApiLambdaProps['integration'];
+  integrationType?: 'aws' | 'aws-proxy';
   action?: string;
   lambda?: LambdaProps;
   response?: ResponseFieldMetadata;
@@ -389,6 +624,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   summary?: string;
   tags?: string[];
   additionalServices?: ServicesValues;
+  methodSettings?: MethodSettingsConfig;
 }
 
 export enum Method {

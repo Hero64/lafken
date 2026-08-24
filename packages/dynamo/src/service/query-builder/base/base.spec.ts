@@ -73,6 +73,94 @@ describe('Query builder base', () => {
       );
     });
 
+    it('should omit undefined partition attributes and build expression with defined keys only', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: undefined,
+              },
+              sort: {
+                age: 12,
+              },
+            },
+            {
+              name: 'partial_partition_index',
+              type: 'global',
+              partitionKey: new Set(['name']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual('#name = :name and #age = :age');
+    });
+
+    it('should omit undefined sort attributes and build expression with defined keys only', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: 'test@test.com',
+              },
+              sort: {
+                age: 12,
+                foo: undefined,
+              },
+            },
+            {
+              name: 'partial_sort_index',
+              type: 'global',
+              partitionKey: new Set(['name', 'email']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual(
+        '#name = :name and #email = :email and #age = :age'
+      );
+    });
+
+    it('should omit undefined attributes in both partition and sort keys', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getConditionExpression() {
+          return this.getKeyConditionExpression(
+            {
+              partition: {
+                name: 'test',
+                email: undefined,
+              },
+              sort: {
+                age: 12,
+                foo: undefined,
+              },
+            },
+            {
+              name: 'partial_multi_index',
+              type: 'global',
+              partitionKey: new Set(['name']),
+              sortKey: new Set(['age']),
+            }
+          );
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+
+      expect(qb.getConditionExpression()).toEqual('#name = :name and #age = :age');
+    });
+
     it('should throw error to invalid multi attribute selection', () => {
       class QueryBuilder extends QueryBuilderBase<any> {
         public getConditionExpression() {
@@ -152,6 +240,56 @@ describe('Query builder base', () => {
       expect(qb.getQueryFilter()).toEqual(
         '#age BETWEEN :age_1_0_0 and :age_1_0_1 and contains(#email, :email_1_1) and (#name in (:name_2_0_0,:name_2_0_1,:name_2_0_2) or attribute_not_exists(#other))'
       );
+    });
+
+    it('should omit attributes whose value is undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            name: undefined,
+            age: { notEqual: undefined },
+            email: {
+              contains: '@gmail.com',
+            },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('contains(#email, :email_1_1)');
+    });
+
+    it('should omit a nested filter group when all of its attributes are undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            address: {
+              city: undefined,
+            },
+            email: {
+              contains: '@gmail.com',
+            },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('contains(#email, :email_1_1)');
+      expect(qb.getQueryFilter()).not.toContain('#address');
+    });
+
+    it('should return an empty expression when all attributes are undefined', () => {
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression({
+            name: undefined,
+            age: { notEqual: undefined },
+          });
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual('');
     });
   });
 

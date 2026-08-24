@@ -135,7 +135,7 @@ import { SnsResolver } from './resolver/resolver';
 import { NotificationService } from './modules/notifications';
 
 const notifications = createModule({
-  prefix: 'notifications',
+  name: 'notifications',
   resources: [NotificationService],
 });
 

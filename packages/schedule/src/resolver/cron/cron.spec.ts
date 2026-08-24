@@ -70,4 +70,64 @@ describe('Cron', () => {
       }),
     });
   });
+
+  it('should map optional attributes to the schedule resource', async () => {
+    @Schedule()
+    class OptionsEvent {
+      @Cron({
+        schedule: { hour: 8, minute: 0 },
+        timezone: 'America/Santiago',
+        description: 'Daily report',
+        state: 'disabled',
+        startDate: '2026-07-01T00:00:00Z',
+        endDate: '2026-12-31T23:59:59Z',
+      })
+      cron() {}
+    }
+
+    const optionsMetadata = getResourceMetadata(OptionsEvent);
+    const optionsHandlers = getResourceHandlerMetadata<EventCronMetadata>(OptionsEvent);
+    const { stack, module } = setupTestingStackWithModule();
+
+    new CronResolver(module, 'cron-OptionsEvent', {
+      handler: optionsHandlers[0],
+      resourceMetadata: optionsMetadata,
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
+      schedule_expression_timezone: 'America/Santiago',
+      description: 'Daily report',
+      state: 'DISABLED',
+      start_date: '2026-07-01T00:00:00Z',
+      end_date: '2026-12-31T23:59:59Z',
+    });
+  });
+
+  it('should enable a flexible time window when minutes are provided', async () => {
+    @Schedule()
+    class FlexibleEvent {
+      @Cron({
+        schedule: { hour: 8, minute: 0 },
+        flexibleWindowMinutes: 15,
+      })
+      cron() {}
+    }
+
+    const flexibleMetadata = getResourceMetadata(FlexibleEvent);
+    const flexibleHandlers = getResourceHandlerMetadata<EventCronMetadata>(FlexibleEvent);
+    const { stack, module } = setupTestingStackWithModule();
+
+    new CronResolver(module, 'cron-FlexibleEvent', {
+      handler: flexibleHandlers[0],
+      resourceMetadata: flexibleMetadata,
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(SchedulerSchedule, {
+      flexible_time_window: { mode: 'FLEXIBLE', maximum_window_in_minutes: 15 },
+    });
+  });
 });
