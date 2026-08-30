@@ -38,6 +38,14 @@ const partialSchemaToDefinition = (partial: PartialSchema<any>): SchemaDefinitio
   return schema;
 };
 
+/**
+ * Converts a single {@link ApiParamMetadata} entry into a JSON Schema
+ * {@link SchemaDefinition} suitable for request validation and OpenAPI
+ * generation.
+ *
+ * @param param - Resolved parameter metadata from a `@BodyParam` or `@QueryParam`.
+ * @returns A JSON Schema definition matching the parameter's type and constraints.
+ */
 export const paramToSchema = (param: ApiParamMetadata): SchemaDefinition => {
   if (param.type === 'String') {
     return {
@@ -91,6 +99,14 @@ export const paramToSchema = (param: ApiParamMetadata): SchemaDefinition => {
   return objectToSchema(param);
 };
 
+/**
+ * Converts an {@link ApiObjectMetadata} (request body) into a full JSON Schema
+ * object definition, recursively converting each nested property via
+ * {@link paramToSchema}.
+ *
+ * @param data - The resolved object metadata from an `@ApiRequest` or `@ApiResponse` class.
+ * @returns A JSON Schema `object` definition with `properties` and `required` fields.
+ */
 export const objectToSchema = (data: ApiObjectMetadata): SchemaDefinition => {
   const properties: Record<string, SchemaDefinition> = {};
   const required: string[] = [];

@@ -10,7 +10,10 @@ import {
 import { RESOURCE_TYPE } from '../state-machine';
 import type { JsonAtaString, ParamProps, StateMachineParamMetadata } from './param.types';
 
+/** Reflect-metadata key prefix for state machine field metadata. */
 export const stateMachineFieldKey = createFieldName(RESOURCE_TYPE, FieldProperties.field);
+
+/** Reflect-metadata key prefix for state machine payload metadata. */
 export const stateMachinePayloadKey = createFieldName(
   RESOURCE_TYPE,
   FieldProperties.payload

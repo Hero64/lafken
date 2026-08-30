@@ -17,14 +17,59 @@ export enum StateMachineReflectKeys {
   nested = 'state_machine:nested',
 }
 
+/** Generic method signature for any Lambda handler. */
 export type DefaultMethod = (...args: any) => any;
+
+/**
+ * Step Functions execution type.
+ *
+ * - `'STANDARD'` — Long-running workflows with exactly-once processing.
+ * - `'EXPRESS'` — High-throughput, short-duration workflows with at-least-once processing.
+ */
 export type ProcessorExecutionType = 'STANDARD' | 'EXPRESS';
+
+/**
+ * Map state execution mode.
+ *
+ * - `'INLINE'` — All iterations run within the same state machine execution.
+ * - `'DISTRIBUTED'` — Each iteration can be a separate execution for higher scalability.
+ */
 export type ProcessorMode = 'INLINE' | 'DISTRIBUTED';
+
+/**
+ * CSV delimiter character for distributed map item readers.
+ */
 export type CsvDelimiter = 'COMMA' | 'PIPE' | 'SEMICOLON' | 'SPACE' | 'TAB';
+
+/**
+ * Header location in CSV files for distributed map item readers.
+ *
+ * - `'FIRST_ROW'` — Headers are in the first row of the CSV.
+ * - `'GIVEN'` — Headers are provided explicitly via `titles`.
+ */
 export type HeaderLocation = 'FIRST_ROW' | 'GIVEN';
 
+/**
+ * Output format for distributed map result writers.
+ */
 export type ResultOutputType = 'JSON' | 'JSONL';
+
+/**
+ * Transformation applied to distributed map results before writing.
+ *
+ * - `'NONE'` — No transformation.
+ * - `'COMPACT'` — Compact the JSON output.
+ * - `'FLATTEN'` — Flatten nested objects.
+ */
 export type ResultTransformation = 'NONE' | 'COMPACT' | 'FLATTEN';
+
+/**
+ * Integration invocation mode for Step Functions service integrations.
+ *
+ * - `'sync'` — Wait for the service to complete before proceeding.
+ * - `'async'` — Fire-and-forget; the state machine continues immediately.
+ * - `'token'` — Use a task token for callback-based integrations.
+ */
 export type IntegrationMode = 'sync' | 'async' | 'token';
 
 type ObjectOrJsonAta = Record<string, any> | JsonAtaString;
@@ -485,6 +530,7 @@ interface ParallelState<T> extends CatchAndRetry<T>, StateName {
 }
 
 interface FailState extends StateName {
+  /** State type: Fail. Terminates execution with an error. */
   type: 'fail';
   /**
    * Description about error cause, you can use an jsonata expression
@@ -516,6 +562,7 @@ interface FailState extends StateName {
 }
 
 interface SucceedState extends StateName {
+  /** State type: Succeed. Terminates execution successfully. */
   type: 'succeed';
   /**
    * State output transformation.
@@ -541,6 +588,7 @@ interface SucceedState extends StateName {
 }
 
 interface PassState<T> extends StateName {
+  /** State type: Pass. Passes its input to its output or injects fixed data. */
   type: 'pass';
   /**
    * Next state to execute.
@@ -763,31 +811,58 @@ interface MapInline<T> extends MapStateBase<T> {
   mode: 'inline';
 }
 
+/**
+ * Base configuration for a distributed map item reader.
+ */
 interface MapReaderItemBase {
+  /** S3 bucket containing the input data file. */
   bucket: BucketNames;
+  /** S3 object key of the input data file. */
   key: string;
+  /** Maximum number of items to read from the file. */
   maxItems?: number;
 }
 
+/**
+ * Item reader for JSON, JSONL, or manifest files.
+ */
 interface MapReaderJSONItem extends MapReaderItemBase {
+  /** Input file format. */
   source: 'json' | 'jsonl' | 'manifest';
+  /** JSON pointer expression to locate the array of items within the file. */
   itemsPointer?: string;
 }
 
+/**
+ * Item reader for CSV files.
+ */
 interface MapReaderCSVItem extends MapReaderItemBase {
+  /** Must be `'csv'` to indicate CSV input. */
   source: 'csv';
+  /** Header configuration for the CSV file. */
   headers: {
+    /** Where the header row is located. */
     location: HeaderLocation;
+    /** Explicit column titles (used when `location` is `'GIVEN'`). */
     titles?: string[];
   };
+  /** Delimiter character between CSV fields. */
   delimiter?: CsvDelimiter;
 }
 
+/**
+ * Configuration for writing distributed map results to S3.
+ */
 interface MapWriteResult {
+  /** S3 bucket where results are written. */
   bucket: BucketNames;
+  /** S3 key prefix for the result files. */
   prefix: string;
+  /** Output format and transformation settings. */
   config?: {
+    /** Output file format. */
     outputType: 'JSON' | 'JSONL';
+    /** Transformation applied to the output. */
     transformation?: 'NONE' | 'COMPACT' | 'FLATTEN';
   };
 }
@@ -879,12 +954,21 @@ export type ErrorType =
   | 'States.ResultWriterFailed'
   | (string & {});
 
+/**
+ * Retry configuration for a state in case of failure.
+ */
 interface StateRetry {
+  /** Error types that trigger this retry configuration. */
   errorEquals: ErrorType[];
+  /** Seconds to wait before the first retry attempt. */
   intervalSeconds?: number;
+  /** Maximum number of retry attempts. */
   maxAttempt?: number;
+  /** Multiplier applied to `intervalSeconds` after each retry. */
   backoffRate?: number;
+  /** Maximum delay in seconds between retries (caps exponential backoff). */
   maxDelaySeconds?: number;
+  /** Random jitter strategy: `'FULL'` adds up to 100% jitter, `'NONE'` disables it. */
   jitterStrategy?: 'FULL' | 'NONE';
 }
 

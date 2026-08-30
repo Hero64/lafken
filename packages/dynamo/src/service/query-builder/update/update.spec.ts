@@ -179,4 +179,100 @@ describe('UpdateBuilder', () => {
       expect(builder.getCommand().UpdateExpression).toMatch(/REMOVE /);
     });
   });
+
+  describe('undefined value handling', () => {
+    it('should filter out undefined values from setValues', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { id: '123' },
+          setValues: {
+            name: 'John',
+            age: undefined,
+            email: 'john@example.com',
+          },
+        },
+      });
+
+      const command = builder.getCommand();
+      const values = command.ExpressionAttributeValues!;
+      const rawValues = Object.fromEntries(
+        Object.entries(values).map(([k, v]) => [k, (v as any).S ?? (v as any).N])
+      );
+
+      // Should only have values for name and email, not age
+      expect(Object.keys(rawValues)).toHaveLength(2);
+      expect(Object.keys(rawValues).some((k) => k.includes('age'))).toBe(false);
+    });
+
+    it('should filter out undefined values from replaceValues', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { id: '123' },
+          replaceValues: {
+            name: 'John',
+            age: undefined,
+            email: 'john@example.com',
+          },
+        },
+      });
+
+      const command = builder.getCommand();
+      const values = command.ExpressionAttributeValues!;
+      const rawValues = Object.fromEntries(
+        Object.entries(values).map(([k, v]) => [k, (v as any).S ?? (v as any).N])
+      );
+
+      // Should only have values for name and email, not age
+      expect(Object.keys(rawValues)).toHaveLength(2);
+      expect(Object.keys(rawValues).some((k) => k.includes('age'))).toBe(false);
+    });
+
+    it('should filter out undefined values from nested setValues', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { id: '123' },
+          setValues: {
+            address: {
+              city: 'New York',
+              zip: undefined,
+              state: 'NY',
+            },
+          },
+        },
+      });
+
+      const command = builder.getCommand();
+      const values = command.ExpressionAttributeValues!;
+      const rawValues = Object.fromEntries(
+        Object.entries(values).map(([k, v]) => [k, (v as any).S ?? (v as any).N])
+      );
+
+      // Should only have values for city and state, not zip
+      expect(Object.keys(rawValues)).toHaveLength(2);
+      expect(Object.keys(rawValues).some((k) => k.includes('zip'))).toBe(false);
+    });
+
+    it('should still work when all setValues are undefined (empty after filtering)', () => {
+      const builder = new UpdateBuilder({
+        ...getBaseProps(),
+        inputProps: {
+          keyCondition: { id: '123' },
+          setValues: {
+            name: undefined,
+            age: undefined,
+          },
+        },
+      });
+
+      const command = builder.getCommand();
+      const values = command.ExpressionAttributeValues!;
+
+      // Should have no SET expression
+      expect(command.UpdateExpression).not.toMatch(/^SET/);
+      expect(values).toBeUndefined();
+    });
+  });
 });

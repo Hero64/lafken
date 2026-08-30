@@ -14,7 +14,10 @@ import type {
   StandardAttributeMetadata,
 } from './attribute.types';
 
+/** Reflect-metadata key prefix for auth field metadata. */
 export const authFieldKey = createFieldName(RESOURCE_TYPE, FieldProperties.field);
+
+/** Reflect-metadata key prefix for auth payload metadata. */
 export const authPayloadKey = createFieldName(RESOURCE_TYPE, FieldProperties.payload);
 
 /**

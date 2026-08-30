@@ -40,9 +40,18 @@ export interface Transition {
   days: number;
 }
 
+/**
+ * Configuration for automatic object expiration in an S3 lifecycle rule.
+ *
+ * Exactly one of `days`, `date`, or `expiredObjectDeleteMarker` must be
+ * specified (enforced via `OnlyOne<Expiration>` in {@link KeyLifeCycleRule}).
+ */
 export interface Expiration {
+  /** Number of days after object creation when the object is deleted. */
   days?: number;
+  /** Specific date on which the object is deleted. */
   date?: Date;
+  /** When `true`, S3 adds a delete marker and removes the current object version. */
   expiredObjectDeleteMarker?: boolean;
 }
 
@@ -221,6 +230,14 @@ export interface InternalBucketProps extends BaseBucketProps {
   lifeCycleRules?: Record<string, KeyLifeCycleRule>;
   /**
    * Indicates all objects from bucket should be deleted when bucket is destroyed
+   */
+  /**
+   * Whether to delete all objects from the bucket when the bucket resource is destroyed.
+   *
+   * When `true`, Terraform will empty the bucket before destroying it.
+   * Use with caution as this permanently removes all stored objects.
+   *
+   * @default false
    */
   forceDestroy?: boolean;
   /**

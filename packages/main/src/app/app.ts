@@ -82,11 +82,16 @@ export class AppStack extends TerraformStack {
   }
 
   private createRole() {
+    const services = this.props.globalConfig?.lambda?.services;
+    if (Array.isArray(services) && !services.length) {
+      return;
+    }
+
     const roleName = `${this.props.name}-global-role`;
 
     const lambdaRole = new Role(this, roleName, {
       name: roleName,
-      services: this.props.globalConfig?.lambda?.services || [
+      services: services || [
         'dynamodb',
         's3',
         'lambda',

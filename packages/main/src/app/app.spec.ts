@@ -90,6 +90,25 @@ describe('App', () => {
     expect(role).toBeInstanceOf(Role);
   });
 
+  it('should skip global role creation when services is an empty array', async () => {
+    await createApp({
+      name: 'testing-skip-role',
+      modules: [],
+      resolvers: [],
+      globalConfig: {
+        lambda: {
+          services: [],
+        },
+      },
+    });
+    const role = lafkenResource.getResource<Role | undefined>(
+      'app',
+      'testing-skip-role-global-role'
+    );
+
+    expect(role).toBeUndefined();
+  });
+
   it('should process module resources', async () => {
     const createMock = vi.fn();
     class TestResolver implements ResolverType {
