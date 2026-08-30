@@ -1,3 +1,6 @@
+/**
+ * Supported JSON Schema primitive types for request validation.
+ */
 export type SchemaType =
   | 'string'
   | 'number'
@@ -7,6 +10,11 @@ export type SchemaType =
   | 'object'
   | 'null';
 
+/**
+ * JSON Schema definition used for request parameter validation.
+ * Supports type constraints, enums, string patterns, numeric ranges,
+ * array limits, object properties, and schema composition keywords.
+ */
 export interface SchemaDefinition {
   type?: SchemaType | SchemaType[];
   nullable?: boolean;
@@ -41,7 +49,11 @@ export interface SchemaDefinition {
   not?: SchemaDefinition;
 }
 
+/**
+ * Result of validating a value against a {@link SchemaDefinition}.
+ */
 export interface ValidationResult {
+  /** Whether the value passed all schema constraints. */
   valid: boolean;
   /**
    * Mirrors $context.error.validationErrorString from AWS API Gateway.
@@ -50,6 +62,7 @@ export interface ValidationResult {
    * Multiple      → "[err1, err2, ...]"
    */
   validationErrorString: string | null;
+  /** List of human-readable error messages for each failed constraint. */
   errors: string[];
 }
 

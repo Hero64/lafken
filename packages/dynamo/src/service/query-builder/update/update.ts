@@ -17,6 +17,25 @@ import type {
 import type { UpdateBuilderProps } from './update.types';
 import { updateResolver, updateResolverKeys } from './update.utils';
 
+/**
+ * Recursively removes undefined values from an object.
+ * This prevents DynamoDB expression errors when undefined values
+ * are passed in setValues or replaceValues.
+ */
+function removeUndefinedValues<T extends Record<string, any>>(obj: T): T {
+  const result = {} as Record<string, any>;
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        result[key] = removeUndefinedValues(obj[key]);
+      } else {
+        result[key] = obj[key];
+      }
+    }
+  }
+  return result as T;
+}
+
 export class UpdateBuilder<
   E extends ClassResource,
   R extends ReturnValueOption | undefined = undefined,
@@ -61,20 +80,30 @@ export class UpdateBuilder<
       condition,
     } = this.queryOptions.inputProps;
 
+    // Remove undefined values from setValues and replaceValues to prevent
+    // DynamoDB expression errors when undefined values are passed
+    const filteredSetValues = removeUndefinedValues(setValues);
+    const filteredReplaceValues = removeUndefinedValues(replaceValues);
+
     if (
       Object.keys(removeValues).length > 0 &&
-      Object.keys(replaceValues).length > 0 &&
-      Object.keys(setValues).length > 0
+      Object.keys(filteredReplaceValues).length > 0 &&
+      Object.keys(filteredSetValues).length > 0
     ) {
       throw new Error('You must assign a value to update');
     }
 
     let setExpression = '';
-    if (Object.keys(setValues).length > 0) {
-      setExpression = this.setValues(setValues, true, [], this.expressionGroupCounter++);
+    if (Object.keys(filteredSetValues).length > 0) {
+      setExpression = this.setValues(
+        filteredSetValues,
+        true,
+        [],
+        this.expressionGroupCounter++
+      );
     }
-    if (Object.keys(replaceValues).length > 0) {
-      setExpression += `${setExpression ? ',' : ''} ${this.setValues(replaceValues, false, [], this.expressionGroupCounter++)}`;
+    if (Object.keys(filteredReplaceValues).length > 0) {
+      setExpression += `${setExpression ? ',' : ''} ${this.setValues(filteredReplaceValues, false, [], this.expressionGroupCounter++)}`;
     }
 
     const removeExpression = this.removeValues(removeValues);

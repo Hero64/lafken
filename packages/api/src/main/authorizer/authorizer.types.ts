@@ -54,8 +54,16 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
   description?: string;
 }
 
+/**
+ * Default filename used to store custom authorizer permission definitions.
+ * Permissions are written as a JSON file that maps routes and methods
+ * to allowed permission strings.
+ */
 export const PERMISSION_DEFINITION_FILE = 'permissions.json';
 
+/**
+ * Time period over which an API key quota limit applies.
+ */
 export type ApiKeyQuotaPeriod = 'day' | 'week' | 'month';
 
 export interface AuthorizerQuota {
@@ -232,15 +240,30 @@ export interface AuthorizerResponse {
   context?: Record<string, string>;
 }
 
+/**
+ * Interface for a custom authorizer Lambda handler.
+ *
+ * The handler receives an authorization event and must return a
+ * response indicating whether the request is allowed or denied.
+ */
 export interface CustomAuthorizerHandler {
   handler: (e: AuthorizationHandlerEvent) => AuthorizerResponse;
 }
 /**
+ * Permission definition file content.
+ *
+ * Maps route paths to their allowed HTTP methods and the permission
+ * strings that grant access to those endpoints.
+ *
+ * @example
+ * ```json
  * {
- *  "path": {
- *    [METHOD]: ["permission"]
- *  }
+ *   "/users": {
+ *     "GET": ["read:user"],
+ *     "POST": ["write:user"]
+ *   }
  * }
+ * ```
  */
 export type PermissionContent = Record<string, Partial<Record<Method, string[]>>>;
 

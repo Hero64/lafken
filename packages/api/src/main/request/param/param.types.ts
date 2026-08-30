@@ -94,6 +94,11 @@ export interface ApiPayloadMetadata<T>
   extends Omit<ApiPayloadProps<T>, 'name'>,
     PayloadMetadata {}
 
+/**
+ * Properties for an object field that includes an OpenAPI payload schema.
+ * Used internally to represent nested object parameters with their associated
+ * schema metadata (description, additionalProperties, etc.).
+ */
 export interface ObjectFieldWithSchemaProps extends Omit<ObjectField, 'payload'> {
   payload: ApiPayloadMetadata<any>;
 }

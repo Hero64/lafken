@@ -8,7 +8,10 @@ import {
 import { RESOURCE_TYPE } from '../queue';
 import type { ParamProps, QueueParamMetadata } from './event.types';
 
+/** Reflect-metadata key prefix for queue field metadata. */
 export const queueFieldKey = createFieldName(RESOURCE_TYPE, FieldProperties.field);
+
+/** Reflect-metadata key prefix for queue payload metadata. */
 export const queuePayloadKey = createFieldName(RESOURCE_TYPE, FieldProperties.payload);
 
 /**

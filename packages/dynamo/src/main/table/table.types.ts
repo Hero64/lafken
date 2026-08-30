@@ -39,6 +39,13 @@ interface IndexBase<T extends Function> {
   projection?: (keyof T['prototype'])[] | 'ALL';
 }
 
+/**
+ * Filter expression for a single DynamoDB attribute.
+ *
+ * Supports exact matches, `anything-but`, `exists`, `prefix`, and empty-string
+ * conditions. Values can be provided as a single value, an array of values,
+ * or null.
+ */
 type AttributeFilter<T> = {
   [key in keyof T]?:
     | (
@@ -405,7 +412,11 @@ export interface ExternalTableMetadata extends Omit<ExternalTableProps<any>, 'na
 
 export type TableMetadata = InternalTableMetadata | ExternalTableMetadata;
 
+/**
+ * Base properties for a DynamoDB table field definition.
+ */
 export interface FieldProps {
+  /** The TypeScript constructor that determines the field's DynamoDB type. */
   type?:
     | StringConstructor
     | NumberConstructor
@@ -414,17 +425,42 @@ export interface FieldProps {
     | Function;
 }
 
+/**
+ * Resolved metadata for a DynamoDB table field after the `@Field`
+ * decorator is processed.
+ */
 export interface FieldMetadata {
+  /** Property name as declared on the class. */
   name: string;
+  /** Resolved DynamoDB type (e.g. `'string'`, `'number'`, `'boolean'`). */
   type: FieldTypes;
 }
 
+/**
+ * Map of property names to their resolved DynamoDB field metadata.
+ */
 export type FieldsMetadata = Record<string, FieldMetadata>;
 
+/**
+ * Sentinel type used internally to mark DynamoDB partition key properties.
+ * Properties typed with `PrimaryPartition<T>` are recognized as partition
+ * key candidates during table metadata resolution.
+ */
 type Partition = { __special: unknown };
 
+/**
+ * Marks a type as a DynamoDB partition key candidate.
+ *
+ * @typeParam T - The type to mark as a partition key.
+ */
 export type PrimaryPartition<T = never> = T | (T & Partition);
 
+/**
+ * Extracts only the partition key properties from a DynamoDB table class.
+ *
+ * Filters the keys of `T` to include only those whose type includes the
+ * {@link Partition} sentinel, giving the list of valid partition key fields.
+ */
 export type TablePartition<T> = {
   [K in keyof T as [Extract<T[K], Partition>] extends [never] ? never : K]: T[K];
 };
