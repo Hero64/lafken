@@ -1,5 +1,15 @@
 import { HTTP_STATUS_CODE, type HTTP_STATUS_CODE_NUMBER } from './status.types';
 
+/**
+ * Creates an error class that represents an HTTP error response.
+ *
+ * The generated class extends `Error` and serializes the status message
+ * and optional data into a JSON string. The framework catches this error
+ * and converts it into the final API Gateway response.
+ *
+ * @param message - The HTTP status phrase (e.g. `'NOT_FOUND'`, `'BAD_REQUEST'`).
+ * @returns An `HttpErrorResponse` error class.
+ */
 export const createHttpResponse = (message: string) => {
   return class HttpErrorResponse extends Error {
     constructor(public data?: any | undefined) {

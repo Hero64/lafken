@@ -35,8 +35,24 @@ export interface MethodAuthorizer {
   scopes?: string[];
 }
 
+/**
+ * API Gateway method logging level.
+ *
+ * Controls the verbosity of the logs written to CloudWatch Logs
+ * for a specific API method.
+ */
 export type MethodLoggingLevel = 'off' | 'error' | 'info';
 
+/**
+ * Strategy used when a request includes a `Cache-Control` directive
+ * but lacks the required authorization.
+ *
+ * - `'fail_with_403'` — Returns HTTP 403 Forbidden.
+ * - `'succeed_with_response_header'` — Processes the request and includes the authorization
+ *   status in the response header.
+ * - `'succeed_without_response_header'` — Processes the request without adding an
+ *   authorization response header.
+ */
 export type UnauthorizedCacheControlHeaderStrategy =
   | 'fail_with_403'
   | 'succeed_with_response_header'
@@ -132,6 +148,13 @@ export interface StageMethodSettings extends MethodSettings {
   stageName: string;
 }
 
+/**
+ * Configuration for API Gateway method settings.
+ *
+ * Accepts either:
+ * - A single `MethodSettings` object applied to every stage of the REST API.
+ * - An array of `StageMethodSettings` where each entry targets a specific stage.
+ */
 export type MethodSettingsConfig = MethodSettings | StageMethodSettings[];
 
 export interface ApiLambdaBaseProps {
@@ -263,6 +286,12 @@ export interface ApiLambdaBaseProps {
 }
 
 export interface ApiIntegrationBaseProps extends ApiLambdaBaseProps {
+  /**
+   * Additional AWS services the Lambda function can access.
+   *
+   * Extends the base IAM permissions granted to the method's Lambda function,
+   * allowing it to interact with extra AWS services (e.g., SQS, DynamoDB).
+   */
   additionalServices?: ServicesValues;
 }
 
@@ -312,6 +341,13 @@ export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
   lambda?: LambdaProps;
 }
 
+/**
+ * Supported actions for S3 bucket direct integrations.
+ *
+ * - `'Download'` — Retrieves an object from the bucket.
+ * - `'Upload'` — Uploads an object to the bucket.
+ * - `'Delete'` — Deletes an object from the bucket.
+ */
 export type BucketIntegrationActions = 'Download' | 'Upload' | 'Delete';
 
 export interface BucketDownloadIntegrationServiceProps extends ApiIntegrationBaseProps {
@@ -361,6 +397,13 @@ export type BucketIntegrationServiceProps =
   | BucketDownloadIntegrationServiceProps
   | BucketUploadDeleteIntegrationServiceProps;
 
+/**
+ * Supported actions for Step Functions state machine direct integrations.
+ *
+ * - `'Start'` — Starts a new execution of the state machine.
+ * - `'Stop'` — Stops a running execution.
+ * - `'Status'` — Retrieves the status of an execution.
+ */
 export type StateMachineIntegrationActions = 'Start' | 'Stop' | 'Status';
 
 export interface StateMachineIntegrationServiceProps
@@ -385,6 +428,13 @@ export interface StateMachineIntegrationServiceProps
   action: StateMachineIntegrationActions;
 }
 
+/**
+ * Supported actions for DynamoDB direct integrations.
+ *
+ * - `'Query'` — Retrieves items using a query operation.
+ * - `'Put'` — Inserts or replaces an item in the table.
+ * - `'Delete'` — Removes an item from the table.
+ */
 export type DynamoDbIntegrationActions = 'Query' | 'Put' | 'Delete';
 
 export interface DynamoDbQueryIntegrationServiceProps extends ApiIntegrationBaseProps {
@@ -434,6 +484,11 @@ export type DynamoDbIntegrationServiceProps =
   | DynamoDbQueryIntegrationServiceProps
   | DynamoDbPutDeleteIntegrationServiceProps;
 
+/**
+ * Supported actions for SQS queue direct integrations.
+ *
+ * - `'SendMessage'` — Sends a message to the queue.
+ */
 export type QueueIntegrationActions = 'SendMessage';
 
 export interface QueueIntegrationServiceProps extends ApiIntegrationBaseProps {
@@ -456,6 +511,11 @@ export interface QueueIntegrationServiceProps extends ApiIntegrationBaseProps {
   action: QueueIntegrationActions;
 }
 
+/**
+ * Supported actions for Kinesis Data Streams direct integrations.
+ *
+ * - `'PutRecord'` — Puts a single record into the stream.
+ */
 export type KinesisIntegrationActions = 'PutRecord';
 
 export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps {
@@ -475,6 +535,11 @@ export interface KinesisIntegrationServiceProps extends ApiIntegrationBaseProps 
   action: KinesisIntegrationActions;
 }
 
+/**
+ * Supported actions for EventBridge direct integrations.
+ *
+ * - `'PutEvents'` — Publishes one or more events to an event bus.
+ */
 export type EventBridgeIntegrationActions = 'PutEvents';
 
 export interface EventBridgeIntegrationServiceProps extends ApiIntegrationBaseProps {
@@ -509,6 +574,19 @@ export interface MockIntegrationServiceProps extends ApiIntegrationBaseProps {
   integration: 'mock';
 }
 
+/**
+ * Union of all supported API method integration configurations.
+ *
+ * Each variant represents a different backend integration type:
+ * - Lambda (`ApiLambdaIntegrationProps`)
+ * - S3 bucket (`BucketIntegrationServiceProps`)
+ * - Step Functions (`StateMachineIntegrationServiceProps`)
+ * - DynamoDB (`DynamoDbIntegrationServiceProps`)
+ * - SQS queue (`QueueIntegrationServiceProps`)
+ * - Kinesis (`KinesisIntegrationServiceProps`)
+ * - EventBridge (`EventBridgeIntegrationServiceProps`)
+ * - Mock (`MockIntegrationServiceProps`)
+ */
 export type ApiLambdaProps =
   | ApiLambdaIntegrationProps
   | BucketIntegrationServiceProps
@@ -611,22 +689,42 @@ export interface ApiResourceMetadata
   extends Required<Omit<ApiProps, 'bundler'>>,
     ResourceMetadata {}
 
+/**
+ * Resolved metadata for an API Lambda method, used internally by the resolver
+ * to generate API Gateway resources, Lambda functions, and OpenAPI definitions.
+ */
 export interface ApiLambdaMetadata extends LambdaMetadata {
+  /** Route path for this method (e.g. `"/users/{id}"`). */
   path: string;
+  /** HTTP method (GET, POST, etc.). */
   method: Method;
+  /** Logical name of the method. */
   name: string;
+  /** Integration target service (e.g. `'dynamodb'`, `'queue'`). `undefined` for Lambda. */
   integration?: ApiLambdaProps['integration'];
+  /** Lambda integration type: `'aws'` (non-proxy) or `'aws-proxy'`. */
   integrationType?: 'aws' | 'aws-proxy';
+  /** Integration action name (e.g. `'Put'`, `'SendMessage'`). */
   action?: string;
+  /** Lambda function configuration overrides. */
   lambda?: LambdaProps;
+  /** Response field metadata for OpenAPI response schema generation. */
   response?: ResponseFieldMetadata;
+  /** Authorizer configuration. `false` disables authorization. */
   auth?: MethodAuthorizer | false;
+  /** Short summary for OpenAPI documentation. */
   summary?: string;
+  /** Tags for OpenAPI grouping. */
   tags?: string[];
+  /** Additional AWS service permissions granted to the Lambda. */
   additionalServices?: ServicesValues;
+  /** Method-level cache, logging, metrics, and throttling settings. */
   methodSettings?: MethodSettingsConfig;
 }
 
+/**
+ * HTTP methods supported by the API Gateway REST API.
+ */
 export enum Method {
   GET = 'GET',
   POST = 'POST',
