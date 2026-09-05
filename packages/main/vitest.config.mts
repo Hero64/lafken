@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     watch: false,
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./vitest.setup.mts'],
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
@@ -13,7 +13,7 @@ export default defineConfig({
     alias: [
       {
         find: /^@lafken\/(.*)$/,
-        replacement: path.resolve(__dirname, '../$1/src'),
+        replacement: path.resolve(import.meta.dirname, '../$1/src'),
       },
     ],
   },
