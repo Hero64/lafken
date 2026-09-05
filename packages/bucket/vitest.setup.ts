@@ -1,3 +1,3 @@
-import { setupVitest } from 'cdktn-vitest';
+import { setupVitest } from '@cdktn/vitest';
 
 setupVitest();
