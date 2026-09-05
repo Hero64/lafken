@@ -6,7 +6,7 @@ export default defineConfig({
   oxc: false,
   test: {
     watch: false,
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./vitest.setup.mts'],
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
@@ -14,12 +14,8 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^@lafken\/([^/]+)\/(.+)$/,
-        replacement: path.resolve(__dirname, '../../packages/$1/src/$2'),
-      },
-      {
-        find: /^@lafken\/([^/]+)$/,
-        replacement: path.resolve(__dirname, '../../packages/$1/src'),
+        find: /^@lafken\/(.*)$/,
+        replacement: path.resolve(import.meta.dirname, '../$1/src'),
       },
     ],
   },
