@@ -68,7 +68,7 @@
     "@swc/helpers": "catalog:",
     "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
-    "cdktn-vitest": "catalog:",
+    "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
