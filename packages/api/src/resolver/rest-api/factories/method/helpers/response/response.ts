@@ -4,6 +4,7 @@ import {
   HTTP_STATUS_CODE,
   type HTTP_STATUS_CODE_NUMBER,
   type Method,
+  type ResponseFieldMetadata,
   type ResponseObjectMetadata,
 } from '../../../../../../main';
 import type { ResponseHandler } from './response.types';
@@ -57,22 +58,30 @@ export class ResponseHelper {
       this.handler.response.type === 'Array' &&
       this.handler.response.items.type === 'Object'
     ) {
+      // The status code configuration lives in the item payload, but the body
+      // returned by the handler is the array itself, so it is the array that
+      // must be mapped to the success response model.
       this.setHandlerResponseByConfig(
         this.addDefaultResponses(this.handler.response.items),
-        this.handler.method
+        this.handler.method,
+        this.handler.response
       );
     }
 
     return this._handlerResponse;
   }
 
-  private setHandlerResponseByConfig(response: ResponseObjectMetadata, method: Method) {
+  private setHandlerResponseByConfig(
+    response: ResponseObjectMetadata,
+    method: Method,
+    successField: ResponseFieldMetadata = response
+  ) {
     const { defaultCode = getSuccessStatusCode(method) } = response.payload;
     const responses: ResponseHandler[] = [];
 
     responses.push({
       statusCode: (defaultCode || getSuccessStatusCode(method)).toString(),
-      field: response,
+      field: successField,
       selectionPattern: response.payload.selectionPattern,
     });
 
