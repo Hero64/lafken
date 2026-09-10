@@ -17,6 +17,7 @@ import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
 import {
   Api,
+  ApiResponse,
   AuthorizerHandler,
   BodyParam,
   type BucketIntegrationResponse,
@@ -29,12 +30,15 @@ import {
   Post,
   QueryParam,
   type QueueSendMessageIntegrationResponse,
+  ResField,
+  ResponseObject,
   type StateMachineStartIntegrationResponse,
 } from '../../../../main';
 import {
   initializeMethod,
   setupInternalTestingRestApi,
 } from '../../../utils/testing.utils';
+import type { DocumentationPartObject } from './openapi.types';
 
 vi.mock('@lafken/resolver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@lafken/resolver')>();
@@ -271,6 +275,175 @@ describe('OpenApi definition mode - auth, cors and docs', () => {
       stage_name: 'api',
       documentation_version: expect.any(String),
     });
+  });
+});
+
+describe('OpenApi definition mode - response models', () => {
+  enableBuildEnvVariable();
+
+  @ResponseObject()
+  class Address {
+    @ResField({ example: 'Main st' })
+    street: string;
+  }
+
+  @ApiResponse({ description: 'A user' })
+  class UserResponse {
+    @ResField({ description: 'the name', example: 'Alice', deprecated: true })
+    name: string;
+
+    @ResField({ type: Address })
+    address: Address;
+
+    @ResField({ type: [Address], required: false })
+    otherAddresses: Address[];
+  }
+
+  @ApiResponse()
+  class NotFoundResponse {
+    @ResField({ nullable: true })
+    reason: string;
+  }
+
+  @ApiResponse({ responses: { 404: NotFoundResponse } })
+  class ItemResponse {
+    @ResField()
+    id: string;
+  }
+
+  @Api()
+  class ResponseApi {
+    @Get({ path: 'users', response: UserResponse })
+    getUser() {}
+
+    @Post({ path: 'users', response: UserResponse })
+    createUser() {}
+
+    @Get({ path: 'items', response: [ItemResponse] })
+    listItems() {}
+  }
+
+  const setup = async () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+    await initializeMethod(restApi, stack, ResponseApi, 'getUser');
+    await initializeMethod(restApi, stack, ResponseApi, 'createUser');
+    await initializeMethod(restApi, stack, ResponseApi, 'listItems');
+    restApi.createStageDeployment();
+
+    const parsed = JSON.parse(Testing.synth(stack));
+    const api = Object.values(parsed.resource.aws_api_gateway_rest_api)[0] as {
+      body: string;
+    };
+
+    return JSON.parse(api.body);
+  };
+
+  it('references the response object schema in every operation that returns it', async () => {
+    const doc = await setup();
+
+    const content = {
+      'application/json': { schema: { $ref: '#/components/schemas/UserResponse' } },
+    };
+
+    expect(doc.paths['/users'].get.responses['200'].content).toEqual(content);
+    expect(doc.paths['/users'].post.responses['201'].content).toEqual(content);
+    expect(Object.keys(doc.components.schemas)).toContain('UserResponse');
+  });
+
+  it('keeps every model field in the component schema and references nested objects', async () => {
+    const doc = await setup();
+
+    expect(doc.components.schemas.UserResponse).toEqual({
+      type: 'object',
+      description: 'A user',
+      required: ['name', 'address'],
+      additionalProperties: false,
+      properties: {
+        name: { type: 'string', description: 'the name' },
+        address: { $ref: '#/components/schemas/Address' },
+        otherAddresses: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Address' },
+        },
+      },
+    });
+
+    expect(doc.components.schemas.Address).toEqual({
+      type: 'object',
+      required: ['street'],
+      additionalProperties: false,
+      properties: { street: { type: 'string' } },
+    });
+  });
+
+  it('wraps an array response in an array schema referencing the item model', async () => {
+    const doc = await setup();
+
+    const { schema } = doc.paths['/items'].get.responses['200'].content[
+      'application/json'
+    ] as { schema: { $ref: string } };
+    const modelName = schema.$ref.replace('#/components/schemas/', '');
+
+    expect(doc.components.schemas[modelName]).toEqual({
+      type: 'array',
+      items: { $ref: '#/components/schemas/ItemResponse' },
+    });
+  });
+
+  it('references the schema declared for an additional status code', async () => {
+    const doc = await setup();
+
+    expect(doc.paths['/items'].get.responses['404'].content).toEqual({
+      'application/json': {
+        schema: { $ref: '#/components/schemas/NotFoundResponse' },
+      },
+    });
+  });
+
+  it('publishes example, deprecated and nullable as MODEL documentation parts', async () => {
+    const doc = await setup();
+
+    const modelParts = doc['x-amazon-apigateway-documentation'].documentationParts.filter(
+      (part: DocumentationPartObject) => part.location.type === 'MODEL'
+    );
+
+    expect(modelParts).toEqual(
+      expect.arrayContaining([
+        {
+          location: { type: 'MODEL', name: 'UserResponse' },
+          properties: {
+            description: 'A user',
+            title: 'UserResponse',
+            properties: { name: { example: 'Alice', deprecated: true } },
+          },
+        },
+        {
+          location: { type: 'MODEL', name: 'Address' },
+          properties: {
+            title: 'Address',
+            properties: { street: { example: 'Main st' } },
+          },
+        },
+        {
+          location: { type: 'MODEL', name: 'NotFoundResponse' },
+          properties: {
+            title: 'NotFoundResponse',
+            properties: { reason: { nullable: true } },
+          },
+        },
+      ])
+    );
+  });
+
+  it('declares each schema only once even when shared by several operations', async () => {
+    const doc = await setup();
+
+    const modelParts = doc['x-amazon-apigateway-documentation'].documentationParts.filter(
+      (part: DocumentationPartObject) =>
+        part.location.type === 'MODEL' && part.location.name === 'UserResponse'
+    );
+
+    expect(modelParts).toHaveLength(1);
   });
 });
 

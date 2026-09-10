@@ -4,6 +4,7 @@ import { uuid } from '@lafken/resolver';
 import { Annotations, Fn, Token } from 'cdktn';
 import type { ResponseFieldMetadata } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import type { DocLocation } from '../docs/docs.types';
 import type {
   CreateModelResponse,
   FullJsonSchema,
@@ -24,6 +25,7 @@ export const schemaTypeMap: Record<string, string> = {
 export class ModelFactory {
   private models: Record<string, ApiGatewayModel> = {};
   private componentRefs: Record<string, ModelRef> = {};
+  private documentedModels = new Set<string>();
 
   constructor(private scope: RestApi) {}
 
@@ -64,6 +66,7 @@ export class ModelFactory {
 
     if (this.isOpenApi) {
       const componentRef = this.scope.openapiFactory.addSchema(capitalizedName, schema);
+      this.createModelDoc(fullSchema, capitalizedName);
       return { name: capitalizedName, ref: componentRef };
     }
 
@@ -218,6 +221,7 @@ export class ModelFactory {
       if (this.isOpenApi) {
         const ref = this.scope.openapiFactory.addSchema(modelName, schema);
         this.componentRefs[field.payload.id] = { name: modelName, ref };
+        this.createModelDoc(fullSchema, modelName);
         const refSchema = { $ref: ref };
         return { ref, name: modelName, schema: refSchema, fullSchema: refSchema };
       }
@@ -257,9 +261,15 @@ export class ModelFactory {
 
     const itemResult = this.createModel(field.items);
 
+    // A created model must be referenced, never inlined, otherwise the item
+    // schema is duplicated in every array that uses it.
+    const items = itemResult.model
+      ? { $ref: this.objectRef(itemResult.model.name) }
+      : itemResult.fullSchema;
+
     const fullSchema: FullJsonSchema = {
       type: 'array',
-      items: itemResult.fullSchema,
+      items,
       deprecated: field.deprecated,
       description: field.description,
       example: field.example,
@@ -275,18 +285,39 @@ export class ModelFactory {
     };
   };
 
+  /**
+   * `example`, `nullable` and `deprecated` are stripped from the model schema
+   * because API Gateway models only accept JSON Schema draft 4, so they are
+   * published as documentation parts instead: real resources in "resource"
+   * mode, `x-amazon-apigateway-documentation` entries in openapi mode.
+   */
   private createModelDoc(fullSchema: FullJsonSchema, modelName: string) {
     const docProperties = buildDocProperties(fullSchema, modelName);
     if (!docProperties) {
       return;
     }
 
+    const location: DocLocation = {
+      type: 'MODEL',
+      name: modelName,
+    };
+
+    if (this.isOpenApi) {
+      // Unlike the "resource" mode, where a repeated doc part would collide on
+      // the construct id, duplicated parts inside the body are rejected by the
+      // API Gateway import, so a schema is documented only once.
+      if (this.documentedModels.has(modelName)) {
+        return;
+      }
+
+      this.documentedModels.add(modelName);
+      this.scope.openapiFactory.addDocumentationPart(location, docProperties);
+      return;
+    }
+
     this.scope.docsFactory.createDoc({
       id: `${modelName}-model`,
-      location: {
-        type: 'MODEL',
-        name: modelName,
-      },
+      location,
       properties: docProperties,
     });
   }
