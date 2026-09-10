@@ -258,6 +258,54 @@ describe('Model factory', () => {
     });
   });
 
+  it('should reference the item model instead of inlining it in an array', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    restApi.modelFactory.getModel({
+      field: {
+        destinationName: 'test',
+        name: 'test',
+        type: 'Array',
+        items: {
+          destinationName: 'item',
+          name: 'item',
+          type: 'Object',
+          payload: {
+            id: 'item-model',
+            name: 'item-model',
+          },
+          properties: [
+            {
+              destinationName: 'foo',
+              name: 'foo',
+              type: 'String',
+              required: true,
+            },
+          ],
+        },
+      },
+      defaultModelName: 'listModel',
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
+      name: 'ItemModel',
+      schema:
+        '${jsonencode({"type" = "object", "required" = ["foo"], "properties" = {"foo" = {"type" = "string"}}})}',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
+      name: 'ListModel',
+      schema: JSON.stringify({
+        type: 'array',
+        items: {
+          $ref: 'https://apigateway.amazonaws.com/restapis/${aws_api_gateway_rest_api.testing-api-api.id}/models/${aws_api_gateway_model.testing-api-api_item-model_E93B4543.name}',
+        },
+      }),
+    });
+  });
+
   it('should not create MODEL documentation part when no non-Draft-4 fields exist', () => {
     const { restApi, stack } = setupInternalTestingRestApi();
 
@@ -292,6 +340,131 @@ describe('Model factory', () => {
         type: 'MODEL',
       },
     });
+  });
+});
+
+describe('Model factory - openapi mode', () => {
+  enableBuildEnvVariable();
+
+  const objectField = {
+    destinationName: 'test',
+    type: 'Object',
+    name: 'test',
+    payload: {
+      id: 'test-model',
+      name: 'test-model',
+      description: 'A user',
+    },
+    properties: [
+      {
+        destinationName: 'foo',
+        name: 'foo',
+        type: 'String',
+        required: true,
+        description: 'the foo field',
+        maxLength: 50,
+        example: 'example-value',
+        deprecated: true,
+        nullable: true,
+      },
+    ],
+    required: true,
+  } as const;
+
+  it('should register the object as a component schema instead of a model resource', () => {
+    const { restApi, stack } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const model = restApi.modelFactory.getModel({ field: objectField as any });
+
+    expect(model).toEqual({
+      name: 'TestModel',
+      ref: '#/components/schemas/TestModel',
+    });
+    expect(restApi.modelFactory.resources).toHaveLength(0);
+    expect(Testing.synth(stack)).not.toHaveResource(ApiGatewayModel);
+  });
+
+  it('should keep every model field in the component schema', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    restApi.modelFactory.getModel({ field: objectField as any });
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(document.components.schemas.TestModel).toEqual({
+      type: 'object',
+      description: 'A user',
+      required: ['foo'],
+      properties: {
+        foo: {
+          type: 'string',
+          description: 'the foo field',
+          maxLength: 50,
+        },
+      },
+    });
+  });
+
+  it('should emit the non-Draft-4 fields as a MODEL documentation part', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    restApi.modelFactory.getModel({ field: objectField as any });
+
+    expect(restApi.openapiFactory.documentationPartsList).toEqual([
+      {
+        location: { type: 'MODEL', name: 'TestModel' },
+        properties: {
+          description: 'A user',
+          properties: {
+            foo: {
+              example: 'example-value',
+              deprecated: true,
+              nullable: true,
+            },
+          },
+          title: 'TestModel',
+        },
+      },
+    ]);
+  });
+
+  it('should reference the item component schema in an array model', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const model = restApi.modelFactory.getModel({
+      field: {
+        destinationName: 'test',
+        name: 'test',
+        type: 'Array',
+        items: objectField,
+      } as any,
+      defaultModelName: 'listModel',
+    });
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(model.ref).toBe('#/components/schemas/ListModel');
+    expect(document.components.schemas.ListModel).toEqual({
+      type: 'array',
+      items: { $ref: '#/components/schemas/TestModel' },
+    });
+    expect(document.components.schemas.TestModel).toBeDefined();
+  });
+
+  it('should reuse the same component schema for a model used twice', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const first = restApi.modelFactory.getModel({ field: objectField as any });
+    const second = restApi.modelFactory.getModel({ field: objectField as any });
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(second).toEqual(first);
+    expect(Object.keys(document.components.schemas)).toEqual(['TestModel']);
+    expect(restApi.openapiFactory.documentationPartsList).toHaveLength(1);
   });
 });
 

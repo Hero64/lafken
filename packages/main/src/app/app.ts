@@ -7,7 +7,7 @@ import {
   type ResolverType,
   Role,
 } from '@lafken/resolver';
-import { App, Aspects, S3Backend, TerraformStack } from 'cdktn';
+import { App, Aspects, LocalBackend, S3Backend, TerraformStack } from 'cdktn';
 import { AppAspect } from '../aspect/aspect';
 import { AppContext } from '../context/context';
 import type { CreateAppProps } from './app.types';
@@ -30,10 +30,7 @@ export class AppStack extends TerraformStack {
     });
     new AwsProvider(this, 'AWS', props.awsProviderConfig);
 
-    if (props.s3Backend) {
-      new S3Backend(this, props.s3Backend);
-    }
-
+    this.createStateBackend();
     this.createRole();
   }
 
@@ -79,6 +76,23 @@ export class AppStack extends TerraformStack {
         module(this, resolversByType, this.props.globalConfig?.lambda?.services)
       )
     );
+  }
+
+  private createStateBackend() {
+    const { state } = this.props;
+
+    if (!state) {
+      return;
+    }
+
+    if (state.type === 'local') {
+      const { type, ...config } = state;
+      new LocalBackend(this, config);
+      return;
+    }
+
+    const { type, ...config } = state;
+    new S3Backend(this, config);
   }
 
   private createRole() {
