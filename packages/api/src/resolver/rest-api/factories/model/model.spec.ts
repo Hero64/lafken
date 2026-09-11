@@ -306,6 +306,42 @@ describe('Model factory', () => {
     });
   });
 
+  it('should keep the item constraints of a primitive array in the model schema', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    restApi.modelFactory.getModel({
+      field: {
+        destinationName: 'types',
+        name: 'types',
+        type: 'Array',
+        minItems: 1,
+        items: {
+          destinationName: 'String',
+          name: 'String',
+          type: 'String',
+          enum: ['fire', 'water'],
+          minLength: 2,
+        },
+      },
+      defaultModelName: 'typesModel',
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayModel, {
+      name: 'TypesModel',
+      schema: JSON.stringify({
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['fire', 'water'],
+          minLength: 2,
+        },
+        minItems: 1,
+      }),
+    });
+  });
+
   it('should not create MODEL documentation part when no non-Draft-4 fields exist', () => {
     const { restApi, stack } = setupInternalTestingRestApi();
 
@@ -451,6 +487,41 @@ describe('Model factory - openapi mode', () => {
       items: { $ref: '#/components/schemas/TestModel' },
     });
     expect(document.components.schemas.TestModel).toBeDefined();
+  });
+
+  it('should keep the item constraints of a primitive array in the component schema', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const model = restApi.modelFactory.getModel({
+      field: {
+        destinationName: 'types',
+        name: 'types',
+        type: 'Array',
+        minItems: 1,
+        items: {
+          destinationName: 'String',
+          name: 'String',
+          type: 'String',
+          enum: ['fire', 'water'],
+          minLength: 2,
+        },
+      } as any,
+      defaultModelName: 'typesModel',
+    });
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(model.ref).toBe('#/components/schemas/TypesModel');
+    expect(document.components.schemas.TypesModel).toEqual({
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['fire', 'water'],
+        minLength: 2,
+      },
+      minItems: 1,
+    });
   });
 
   it('should reuse the same component schema for a model used twice', () => {

@@ -43,6 +43,7 @@ export const ResField =
         return {
           ...props,
           required: props?.required ?? true,
+          overrideItems: (props as { items?: Record<string, unknown> })?.items,
         };
       },
     })(props)(target, destination as string);

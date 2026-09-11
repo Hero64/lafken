@@ -84,13 +84,28 @@ export interface CreateFieldDecoratorProps<P extends FieldProps, M> {
   prefix: string;
   enableInLambdaInvocation?: boolean;
   disablePropertiesValidation?: boolean;
-  getMetadata: (props?: P) => Omit<M, keyof FieldMetadata> & { forceType?: any };
+  getMetadata: (props?: P) => Omit<M, keyof FieldMetadata> & {
+    forceType?: any;
+    /**
+     * Declared metadata for the elements of an array field, forwarded to
+     * `getFieldMetadata` as `overrideItems`. The resolved element identity
+     * always wins over it.
+     */
+    overrideItems?: Record<string, unknown>;
+  };
 }
 
 export interface GetFieldMetadataProps {
   type: string;
   prefix: string;
   destinationName: string;
-  fieldProps?: FieldProps;
+  fieldProps?: FieldProps & {
+    /**
+     * Declared metadata for the elements of an array field. Merged under the
+     * resolved element identity, which always wins, so a decorator can describe
+     * its items without overwriting the type derived from the declaration.
+     */
+    overrideItems?: Record<string, unknown>;
+  };
   disablePropertiesValidation?: boolean;
 }

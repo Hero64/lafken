@@ -222,6 +222,36 @@ class SignupPayload {
 }
 ```
 
+For array parameters, `minItems` / `maxItems` / `uniqueItems` constrain the array itself,
+while `items` constrains every element. Element constraints are the same ones the element's
+primitive type accepts, so a `string[]` element takes `enum`, `minLength`, `pattern`,
+`format`, and a `number[]` element takes `min`, `max`, `multipleOf`:
+
+```typescript
+@ApiRequest()
+class CreatePokemonPayload {
+  @BodyParam({
+    minItems: 1,
+    uniqueItems: true,
+    items: { enum: ['fire', 'water', 'grass'] },
+  })
+  types: string[];
+
+  @BodyParam({ items: { min: 1, max: 100 } })
+  levels: number[];
+}
+```
+
+The generated model schema nests them as OpenAPI does, and the runtime validator rejects any
+element outside the enum:
+
+```json
+{ "type": "array", "minItems": 1, "uniqueItems": true,
+  "items": { "type": "string", "enum": ["fire", "water", "grass"] } }
+```
+
+`@ResField` accepts the same `items` option for response fields.
+
 #### Nested Request Objects
 
 Use `@RequestObject` (an alias for `@ApiRequest`) to define nested structures within a request payload:

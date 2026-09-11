@@ -300,6 +300,18 @@ describe('SchemaValidator', () => {
       expect(r.valid).toBe(false);
       expect(r.errors[0]).toContain('[1]');
     });
+
+    it('should enforce an enum declared on the items schema', () => {
+      const schema: SchemaDefinition = {
+        type: 'array',
+        items: { type: 'string', enum: ['fire', 'water'] },
+      };
+      expect(valid(['fire', 'water'], schema).valid).toBe(true);
+      const r = valid(['fire', 'rock'], schema);
+      expect(r.valid).toBe(false);
+      expect(r.errors[0]).toContain('not found in enum');
+      expect(r.errors[0]).toContain('[1]');
+    });
   });
 
   // ── Object constraints ─────────────────────────────────────────────────
