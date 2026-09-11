@@ -2,11 +2,12 @@ import {
   type TransactWriteItem,
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
-import { CreateBuilder } from '../query-builder/create/create';
-import { DeleteBuilder } from '../query-builder/delete/delete';
-import { UpdateBuilder } from '../query-builder/update/update';
-import { UpsertBuilder } from '../query-builder/upsert/upsert';
-import type { QueryTransactions } from './transaction.types';
+import { CreateBuilder } from '../../query-builder/create/create';
+import { DeleteBuilder } from '../../query-builder/delete/delete';
+import { UpdateBuilder } from '../../query-builder/update/update';
+import { UpsertBuilder } from '../../query-builder/upsert/upsert';
+import { getTransactionClient } from '../transaction.utils';
+import type { QueryTransactions } from './transaction-write.types';
 
 /**
  * Resolves the `TransactWriteItem` operation type for a given query builder.
@@ -57,16 +58,12 @@ export const getTransactionType = (builder: QueryTransactions) => {
  *   if the transaction is rejected by DynamoDB (e.g. a condition check fails in one of the
  *   items).
  */
-export const transaction = async (queryBuilders: QueryTransactions[]) => {
+export const transactionWrite = async (queryBuilders: QueryTransactions[]) => {
   if (queryBuilders.length === 0) {
     return;
   }
 
-  const client = queryBuilders[0].getClient();
-
-  if (queryBuilders.some((builder) => builder.getClient() !== client)) {
-    throw new Error('All queries in a transaction must share the same client');
-  }
+  const client = getTransactionClient(queryBuilders);
 
   const transactionCommands: TransactWriteItem[] = queryBuilders.map((builder) => {
     return {

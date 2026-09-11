@@ -479,12 +479,12 @@ Reuse the same instance across your models instead of creating one per repositor
 
 ### Transactions
 
-Group multiple write operations (create, update, upsert, delete) into an atomic transaction. All operations succeed or fail together:
+`transactionWrite` groups multiple write operations (create, update, upsert, delete) into an atomic transaction. All operations succeed or fail together:
 
 ```typescript
-import { transaction } from '@lafken/dynamo/service';
+import { transactionWrite } from '@lafken/dynamo/service';
 
-await transaction([
+await transactionWrite([
   contactRepository.create({
     email: 'new@example.com',
     company: 'Acme',
@@ -503,9 +503,29 @@ await transaction([
 ```
 
 > [!NOTE]
-> Transaction builders are passed without calling `.exec()` — the `transaction` function handles execution internally.
+> Transaction builders are passed without calling `.exec()` — the `transactionWrite` function handles execution internally.
 
 The transaction is sent with the client of the repositories that created the builders, so every repository taking part in it must share the same client instance. A transaction is a single request and cannot be split across connections: mixing clients throws before anything is sent.
+
+#### Transactional Reads
+
+`transactionGet` reads several items atomically, from any number of tables, so all of them come from the same consistent snapshot. It accepts **only `getItem` queries** — any other builder throws — and resolves the items in the same order they were requested, typed by position:
+
+```typescript
+import { transactionGet } from '@lafken/dynamo/service';
+
+const [contact, order] = await transactionGet([
+  contactRepository.getItem({ email: 'jane@example.com', company: 'Acme' }),
+  orderRepository.getItem({ customerId: 'cust-1', orderId: 'ord-1' }),
+]);
+```
+
+`contact` is `Contact | undefined` and `order` is `Order | undefined`: an item that does not exist resolves as `undefined` in its position.
+
+Unlike `batchGet`, which splits its keys into several requests over a single table, this is one request and cannot be chunked — DynamoDB limits it to 100 items.
+
+> [!NOTE]
+> `consistentRead` and `cacheTtl` do not apply to the queries of a read transaction: it is already strongly consistent, and the in-memory cache is never read nor populated.
 
 ### Extending the Table
 

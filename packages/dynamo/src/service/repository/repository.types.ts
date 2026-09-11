@@ -30,7 +30,7 @@ export interface RepositoryOptions {
    *
    * Injecting a client is the way to reach a table on a different region, account or endpoint,
    * for example a local DynamoDB instance during development. Repositories taking part in the
-   * same `transaction` must share the same client instance.
+   * same transaction must share the same client instance.
    *
    * @default The shared client built from the ambient AWS SDK configuration.
    */

@@ -22,7 +22,7 @@ export class QueryBuilderBase<E extends ClassResource> {
    * Returns the DynamoDB client used to execute this query.
    *
    * It is the client injected into the repository that created the builder, and it allows
-   * operations grouping several builders, like `transaction`, to send their command through
+   * operations grouping several builders, like the transactions, to send their command through
    * the same connection the builders would have used on their own.
    */
   public getClient(): DynamoDBClient {
