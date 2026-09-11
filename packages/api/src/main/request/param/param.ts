@@ -103,7 +103,7 @@ export const BodyParam =
  */
 export const QueryParam =
   <T, P extends keyof T>(props?: QueryParamProps<T[P]>) =>
-  (target: T, destination: string): void => {
+  (target: T, destination: P): void => {
     createFieldDecorator<QueryParamProps<T[P]>, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
       getMetadata: createParamMetadata('query'),
@@ -134,8 +134,8 @@ export const QueryParam =
  */
 
 export const PathParam =
-  <T, P extends keyof T>(props?: PathParamProps<T[P]>) =>
-  (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
+  <T, P extends OnlyTypeKeys<T, Primitive> & keyof T>(props?: PathParamProps<T[P]>) =>
+  (target: T, destination: P): void => {
     createFieldDecorator<PathParamProps<T[P]>, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
       getMetadata: createParamMetadata('path', true),
