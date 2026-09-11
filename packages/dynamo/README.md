@@ -459,6 +459,24 @@ const result = await orderRepository
 
 If `indexName` is omitted, the repository automatically selects the best matching index based on the key condition attributes.
 
+#### Custom Client
+
+By default every repository shares a `DynamoDBClient` built from the ambient AWS SDK configuration (the region, credentials and endpoint the SDK resolves from the environment). Pass a `client` to reach a table on a different region, account or endpoint, such as a local DynamoDB instance during development:
+
+```typescript
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createRepository } from '@lafken/dynamo/service';
+
+const client = new DynamoDBClient({
+  endpoint: 'http://localhost:8000',
+  region: 'us-east-1',
+});
+
+export const contactRepository = createRepository(Contact, { client });
+```
+
+Reuse the same instance across your models instead of creating one per repository, so they share a single connection pool.
+
 ### Transactions
 
 Group multiple write operations (create, update, upsert, delete) into an atomic transaction. All operations succeed or fail together:
@@ -486,6 +504,8 @@ await transaction([
 
 > [!NOTE]
 > Transaction builders are passed without calling `.exec()` — the `transaction` function handles execution internally.
+
+The transaction is sent with the client of the repositories that created the builders, so every repository taking part in it must share the same client instance. A transaction is a single request and cannot be split across connections: mixing clients throws before anything is sent.
 
 ### Extending the Table
 

@@ -24,6 +24,19 @@ import type { ScanBuilder } from '../query-builder/scan/scan';
 import type { UpdateBuilder } from '../query-builder/update/update';
 import type { UpsertBuilder } from '../query-builder/upsert/upsert';
 
+export interface RepositoryOptions {
+  /**
+   * DynamoDB client used by every query of the repository.
+   *
+   * Injecting a client is the way to reach a table on a different region, account or endpoint,
+   * for example a local DynamoDB instance during development. Repositories taking part in the
+   * same `transaction` must share the same client instance.
+   *
+   * @default The shared client built from the ambient AWS SDK configuration.
+   */
+  client?: DynamoDBClient;
+}
+
 export type RepositoryReturn<E extends ClassResource> = {
   /**
    * Queries a single item using `QueryCommand`.

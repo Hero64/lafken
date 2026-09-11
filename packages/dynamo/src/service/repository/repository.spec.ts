@@ -3,6 +3,7 @@ import {
   BatchGetItemCommand,
   BatchWriteItemCommand,
   DeleteItemCommand,
+  DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
   QueryCommand,
@@ -1001,6 +1002,90 @@ describe('Dynamo Service', () => {
       ]);
 
       expect(dynamoClient.commandCalls(TransactWriteItemsCommand, {})).toHaveLength(1);
+    });
+  });
+
+  describe('CUSTOM CLIENT', () => {
+    const customClient = new DynamoDBClient({});
+    const customDynamoClient = mockClient(customClient);
+    const customUserRepository = createRepository(User, { client: customClient });
+
+    beforeEach(() => {
+      for (const mock of [dynamoClient, customDynamoClient]) {
+        mock.on(ScanCommand).resolves({}).on(TransactWriteItemsCommand).resolves({});
+      }
+    });
+
+    afterEach(() => {
+      dynamoClient.reset();
+      customDynamoClient.reset();
+    });
+
+    afterAll(() => {
+      customClient.destroy();
+    });
+
+    it('Should send the queries through the injected client', async () => {
+      await customUserRepository.scan();
+
+      expect(
+        customDynamoClient.commandCalls(ScanCommand, { TableName: 'users' })
+      ).toHaveLength(1);
+      expect(dynamoClient.commandCalls(ScanCommand)).toHaveLength(0);
+    });
+
+    it('Should keep the shared client when no client is injected', async () => {
+      await userRepository.scan();
+
+      expect(dynamoClient.commandCalls(ScanCommand, { TableName: 'users' })).toHaveLength(
+        1
+      );
+      expect(customDynamoClient.commandCalls(ScanCommand)).toHaveLength(0);
+    });
+
+    it('Should run a transaction through the injected client', async () => {
+      await transaction([
+        customUserRepository.create({
+          email: 'custom@example.cl',
+          name: 'Custom',
+          lastName: 'Client',
+          age: 10,
+        }),
+        customUserRepository.delete({
+          email: 'example1@example.com',
+          name: 'example1',
+        }),
+      ]);
+
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(1);
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should reject a transaction mixing clients', async () => {
+      await expect(
+        transaction([
+          userRepository.create({
+            email: 'shared@example.cl',
+            name: 'Shared',
+            lastName: 'Client',
+            age: 10,
+          }),
+          customUserRepository.delete({
+            email: 'example1@example.com',
+            name: 'example1',
+          }),
+        ])
+      ).rejects.toThrow('All queries in a transaction must share the same client');
+
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should not send a command for an empty transaction', async () => {
+      await transaction([]);
+
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
     });
   });
 });
