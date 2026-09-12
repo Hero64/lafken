@@ -11,7 +11,7 @@ All documentation, comments, and communications must be in English.
 ## Commands
 
 ```bash
-pnpm install              # install (requires Node >= 20.19, pnpm >= 10.20)
+pnpm install              # install (requires Node >= 20.19, pnpm >= 11.14.0)
 pnpm build                # build all packages (turbo, respects dependency order)
 pnpm test                 # run all tests
 pnpm lint                 # lint (Biome)
