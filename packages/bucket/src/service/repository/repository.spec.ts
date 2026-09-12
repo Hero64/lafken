@@ -5,6 +5,7 @@ import {
   GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
+  S3Client,
 } from '@aws-sdk/client-s3';
 import {
   afterEach,
@@ -123,5 +124,51 @@ describe('createRepository', () => {
 
     expect(sendMock).toHaveBeenCalledWith(expect.any(ListObjectsV2Command));
     expect(response.Contents).toEqual([{ Key: 'a.txt' }, { Key: 'b.txt' }]);
+  });
+
+  describe('custom client', () => {
+    let customClient: S3Client;
+    let customSendMock: MockInstance;
+
+    beforeEach(() => {
+      customClient = new S3Client({});
+      customSendMock = vi
+        .spyOn(customClient, 'send')
+        .mockImplementation(async (_command: any) => ({}));
+    });
+
+    afterEach(() => {
+      customClient.destroy();
+    });
+
+    it('should send the commands through the injected client', async () => {
+      const customRepository = createRepository(ExampleBucket, { client: customClient });
+
+      await customRepository.putObject({ Key: 'file.txt', Body: 'hello' });
+
+      expect(customSendMock).toHaveBeenCalledWith(expect.any(PutObjectCommand));
+      expect(customSendMock.mock.calls[0][0].input.Bucket).toBe('example');
+      expect(sendMock).not.toHaveBeenCalled();
+    });
+
+    it('should send the move commands through the injected client', async () => {
+      const customRepository = createRepository(ExampleBucket, { client: customClient });
+
+      await customRepository.moveObject({
+        Key: 'moved/file.txt',
+        CopySource: '/example/original/file.txt',
+      });
+
+      expect(customSendMock.mock.calls[0][0]).toBeInstanceOf(CopyObjectCommand);
+      expect(customSendMock.mock.calls[1][0]).toBeInstanceOf(DeleteObjectCommand);
+      expect(sendMock).not.toHaveBeenCalled();
+    });
+
+    it('should keep the shared client when no client is injected', async () => {
+      await repository.putObject({ Key: 'file.txt', Body: 'hello' });
+
+      expect(sendMock).toHaveBeenCalledWith(expect.any(PutObjectCommand));
+      expect(customSendMock).not.toHaveBeenCalled();
+    });
   });
 });
