@@ -9,6 +9,7 @@ import type {
   ObjectField,
   PayloadMetadata,
   PayloadProps,
+  Primitive,
   StringField,
 } from '@lafken/common';
 
@@ -171,16 +172,51 @@ export interface NumberParamProps extends BaseParamProps {
 export interface BooleanParamProps extends BaseParamProps {}
 
 /**
+ * Conditional type that resolves the schema constraints applicable to a single
+ * element of an array parameter, based on the element type `E`.
+ *
+ * Only arrays of primitives accept element constraints; for arrays of payload
+ * classes this resolves to `never`, since those elements describe themselves
+ * through their own decorated properties.
+ *
+ * - `string` → {@link StringParamProps}
+ * - `number` → {@link NumberParamProps}
+ * - `boolean` → {@link BooleanParamProps}
+ *
+ * @typeParam E - The TypeScript type of a single array element.
+ */
+export type ItemProps<E> = E extends string
+  ? Omit<StringParamProps, 'name' | 'type' | 'required'>
+  : E extends number
+    ? Omit<NumberParamProps, 'name' | 'type' | 'required'>
+    : E extends boolean
+      ? Omit<BooleanParamProps, 'name' | 'type' | 'required'>
+      : never;
+
+/**
  * Properties for array-type API parameters.
  * Adds array-specific validation constraints that map to OpenAPI array schema attributes.
+ *
+ * @typeParam E - The TypeScript type of a single array element, used to resolve
+ * which constraints {@link items} accepts.
  */
-export interface ArrayParamProps extends BaseParamProps {
+export interface ArrayParamProps<E = unknown> extends BaseParamProps {
   /** Minimum number of items the array must contain. Maps to OpenAPI `minItems`. */
   minItems?: number;
   /** Maximum number of items the array may contain. Maps to OpenAPI `maxItems`. */
   maxItems?: number;
   /** Whether all items in the array must be unique. Maps to OpenAPI `uniqueItems`. */
   uniqueItems?: boolean;
+  /**
+   * Schema constraints applied to every element of the array. Maps to OpenAPI `items`.
+   *
+   * @example
+   * ```typescript
+   * @BodyParam({ type: [String], items: { enum: ['fire', 'water'] } })
+   * types: string[];
+   * ```
+   */
+  items?: ItemProps<E>;
 }
 
 export interface AnyParamProps extends BaseParamProps {}
@@ -204,8 +240,8 @@ export type BodyParamProps<T> = T extends string
     ? NumberParamProps
     : T extends boolean
       ? BooleanParamProps
-      : T extends unknown[]
-        ? ArrayParamProps
+      : T extends (infer E)[]
+        ? ArrayParamProps<E>
         : BaseParamProps;
 
 /**
@@ -283,6 +319,18 @@ export interface VelocityParamProps extends Omit<FieldProps, 'type'> {
 }
 
 /**
+ * Widest shape a request parameter decorator can declare.
+ *
+ * Every `*ParamProps` type is assignable to it, so the metadata resolver shared
+ * by the decorators can read `required` and `items` without knowing which
+ * source it is resolving.
+ */
+export interface ParamPropsInput extends BaseParamProps {
+  /** Schema constraints applied to every element of an array parameter. */
+  items?: ItemProps<Primitive>;
+}
+
+/**
  * Base metadata attached to every resolved API parameter.
  * The `source` field indicates where the value is extracted from at runtime.
  */
@@ -342,7 +390,7 @@ export interface ApiObjectMetadata
 export interface ApiArrayMetadata
   extends Omit<ArrayField, 'items'>,
     BaseParamMetadata,
-    Omit<ArrayParamProps, 'type' | 'name'> {
+    Omit<ArrayParamProps, 'type' | 'name' | 'items'> {
   /** Schema definition for the items contained in the array. */
   items: ApiParamMetadata;
 }

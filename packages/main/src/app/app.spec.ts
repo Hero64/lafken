@@ -59,7 +59,7 @@ describe('App', () => {
         lambda: {
           enableTrace: true,
           memory: 2000,
-          runtime: 20,
+          runtime: 24,
         },
       },
     });
@@ -68,7 +68,7 @@ describe('App', () => {
       contextCreator: 'testing',
       enableTrace: true,
       memory: 2000,
-      runtime: 20,
+      runtime: 24,
       bundler: undefined,
     });
   });
@@ -231,12 +231,13 @@ describe('App', () => {
     expect(extendCallback).toHaveBeenCalledWith(appStack);
   });
 
-  it('should create S3Backend when s3Backend config is provided', async () => {
+  it('should create S3Backend when state type is s3', async () => {
     const { appStack } = await createApp({
       name: 'testing',
       modules: [],
       resolvers: [],
-      s3Backend: {
+      state: {
+        type: 's3',
         bucket: 'my-terraform-state',
         key: 'testing/terraform.tfstate',
         region: 'us-east-1',
@@ -245,12 +246,41 @@ describe('App', () => {
 
     const terraform = appStack.toTerraform();
 
-    expect(terraform.terraform.backend.s3).toEqual(
-      expect.objectContaining({
-        bucket: 'my-terraform-state',
-        key: 'testing/terraform.tfstate',
-        region: 'us-east-1',
-      })
-    );
+    expect(terraform.terraform.backend.s3).toEqual({
+      bucket: 'my-terraform-state',
+      key: 'testing/terraform.tfstate',
+      region: 'us-east-1',
+    });
+  });
+
+  it('should create LocalBackend when state type is local', async () => {
+    const { appStack } = await createApp({
+      name: 'testing',
+      modules: [],
+      resolvers: [],
+      state: {
+        type: 'local',
+        path: './terraform.testing.tfstate',
+      },
+    });
+
+    const terraform = appStack.toTerraform();
+
+    expect(terraform.terraform.backend.local).toEqual({
+      path: './terraform.testing.tfstate',
+    });
+  });
+
+  it('should fall back to the cdktn default local backend when state is not provided', async () => {
+    const { appStack } = await createApp({
+      name: 'testing',
+      modules: [],
+      resolvers: [],
+    });
+
+    const terraform = appStack.toTerraform();
+
+    expect(terraform.terraform.backend.s3).toBeUndefined();
+    expect(terraform.terraform.backend.local.path).toContain('terraform.testing.tfstate');
   });
 });

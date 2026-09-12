@@ -1,7 +1,7 @@
 import type { AwsProviderConfig } from '@cdktn/provider-aws/lib/provider';
 import type { BundlerConfig, ServicesValues } from '@lafken/common';
 import type { LambdaGlobalConfig, ResolverType } from '@lafken/resolver';
-import type { S3BackendConfig } from 'cdktn';
+import type { LocalBackendConfig, S3BackendConfig } from 'cdktn';
 import type { StackModule } from '../module';
 import type { ModuleResolverType } from '../module/module.types';
 import type { AppStack } from './app';
@@ -51,6 +51,43 @@ export interface GlobalConfig {
    */
   bundler?: BundlerConfig;
 }
+
+/**
+ * S3 backend configuration for Terraform state.
+ *
+ * Stores the state file in an S3 bucket, enabling team collaboration,
+ * state locking, and centralized state management. Accepts every option
+ * supported by the Terraform S3 backend.
+ */
+export interface S3StateConfig extends S3BackendConfig {
+  /**
+   * Backend discriminator.
+   */
+  type: 's3';
+}
+
+/**
+ * Local backend configuration for Terraform state.
+ *
+ * Stores the state file on the local filesystem. Useful for local
+ * development and single-developer workflows where no remote state
+ * is required.
+ */
+export interface LocalStateConfig extends LocalBackendConfig {
+  /**
+   * Backend discriminator.
+   */
+  type: 'local';
+}
+
+/**
+ * Terraform state backend configuration.
+ *
+ * A discriminated union on `type` that selects the backend used to
+ * store the Terraform state file, along with the options required by
+ * that specific backend.
+ */
+export type StateConfig = S3StateConfig | LocalStateConfig;
 
 export interface CreateAppProps {
   /**
@@ -121,20 +158,34 @@ export interface CreateAppProps {
    */
   awsProviderConfig?: AwsProviderConfig;
   /**
-   * S3 backend configuration for Terraform state.
+   * Terraform state backend configuration.
    *
-   * Configures an S3 bucket as the remote backend for storing the
-   * Terraform state file. This enables team collaboration, state
-   * locking, and centralized state management.
+   * Selects where the Terraform state file is stored. The `type`
+   * property discriminates the backend and determines which additional
+   * options are accepted:
+   *
+   * - `'s3'` – stores the state in an S3 bucket, enabling team
+   *   collaboration, state locking, and centralized state management.
+   * - `'local'` – stores the state on the local filesystem.
+   *
+   * When omitted, no backend block is generated and Terraform falls
+   * back to its own default behaviour.
    *
    * @example
-   * s3Backend: {
+   * state: {
+   *   type: 's3',
    *   bucket: 'my-terraform-state',
    *   key: 'app/terraform.tfstate',
    *   region: 'us-east-1',
    * }
+   *
+   * @example
+   * state: {
+   *   type: 'local',
+   *   path: './terraform.tfstate',
+   * }
    */
-  s3Backend?: S3BackendConfig;
+  state?: StateConfig;
   /**
    * Extension callback.
    *

@@ -14,15 +14,20 @@ import {
 import type { ClassResource } from '@lafken/common';
 import type { BucketProps } from '../../main';
 import { client } from '../client/client';
-import type { InputWithoutBucket, RepositoryReturn } from './repository.types';
+import type {
+  InputWithoutBucket,
+  RepositoryOptions,
+  RepositoryReturn,
+} from './repository.types';
 import { getBucketInformation, parseCopySource } from './repository.utils';
 
 export const createRepository = <E extends ClassResource>(
-  bucket: E
+  bucket: E,
+  options: RepositoryOptions = {}
 ): RepositoryReturn<E> => {
   const { name } = getBucketInformation<BucketProps>(bucket);
 
-  const bucketClient = client;
+  const bucketClient = options.client ?? client;
 
   return {
     putObject(props: InputWithoutBucket<PutObjectCommandInput>) {

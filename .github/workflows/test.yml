@@ -1,4 +1,4 @@
-name: 🧪 Tests
+name: 🧪 CI
 
 on:
   push:
@@ -17,26 +17,58 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  quality:
+    name: 🔍 Lint & types
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [24.x]
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v7
 
-      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.x
+          cache: "pnpm"
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🎨 Lint
+        run: pnpm lint
+
+      - name: 🏗️ Build
+        run: pnpm build
+
+      - name: 🔠 Check types
+        run: pnpm check-types
+
+  test:
+    name: 🧪 Tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Covers the whole supported range: `engines.node: >=22.13` (the floor
+        # pnpm 11 imposes) up to current.
+        node-version: ["22.x", "24.x"]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
 
       - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v6
 
-      - name: 💾 Setup pnpm cache
+      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}

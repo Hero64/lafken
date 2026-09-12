@@ -3,10 +3,12 @@ import {
   BatchGetItemCommand,
   BatchWriteItemCommand,
   DeleteItemCommand,
+  DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
   QueryCommand,
   ScanCommand,
+  TransactGetItemsCommand,
   TransactWriteItemsCommand,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -29,7 +31,8 @@ import {
   Table,
 } from '../../main/table';
 import { client } from '../client/client';
-import { transaction } from '../transaction/transaction';
+import { transactionGet } from '../transaction/transaction-get/transaction-get';
+import { transactionWrite } from '../transaction/transaction-write/transaction-write';
 import { createRepository } from './repository';
 
 interface Address {
@@ -63,7 +66,23 @@ class User {
   readonly address?: Address;
 }
 
+@Table({
+  name: 'orders',
+  tracing: false,
+})
+class Order {
+  @PartitionKey(String)
+  readonly customerId!: PrimaryPartition<string>;
+  @SortKey(String)
+  readonly orderId!: PrimaryPartition<string>;
+  @Field()
+  readonly status!: string;
+  @Field()
+  readonly total!: number;
+}
+
 const userRepository = createRepository(User);
+const orderRepository = createRepository(Order);
 const EMAIL = 'example1@example.com';
 
 describe('Dynamo Service', () => {
@@ -982,7 +1001,7 @@ describe('Dynamo Service', () => {
     });
 
     it('Should create and edit in same query', async () => {
-      await transaction([
+      await transactionWrite([
         userRepository.create({
           email: 'transaction@example.cl',
           name: 'Transaction',
@@ -1001,6 +1020,251 @@ describe('Dynamo Service', () => {
       ]);
 
       expect(dynamoClient.commandCalls(TransactWriteItemsCommand, {})).toHaveLength(1);
+    });
+  });
+
+  describe('TRANSACTION GET', () => {
+    const userKey = { email: EMAIL, name: 'example1' };
+    const orderKey = { customerId: 'cust-1', orderId: 'ord-1' };
+
+    const getTransactItems = () => {
+      const calls = dynamoClient.commandCalls(TransactGetItemsCommand);
+      expect(calls).toHaveLength(1);
+
+      return calls[0].args[0].input.TransactItems ?? [];
+    };
+
+    beforeEach(() => {
+      dynamoClient.on(TransactGetItemsCommand).resolves({});
+    });
+
+    afterEach(() => {
+      dynamoClient.reset();
+    });
+
+    it('Should read items from several tables in a single command', async () => {
+      dynamoClient.on(TransactGetItemsCommand).resolves({
+        Responses: [
+          { Item: { email: { S: EMAIL }, name: { S: 'example1' }, age: { N: '20' } } },
+          {
+            Item: {
+              customerId: { S: 'cust-1' },
+              orderId: { S: 'ord-1' },
+              status: { S: 'pending' },
+            },
+          },
+        ],
+      });
+
+      const [user, order] = await transactionGet([
+        userRepository.getItem(userKey),
+        orderRepository.getItem(orderKey),
+      ]);
+
+      expect(getTransactItems()).toEqual([
+        {
+          Get: {
+            TableName: 'users',
+            Key: { email: { S: EMAIL }, name: { S: 'example1' } },
+          },
+        },
+        {
+          Get: {
+            TableName: 'orders',
+            Key: { customerId: { S: 'cust-1' }, orderId: { S: 'ord-1' } },
+          },
+        },
+      ]);
+      expect(user).toEqual({ email: EMAIL, name: 'example1', age: 20 });
+      expect(order).toEqual({
+        customerId: 'cust-1',
+        orderId: 'ord-1',
+        status: 'pending',
+      });
+
+      // the result is typed by position, so each item keeps the model of its query
+      const typedUser: User | undefined = user;
+      const typedOrder: Order | undefined = order;
+      // @ts-expect-error an item cannot be assigned to the model of another position
+      const wrongUser: Order | undefined = user;
+
+      expect([typedUser, typedOrder, wrongUser]).toHaveLength(3);
+    });
+
+    it('Should resolve undefined for the items that do not exist', async () => {
+      dynamoClient.on(TransactGetItemsCommand).resolves({
+        Responses: [
+          {},
+          { Item: { customerId: { S: 'cust-1' }, orderId: { S: 'ord-1' } } },
+        ],
+      });
+
+      const [user, order] = await transactionGet([
+        userRepository.getItem(userKey),
+        orderRepository.getItem(orderKey),
+      ]);
+
+      expect(user).toBeUndefined();
+      expect(order).toEqual({ customerId: 'cust-1', orderId: 'ord-1' });
+    });
+
+    it('Should forward the projection of each query', async () => {
+      await transactionGet([userRepository.getItem(userKey, { projection: ['email'] })]);
+
+      expect(getTransactItems()).toEqual([
+        {
+          Get: {
+            TableName: 'users',
+            Key: { email: { S: EMAIL }, name: { S: 'example1' } },
+            ProjectionExpression: '#email',
+            ExpressionAttributeNames: { '#email': 'email' },
+          },
+        },
+      ]);
+    });
+
+    it('Should not forward consistentRead, unsupported by a transactional read', async () => {
+      await transactionGet([userRepository.getItem(userKey, { consistentRead: true })]);
+
+      expect(getTransactItems()[0].Get).not.toHaveProperty('ConsistentRead');
+    });
+
+    it('Should ignore the cache of the queries', async () => {
+      const cachedKey = { email: 'cached@example.com', name: 'cached' };
+      dynamoClient.on(GetItemCommand).resolves({ Item: { email: { S: 'cached' } } });
+
+      await userRepository.getItem(cachedKey, { cacheTtl: 60 });
+      await transactionGet([userRepository.getItem(cachedKey, { cacheTtl: 60 })]);
+
+      expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(1);
+    });
+
+    it('Should reject a query that is not a getItem', async () => {
+      await expect(
+        transactionGet([
+          userRepository.findOne({ keyCondition: { partition: { email: EMAIL } } }),
+        ] as any)
+      ).rejects.toThrow('The transaction includes a query that is not a getItem');
+
+      expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should not send a command for an empty transaction', async () => {
+      const result = await transactionGet([]);
+
+      expect(result).toEqual([]);
+      expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
+    });
+  });
+
+  describe('CUSTOM CLIENT', () => {
+    const customClient = new DynamoDBClient({});
+    const customDynamoClient = mockClient(customClient);
+    const customUserRepository = createRepository(User, { client: customClient });
+
+    beforeEach(() => {
+      for (const mock of [dynamoClient, customDynamoClient]) {
+        mock
+          .on(ScanCommand)
+          .resolves({})
+          .on(TransactWriteItemsCommand)
+          .resolves({})
+          .on(TransactGetItemsCommand)
+          .resolves({});
+      }
+    });
+
+    afterEach(() => {
+      dynamoClient.reset();
+      customDynamoClient.reset();
+    });
+
+    afterAll(() => {
+      customClient.destroy();
+    });
+
+    it('Should send the queries through the injected client', async () => {
+      await customUserRepository.scan();
+
+      expect(
+        customDynamoClient.commandCalls(ScanCommand, { TableName: 'users' })
+      ).toHaveLength(1);
+      expect(dynamoClient.commandCalls(ScanCommand)).toHaveLength(0);
+    });
+
+    it('Should keep the shared client when no client is injected', async () => {
+      await userRepository.scan();
+
+      expect(dynamoClient.commandCalls(ScanCommand, { TableName: 'users' })).toHaveLength(
+        1
+      );
+      expect(customDynamoClient.commandCalls(ScanCommand)).toHaveLength(0);
+    });
+
+    it('Should run a transaction through the injected client', async () => {
+      await transactionWrite([
+        customUserRepository.create({
+          email: 'custom@example.cl',
+          name: 'Custom',
+          lastName: 'Client',
+          age: 10,
+        }),
+        customUserRepository.delete({
+          email: 'example1@example.com',
+          name: 'example1',
+        }),
+      ]);
+
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(1);
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should reject a transaction mixing clients', async () => {
+      await expect(
+        transactionWrite([
+          userRepository.create({
+            email: 'shared@example.cl',
+            name: 'Shared',
+            lastName: 'Client',
+            age: 10,
+          }),
+          customUserRepository.delete({
+            email: 'example1@example.com',
+            name: 'example1',
+          }),
+        ])
+      ).rejects.toThrow('All queries in a transaction must share the same client');
+
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should not send a command for an empty transaction', async () => {
+      await transactionWrite([]);
+
+      expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+      expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should run a read transaction through the injected client', async () => {
+      await transactionGet([
+        customUserRepository.getItem({ email: EMAIL, name: 'example1' }),
+      ]);
+
+      expect(customDynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(1);
+      expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
+    });
+
+    it('Should reject a read transaction mixing clients', async () => {
+      await expect(
+        transactionGet([
+          userRepository.getItem({ email: EMAIL, name: 'example1' }),
+          customUserRepository.getItem({ email: EMAIL, name: 'example2' }),
+        ])
+      ).rejects.toThrow('All queries in a transaction must share the same client');
+
+      expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
+      expect(customDynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
     });
   });
 });

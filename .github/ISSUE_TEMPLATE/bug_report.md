@@ -33,7 +33,7 @@ Paste relevant logs or error messages here
 <!-- Please provide information about your environment -->
 
 - **Operating System**: <!-- e.g., macOS 14.2 -->
-- **Node.js Version**: <!-- e.g., 20.19.0 -->
+- **Node.js Version**: <!-- e.g., 22.13.0 -->
 - **pnpm Version**: <!-- e.g., 10.20.0 -->
 - **Lafken Version**: <!-- e.g., 0.6.4 -->
 - **Affected Packages**: <!-- e.g., @lafken/api, @lafken/queue -->

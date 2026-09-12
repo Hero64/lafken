@@ -127,9 +127,8 @@ export interface LambdaProps {
    * Supported values:
    * - `24` → Node.js 24
    * - `22` → Node.js 22
-   * - `20` → Node.js 20
    */
-  runtime?: 24 | 22 | 20;
+  runtime?: 24 | 22;
   /**
    * Lambda services.
    *

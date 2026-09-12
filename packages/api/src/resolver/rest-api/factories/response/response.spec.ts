@@ -217,3 +217,107 @@ describe('Response factory', () => {
     });
   });
 });
+
+describe('Response factory - openapi mode', () => {
+  enableBuildEnvVariable();
+
+  const objectField = {
+    name: 'test',
+    destinationName: 'test',
+    type: 'Object',
+    payload: {
+      id: 'user-response',
+      name: 'user-response',
+    },
+    properties: [
+      {
+        destinationName: 'prop',
+        name: 'prop',
+        type: 'Number',
+        required: true,
+      },
+    ],
+    required: true,
+  } as const;
+
+  it('should link an object response to its component schema', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const { operationResponses } = restApi.responseFactory.buildResponseFragments(
+      [{ statusCode: '200', field: objectField as any }],
+      'test'
+    );
+
+    expect(operationResponses['200'].content).toEqual({
+      'application/json': {
+        schema: { $ref: '#/components/schemas/UserResponse' },
+      },
+    });
+  });
+
+  it('should link an array of objects response to an array component schema', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const { operationResponses } = restApi.responseFactory.buildResponseFragments(
+      [
+        {
+          statusCode: '200',
+          field: {
+            name: 'test',
+            destinationName: 'test',
+            type: 'Array',
+            items: objectField,
+          } as any,
+        },
+      ],
+      'test'
+    );
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(operationResponses['200'].content).toEqual({
+      'application/json': {
+        schema: { $ref: '#/components/schemas/Test200Model' },
+      },
+    });
+    expect(document.components.schemas.Test200Model).toEqual({
+      type: 'array',
+      items: { $ref: '#/components/schemas/UserResponse' },
+    });
+  });
+
+  it('should reuse the same component schema across operations', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const first = restApi.responseFactory.buildResponseFragments(
+      [{ statusCode: '200', field: objectField as any }],
+      'first'
+    );
+    const second = restApi.responseFactory.buildResponseFragments(
+      [{ statusCode: '200', field: objectField as any }],
+      'second'
+    );
+    restApi.openapiFactory.addOperation('/test', 'get', { responses: {} });
+
+    const document = JSON.parse(restApi.openapiFactory.finalize() as string);
+
+    expect(second.operationResponses['200'].content).toEqual(
+      first.operationResponses['200'].content
+    );
+    expect(Object.keys(document.components.schemas)).toEqual(['UserResponse']);
+  });
+
+  it('should not add content for a response without a field', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        [{ statusCode: '204', selectionPattern: '2\\d{2}' }],
+        'test'
+      );
+
+    expect(operationResponses['204'].content).toBeUndefined();
+    expect(integrationResponses['2\\d{2}'].statusCode).toBe('204');
+  });
+});

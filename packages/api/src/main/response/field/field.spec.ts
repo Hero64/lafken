@@ -103,6 +103,62 @@ describe('Field', () => {
       });
     });
 
+    it('should apply item constraints to an array response field', () => {
+      class Response {
+        @ResField({
+          type: [String],
+          items: { enum: ['fire', 'water'], minLength: 2 },
+        })
+        types: string[];
+      }
+
+      const params = getMetadataPrototypeByKey(Response, key);
+      expect(params).toStrictEqual([
+        {
+          destinationName: 'types',
+          name: 'types',
+          required: true,
+          type: 'Array',
+          items: {
+            destinationName: 'String',
+            enum: ['fire', 'water'],
+            minLength: 2,
+            name: 'String',
+            type: 'String',
+          },
+        },
+      ]);
+    });
+
+    it('should keep the array items metadata untouched for an array of response objects', () => {
+      class Item {
+        @ResField()
+        name: string;
+      }
+
+      class Response {
+        @ResField({ type: [Item] })
+        data: Item[];
+      }
+
+      const params = getMetadataPrototypeByKey(Response, key) as any[];
+      expect(params[0].items).toStrictEqual({
+        destinationName: 'Object',
+        name: 'Object',
+        payload: { id: 'Item', name: 'Item' },
+        properties: [
+          {
+            destinationName: 'name',
+            name: 'name',
+            required: true,
+            type: 'String',
+            initialValue: undefined,
+          },
+        ],
+        type: 'Object',
+      });
+    });
+
     it('should not include template when not provided', () => {
       class Response {
         @ResField()

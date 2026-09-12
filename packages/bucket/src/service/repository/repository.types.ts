@@ -9,10 +9,23 @@ import type {
   ListObjectsV2CommandInput,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+  S3Client,
 } from '@aws-sdk/client-s3';
 import type { ClassResource } from '@lafken/common';
 
 export type InputWithoutBucket<T> = Omit<T, 'Bucket'>;
+
+export interface RepositoryOptions {
+  /**
+   * S3 client used by every operation of the repository.
+   *
+   * Injecting a client is the way to reach a bucket on a different region, account or endpoint,
+   * for example a local S3-compatible instance during development.
+   *
+   * @default The shared client built from the ambient AWS SDK configuration.
+   */
+  client?: S3Client;
+}
 
 export type RepositoryReturn<_E extends ClassResource> = {
   putObject(

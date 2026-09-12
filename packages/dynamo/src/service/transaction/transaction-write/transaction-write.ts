@@ -2,12 +2,12 @@ import {
   type TransactWriteItem,
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
-import { client } from '../client/client';
-import { CreateBuilder } from '../query-builder/create/create';
-import { DeleteBuilder } from '../query-builder/delete/delete';
-import { UpdateBuilder } from '../query-builder/update/update';
-import { UpsertBuilder } from '../query-builder/upsert/upsert';
-import type { QueryTransactions } from './transaction.types';
+import { CreateBuilder } from '../../query-builder/create/create';
+import { DeleteBuilder } from '../../query-builder/delete/delete';
+import { UpdateBuilder } from '../../query-builder/update/update';
+import { UpsertBuilder } from '../../query-builder/upsert/upsert';
+import { getTransactionClient } from '../transaction.utils';
+import type { QueryTransactions } from './transaction-write.types';
 
 /**
  * Resolves the `TransactWriteItem` operation type for a given query builder.
@@ -49,11 +49,22 @@ export const getTransactionType = (builder: QueryTransactions) => {
  * carries; each builder's command is extracted via `getCommand()` and mapped to the appropriate
  * `TransactWriteItem` operation type.
  *
+ * The request is sent with the client of the repositories that created the builders, so every
+ * builder must share the same client instance: a transaction is a single request and cannot be
+ * split across connections. An empty array is a no-op.
+ *
  * @param queryBuilders - Array of write builders to include in the transaction.
- * @throws If any builder type is unsupported or if the transaction is rejected by DynamoDB
- *   (e.g. a condition check fails in one of the items).
+ * @throws If any builder type is unsupported, if the builders do not share the same client, or
+ *   if the transaction is rejected by DynamoDB (e.g. a condition check fails in one of the
+ *   items).
  */
-export const transaction = async (queryBuilders: QueryTransactions[]) => {
+export const transactionWrite = async (queryBuilders: QueryTransactions[]) => {
+  if (queryBuilders.length === 0) {
+    return;
+  }
+
+  const client = getTransactionClient(queryBuilders);
+
   const transactionCommands: TransactWriteItem[] = queryBuilders.map((builder) => {
     return {
       [getTransactionType(builder)]: builder.getCommand(),

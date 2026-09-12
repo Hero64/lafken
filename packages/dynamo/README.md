@@ -459,14 +459,32 @@ const result = await orderRepository
 
 If `indexName` is omitted, the repository automatically selects the best matching index based on the key condition attributes.
 
-### Transactions
+#### Custom Client
 
-Group multiple write operations (create, update, upsert, delete) into an atomic transaction. All operations succeed or fail together:
+By default every repository shares a `DynamoDBClient` built from the ambient AWS SDK configuration (the region, credentials and endpoint the SDK resolves from the environment). Pass a `client` to reach a table on a different region, account or endpoint, such as a local DynamoDB instance during development:
 
 ```typescript
-import { transaction } from '@lafken/dynamo/service';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createRepository } from '@lafken/dynamo/service';
 
-await transaction([
+const client = new DynamoDBClient({
+  endpoint: 'http://localhost:8000',
+  region: 'us-east-1',
+});
+
+export const contactRepository = createRepository(Contact, { client });
+```
+
+Reuse the same instance across your models instead of creating one per repository, so they share a single connection pool.
+
+### Transactions
+
+`transactionWrite` groups multiple write operations (create, update, upsert, delete) into an atomic transaction. All operations succeed or fail together:
+
+```typescript
+import { transactionWrite } from '@lafken/dynamo/service';
+
+await transactionWrite([
   contactRepository.create({
     email: 'new@example.com',
     company: 'Acme',
@@ -485,7 +503,29 @@ await transaction([
 ```
 
 > [!NOTE]
-> Transaction builders are passed without calling `.exec()` — the `transaction` function handles execution internally.
+> Transaction builders are passed without calling `.exec()` — the `transactionWrite` function handles execution internally.
+
+The transaction is sent with the client of the repositories that created the builders, so every repository taking part in it must share the same client instance. A transaction is a single request and cannot be split across connections: mixing clients throws before anything is sent.
+
+#### Transactional Reads
+
+`transactionGet` reads several items atomically, from any number of tables, so all of them come from the same consistent snapshot. It accepts **only `getItem` queries** — any other builder throws — and resolves the items in the same order they were requested, typed by position:
+
+```typescript
+import { transactionGet } from '@lafken/dynamo/service';
+
+const [contact, order] = await transactionGet([
+  contactRepository.getItem({ email: 'jane@example.com', company: 'Acme' }),
+  orderRepository.getItem({ customerId: 'cust-1', orderId: 'ord-1' }),
+]);
+```
+
+`contact` is `Contact | undefined` and `order` is `Order | undefined`: an item that does not exist resolves as `undefined` in its position.
+
+Unlike `batchGet`, which splits its keys into several requests over a single table, this is one request and cannot be chunked — DynamoDB limits it to 100 items.
+
+> [!NOTE]
+> `consistentRead` and `cacheTtl` do not apply to the queries of a read transaction: it is already strongly consistent, and the in-memory cache is never read nor populated.
 
 ### Extending the Table
 

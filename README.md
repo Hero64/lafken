@@ -1,5 +1,10 @@
 # Lafken
 
+[![npm version](https://img.shields.io/npm/v/@lafken/main?color=cb3837&logo=npm)](https://www.npmjs.com/package/@lafken/main)
+[![CI](https://github.com/Hero64/lafken/actions/workflows/test.yml/badge.svg)](https://github.com/Hero64/lafken/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/node/v/@lafken/main)](https://nodejs.org)
+
 **A TypeScript framework for building serverless applications on AWS using decorators.**
 
 Lafken simplifies AWS infrastructure by letting you define resources with decorators in your TypeScript code. Focus on your application logic while Lafken automatically generates and manages all the infrastructure using Terraform.
@@ -42,7 +47,7 @@ npm install @lafken/main @lafken/api @lafken/common
 
 ### System Requirements
 
-- Node.js >= 20.19
+- Node.js >= 22.13
 - pnpm >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
 - TypeScript >= 5.0 (with `experimentalDecorators` and `emitDecoratorMetadata` enabled)
 

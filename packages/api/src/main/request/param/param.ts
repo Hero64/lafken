@@ -6,12 +6,40 @@ import type {
   BodyParamProps,
   ContextParamProps,
   HeaderParamProps,
+  ParamPropsInput,
   PathParamProps,
   QueryParamProps,
+  Source,
   VelocityParamProps,
 } from './param.types';
 
 export const PARAM_PREFIX = `${RESOURCE_TYPE}_REQUEST` as const;
+
+/**
+ * Builds the `getMetadata` callback shared by the request parameter decorators.
+ *
+ * Every parameter decorator resolves its metadata the same way: it forwards the
+ * declared props, tags them with the request {@link Source} the value is read from,
+ * and marks them as required unless the decorator says otherwise. Array element
+ * constraints are forwarded as `overrideItems`; only the sources that accept arrays
+ * (`body` and `query`) can declare them, so for the rest it resolves to `undefined`.
+ *
+ * @param source - Origin of the parameter value in the HTTP request.
+ * @param alwaysRequired - Marks the parameter as required regardless of what the
+ * decorator received. Used by sources that cannot be optional, such as path and
+ * context parameters.
+ */
+const createParamMetadata =
+  (source: Source, alwaysRequired?: boolean) => (props?: ParamPropsInput) => {
+    const required = alwaysRequired ?? props?.required ?? true;
+
+    return {
+      ...props,
+      required,
+      source,
+      overrideItems: props?.items,
+    };
+  };
 
 /**
  * Property decorator that marks a class field as an HTTP **request body** parameter.
@@ -45,13 +73,7 @@ export const BodyParam =
   (target: T, destination: P): void => {
     createFieldDecorator<BodyParamProps<T[P]>, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
-      getMetadata: (props) => {
-        return {
-          ...props,
-          required: props?.required ?? true,
-          source: 'body',
-        };
-      },
+      getMetadata: createParamMetadata('body'),
       enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
@@ -81,16 +103,10 @@ export const BodyParam =
  */
 export const QueryParam =
   <T, P extends keyof T>(props?: QueryParamProps<T[P]>) =>
-  (target: T, destination: string): void => {
+  (target: T, destination: P): void => {
     createFieldDecorator<QueryParamProps<T[P]>, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
-      getMetadata: (props) => {
-        return {
-          ...props,
-          required: props?.required ?? true,
-          source: 'query',
-        };
-      },
+      getMetadata: createParamMetadata('query'),
       enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
@@ -118,17 +134,11 @@ export const QueryParam =
  */
 
 export const PathParam =
-  <T, P extends keyof T>(props?: PathParamProps<T[P]>) =>
-  (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
+  <T, P extends OnlyTypeKeys<T, Primitive> & keyof T>(props?: PathParamProps<T[P]>) =>
+  (target: T, destination: P): void => {
     createFieldDecorator<PathParamProps<T[P]>, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
-      getMetadata: (props) => {
-        return {
-          ...props,
-          required: true,
-          source: 'path',
-        };
-      },
+      getMetadata: createParamMetadata('path', true),
       enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
@@ -161,13 +171,7 @@ export const HeaderParam =
   (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
     createFieldDecorator<HeaderParamProps, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
-      getMetadata: (props) => {
-        return {
-          ...props,
-          required: props?.required ?? true,
-          source: 'header',
-        };
-      },
+      getMetadata: createParamMetadata('header'),
       enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
@@ -202,13 +206,7 @@ export const ContextParam =
   (target: T, destination: OnlyTypeKeys<T, Primitive>): void => {
     createFieldDecorator<ContextParamProps, ApiParamMetadata>({
       prefix: PARAM_PREFIX,
-      getMetadata: (props) => {
-        return {
-          ...props,
-          required: true,
-          source: 'context',
-        };
-      },
+      getMetadata: createParamMetadata('context', true),
       enableInLambdaInvocation: true,
     })(props)(target, destination as string);
   };
