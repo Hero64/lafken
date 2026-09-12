@@ -110,9 +110,23 @@ jobs:
 
           git tag -a "$VERSION" -m "$VERSION"
 
-      # npm is the only irreversible step, so it runs before anything is pushed
-      # to git. pnpm skips versions that are already published, which makes a
-      # re-run after a partial failure safe.
+      # The commit is pushed before npm because publishing is irreversible and a
+      # real push is the only dependable way to learn whether branch rules will
+      # reject it: `git push --dry-run` may not trigger server-side rule
+      # evaluation, and a rejected push can still exit 0 with the rejection only
+      # on stderr. 0.15.0 published all 12 packages and only then discovered the
+      # ruleset refused the commit.
+      # The tag is pushed after npm instead, so a tag always means "released".
+      - name: ⬆️ Push release commit
+        if: ${{ !inputs.dry_run }}
+        run: |
+          out=$(git push origin "HEAD:$GITHUB_REF_NAME" 2>&1) && status=0 || status=$?
+          echo "$out"
+          if [ "${status:-0}" -ne 0 ] || echo "$out" | grep -qE "remote rejected|GH013"; then
+            echo "::error::Push to $GITHUB_REF_NAME was rejected — nothing was published."
+            exit 1
+          fi
+
       - name: 📦 Publish to npm
         run: |
           pnpm -r publish \
@@ -121,9 +135,9 @@ jobs:
             --tag "$DIST_TAG" \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
-      - name: ⬆️ Push release commit and tag
+      - name: ⬆️ Push release tag
         if: ${{ !inputs.dry_run }}
-        run: git push origin "HEAD:$GITHUB_REF_NAME" "refs/tags/$VERSION"
+        run: git push origin "refs/tags/$VERSION"
 
       - name: 🏷️ Create GitHub release
         if: ${{ !inputs.dry_run }}
