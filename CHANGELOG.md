@@ -1,3 +1,16 @@
+## 0.15.0
+
+### Minor Changes
+
+- Rename the DynamoDB transaction function to transactionWrite (breaking: the transaction export no longer exists)
+- Add transactionGet for atomic reads across tables in DynamoDB
+- Allow injecting a custom client per repository in DynamoDB and buckets
+- Add items constraints for array params and fields in APIs
+
+### Patch Changes
+
+- Infer the decorated property key in QueryParam and PathParam props
+
 ## 0.14.2
 
 ### Patch Changes
