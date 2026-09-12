@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
 const { execSync } = require('node:child_process');
+const { setVersion } = require('./set-version');
 
 // ---- CONFIG ----
 const PACKAGES_DIR = path.join(process.cwd(), 'packages');
@@ -11,17 +12,6 @@ const MAIN_PACKAGE = path.join(PACKAGES_DIR, 'main', 'package.json');
 
 // ---- UTILS ----
 const readJSON = (filePath) => JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-const writeJSON = (filePath, data) => {
-  fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`);
-};
-
-const getAllPackageJsonFiles = () => {
-  return fs
-    .readdirSync(PACKAGES_DIR)
-    .map((dir) => path.join(PACKAGES_DIR, dir, 'package.json'))
-    .filter((file) => fs.existsSync(file));
-};
 
 const getCurrentBranch = () => {
   try {
@@ -105,39 +95,9 @@ const ask = (q, defaultValue) =>
       process.exit(0);
     }
 
-    const packageFiles = getAllPackageJsonFiles();
+    const count = setVersion(newVersion);
 
-    packageFiles.forEach((file) => {
-      const pkg = readJSON(file);
-      pkg.version = newVersion;
-
-      if (pkg.dependencies) {
-        Object.keys(pkg.dependencies).forEach((dep) => {
-          if (dep.startsWith('@your-scope/')) {
-            pkg.dependencies[dep] = newVersion;
-          }
-        });
-      }
-
-      if (pkg.devDependencies) {
-        Object.keys(pkg.devDependencies).forEach((dep) => {
-          if (dep.startsWith('@your-scope/')) {
-            pkg.devDependencies[dep] = newVersion;
-          }
-        });
-      }
-
-      writeJSON(file, pkg);
-      console.log(`✅ Updated: ${file}`);
-    });
-
-    console.log('\n🎉 All packages updated!');
-
-    // ---- RELEASE ----
-    const release = await ask('\n📦 Run release? (pnpm release) (y/n)', 'y');
-    if (['y', 'yes'].includes(release.toLowerCase())) {
-      run('pnpm release');
-    }
+    console.log(`\n🎉 ${count} packages updated!`);
 
     // ---- COMMIT ----
     const branch = getCurrentBranch();
@@ -151,6 +111,10 @@ const ask = (q, defaultValue) =>
       run(`git commit -m "${message}"`);
       console.log('\n✅ Commit created!');
     }
+
+    console.log(
+      `\n📦 To publish, run the "🚀 Release" workflow on GitHub with version ${newVersion}.`
+    );
   } catch (err) {
     console.error('❌ Error:', err);
   } finally {
