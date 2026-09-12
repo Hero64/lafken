@@ -26,7 +26,7 @@ pnpm --filter @lafken/api test                          # one package's tests
 pnpm --filter @lafken/api test src/resolver/resolver.spec.ts   # single test file
 ```
 
-Commits follow Conventional Commits (`feat(api): ...`), enforced by commitlint/husky. Scope is the package name (`api`, `resolver`, `queue`, ...). All packages share one version, bumped with `pnpm update-version` (scripts/version.js).
+Commits follow Conventional Commits (`feat(api): ...`), enforced by commitlint/husky. Scope is the package name (`api`, `resolver`, `queue`, ...). All packages share one version. Releases run through the `🚀 Release` workflow on GitHub (manual dispatch with the target version, `dry_run` on by default); it bumps every package with `scripts/set-version.js`, publishes to npm via OIDC and cuts the GitHub release from the matching `CHANGELOG.md` section, which must exist beforehand.
 
 ## Architecture
 
