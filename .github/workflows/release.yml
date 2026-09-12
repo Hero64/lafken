@@ -98,7 +98,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore(release): $VERSION"
+
+          # The bump may already be committed, e.g. when the release branch was
+          # prepared by hand. Committing then fails with "nothing to commit", so
+          # only commit when the version actually changed.
+          if git diff --quiet; then
+            echo "Packages are already at $VERSION, no release commit needed"
+          else
+            git commit -am "chore(release): $VERSION"
+          fi
+
           git tag -a "$VERSION" -m "$VERSION"
 
       # npm is the only irreversible step, so it runs before anything is pushed
