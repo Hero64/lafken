@@ -49,7 +49,7 @@ describe('App Aspect', () => {
           functionName: 'test-fn',
           role: 'arn:aws:iam::123456789:role/test',
           handler: 'index.handler',
-          runtime: 'nodejs20.x',
+          runtime: 'nodejs22.x',
         });
 
         Aspects.of(this).add(
@@ -84,7 +84,7 @@ describe('App Aspect', () => {
           functionName: 'test-fn',
           role: 'arn:aws:iam::123456789:role/test',
           handler: 'index.handler',
-          runtime: 'nodejs20.x',
+          runtime: 'nodejs22.x',
           environment: {
             variables: {
               EXISTING: 'value',
@@ -149,7 +149,7 @@ describe('App Aspect', () => {
           functionName: 'test-fn',
           role: 'arn:aws:iam::123456789:role/test',
           handler: 'index.handler',
-          runtime: 'nodejs20.x',
+          runtime: 'nodejs22.x',
         });
 
         Aspects.of(this).add(
@@ -184,7 +184,7 @@ describe('App Aspect', () => {
           functionName: 'test-fn',
           role: 'arn:aws:iam::123456789:role/test',
           handler: 'index.handler',
-          runtime: 'nodejs20.x',
+          runtime: 'nodejs22.x',
           vpcConfig: {
             securityGroupIds: ['sg-original'],
             subnetIds: ['subnet-original'],
@@ -223,7 +223,7 @@ describe('App Aspect', () => {
           functionName: 'test-fn',
           role: 'arn:aws:iam::123456789:role/test',
           handler: 'index.handler',
-          runtime: 'nodejs20.x',
+          runtime: 'nodejs22.x',
         });
 
         Aspects.of(this).add(

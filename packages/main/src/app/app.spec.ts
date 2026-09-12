@@ -59,7 +59,7 @@ describe('App', () => {
         lambda: {
           enableTrace: true,
           memory: 2000,
-          runtime: 20,
+          runtime: 24,
         },
       },
     });
@@ -68,7 +68,7 @@ describe('App', () => {
       contextCreator: 'testing',
       enableTrace: true,
       memory: 2000,
-      runtime: 20,
+      runtime: 24,
       bundler: undefined,
     });
   });

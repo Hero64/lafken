@@ -30,7 +30,7 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://www.c
 
 ### System Requirements
 
-- **Node.js**: >= 22.13 (required by pnpm 11; the published packages themselves support >= 20.19)
+- **Node.js**: >= 22.13
 - **pnpm**: >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
 - **Git**: Recent version
 

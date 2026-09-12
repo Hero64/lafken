@@ -57,10 +57,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The packages declare `engines.node: >=20.19` and that still holds for
-        # consumers — they install with npm and run on Lambda's nodejs20.x.
-        # CI cannot test that floor: pnpm 11.14 itself requires Node >=22.13 and
-        # crashes on 20.x before any test runs.
+        # Covers the whole supported range: `engines.node: >=22.13` (the floor
+        # pnpm 11 imposes) up to current.
         node-version: ["22.x", "24.x"]
 
     steps:

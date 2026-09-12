@@ -14,7 +14,7 @@ describe('App context', () => {
           foo: 'bar',
         },
         memory: 2000,
-        runtime: 20,
+        runtime: 24,
       },
     });
 
@@ -22,7 +22,7 @@ describe('App context', () => {
       contextCreator: 'app',
       enableTrace: true,
       memory: 2000,
-      runtime: 20,
+      runtime: 24,
       bundler: undefined,
     });
   });

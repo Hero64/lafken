@@ -55,7 +55,7 @@
     "constructs": ">=10.7.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "publishConfig": {
     "access": "public"

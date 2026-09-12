@@ -107,7 +107,7 @@ class NotificationService {
 | ------------- | ------------------- | --------------------------------------------- |
 | `timeout`     | `number`            | Execution timeout in seconds                  |
 | `memory`      | `number`            | Memory allocation in MB                       |
-| `runtime`     | `24 \| 22 \| 20`   | Node.js runtime version                       |
+| `runtime`     | `24 \| 22`   | Node.js runtime version                       |
 | `services`    | `ServicesValues`    | IAM service permissions                       |
 | `env`         | `EnvironmentValue`  | Environment variables (static or dynamic)     |
 | `tags`        | `Record<string, string>` | Resource tags                            |

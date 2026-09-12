@@ -133,7 +133,7 @@ App globalConfig → Module globalConfig → Resource-level config
 | ------------- | ---------------- | --------------------------------------------------------- |
 | `memory`      | `number`         | Memory allocation in MB                                   |
 | `timeout`     | `number`         | Execution timeout in seconds                              |
-| `runtime`     | `20 \| 22 \| 24` | Node.js runtime version                                   |
+| `runtime`     | `22 \| 24` | Node.js runtime version                                   |
 | `services`    | `Services[]`     | AWS services the Lambda can access (creates IAM role)     |
 | `enableTrace` | `boolean`        | Enable AWS X-Ray tracing                                  |
 | `env`         | `EnvironmentValue` | Environment variables for Lambda functions              |

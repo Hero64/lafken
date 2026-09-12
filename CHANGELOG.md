@@ -3,6 +3,8 @@
 ### Minor Changes
 
 - Rename the DynamoDB transaction function to transactionWrite (breaking: the transaction export no longer exists)
+- Drop Node.js 20 as a Lambda runtime option (breaking: runtime now accepts 24 or 22, since AWS deprecated nodejs20.x on Apr 30 2026 and blocks new functions from Feb 1 2027)
+- Raise the minimum Node.js version to 22.13
 - Add transactionGet for atomic reads across tables in DynamoDB
 - Allow injecting a custom client per repository in DynamoDB and buckets
 - Add items constraints for array params and fields in APIs

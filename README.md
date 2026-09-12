@@ -47,7 +47,7 @@ npm install @lafken/main @lafken/api @lafken/common
 
 ### System Requirements
 
-- Node.js >= 20.19
+- Node.js >= 22.13
 - pnpm >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
 - TypeScript >= 5.0 (with `experimentalDecorators` and `emitDecoratorMetadata` enabled)
 
