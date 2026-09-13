@@ -1,0 +1,15 @@
+/* Not wrapped in @layer, so these unconditionally win over the theme's
+   @layer rapide accent tokens regardless of import order. */
+:root,
+::backdrop {
+  --sl-color-accent-low: hsl(25, 55%, 18%);
+  --sl-color-accent: #d26413;
+  --sl-color-accent-high: hsl(25, 85%, 68%);
+}
+
+:root[data-theme="light"],
+[data-theme="light"] ::backdrop {
+  --sl-color-accent-low: hsl(25, 85%, 93%);
+  --sl-color-accent: #d26413;
+  --sl-color-accent-high: hsl(25, 85%, 32%);
+}

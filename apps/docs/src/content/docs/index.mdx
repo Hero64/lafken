@@ -1,0 +1,32 @@
+---
+title: Lafken
+description: A TypeScript framework for building serverless AWS applications using decorators.
+template: splash
+hero:
+  tagline: Define AWS infrastructure with TypeScript decorators. Lafken turns your application code into Terraform via CDKTN.
+  actions:
+    - text: Get Started
+      link: /lafken/guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/Hero64/lafken
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<Card title="Decorator-based" icon="seti:typescript">
+		Define APIs, queues, tables and more with familiar TypeScript decorators — no separate infrastructure DSL to learn.
+	</Card>
+	<Card title="Type-safe" icon="approve-check">
+		Full TypeScript support end to end, from request parsing to DynamoDB queries.
+	</Card>
+	<Card title="Infrastructure as code" icon="setting">
+		Every resource compiles to Terraform through CDKTN — inspect the plan before it ever touches AWS.
+	</Card>
+	<Card title="Modular" icon="puzzle">
+		One resolver per AWS service. Compose only what your app needs, or write your own resolver.
+	</Card>
+</CardGrid>
