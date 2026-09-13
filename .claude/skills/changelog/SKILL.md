@@ -24,13 +24,14 @@ BASE=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 git log --no-merges --pretty=format:'%h %s' "$BASE"..HEAD
 ```
 
-Two traps make the obvious alternatives wrong here:
+Two details make the obvious alternatives wrong here:
 
-- **`git tag --sort=-v:refname | head -1` returns `s3-file`.** The repo carries
-  leftover tags from an older scheme — per-package ones (`@lafken/api@0.1.1`,
-  `@lafken/common-v0.7.0`) and branch-shaped ones (`push`, `s3-file`,
-  `functions`). The `^[0-9]+\.[0-9]+\.[0-9]+$` filter is what isolates the
-  current scheme.
+- **Keep the `^[0-9]+\.[0-9]+\.[0-9]+$` filter.** The repo used to carry 82
+  leftover tags from an older scheme — per-package (`@lafken/api@0.1.1`) and
+  branch-shaped (`push`, `s3-file`) — which made a bare
+  `git tag --sort=-v:refname | head -1` return `s3-file`. They were deleted in
+  September 2026, but the filter also rejects a future pre-release tag
+  (`0.16.0-beta.0`), which is not a base for the next changelog.
 - **`main` can lag behind what is published.** At the time of writing, `0.14.4`
   was tagged and live on npm while `origin/main` sat four commits behind local
   `main`. A tag records what actually shipped; a branch records what someone
