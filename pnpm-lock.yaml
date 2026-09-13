@@ -45,6 +45,9 @@ catalogs:
     '@types/node':
       specifier: 26.2.0
       version: 26.2.0
+    '@vitest/coverage-v8':
+      specifier: ^4.1.10
+      version: 4.1.11
     '@vitest/runner':
       specifier: ^4.1.10
       version: 4.1.11
@@ -116,6 +119,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   apps/example:
     dependencies:
@@ -179,7 +185,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@22.20.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@22.20.1)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/api:
     dependencies:
@@ -198,7 +204,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -208,6 +214,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -225,7 +234,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/auth:
     dependencies:
@@ -241,7 +250,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -251,6 +260,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -268,7 +280,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/bucket:
     dependencies:
@@ -287,7 +299,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -297,6 +309,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -314,7 +329,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/common:
     dependencies:
@@ -327,13 +342,16 @@ importers:
     devDependencies:
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@4.1.11)
       '@swc/core':
         specifier: 'catalog:'
         version: 1.16.1(@swc/helpers@0.5.23)
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -345,7 +363,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/dynamo:
     dependencies:
@@ -367,7 +385,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -377,6 +395,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -397,7 +418,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/event:
     dependencies:
@@ -413,7 +434,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -423,6 +444,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -440,7 +464,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/main:
     dependencies:
@@ -456,10 +480,13 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       cdktn:
         specifier: 'catalog:'
         version: 0.24.0(constructs@10.8.1)
@@ -471,7 +498,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/queue:
     dependencies:
@@ -490,7 +517,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -503,6 +530,9 @@ importers:
       '@types/aws-lambda':
         specifier: 'catalog:'
         version: 8.10.163
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -520,7 +550,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/resolver:
     dependencies:
@@ -536,10 +566,13 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       cdktn:
         specifier: 'catalog:'
         version: 0.24.0(constructs@10.8.1)
@@ -551,7 +584,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/schedule:
     dependencies:
@@ -567,7 +600,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -577,6 +610,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -594,7 +630,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/standalone:
     dependencies:
@@ -610,7 +646,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -620,6 +656,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -637,7 +676,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/state-machine:
     dependencies:
@@ -653,7 +692,7 @@ importers:
         version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))
+        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -663,6 +702,9 @@ importers:
       '@swc/helpers':
         specifier: 'catalog:'
         version: 0.5.23
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.11(vitest@4.1.11)
       '@vitest/runner':
         specifier: 'catalog:'
         version: 4.1.11
@@ -680,7 +722,7 @@ importers:
         version: 1.5.11(@swc/core@1.16.1(@swc/helpers@0.5.23))(rolldown@1.2.7)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
 packages:
 
@@ -818,6 +860,10 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
+
+  '@bcoe/v8-coverage@1.0.2':
+    resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
+    engines: {node: '>=18'}
 
   '@biomejs/biome@2.5.7':
     resolution: {integrity: sha512-zr8K/DcY5tYsQOQwqMJ0AWElo6QgmgNI7idXgXLhevVszlt8RGVpesEJPqx3ThazLaOwjJ5Y8fz3BtH5fGZNsw==}
@@ -1727,6 +1773,15 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@vitest/coverage-v8@4.1.11':
+    resolution: {integrity: sha512-8MVGEFnJIcdGjcbfKmeq8z0pZHH0JlVtoVZH9Q/qwUp6wyFnEJUBMrw9DCaj+ra3vShGmhavjalMIhPNxZAUcw==}
+    peerDependencies:
+      '@vitest/browser': 4.1.11
+      vitest: 4.1.11
+    peerDependenciesMeta:
+      '@vitest/browser':
+        optional: true
+
   '@vitest/expect@4.1.11':
     resolution: {integrity: sha512-VX2x5vNJXET47KAFzwERI+KRMtTTCSWTfSMKsW7JsUsXV4psq++e3DvZpuTDOpHcxytiDs6p2nhVb2tVDiiUYw==}
 
@@ -1797,6 +1852,9 @@ packages:
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
+
+  ast-v8-to-istanbul@1.0.6:
+    resolution: {integrity: sha512-fvpl29helSO2w/z7utIbrkNXILdrLwDwAMH2I/zPKlGf5244+gf+B4cyS1sANcrPY2h+hWCGSgC8N61s/+AF9A==}
 
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
@@ -2218,6 +2276,9 @@ packages:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
+  html-escaper@2.0.2:
+    resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
   husky@9.1.7:
     resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
     engines: {node: '>=18'}
@@ -2335,9 +2396,24 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  istanbul-lib-coverage@3.2.2:
+    resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
+    engines: {node: '>=8'}
+
+  istanbul-lib-report@3.0.1:
+    resolution: {integrity: sha512-GCfE1mtsHGOELCU8e/Z7YWzpmybrx/+dSTfLrvY8qRmaY6zXTKWn6WQIjaAFw069icm6GVMNkgu0NzI4iPZUNw==}
+    engines: {node: '>=10'}
+
+  istanbul-reports@3.2.0:
+    resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
+    engines: {node: '>=8'}
+
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
+
+  js-tokens@10.0.0:
+    resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2490,6 +2566,13 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  magicast@0.5.5:
+    resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
+
+  make-dir@4.0.0:
+    resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
+    engines: {node: '>=10'}
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -3323,6 +3406,8 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
+  '@bcoe/v8-coverage@1.0.2': {}
+
   '@biomejs/biome@2.5.7':
     optionalDependencies:
       '@biomejs/cli-darwin-arm64': 2.5.7
@@ -3442,15 +3527,15 @@ snapshots:
       - debug
       - supports-color
 
-  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))':
+  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@4.1.11)':
     dependencies:
       cdktn: 0.24.0(constructs@10.6.0)
-      vitest: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
-  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)))':
+  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)':
     dependencies:
       cdktn: 0.24.0(constructs@10.8.1)
-      vitest: 4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
 
   '@colors/colors@1.5.0':
     optional: true
@@ -4108,6 +4193,20 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
+  '@vitest/coverage-v8@4.1.11(vitest@4.1.11)':
+    dependencies:
+      '@bcoe/v8-coverage': 1.0.2
+      '@vitest/utils': 4.1.11
+      ast-v8-to-istanbul: 1.0.6
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-reports: 3.2.0
+      magicast: 0.5.5
+      obug: 2.1.4
+      std-env: 4.2.0
+      tinyrainbow: 3.1.1
+      vitest: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
+
   '@vitest/expect@4.1.11':
     dependencies:
       '@standard-schema/spec': 1.1.0
@@ -4190,6 +4289,12 @@ snapshots:
       is-array-buffer: 3.0.5
 
   assertion-error@2.0.1: {}
+
+  ast-v8-to-istanbul@1.0.6:
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      estree-walker: 3.0.3
+      js-tokens: 10.0.0
 
   available-typed-arrays@1.0.7:
     dependencies:
@@ -4607,6 +4712,8 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  html-escaper@2.0.2: {}
+
   husky@9.1.7: {}
 
   iconv-lite@0.7.3:
@@ -4715,7 +4822,22 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  istanbul-lib-coverage@3.2.2: {}
+
+  istanbul-lib-report@3.0.1:
+    dependencies:
+      istanbul-lib-coverage: 3.2.2
+      make-dir: 4.0.0
+      supports-color: 7.2.0
+
+  istanbul-reports@3.2.0:
+    dependencies:
+      html-escaper: 2.0.2
+      istanbul-lib-report: 3.0.1
+
   jiti@2.6.1: {}
+
+  js-tokens@10.0.0: {}
 
   js-tokens@4.0.0: {}
 
@@ -4885,6 +5007,16 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  magicast@0.5.5:
+    dependencies:
+      '@babel/parser': 7.29.8
+      '@babel/types': 7.29.8
+      source-map-js: 1.2.1
+
+  make-dir@4.0.0:
+    dependencies:
+      semver: 7.8.5
 
   math-intrinsics@1.1.0: {}
 
@@ -5359,7 +5491,7 @@ snapshots:
       jiti: 2.6.1
       yaml: 2.9.0
 
-  vitest@4.1.11(@types/node@22.20.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0)):
+  vitest@4.1.11(@types/node@22.20.1)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
@@ -5383,10 +5515,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.20.1
+      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.11(@types/node@26.2.0)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)):
+  vitest@4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@26.2.0)(jiti@2.6.1)(yaml@2.9.0))
@@ -5410,6 +5543,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.2.0
+      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
 

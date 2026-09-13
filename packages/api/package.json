@@ -54,7 +54,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -66,6 +67,7 @@
     "@lafken/common": "workspace:*",
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
     "@cdktn/vitest": "catalog:",
