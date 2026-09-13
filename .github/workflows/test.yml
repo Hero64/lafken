@@ -79,3 +79,38 @@ jobs:
 
       - name: 🧪 Run tests
         run: pnpm test
+
+  coverage:
+    name: 📊 Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 📊 Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: 📋 Summary
+        if: always()
+        run: node scripts/coverage-report.js
+
+      - name: 📤 Upload HTML reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: packages/*/coverage/
+          retention-days: 14

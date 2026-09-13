@@ -60,7 +60,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "catalog:",
@@ -73,6 +74,7 @@
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
     "@types/aws-lambda": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
     "@cdktn/vitest": "catalog:",

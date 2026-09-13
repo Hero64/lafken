@@ -1,6 +1,7 @@
 import path from 'node:path';
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
+import { coverage } from '../../vitest.coverage.mts';
 
 export default defineConfig({
   oxc: false,
@@ -10,6 +11,15 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
+    coverage: {
+      ...coverage,
+      thresholds: {
+        statements: 73,
+        branches: 60,
+        functions: 78,
+        lines: 73,
+      },
+    },
   },
   resolve: {
     alias: [

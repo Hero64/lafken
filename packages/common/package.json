@@ -33,7 +33,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@types/aws-lambda": "catalog:",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "@cdktn/vitest": "catalog:",
     "typescript": "catalog:",

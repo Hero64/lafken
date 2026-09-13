@@ -21,7 +21,12 @@
     },
     "test": {
       "cache": false,
-      "inputs": ["$TURBO_DEFAULT$", "vitest.config.ts", "vitest.setup.ts"]
+      "inputs": ["$TURBO_DEFAULT$", "vitest.config.mts", "vitest.setup.mts"]
+    },
+    "test:coverage": {
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", "vitest.config.mts", "vitest.setup.mts"],
+      "outputs": ["coverage/**"]
     }
   }
 }

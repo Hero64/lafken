@@ -61,7 +61,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "catalog:",
@@ -74,6 +75,7 @@
     "@lafken/common": "workspace:*",
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "aws-sdk-client-mock": "catalog:",
     "cdktn": "catalog:",

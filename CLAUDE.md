@@ -14,6 +14,7 @@ All documentation, comments, and communications must be in English.
 pnpm install              # install (requires Node >= 22.13, pnpm >= 11.14.0)
 pnpm build                # build all packages (turbo, respects dependency order)
 pnpm test                 # run all tests
+pnpm test:coverage        # tests + coverage; each package enforces its own thresholds
 pnpm lint                 # lint (Biome)
 pnpm format               # format with Biome (do NOT use Prettier)
 pnpm check-types          # typecheck (requires dependencies built first — run via turbo from root)

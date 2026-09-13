@@ -34,7 +34,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -47,6 +48,7 @@
     "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {

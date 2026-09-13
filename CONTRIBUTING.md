@@ -224,8 +224,37 @@ pnpm test:coverage
 pnpm test --watch
 
 # For a specific package
-pnpm test --filter=@lafken/api
+pnpm --filter @lafken/api test
 ```
+
+### Coverage
+
+Every published package measures itself and enforces its own thresholds:
+
+```bash
+pnpm test:coverage                       # all packages, fails under threshold
+pnpm --filter @lafken/api test:coverage  # just one
+node scripts/coverage-report.js          # one table out of the 12 reports
+```
+
+Each package writes `packages/<name>/coverage/` (gitignored); open
+`index.html` there to see which lines are missing. The 📊 Coverage job on CI
+prints the same table in its summary and uploads the HTML reports as an
+artifact; it runs on one Node version only, since coverage measures which lines
+the suite reaches and that does not change between releases. The `Total` row is
+weighted by size, not an average of the twelve percentages.
+
+The thresholds live in each package's `vitest.config.mts` and are set two
+points below what the package already reaches. **They are a ratchet.** Raise
+them when coverage improves; if a change pushes a package below its floor, add
+the missing tests rather than lowering the number. Everything shared — the
+provider, what is included and excluded, the reporters — lives in
+`vitest.coverage.mts` at the repository root.
+
+`.types.ts`, `index.ts` and `*.d.ts` files are excluded: they compile to
+nothing, so they would report as uncovered and distort every number.
+`apps/example` is not measured — it exercises the framework as a user would,
+which says nothing about the framework's own tests.
 
 ### Writing Tests
 
