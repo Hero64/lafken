@@ -27,8 +27,9 @@ jobs:
     environment: release
 
     permissions:
-      contents: write # release commit, tag and GitHub release
+      contents: write # release branch, tag and GitHub release
       id-token: write # npm trusted publishing (OIDC)
+      pull-requests: write # the release pull request
 
     steps:
       - name: 📥 Checkout
@@ -62,6 +63,7 @@ jobs:
 
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "DIST_TAG=$dist_tag" >> "$GITHUB_ENV"
+          echo "RELEASE_BRANCH=chore/release-$version" >> "$GITHUB_ENV"
           echo "Releasing $version under dist-tag '$dist_tag'"
 
       - name: 📝 Extract release notes
@@ -110,9 +112,24 @@ jobs:
 
           git tag -a "$VERSION" -m "$VERSION"
 
-      # npm is the only irreversible step, so it runs before anything is pushed
-      # to git. pnpm skips versions that are already published, which makes a
-      # re-run after a partial failure safe.
+      # The release commit goes to its own branch, never to the branch this ran
+      # from. The default branch's ruleset requires a pull request and the
+      # GITHUB_TOKEN cannot bypass it, so writing there directly always fails —
+      # this way the workflow can be dispatched from any branch, main included.
+      #
+      # It also runs before npm: publishing is irreversible, so anything that
+      # can be refused should be attempted first. Force-push keeps a re-run
+      # after a failure idempotent.
+      - name: ⬆️ Push the release branch
+        if: ${{ !inputs.dry_run }}
+        run: |
+          out=$(git push --force origin "HEAD:refs/heads/$RELEASE_BRANCH" 2>&1) && status=0 || status=$?
+          echo "$out"
+          if [ "${status:-0}" -ne 0 ] || echo "$out" | grep -qE "remote rejected|GH013"; then
+            echo "::error::Push to $RELEASE_BRANCH was rejected — nothing was published."
+            exit 1
+          fi
+
       - name: 📦 Publish to npm
         run: |
           pnpm -r publish \
@@ -121,9 +138,9 @@ jobs:
             --tag "$DIST_TAG" \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
-      - name: ⬆️ Push release commit and tag
+      - name: ⬆️ Push the release tag
         if: ${{ !inputs.dry_run }}
-        run: git push origin "HEAD:$GITHUB_REF_NAME" "refs/tags/$VERSION"
+        run: git push origin "refs/tags/$VERSION"
 
       - name: 🏷️ Create GitHub release
         if: ${{ !inputs.dry_run }}
@@ -141,6 +158,31 @@ jobs:
             --verify-tag \
             $prerelease
 
+      - name: 🔀 Open the release pull request
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          existing=$(gh pr list --head "$RELEASE_BRANCH" --state open --json url --jq '.[0].url')
+
+          if [ -n "$existing" ]; then
+            echo "Pull request already open: $existing"
+            echo "PR_URL=$existing" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          url=$(gh pr create \
+            --base "$BASE" \
+            --head "$RELEASE_BRANCH" \
+            --title "chore(release): $VERSION" \
+            --body "Version bump for \`$VERSION\`, already published to npm under the \`$DIST_TAG\` tag.
+
+          Merge this to bring \`$BASE\` in line with the registry. Use a merge commit rather than a squash, so the \`$VERSION\` tag stays inside the branch history.")
+
+          echo "Opened $url"
+          echo "PR_URL=$url" >> "$GITHUB_ENV"
+
       - name: 📋 Summary
         run: |
           {
@@ -150,6 +192,8 @@ jobs:
               echo "**Dry run** — nothing was published or pushed."
             else
               echo "Published to npm under dist-tag \`$DIST_TAG\`."
+              echo
+              echo "Merge ${PR_URL:-the release pull request} to update the default branch."
             fi
             echo
             cat "$RUNNER_TEMP/release-notes.md"
