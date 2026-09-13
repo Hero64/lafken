@@ -1,15 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Renders one markdown table out of the per-package coverage summaries.
- *
- * Each package measures itself, so `pnpm test:coverage` leaves twelve
- * `packages/*\/coverage/coverage-summary.json` files and no repo-wide number.
- * This collects them into a single view, sorted weakest first — the interesting
- * end of the list.
- *
- * On CI the table is appended to the job summary; run it locally with no
- * GITHUB_STEP_SUMMARY set and it prints to stdout instead.
+ * Folds the per-package coverage summaries into one markdown table, appended to
+ * the CI job summary when GITHUB_STEP_SUMMARY is set.
  *
  * Usage: node scripts/coverage-report.js
  */
@@ -48,8 +41,6 @@ function render(rows) {
     ),
   ];
 
-  // A weighted total, not an average of averages: a 40-line package must not
-  // count the same as a 1900-line one.
   const sum = (metric, key) =>
     rows.reduce((acc, { total }) => acc + total[metric][key], 0);
   const overall = METRICS.map((m) => {

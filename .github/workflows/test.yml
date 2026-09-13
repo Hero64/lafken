@@ -91,9 +91,6 @@ jobs:
       - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v6
 
-      # One version is enough: coverage measures which lines the suite reaches,
-      # and that does not change between Node releases. The matrix above is what
-      # proves the code runs on both.
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -103,8 +100,6 @@ jobs:
       - name: 📚 Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Each package enforces its own thresholds, so this step fails as soon as
-      # one of them drops below what it already reached.
       - name: 📊 Run tests with coverage
         run: pnpm test:coverage
 

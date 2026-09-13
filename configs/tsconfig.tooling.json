@@ -1,7 +1,4 @@
 {
-  // Type-checks the config and script files that live outside any package, so
-  // an option vitest no longer supports fails `pnpm check-types` instead of
-  // being silently ignored at runtime.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,

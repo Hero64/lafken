@@ -13,9 +13,6 @@ export default defineConfig({
     include: ['src/**/*.spec.ts'],
     coverage: {
       ...coverage,
-      // A ratchet, not a target: these are the numbers this package
-      // already reaches, minus 2 points of slack. Raise them when
-      // coverage improves; never lower them to make a build pass.
       thresholds: {
         statements: 94,
         branches: 89,

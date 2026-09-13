@@ -240,7 +240,9 @@ node scripts/coverage-report.js          # one table out of the 12 reports
 Each package writes `packages/<name>/coverage/` (gitignored); open
 `index.html` there to see which lines are missing. The 📊 Coverage job on CI
 prints the same table in its summary and uploads the HTML reports as an
-artifact.
+artifact; it runs on one Node version only, since coverage measures which lines
+the suite reaches and that does not change between releases. The `Total` row is
+weighted by size, not an average of the twelve percentages.
 
 The thresholds live in each package's `vitest.config.mts` and are set two
 points below what the package already reaches. **They are a ratchet.** Raise
