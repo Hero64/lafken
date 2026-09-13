@@ -51,8 +51,11 @@ export const Payload = createPayloadDecorator({
  *
  * - `source: 'attribute'` (default) — reads a **message attribute** whose
  *   name matches the property (or the `name` option).
- * - `source: 'body'` — reads from the raw message body string; set
- *   `parse: true` to JSON-parse it and pick the matching key.
+ * - `source: 'body'` — reads the raw message body string. Set `parse: true`
+ *   to JSON-parse it first. Either way, the **entire** body is assigned to
+ *   this one property — it is not split by key — so only one `@Param` with
+ *   `source: 'body'` is allowed per payload class. The `name` option has no
+ *   effect for this source.
  * - `source: 'record'` — reads a top-level SQS record field such as
  *   `messageId`, `receiptHandle`, `awsRegion`, etc. The `name` option
  *   can override which record field is read.
