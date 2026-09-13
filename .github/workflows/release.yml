@@ -81,6 +81,14 @@ jobs:
       - name: 📚 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 📦 Cache turbo
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-release-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-release-
+
       - name: 🎨 Lint
         run: pnpm lint
 
