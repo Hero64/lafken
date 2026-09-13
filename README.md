@@ -1,9 +1,17 @@
-# Lafken
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.png">
+    <img src="assets/logo-light.png" alt="Lafken" width="320">
+  </picture>
+</p>
 
-[![npm version](https://img.shields.io/npm/v/@lafken/main?color=cb3837&logo=npm)](https://www.npmjs.com/package/@lafken/main)
-[![CI](https://github.com/Hero64/lafken/actions/workflows/test.yml/badge.svg)](https://github.com/Hero64/lafken/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Node](https://img.shields.io/node/v/@lafken/main)](https://nodejs.org)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@lafken/main"><img src="https://img.shields.io/npm/v/@lafken/main?color=cb3837&logo=npm" alt="npm version"></a>
+  <a href="https://github.com/Hero64/lafken/actions/workflows/test.yml"><img src="https://github.com/Hero64/lafken/actions/workflows/test.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/@lafken/main" alt="Node"></a>
+</p>
 
 **A TypeScript framework for building serverless applications on AWS using decorators.**
 
