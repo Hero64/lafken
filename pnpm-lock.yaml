@@ -22,8 +22,8 @@ catalogs:
       specifier: 2.5.7
       version: 2.5.7
     '@cdktn/provider-aws':
-      specifier: ^25.0.0
-      version: 25.4.0
+      specifier: ^25.5.0
+      version: 25.5.0
     '@cdktn/vitest':
       specifier: ^0.1.0
       version: 0.1.0
@@ -61,7 +61,7 @@ catalogs:
       specifier: ^0.24.0
       version: 0.24.0
     constructs:
-      specifier: ^10.8.0
+      specifier: ^10.8.1
       version: 10.8.1
     dayjs:
       specifier: 1.11.21
@@ -127,7 +127,7 @@ importers:
     dependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@lafken/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -201,7 +201,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -247,7 +247,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -296,7 +296,7 @@ importers:
         version: 3.1127.0
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -382,7 +382,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -431,7 +431,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -477,7 +477,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -514,7 +514,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -563,7 +563,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -597,7 +597,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -643,7 +643,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -689,7 +689,7 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
         version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@4.1.11)
@@ -934,8 +934,8 @@ packages:
   '@cdktn/hcl2json@0.24.0':
     resolution: {integrity: sha512-ECDHCIhXkg6cBVwm2842II5NYzcqaZyz99hqVFIhBEeWCYG2NmfTaCxbdOXWo7nlWI4Dn+lhekgnksEwolH4Yg==}
 
-  '@cdktn/provider-aws@25.4.0':
-    resolution: {integrity: sha512-x3s88MQvYavAd1yXcaOQRGDe5rdeN4NiuTrsXTdO7Zq/oO00joVr3l8pS+XMY1vwcuDBpnKBA+CN6rChj4Gv4g==}
+  '@cdktn/provider-aws@25.5.0':
+    resolution: {integrity: sha512-84Ga2PZ4y+UxpOxp3VedlFNax/LFNKrI8Y2NBQ0r/MxvOUpYLZ6FnjE5zowoXUw9nGcrOYgibEBMEg2l6zrqFw==}
     engines: {node: '>= 22.11.0'}
     peerDependencies:
       cdktn: ^0.24.0
@@ -3494,7 +3494,7 @@ snapshots:
     dependencies:
       fs-extra: 11.3.6
 
-  '@cdktn/provider-aws@25.4.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@cdktn/provider-aws@25.5.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
       cdktn: 0.24.0(constructs@10.8.1)
       constructs: 10.8.1
