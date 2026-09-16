@@ -36,3 +36,6 @@ lib
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 graft/
+
+# Machine-specific agent helpers (absolute paths are baked in at install time)
+.claude/helpers/
