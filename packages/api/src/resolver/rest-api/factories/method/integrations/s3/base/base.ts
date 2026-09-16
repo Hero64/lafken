@@ -133,7 +133,6 @@ export class BucketBaseIntegration implements Integration {
     responses[0].integrationParameters = {
       'method.response.header.Content-Type': 'integration.response.header.Content-Type',
     };
-    responses[0].rawBody = true;
 
     const rebuildUri = async () => {
       const rebuilt: BucketIntegrationResponse = await resource[handler.name](

@@ -94,23 +94,24 @@ export type CorsHttpMethod =
  */
 export interface CorsOptions {
   /**
-   * Specifies the origins that are allowed to make requests to the API.
+   * Specifies the origin that is allowed to make requests to the API.
    * Can be:
    * - `true`: Allow all origins (`*`)
    * - `false`: Disable CORS, no header is emitted
    * - `string`: Single origin (e.g., 'https://example.com')
-   * - `string[]`: Multiple specific origins
    *
-   * `Access-Control-Allow-Origin` holds a single value, so a list of origins
-   * cannot be rendered statically: the first entry is mapped as a response
-   * parameter and the rest are matched against the request `Origin` at runtime
-   * in the `OPTIONS` preflight. `*` cannot be mixed with specific origins, and
-   * cannot be combined with {@link CorsOptions.allowCredentials} — browsers
+   * Only one origin is supported. `Access-Control-Allow-Origin` holds a single
+   * value, and the gateway responses API Gateway emits before reaching the
+   * integration are rendered by a non-VTL template that cannot match the
+   * request origin against a list, so a multi-origin API would answer its
+   * errors for one origin only. Configure the origin per deployment instead.
+   *
+   * `*` cannot be combined with {@link CorsOptions.allowCredentials} — browsers
    * reject that pair.
    *
    * @default false
    */
-  allowOrigins?: boolean | string | string[];
+  allowOrigins?: boolean | string;
 
   /**
    * Specifies the HTTP methods that are allowed when accessing the resource.

@@ -129,4 +129,5 @@ export interface OpenApiDocument {
 export interface GatewayResponseObject {
   statusCode?: string;
   responseTemplates?: Record<string, string>;
+  responseParameters?: Record<string, string>;
 }

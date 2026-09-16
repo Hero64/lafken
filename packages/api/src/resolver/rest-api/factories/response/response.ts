@@ -52,11 +52,11 @@ export class ResponseFactory {
       };
 
       const key = response.selectionPattern ?? 'default';
-      const template = this.buildIntegrationTemplate(response, cors);
-
       integrationResponses[key] = {
         statusCode: response.statusCode,
-        responseTemplates: template ? { 'application/json': template } : undefined,
+        responseTemplates: response.template
+          ? { 'application/json': response.template }
+          : undefined,
         responseParameters:
           Object.keys(integrationParameters).length > 0
             ? integrationParameters
@@ -67,10 +67,6 @@ export class ResponseFactory {
     return { operationResponses, integrationResponses };
   }
 
-  /**
-   * Merges the CORS headers for `response.statusCode` into the response's own
-   * method parameters (boolean flags) and integration parameters (header values).
-   */
   private mergeCorsParameters(response: ResponseHandler, cors?: CorsOptions) {
     const corsHeaders = this.corsHelper.isEnabled(cors)
       ? this.corsHelper.buildActualResponseHeaders(cors, response.statusCode)
@@ -83,36 +79,6 @@ export class ResponseFactory {
       },
       integrationParameters: { ...response.integrationParameters, ...corsHeaders },
     };
-  }
-
-  /**
-   * The integration response template, with the multi-origin CORS override
-   * prepended when one applies.
-   *
-   * `Access-Control-Allow-Origin` holds a single value, so the origins past the
-   * first can only be matched at runtime, and matching them needs a template.
-   * A response with no template of its own gets `$input.body`, which forwards
-   * the integration payload verbatim.
-   */
-  private buildIntegrationTemplate(
-    response: ResponseHandler,
-    cors?: CorsOptions
-  ): string | undefined {
-    const override = this.corsHelper.isEnabled(cors)
-      ? this.corsHelper.buildOriginOverrideTemplate(cors)
-      : undefined;
-
-    if (!override) {
-      return response.template;
-    }
-
-    if (response.rawBody) {
-      throw new Error(
-        'cors.allowOrigins with several origins cannot be applied to a response that forwards its body untouched, such as an S3 download: matching the origin needs a mapping template, which would corrupt the payload. Declare a single origin for this API.'
-      );
-    }
-
-    return `${override}\n${response.template ?? '$input.body'}`;
   }
 
   private buildResponseHeaders(methodParameters?: Record<string, boolean>) {
@@ -160,7 +126,6 @@ export class ResponseFactory {
         response,
         cors
       );
-      const template = this.buildIntegrationTemplate(response, cors);
 
       const methodResponse = new ApiGatewayMethodResponse(
         this.scope,
@@ -200,7 +165,9 @@ export class ResponseFactory {
               ? integrationParameters
               : undefined,
           selectionPattern: response.selectionPattern,
-          responseTemplates: template ? { 'application/json': template } : undefined,
+          responseTemplates: response.template
+            ? { 'application/json': response.template }
+            : undefined,
           dependsOn: [integration, methodResponse],
         }
       );

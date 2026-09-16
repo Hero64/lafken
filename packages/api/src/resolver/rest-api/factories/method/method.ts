@@ -49,6 +49,7 @@ export class MethodFactory {
   private methodResources: TerraformResource[] = [];
   private methodSettings: MethodSettingsEntry[] = [];
   private corsHelper = new CorsHelper();
+  private corsPaths = new Set<string>();
 
   constructor(private scope: RestApi) {}
 
@@ -141,14 +142,19 @@ export class MethodFactory {
         : undefined,
     });
 
-    if (this.corsHelper.isEnabled(props.cors)) {
-      const corsResources = this.corsHelper.createOptionsMethod(
-        this.scope,
-        methodName,
-        resourceId,
-        props.cors
+    // One preflight per path: every method sharing it answers the same OPTIONS,
+    // and a second one would collide on the same resource. Keyed by path
+    // because resourceId is a fresh token on each read.
+    if (this.corsHelper.isEnabled(props.cors) && !this.corsPaths.has(fullPath)) {
+      this.corsPaths.add(fullPath);
+      this.methodResources.push(
+        ...this.corsHelper.createOptionsMethod(
+          this.scope,
+          methodName,
+          resourceId,
+          props.cors
+        )
       );
-      this.methodResources.push(...corsResources);
     }
 
     const integration = await this.integrateMethod({
@@ -219,10 +225,7 @@ export class MethodFactory {
       this.scope.openapiFactory.addOperation(
         fullPath,
         'OPTIONS',
-        corsToOptionsOperation(
-          this.corsHelper.buildHeaders(cors),
-          this.corsHelper.buildOriginOverrideTemplate(cors)
-        )
+        corsToOptionsOperation(this.corsHelper.buildHeaders(cors))
       );
     }
 

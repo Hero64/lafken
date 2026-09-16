@@ -1,3 +1,4 @@
+import { ApiGatewayGatewayResponse } from '@cdktn/provider-aws/lib/api-gateway-gateway-response';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
@@ -14,6 +15,7 @@ import {
   type ApiLambdaMetadata,
   type ApiResourceMetadata,
   type BucketIntegrationResponse,
+  Delete,
   Get,
 } from '../../../main';
 import { setupInternalTestingRestApi } from '../../utils/testing.utils';
@@ -134,6 +136,115 @@ describe('InternalRestApi', () => {
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayMethod, {
       http_method: 'OPTIONS',
     });
+  });
+
+  it('should create a single OPTIONS method for a path served by several methods', async () => {
+    @Api({ path: 'users' })
+    class TestingApiShared {
+      @Get({ integration: 'bucket', action: 'Download', path: 'file' })
+      read(): BucketIntegrationResponse {
+        return { bucket: 'test', object: 'foo.json' };
+      }
+
+      @Delete({ integration: 'bucket', action: 'Delete', path: 'file' })
+      remove(): BucketIntegrationResponse {
+        return { bucket: 'test', object: 'foo.json' };
+      }
+    }
+
+    const { stack, restApi, app } = setupInternalTestingRestApi({
+      cors: { allowOrigins: true },
+    });
+    const metadata = getResourceMetadata<ApiResourceMetadata>(TestingApiShared);
+
+    for (const handler of getResourceHandlerMetadata<ApiLambdaMetadata>(
+      TestingApiShared
+    )) {
+      await restApi.addMethod(app, {
+        classResource: TestingApiShared,
+        handler,
+        resourceMetadata: metadata,
+      });
+    }
+
+    const methods = Object.values<{ http_method: string }>(
+      JSON.parse(Testing.synth(stack)).resource.aws_api_gateway_method
+    );
+
+    // A second one lands on the same resource and API Gateway rejects the apply.
+    expect(methods.filter(({ http_method }) => http_method === 'OPTIONS')).toHaveLength(
+      1
+    );
+  });
+
+  it('should add cors headers to the default gateway responses', () => {
+    const { stack } = setupInternalTestingRestApi({
+      cors: { allowOrigins: 'https://example.com' },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    for (const responseType of ['DEFAULT_4XX', 'DEFAULT_5XX']) {
+      expect(synthesized).toHaveResourceWithProperties(ApiGatewayGatewayResponse, {
+        response_type: responseType,
+        response_parameters: {
+          'gatewayresponse.header.Access-Control-Allow-Origin': "'https://example.com'",
+          'gatewayresponse.header.Vary': "'Origin'",
+        },
+      });
+    }
+  });
+
+  it('should deploy after the gateway responses', async () => {
+    @Api()
+    class TestingApiDeploy {
+      @Get({ integration: 'bucket', action: 'Download', path: 'test/method' })
+      get(): BucketIntegrationResponse {
+        return { bucket: 'test', object: 'foo.json' };
+      }
+    }
+
+    const { stack, restApi, app } = setupInternalTestingRestApi({
+      cors: { allowOrigins: 'https://example.com' },
+    });
+
+    await restApi.addMethod(app, {
+      classResource: TestingApiDeploy,
+      handler: getResourceHandlerMetadata<ApiLambdaMetadata>(TestingApiDeploy)[0],
+      resourceMetadata: getResourceMetadata<ApiResourceMetadata>(TestingApiDeploy),
+    });
+    restApi.createStageDeployment();
+
+    const resources = JSON.parse(Testing.synth(stack)).resource;
+    const deployment = Object.values<{ depends_on: string[] }>(
+      resources.aws_api_gateway_deployment
+    )[0];
+    const gatewayResponseIds = Object.keys(resources.aws_api_gateway_gateway_response);
+
+    expect(gatewayResponseIds).toHaveLength(2);
+    for (const id of gatewayResponseIds) {
+      expect(deployment.depends_on).toContain(`aws_api_gateway_gateway_response.${id}`);
+    }
+  });
+
+  it('should not add gateway responses when cors is disabled', () => {
+    const { stack } = setupInternalTestingRestApi({
+      cors: { allowOrigins: false },
+    });
+
+    expect(
+      JSON.parse(Testing.synth(stack)).resource.aws_api_gateway_gateway_response
+    ).toBeUndefined();
+  });
+
+  it('should not add cors headers to gateway responses when addToErrorResponses is false', () => {
+    const { stack } = setupInternalTestingRestApi({
+      cors: { allowOrigins: 'https://example.com', addToErrorResponses: false },
+    });
+
+    expect(
+      JSON.parse(Testing.synth(stack)).resource.aws_api_gateway_gateway_response
+    ).toBeUndefined();
   });
 
   it('should create a rest api policy when private endpoint with vpcEndpointIds is provided', async () => {

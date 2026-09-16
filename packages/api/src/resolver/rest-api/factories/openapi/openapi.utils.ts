@@ -61,8 +61,7 @@ function toParameterObject(
  * reusing the header map produced by `CorsHelper.buildHeaders`.
  */
 export function corsToOptionsOperation(
-  corsHeaders: Record<string, string>,
-  originOverrideTemplate?: string
+  corsHeaders: Record<string, string>
 ): OperationObject {
   const responseHeaders: Record<string, { schema: JsonSchema }> = {};
   for (const key of Object.keys(corsHeaders)) {
@@ -81,7 +80,7 @@ export function corsToOptionsOperation(
         default: {
           statusCode: '200',
           responseParameters: corsHeaders,
-          responseTemplates: { 'application/json': originOverrideTemplate ?? '' },
+          responseTemplates: { 'application/json': '' },
         },
       },
     },

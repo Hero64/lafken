@@ -38,15 +38,6 @@ describe('CorsHelper', () => {
       );
     });
 
-    it('should map the first origin of an array statically', () => {
-      const headers = corsHelper.buildHeaders({
-        allowOrigins: ['https://a.com', 'https://b.com'],
-      });
-      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe(
-        "'https://a.com'"
-      );
-    });
-
     it('should set Vary to Origin for a specific origin', () => {
       const headers = corsHelper.buildHeaders({ allowOrigins: 'https://a.com' });
       expect(headers['method.response.header.Vary']).toBe("'Origin'");
@@ -57,25 +48,20 @@ describe('CorsHelper', () => {
       expect(headers['method.response.header.Vary']).toBeUndefined();
     });
 
-    it('should reject an empty origin array', () => {
-      expect(() => corsHelper.buildHeaders({ allowOrigins: [] })).toThrow(
-        /at least one origin/
-      );
-    });
-
-    it('should reject * mixed with specific origins', () => {
+    it('should reject an array of origins', () => {
       expect(() =>
-        corsHelper.buildHeaders({ allowOrigins: ['*', 'https://a.com'] })
-      ).toThrow(/cannot mix/);
+        corsHelper.buildHeaders({
+          allowOrigins: ['https://a.com', 'https://b.com'],
+        } as unknown as CorsOptions)
+      ).toThrow(/single origin/);
     });
 
     it('should reject a RegExp origin', () => {
-      // A RegExp is no longer part of the type, so this only reaches a JS caller.
       expect(() =>
         corsHelper.buildHeaders({
           allowOrigins: /example\.com/,
         } as unknown as CorsOptions)
-      ).toThrow(/RegExp/);
+      ).toThrow(/boolean or a string/);
     });
 
     it('should reject * combined with credentials', () => {
@@ -170,39 +156,6 @@ describe('CorsHelper', () => {
     });
   });
 
-  describe('buildOriginOverrideTemplate', () => {
-    const corsHelper = new CorsHelper();
-
-    it('should return undefined when there is a single origin', () => {
-      expect(
-        corsHelper.buildOriginOverrideTemplate({ allowOrigins: 'https://a.com' })
-      ).toBeUndefined();
-      expect(
-        corsHelper.buildOriginOverrideTemplate({ allowOrigins: ['https://a.com'] })
-      ).toBeUndefined();
-      expect(
-        corsHelper.buildOriginOverrideTemplate({ allowOrigins: true })
-      ).toBeUndefined();
-    });
-
-    it('should match every origin past the first', () => {
-      const template = corsHelper.buildOriginOverrideTemplate({
-        allowOrigins: ['https://a.com', 'https://b.com', 'https://c.com'],
-      });
-
-      expect(template).toContain('$input.params().header.get("Origin")');
-      expect(template).toContain(
-        '#if($origin == "https://b.com" || $origin == "https://c.com")'
-      );
-      expect(template).toContain(
-        '#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)'
-      );
-      // The first origin is already mapped statically, so matching it again
-      // would override the same parameter twice and return a 5XX.
-      expect(template).not.toContain('https://a.com');
-    });
-  });
-
   describe('createOptionsMethod', () => {
     it('should create OPTIONS method, integration, method response, and integration response', () => {
       const { restApi, stack } = setupInternalTestingRestApi();
@@ -241,27 +194,6 @@ describe('CorsHelper', () => {
         status_code: '200',
         response_templates: {
           'application/json': '',
-        },
-      });
-    });
-
-    it('should carry the origin override template when several origins are allowed', () => {
-      const { restApi, stack } = setupInternalTestingRestApi();
-      const corsHelper = new CorsHelper();
-
-      corsHelper.createOptionsMethod(restApi, 'test-multi', 'resource-id', {
-        allowOrigins: ['https://a.com', 'https://b.com'],
-      });
-
-      const synthesized = Testing.synth(stack);
-
-      expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
-        response_parameters: expect.objectContaining({
-          'method.response.header.Access-Control-Allow-Origin': "'https://a.com'",
-          'method.response.header.Vary': "'Origin'",
-        }),
-        response_templates: {
-          'application/json': expect.stringContaining('https://b.com'),
         },
       });
     });

@@ -60,7 +60,7 @@ export class CorsHelper {
         statusCode: '200',
         responseParameters: corsHeaders,
         responseTemplates: {
-          'application/json': this.buildOriginOverrideTemplate(cors) ?? '',
+          'application/json': '',
         },
         dependsOn: [corsMethod],
       }
@@ -69,10 +69,7 @@ export class CorsHelper {
     return [corsMethod, corsIntegration, corsResponse, corsIntegrationResponse];
   }
 
-  /**
-   * `allowOrigins: false` disables CORS: no preflight method and no header on
-   * any response.
-   */
+  /** `allowOrigins: false` means no preflight method and no header anywhere. */
   public isEnabled(cors?: CorsOptions): cors is NonNullable<CorsOptions> {
     return cors !== undefined && cors.allowOrigins !== false;
   }
@@ -123,13 +120,9 @@ export class CorsHelper {
   }
 
   /**
-   * Builds the CORS headers that belong on an actual method response (as
-   * opposed to the `OPTIONS` preflight): just the subset browsers check when
-   * reading a real response body (`Access-Control-Allow-Origin`, plus
-   * `-Credentials` / `-Expose-Headers` when configured).
-   *
-   * Returns an empty object for an error status (`4xx`/`5xx`) when
-   * `cors.addToErrorResponses` is `false`.
+   * The subset of CORS headers a real response needs, as opposed to the
+   * `OPTIONS` preflight. Empty for a `4xx`/`5xx` when `addToErrorResponses`
+   * is `false`.
    */
   public buildActualResponseHeaders(
     cors: NonNullable<CorsOptions>,
@@ -156,37 +149,16 @@ export class CorsHelper {
     return this.withVary(headers);
   }
 
-  /**
-   * Velocity template for the `OPTIONS` integration response that echoes back
-   * the request `Origin` when it matches one of the origins past the first.
-   *
-   * `Access-Control-Allow-Origin` holds a single value, so a list of origins
-   * cannot be rendered statically: the first one is mapped as a response
-   * parameter and the rest are matched at runtime and applied through
-   * `$context.responseOverride`. Returns `undefined` when there is nothing to
-   * match, i.e. every case except an array of more than one origin.
-   */
-  public buildOriginOverrideTemplate(cors: NonNullable<CorsOptions>): string | undefined {
-    const { allowOrigins } = cors;
-
-    if (!Array.isArray(allowOrigins) || allowOrigins.length < 2) {
-      return undefined;
-    }
-
-    const condition = allowOrigins
-      .slice(1)
-      .map((origin) => `$origin == "${origin}"`)
-      .join(' || ');
-
-    return [
-      '#set($origin = $input.params().header.get("Origin"))',
-      '#if($origin == "")',
-      '  #set($origin = $input.params().header.get("origin"))',
-      '#end',
-      `#if(${condition})`,
-      '  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)',
-      '#end',
-    ].join('\n');
+  /** Same headers, rekeyed for a gateway response's own prefix. */
+  public buildGatewayResponseHeaders(
+    cors: NonNullable<CorsOptions>
+  ): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(this.buildActualResponseHeaders(cors, '400')).map(([key, value]) => [
+        key.replace('method.response.header.', 'gatewayresponse.header.'),
+        value,
+      ])
+    );
   }
 
   public buildMethodResponseParameters(
@@ -201,10 +173,7 @@ export class CorsHelper {
     return methodParameters;
   }
 
-  /**
-   * A response whose allowed origin is anything but `*` varies by request
-   * origin, so caches must not reuse it across origins.
-   */
+  /** A specific origin makes the response vary, so caches must not share it. */
   private withVary(headers: Record<string, string>): Record<string, string> {
     if (headers['method.response.header.Access-Control-Allow-Origin'] !== "'*'") {
       headers['method.response.header.Vary'] = "'Origin'";
@@ -213,38 +182,21 @@ export class CorsHelper {
     return headers;
   }
 
-  /**
-   * Resolves the single value `Access-Control-Allow-Origin` is mapped to, and
-   * rejects the configurations that cannot be expressed as one: an empty list,
-   * `*` mixed with specific origins, and `*` together with credentials.
-   *
-   * Never called for a disabled `cors`, see {@link CorsHelper.isEnabled}.
-   */
   private resolveAllowOrigin(cors: NonNullable<CorsOptions>): string {
     const { allowOrigins } = cors;
 
     if (Array.isArray(allowOrigins)) {
-      if (allowOrigins.length === 0) {
-        throw new Error(
-          'cors.allowOrigins must contain at least one origin. Use true to allow every origin.'
-        );
-      }
-      if (allowOrigins.includes('*') && allowOrigins.length > 1) {
-        throw new Error(
-          `cors.allowOrigins cannot mix '*' with specific origins: ${allowOrigins.join(', ')}`
-        );
-      }
+      throw new Error(
+        'cors.allowOrigins accepts a single origin. Access-Control-Allow-Origin holds one value and API Gateway cannot match a list, so name one origin per deployment.'
+      );
     }
 
     if (
       allowOrigins !== undefined &&
-      !Array.isArray(allowOrigins) &&
       typeof allowOrigins !== 'boolean' &&
       typeof allowOrigins !== 'string'
     ) {
-      throw new Error(
-        'cors.allowOrigins accepts a boolean, a string or an array of strings. A RegExp cannot be matched by API Gateway.'
-      );
+      throw new Error('cors.allowOrigins accepts a boolean or a string.');
     }
 
     if (allowOrigins === false) {
@@ -252,15 +204,11 @@ export class CorsHelper {
     }
 
     const origin =
-      allowOrigins === undefined || allowOrigins === true
-        ? '*'
-        : Array.isArray(allowOrigins)
-          ? allowOrigins[0]
-          : allowOrigins;
+      allowOrigins === undefined || allowOrigins === true ? '*' : allowOrigins;
 
     if (origin === '*' && cors.allowCredentials) {
       throw new Error(
-        "cors.allowOrigins cannot be '*' when allowCredentials is true: browsers reject that pair. Name the allowed origins instead."
+        "cors.allowOrigins cannot be '*' when allowCredentials is true: browsers reject that pair. Name the allowed origin instead."
       );
     }
 
