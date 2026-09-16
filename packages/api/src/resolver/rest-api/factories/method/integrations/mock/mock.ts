@@ -30,7 +30,8 @@ export class MockIntegration implements Integration {
       apiGatewayMethod,
       integration,
       responseHandlers,
-      name
+      name,
+      this.props.cors
     );
 
     return integration;
@@ -42,7 +43,11 @@ export class MockIntegration implements Integration {
     const { name, statusCode, responseHandlers } = await this.resolveResponse();
 
     const { operationResponses, integrationResponses } =
-      restApi.responseFactory.buildResponseFragments(responseHandlers, name);
+      restApi.responseFactory.buildResponseFragments(
+        responseHandlers,
+        name,
+        this.props.cors
+      );
 
     const integration = toXAmazonIntegration(
       {

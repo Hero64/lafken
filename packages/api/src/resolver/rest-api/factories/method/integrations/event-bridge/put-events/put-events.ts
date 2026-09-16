@@ -50,7 +50,8 @@ export class PutEventsIntegration implements Integration {
       apiGatewayMethod,
       integration,
       compute.responseHandlers,
-      compute.name
+      compute.name,
+      this.props.cors
     );
 
     return integration;
@@ -64,7 +65,8 @@ export class PutEventsIntegration implements Integration {
     const { operationResponses, integrationResponses } =
       restApi.responseFactory.buildResponseFragments(
         compute.responseHandlers,
-        compute.name
+        compute.name,
+        this.props.cors
       );
 
     const integration = toXAmazonIntegration(

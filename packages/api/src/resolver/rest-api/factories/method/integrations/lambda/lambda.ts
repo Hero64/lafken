@@ -31,7 +31,8 @@ export class LambdaIntegration implements Integration {
     const { operationResponses, integrationResponses } =
       restApi.responseFactory.buildResponseFragments(
         responseHelper.handlerResponse,
-        baseName
+        baseName,
+        this.props.cors
       );
 
     const integration: XAmazonIntegration = {
@@ -81,7 +82,8 @@ export class LambdaIntegration implements Integration {
         apiGatewayMethod,
         integration,
         responseHelper.handlerResponse,
-        `${resourceMetadata.name}-${handler.name}`
+        `${resourceMetadata.name}-${handler.name}`,
+        this.props.cors
       );
     }
 

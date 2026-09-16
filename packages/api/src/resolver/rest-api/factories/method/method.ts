@@ -141,7 +141,7 @@ export class MethodFactory {
         : undefined,
     });
 
-    if (props.cors) {
+    if (this.corsHelper.isEnabled(props.cors)) {
       const corsResources = this.corsHelper.createOptionsMethod(
         this.scope,
         methodName,
@@ -215,11 +215,14 @@ export class MethodFactory {
 
     this.scope.openapiFactory.addOperation(fullPath, handler.method, operation);
 
-    if (cors) {
+    if (this.corsHelper.isEnabled(cors)) {
       this.scope.openapiFactory.addOperation(
         fullPath,
         'OPTIONS',
-        corsToOptionsOperation(this.corsHelper.buildHeaders(cors))
+        corsToOptionsOperation(
+          this.corsHelper.buildHeaders(cors),
+          this.corsHelper.buildOriginOverrideTemplate(cors)
+        )
       );
     }
 

@@ -216,6 +216,168 @@ describe('Response factory', () => {
       status_code: '200',
     });
   });
+
+  it('should add Access-Control-Allow-Origin to a real response when cors is set', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [{ statusCode: '200' }, { statusCode: '400' }],
+      'test',
+      { allowOrigins: 'https://example.com' }
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '200',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+        'method.response.header.Vary': "'Origin'",
+      },
+    });
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '400',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+        'method.response.header.Vary': "'Origin'",
+      },
+    });
+  });
+
+  it('should match the extra origins in the integration response template', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [{ statusCode: '200' }, { statusCode: '400', template: '{"message": "bad"}' }],
+      'test',
+      { allowOrigins: ['https://a.com', 'https://b.com'] }
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    // No template of its own: the body is forwarded with $input.body.
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '200',
+      response_parameters: expect.objectContaining({
+        'method.response.header.Access-Control-Allow-Origin': "'https://a.com'",
+      }),
+      response_templates: {
+        'application/json': expect.stringContaining('$input.body'),
+      },
+    });
+
+    // An existing template is kept, with the override prepended.
+    const responses =
+      JSON.parse(synthesized).resource.aws_api_gateway_integration_response;
+    const errorEntry = Object.values(responses).find(
+      (entry: any) => entry.status_code === '400'
+    ) as any;
+    const errorTemplate = errorEntry.response_templates['application/json'];
+    expect(errorTemplate).toContain('$origin == "https://b.com"');
+    expect(errorTemplate).toContain('{"message": "bad"}');
+    expect(errorTemplate).not.toContain('$input.body');
+  });
+
+  it('should reject several origins on a response that forwards its body untouched', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    expect(() =>
+      restApi.responseFactory.createResponses(
+        method,
+        integration,
+        [{ statusCode: '200', rawBody: true }],
+        'test',
+        { allowOrigins: ['https://a.com', 'https://b.com'] }
+      )
+    ).toThrow(/forwards its body untouched/);
+  });
+
+  it('should not add cors headers to error responses when addToErrorResponses is false', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [{ statusCode: '200' }, { statusCode: '500' }],
+      'test',
+      { allowOrigins: '*', addToErrorResponses: false }
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '200',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'*'",
+      },
+    });
+    const errorResponse =
+      JSON.parse(synthesized).resource.aws_api_gateway_integration_response;
+    const errorEntry = Object.values(errorResponse).find(
+      (entry: any) => entry.status_code === '500'
+    ) as any;
+    expect(errorEntry.response_parameters).toBeUndefined();
+  });
 });
 
 describe('Response factory - openapi mode', () => {
@@ -319,5 +481,29 @@ describe('Response factory - openapi mode', () => {
 
     expect(operationResponses['204'].content).toBeUndefined();
     expect(integrationResponses['2\\d{2}'].statusCode).toBe('204');
+  });
+
+  it('should add Access-Control-Allow-Origin to a real response when cors is set', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        [{ statusCode: '200' }, { statusCode: '400', selectionPattern: '.*BAD.*' }],
+        'test',
+        { allowOrigins: 'https://example.com' }
+      );
+
+    expect(operationResponses['200'].headers).toEqual({
+      'Access-Control-Allow-Origin': { schema: { type: 'string' } },
+      Vary: { schema: { type: 'string' } },
+    });
+    expect(integrationResponses.default.responseParameters).toEqual({
+      'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+      'method.response.header.Vary': "'Origin'",
+    });
+    expect(integrationResponses['.*BAD.*'].responseParameters).toEqual({
+      'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+      'method.response.header.Vary': "'Origin'",
+    });
   });
 });

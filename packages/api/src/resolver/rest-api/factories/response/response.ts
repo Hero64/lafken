@@ -3,7 +3,8 @@ import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gatew
 import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import type { TerraformResource } from 'cdktn';
-import type { RestApi } from '../../../resolver.types';
+import type { CorsOptions, RestApi } from '../../../resolver.types';
+import { CorsHelper } from '../method/helpers/cors/cors';
 import type { ResponseHandler } from '../method/helpers/response/response.types';
 import type {
   ResponseObject,
@@ -14,6 +15,7 @@ const METHOD_RESPONSE_HEADER_PREFIX = 'method.response.header.';
 
 export class ResponseFactory {
   private responses: TerraformResource[] = [];
+  private corsHelper = new CorsHelper();
   constructor(private scope: RestApi) {}
 
   get resources() {
@@ -25,13 +27,22 @@ export class ResponseFactory {
    * `responses` map and the `x-amazon-apigateway-integration.responses` map
    * from the same {@link ResponseHandler} data, without creating any resource.
    */
-  public buildResponseFragments(responses: ResponseHandler[], baseName: string) {
+  public buildResponseFragments(
+    responses: ResponseHandler[],
+    baseName: string,
+    cors?: CorsOptions
+  ) {
     const operationResponses: Record<string, ResponseObject> = {};
     const integrationResponses: Record<string, XAmazonIntegrationResponse> = {};
 
     for (const response of responses) {
       const responseName = `${baseName}-${response.statusCode}`;
-      const headers = this.buildResponseHeaders(response.methodParameters);
+      const { methodParameters, integrationParameters } = this.mergeCorsParameters(
+        response,
+        cors
+      );
+
+      const headers = this.buildResponseHeaders(methodParameters);
       const content = this.buildResponseContent(response, responseName);
 
       operationResponses[response.statusCode] = {
@@ -41,16 +52,67 @@ export class ResponseFactory {
       };
 
       const key = response.selectionPattern ?? 'default';
+      const template = this.buildIntegrationTemplate(response, cors);
+
       integrationResponses[key] = {
         statusCode: response.statusCode,
-        responseTemplates: response.template
-          ? { 'application/json': response.template }
-          : undefined,
-        responseParameters: response.integrationParameters,
+        responseTemplates: template ? { 'application/json': template } : undefined,
+        responseParameters:
+          Object.keys(integrationParameters).length > 0
+            ? integrationParameters
+            : undefined,
       };
     }
 
     return { operationResponses, integrationResponses };
+  }
+
+  /**
+   * Merges the CORS headers for `response.statusCode` into the response's own
+   * method parameters (boolean flags) and integration parameters (header values).
+   */
+  private mergeCorsParameters(response: ResponseHandler, cors?: CorsOptions) {
+    const corsHeaders = this.corsHelper.isEnabled(cors)
+      ? this.corsHelper.buildActualResponseHeaders(cors, response.statusCode)
+      : {};
+
+    return {
+      methodParameters: {
+        ...response.methodParameters,
+        ...this.corsHelper.buildMethodResponseParameters(corsHeaders),
+      },
+      integrationParameters: { ...response.integrationParameters, ...corsHeaders },
+    };
+  }
+
+  /**
+   * The integration response template, with the multi-origin CORS override
+   * prepended when one applies.
+   *
+   * `Access-Control-Allow-Origin` holds a single value, so the origins past the
+   * first can only be matched at runtime, and matching them needs a template.
+   * A response with no template of its own gets `$input.body`, which forwards
+   * the integration payload verbatim.
+   */
+  private buildIntegrationTemplate(
+    response: ResponseHandler,
+    cors?: CorsOptions
+  ): string | undefined {
+    const override = this.corsHelper.isEnabled(cors)
+      ? this.corsHelper.buildOriginOverrideTemplate(cors)
+      : undefined;
+
+    if (!override) {
+      return response.template;
+    }
+
+    if (response.rawBody) {
+      throw new Error(
+        'cors.allowOrigins with several origins cannot be applied to a response that forwards its body untouched, such as an S3 download: matching the origin needs a mapping template, which would corrupt the payload. Declare a single origin for this API.'
+      );
+    }
+
+    return `${override}\n${response.template ?? '$input.body'}`;
   }
 
   private buildResponseHeaders(methodParameters?: Record<string, boolean>) {
@@ -89,10 +151,17 @@ export class ResponseFactory {
     method: ApiGatewayMethod,
     integration: ApiGatewayIntegration,
     responses: ResponseHandler[],
-    baseName: string
+    baseName: string,
+    cors?: CorsOptions
   ) {
     for (const response of responses) {
       const responseName = `${baseName}-${response.statusCode}`;
+      const { methodParameters, integrationParameters } = this.mergeCorsParameters(
+        response,
+        cors
+      );
+      const template = this.buildIntegrationTemplate(response, cors);
+
       const methodResponse = new ApiGatewayMethodResponse(
         this.scope,
         `${responseName}-method-response`,
@@ -101,7 +170,8 @@ export class ResponseFactory {
           resourceId: method.resourceId,
           restApiId: this.scope.id,
           statusCode: response.statusCode,
-          responseParameters: response.methodParameters,
+          responseParameters:
+            Object.keys(methodParameters).length > 0 ? methodParameters : undefined,
           dependsOn: [method, integration],
           responseModels:
             response.field &&
@@ -125,13 +195,12 @@ export class ResponseFactory {
           resourceId: integration.resourceId,
           restApiId: this.scope.id,
           statusCode: response.statusCode,
-          responseParameters: response.integrationParameters,
+          responseParameters:
+            Object.keys(integrationParameters).length > 0
+              ? integrationParameters
+              : undefined,
           selectionPattern: response.selectionPattern,
-          responseTemplates: response.template
-            ? {
-                'application/json': response.template,
-              }
-            : undefined,
+          responseTemplates: template ? { 'application/json': template } : undefined,
           dependsOn: [integration, methodResponse],
         }
       );

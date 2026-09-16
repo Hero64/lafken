@@ -22,11 +22,11 @@ describe('CorsHelper', () => {
       expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe("'*'");
     });
 
-    it('should set allow origin to null when allowOrigins is false', () => {
-      const headers = corsHelper.buildHeaders({ allowOrigins: false });
-      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe(
-        "'null'"
-      );
+    it('should report cors as disabled when allowOrigins is false', () => {
+      expect(corsHelper.isEnabled({ allowOrigins: false })).toBe(false);
+      expect(corsHelper.isEnabled(undefined)).toBe(false);
+      expect(corsHelper.isEnabled({ allowOrigins: true })).toBe(true);
+      expect(corsHelper.isEnabled({})).toBe(true);
     });
 
     it('should set the specific origin string', () => {
@@ -38,7 +38,7 @@ describe('CorsHelper', () => {
       );
     });
 
-    it('should use the first origin from an array', () => {
+    it('should map the first origin of an array statically', () => {
       const headers = corsHelper.buildHeaders({
         allowOrigins: ['https://a.com', 'https://b.com'],
       });
@@ -47,14 +47,41 @@ describe('CorsHelper', () => {
       );
     });
 
-    it('should fallback to * for empty origin array', () => {
-      const headers = corsHelper.buildHeaders({ allowOrigins: [] });
-      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe("'*'");
+    it('should set Vary to Origin for a specific origin', () => {
+      const headers = corsHelper.buildHeaders({ allowOrigins: 'https://a.com' });
+      expect(headers['method.response.header.Vary']).toBe("'Origin'");
     });
 
-    it('should set * for RegExp origins', () => {
-      const headers = corsHelper.buildHeaders({ allowOrigins: /example\.com/ });
-      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe("'*'");
+    it('should not set Vary when every origin is allowed', () => {
+      const headers = corsHelper.buildHeaders({ allowOrigins: true });
+      expect(headers['method.response.header.Vary']).toBeUndefined();
+    });
+
+    it('should reject an empty origin array', () => {
+      expect(() => corsHelper.buildHeaders({ allowOrigins: [] })).toThrow(
+        /at least one origin/
+      );
+    });
+
+    it('should reject * mixed with specific origins', () => {
+      expect(() =>
+        corsHelper.buildHeaders({ allowOrigins: ['*', 'https://a.com'] })
+      ).toThrow(/cannot mix/);
+    });
+
+    it('should reject a RegExp origin', () => {
+      // A RegExp is no longer part of the type, so this only reaches a JS caller.
+      expect(() =>
+        corsHelper.buildHeaders({
+          allowOrigins: /example\.com/,
+        } as unknown as CorsOptions)
+      ).toThrow(/RegExp/);
+    });
+
+    it('should reject * combined with credentials', () => {
+      expect(() =>
+        corsHelper.buildHeaders({ allowOrigins: true, allowCredentials: true })
+      ).toThrow(/allowCredentials/);
     });
 
     it('should set default allowed methods when not provided', () => {
@@ -116,7 +143,10 @@ describe('CorsHelper', () => {
     });
 
     it('should set allow credentials when true', () => {
-      const headers = corsHelper.buildHeaders({ allowCredentials: true });
+      const headers = corsHelper.buildHeaders({
+        allowOrigins: 'https://example.com',
+        allowCredentials: true,
+      });
       expect(headers['method.response.header.Access-Control-Allow-Credentials']).toBe(
         "'true'"
       );
@@ -137,6 +167,39 @@ describe('CorsHelper', () => {
     it('should set custom max age', () => {
       const headers = corsHelper.buildHeaders({ maxAge: 3600 });
       expect(headers['method.response.header.Access-Control-Max-Age']).toBe("'3600'");
+    });
+  });
+
+  describe('buildOriginOverrideTemplate', () => {
+    const corsHelper = new CorsHelper();
+
+    it('should return undefined when there is a single origin', () => {
+      expect(
+        corsHelper.buildOriginOverrideTemplate({ allowOrigins: 'https://a.com' })
+      ).toBeUndefined();
+      expect(
+        corsHelper.buildOriginOverrideTemplate({ allowOrigins: ['https://a.com'] })
+      ).toBeUndefined();
+      expect(
+        corsHelper.buildOriginOverrideTemplate({ allowOrigins: true })
+      ).toBeUndefined();
+    });
+
+    it('should match every origin past the first', () => {
+      const template = corsHelper.buildOriginOverrideTemplate({
+        allowOrigins: ['https://a.com', 'https://b.com', 'https://c.com'],
+      });
+
+      expect(template).toContain('$input.params().header.get("Origin")');
+      expect(template).toContain(
+        '#if($origin == "https://b.com" || $origin == "https://c.com")'
+      );
+      expect(template).toContain(
+        '#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)'
+      );
+      // The first origin is already mapped statically, so matching it again
+      // would override the same parameter twice and return a 5XX.
+      expect(template).not.toContain('https://a.com');
     });
   });
 
@@ -178,6 +241,27 @@ describe('CorsHelper', () => {
         status_code: '200',
         response_templates: {
           'application/json': '',
+        },
+      });
+    });
+
+    it('should carry the origin override template when several origins are allowed', () => {
+      const { restApi, stack } = setupInternalTestingRestApi();
+      const corsHelper = new CorsHelper();
+
+      corsHelper.createOptionsMethod(restApi, 'test-multi', 'resource-id', {
+        allowOrigins: ['https://a.com', 'https://b.com'],
+      });
+
+      const synthesized = Testing.synth(stack);
+
+      expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+        response_parameters: expect.objectContaining({
+          'method.response.header.Access-Control-Allow-Origin': "'https://a.com'",
+          'method.response.header.Vary': "'Origin'",
+        }),
+        response_templates: {
+          'application/json': expect.stringContaining('https://b.com'),
         },
       });
     });
