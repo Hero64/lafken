@@ -1,3 +1,18 @@
+## 0.15.1
+
+### Minor Changes
+
+- Add the CORS headers to the actual method responses, not only to the `OPTIONS` preflight
+- Accept several origins in `cors.allowOrigins`: the first one is mapped statically and the rest are matched against the request `Origin` at runtime, in the preflight and in the real response
+- Send `Vary: Origin` whenever the allowed origin is not `*`, so caches do not serve one origin's response to another
+- Make `cors.allowOrigins: false` disable CORS (breaking: it used to emit `Access-Control-Allow-Origin: 'null'`, which grants access to null-origin contexts instead of denying it)
+- Drop `RegExp` from `cors.allowOrigins` (breaking: API Gateway cannot match a pattern, and it used to fall back to `*`)
+
+### Patch Changes
+
+- Reject the CORS configurations that silently fell back to `*`: an empty `allowOrigins`, `*` mixed with specific origins, and `*` combined with `allowCredentials`
+- Apply the CORS preflight configuration in `openapi` definition mode, which ignored part of it
+
 ## 0.15.0
 
 ### Minor Changes
