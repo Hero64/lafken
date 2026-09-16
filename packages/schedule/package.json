@@ -1,6 +1,6 @@
 {
   "name": "@lafken/schedule",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "private": false,
   "description": "Define EventBridge scheduled rules and cron jobs using TypeScript decorators with Lafken",
   "keywords": [
@@ -54,7 +54,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -65,9 +66,10 @@
     "@lafken/common": "workspace:*",
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
-    "cdktn-vitest": "catalog:",
+    "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
@@ -80,7 +82,7 @@
     "constructs": ">=10.7.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "publishConfig": {
     "access": "public"

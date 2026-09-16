@@ -172,6 +172,43 @@ describe('paramToSchema', () => {
       });
     });
 
+    it('should carry string item constraints into the items schema', () => {
+      const param: ApiArrayMetadata = {
+        type: 'Array',
+        name: 'types',
+        destinationName: 'types',
+        minItems: 1,
+        items: {
+          type: 'String',
+          name: 'String',
+          destinationName: 'String',
+          enum: ['fire', 'water'],
+          minLength: 2,
+          pattern: '^[a-z]+$',
+          format: 'simple',
+          ...baseMetadata,
+        },
+        ...baseMetadata,
+      };
+
+      expect(paramToSchema(param)).toEqual({
+        type: 'array',
+        nullable: undefined,
+        minItems: 1,
+        maxItems: undefined,
+        uniqueItems: undefined,
+        items: {
+          type: 'string',
+          nullable: undefined,
+          enum: ['fire', 'water'],
+          minLength: 2,
+          maxLength: undefined,
+          pattern: '^[a-z]+$',
+          format: 'simple',
+        },
+      });
+    });
+
     it('should map all array constraints', () => {
       const param: ApiArrayMetadata = {
         type: 'Array',

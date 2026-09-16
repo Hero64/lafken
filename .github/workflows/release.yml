@@ -1,0 +1,208 @@
+name: 🚀 Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 0.15.0 or 0.15.0-beta.0)"
+        required: true
+        type: string
+      dry_run:
+        description: "Dry run — build, test and pack, but publish nothing and push nothing"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: 🚀 ${{ inputs.version }}${{ inputs.dry_run && ' (dry run)' || '' }}
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      contents: write # release branch, tag and GitHub release
+      id-token: write # npm trusted publishing (OIDC)
+      pull-requests: write # the release pull request
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: ✅ Validate version
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          version="$VERSION_INPUT"
+
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$version' is not a valid semver version"
+            exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$version" > /dev/null; then
+            echo "::error::Tag $version already exists"
+            exit 1
+          fi
+
+          # A version with a pre-release suffix must never become the default
+          # install for everyone, so it goes out under the "next" dist-tag.
+          if [[ "$version" == *-* ]]; then
+            dist_tag="next"
+          else
+            dist_tag="latest"
+          fi
+
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "DIST_TAG=$dist_tag" >> "$GITHUB_ENV"
+          echo "RELEASE_BRANCH=chore/release-$version" >> "$GITHUB_ENV"
+          echo "Releasing $version under dist-tag '$dist_tag'"
+
+      - name: 📝 Extract release notes
+        run: node scripts/changelog-section.js "$VERSION" | tee "$RUNNER_TEMP/release-notes.md"
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 📦 Cache turbo
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-release-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-release-
+
+      - name: 🎨 Lint
+        run: pnpm lint
+
+      - name: 🏗️ Build
+        run: pnpm build
+
+      - name: 🔠 Check types
+        run: pnpm check-types
+
+      - name: 🧪 Test
+        run: pnpm test
+
+      - name: 🔢 Set version
+        run: node scripts/set-version.js "$VERSION"
+
+      - name: 🔖 Create release commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # The bump may already be committed, e.g. when the release branch was
+          # prepared by hand. Committing then fails with "nothing to commit", so
+          # only commit when the version actually changed.
+          if git diff --quiet; then
+            echo "Packages are already at $VERSION, no release commit needed"
+          else
+            git commit -am "chore(release): $VERSION"
+          fi
+
+          git tag -a "$VERSION" -m "$VERSION"
+
+      # The release commit goes to its own branch, never to the branch this ran
+      # from. The default branch's ruleset requires a pull request and the
+      # GITHUB_TOKEN cannot bypass it, so writing there directly always fails —
+      # this way the workflow can be dispatched from any branch, main included.
+      #
+      # It also runs before npm: publishing is irreversible, so anything that
+      # can be refused should be attempted first. Force-push keeps a re-run
+      # after a failure idempotent.
+      - name: ⬆️ Push the release branch
+        if: ${{ !inputs.dry_run }}
+        run: |
+          out=$(git push --force origin "HEAD:refs/heads/$RELEASE_BRANCH" 2>&1) && status=0 || status=$?
+          echo "$out"
+          if [ "${status:-0}" -ne 0 ] || echo "$out" | grep -qE "remote rejected|GH013"; then
+            echo "::error::Push to $RELEASE_BRANCH was rejected — nothing was published."
+            exit 1
+          fi
+
+      - name: 📦 Publish to npm
+        run: |
+          pnpm -r publish \
+            --access public \
+            --no-git-checks \
+            --tag "$DIST_TAG" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: ⬆️ Push the release tag
+        if: ${{ !inputs.dry_run }}
+        run: git push origin "refs/tags/$VERSION"
+
+      - name: 🏷️ Create GitHub release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=""
+          if [[ "$VERSION" == *-* ]]; then
+            prerelease="--prerelease"
+          fi
+
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --verify-tag \
+            $prerelease
+
+      - name: 🔀 Open the release pull request
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          existing=$(gh pr list --head "$RELEASE_BRANCH" --state open --json url --jq '.[0].url')
+
+          if [ -n "$existing" ]; then
+            echo "Pull request already open: $existing"
+            echo "PR_URL=$existing" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          url=$(gh pr create \
+            --base "$BASE" \
+            --head "$RELEASE_BRANCH" \
+            --title "chore(release): $VERSION" \
+            --body "Version bump for \`$VERSION\`, already published to npm under the \`$DIST_TAG\` tag.
+
+          Merge this to bring \`$BASE\` in line with the registry. Use a merge commit rather than a squash, so the \`$VERSION\` tag stays inside the branch history.")
+
+          echo "Opened $url"
+          echo "PR_URL=$url" >> "$GITHUB_ENV"
+
+      - name: 📋 Summary
+        run: |
+          {
+            echo "## $VERSION"
+            echo
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+              echo "**Dry run** — nothing was published or pushed."
+            else
+              echo "Published to npm under dist-tag \`$DIST_TAG\`."
+              echo
+              echo "Merge ${PR_URL:-the release pull request} to update the default branch."
+            fi
+            echo
+            cat "$RUNNER_TEMP/release-notes.md"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -216,6 +216,25 @@ for (const object of result.Contents) {
 }
 ```
 
+#### Custom Client
+
+By default every repository shares an `S3Client` built from the ambient AWS SDK configuration (the region, credentials and endpoint the SDK resolves from the environment). Pass a `client` to reach a bucket on a different region, account or endpoint, such as a local S3-compatible instance during development:
+
+```typescript
+import { S3Client } from '@aws-sdk/client-s3';
+import { createRepository } from '@lafken/bucket/service';
+
+const client = new S3Client({
+  endpoint: 'http://localhost:9000',
+  region: 'us-east-1',
+  forcePathStyle: true,
+});
+
+export const docsRepository = createRepository(DocumentBucket, { client });
+```
+
+Reuse the same instance across your buckets instead of creating one per repository, so they share a single connection pool.
+
 ### X-Ray Tracing
 
 Enable `tracing` in the `@Bucket` decorator to instrument all repository operations with AWS X-Ray:

@@ -1,6 +1,6 @@
 {
   "name": "@lafken/queue",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "private": false,
   "description": "Define SQS queues and consumers using TypeScript decorators - automatic infrastructure generation with Lafken",
   "keywords": [
@@ -60,7 +60,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "catalog:",
@@ -73,9 +74,10 @@
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
     "@types/aws-lambda": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
-    "cdktn-vitest": "catalog:",
+    "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
@@ -88,7 +90,7 @@
     "constructs": ">=10.7.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "publishConfig": {
     "access": "public"

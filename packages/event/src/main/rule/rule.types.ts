@@ -58,12 +58,25 @@ export interface EventRuleBaseProps {
   ref?: EventRuleReferenceNames;
 }
 
+/**
+ * Supported S3 EventBridge detail types.
+ *
+ * - `'Object Created'` — An object was added to the bucket.
+ * - `'Object Deleted'` — An object was removed from the bucket.
+ */
 export type S3DetailType = 'Object Created' | 'Object Deleted';
 
+/**
+ * Filtering criteria for S3 EventBridge events.
+ *
+ * Allows narrowing which bucket and object key events trigger the rule.
+ */
 export interface S3Detail {
+  /** Filter by bucket name(s). */
   bucket?: {
     name: BucketNames[];
   };
+  /** Filter by object key pattern(s). */
   object?: {
     key?: EventBridgePattern[];
   };
@@ -298,12 +311,29 @@ export interface EventDetail {
   [field: string]: EventFieldPattern | EventDetail | EventDetail[] | undefined;
 }
 
+/**
+ * Filter criteria for a single DynamoDB stream attribute.
+ * Accepts one or more EventBridge patterns as a match condition.
+ */
 export type DynamoAttributeFilter = EventBridgePattern | EventBridgePattern[];
+
+/**
+ * Map of DynamoDB attribute names to their filter criteria.
+ * Used to narrow which stream records trigger the EventBridge rule.
+ */
 export type DynamoAttributeFilters = Record<string, DynamoAttributeFilter>;
+
+/**
+ * Filtering criteria for DynamoDB stream event details.
+ */
 interface DynamoDetail {
+  /** Event types to include (e.g. `'INSERT'`, `'MODIFY'`, `'REMOVE'`). */
   eventName?: ('INSERT' | 'MODIFY' | 'REMOVE')[];
+  /** Filter by partition/sort key values. */
   keys?: DynamoAttributeFilters;
+  /** Filter by attributes in the new item image. */
   newImage?: DynamoAttributeFilters;
+  /** Filter by attributes in the old item image. */
   oldImage?: DynamoAttributeFilters;
 }
 

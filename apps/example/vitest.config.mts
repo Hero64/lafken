@@ -1,0 +1,39 @@
+import path from 'node:path';
+import swc from 'unplugin-swc';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  oxc: false,
+  test: {
+    watch: false,
+    setupFiles: ['./vitest.setup.mts'],
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.spec.ts'],
+  },
+  resolve: {
+    alias: [
+      {
+        find: /^@lafken\/([^/]+)\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, '../../packages/$1/src/$2'),
+      },
+      {
+        find: /^@lafken\/([^/]+)$/,
+        replacement: path.resolve(import.meta.dirname, '../../packages/$1/src'),
+      },
+    ],
+  },
+  plugins: [
+    swc.vite({
+      jsc: {
+        parser: {
+          syntax: 'typescript',
+          decorators: true,
+        },
+        transform: {
+          decoratorMetadata: true,
+        },
+      },
+    }),
+  ],
+});

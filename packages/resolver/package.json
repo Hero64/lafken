@@ -1,6 +1,6 @@
 {
   "name": "@lafken/resolver",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "private": false,
   "description": "Lafken resolver foundation - AWS Lambda and IAM utilities for building decorator-based infrastructure resolvers",
   "keywords": [
@@ -33,7 +33,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "reflect-metadata": "catalog:",
@@ -43,9 +44,10 @@
     "@cdktn/provider-aws": "catalog:",
     "@lafken/common": "workspace:*",
     "cdktn": "catalog:",
-    "cdktn-vitest": "catalog:",
+    "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
@@ -55,7 +57,7 @@
     "constructs": ">=10.7.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "publishConfig": {
     "access": "public"

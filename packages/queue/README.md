@@ -52,6 +52,8 @@ createApp({
 });
 ```
 
+`total` above receives the **entire** message body (parsed, since `parse: true`) — in this example the body sent is assumed to be just `49.99`, nothing wrapping it. `source: 'body'` never plucks one key out of a larger body; see [`@Param` Options](#param-options) below.
+
 Each `@Standard` or `@Fifo` method becomes an independent Lambda function with its own SQS queue and event source mapping. The handler always receives an **array** of mapped payload objects — one per SQS record in the batch.
 
 ## Features
@@ -138,6 +140,11 @@ Use `@Payload` on a class to define the structure of SQS messages. Decorate each
 ```typescript
 import { Payload, Param } from '@lafken/queue/main';
 
+interface TaskDetails {
+  taskName: string;
+  dueDate: string;
+}
+
 @Payload()
 export class TaskMessage {
   @Param({ source: 'attribute' })
@@ -147,7 +154,7 @@ export class TaskMessage {
   priority: number;
 
   @Param({ source: 'body', parse: true })
-  taskName: string;
+  details: TaskDetails;
 }
 ```
 
@@ -158,14 +165,14 @@ export class TaskMessage {
 | `source` | `'attribute' \| 'body' \| 'record'`        | `'attribute'` | Where to extract the value from the SQS record           |
 | `parse`  | `boolean`                                  | `false`       | JSON-parse the message body before extraction (`'body'` only) |
 | `type`   | `String \| Number \| ...`                  | inferred      | Data type of the extracted value                         |
-| `name`   | `string`                                   | property name | Override the source field name used for extraction       |
+| `name`   | `string`                                   | property name | Override the source field name used for extraction (`'attribute'` and `'record'` only — see note below) |
 
 - **`source: 'attribute'`** — reads from SQS message attributes (supports `String` and `Number` types).
-- **`source: 'body'`** — reads from the message body. Set `parse: true` to JSON-parse the body and extract a specific key by property name.
+- **`source: 'body'`** — reads the message body. Set `parse: true` to JSON-parse it. Either way, the **entire** body — not a key inside it — is assigned to this property, which is why only one `source: 'body'` param is allowed per payload class (see below). Type it as whatever shape the body actually is: `String` when unparsed, or an object/array/class when `parse: true`.
 - **`source: 'record'`** — reads a top-level SQS record field such as `messageId`, `receiptHandle`, `awsRegion`, etc. The `name` option accepts only valid `SQSRecordField` values and defaults to the property name.
 
 > [!IMPORTANT]
-> Only **one** `@Param` with `source: 'body'` is allowed per payload class.
+> Only **one** `@Param` with `source: 'body'` is allowed per payload class — the whole message body can only be assigned to one property. `name` has no effect on `source: 'body'`.
 
 #### `source: 'record'` — SQS Record Fields
 

@@ -1,3 +1,4 @@
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import type { ClassResource } from '@lafken/common';
 import type { LocalIndex } from '../../../main';
@@ -11,12 +12,22 @@ import type {
 import { filterKeys, filterResolver, notValueKeys } from './base.utils';
 
 export class QueryBuilderBase<E extends ClassResource> {
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: ''
   constructor(private options: QueryBuilderProps<E>) {}
 
   protected attributeNames: Record<string, string> = {};
   protected attributeValues: Record<string, any> = {};
   protected expressionGroupCounter = 0;
+
+  /**
+   * Returns the DynamoDB client used to execute this query.
+   *
+   * It is the client injected into the repository that created the builder, and it allows
+   * operations grouping several builders, like the transactions, to send their command through
+   * the same connection the builders would have used on their own.
+   */
+  public getClient(): DynamoDBClient {
+    return this.options.client;
+  }
 
   protected getKeyConditionExpression(
     expression: KeyCondition<E>,

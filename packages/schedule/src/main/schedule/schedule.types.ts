@@ -15,12 +15,25 @@ type ScheduleExpressions = number | '*' | '?' | (string & {});
  */
 export type ScheduleOutputAttributes = 'arn' | 'id';
 
+/**
+ * Structured schedule time fields for EventBridge Scheduler.
+ *
+ * Allows composing a cron expression from individual time components.
+ * Each field accepts a number, `'*'` (every), `'?'` (no specific value),
+ * or a range string (e.g. `'1-5'`).
+ */
 export interface ScheduleTime {
+  /** Day of the month (1–31). */
   day?: ScheduleExpressions;
+  /** Hour of the day (0–23). */
   hour?: ScheduleExpressions;
+  /** Minute of the hour (0–59). */
   minute?: ScheduleExpressions;
+  /** Month of the year (1–12). */
   month?: ScheduleExpressions;
+  /** Day of the week (1–7 or SUN–SAT). */
   weekDay?: ScheduleExpressions;
+  /** Year (e.g. `2026`). */
   year?: ScheduleExpressions;
 }
 

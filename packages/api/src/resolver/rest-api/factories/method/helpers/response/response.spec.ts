@@ -158,9 +158,36 @@ describe('ResponseHelper', () => {
 
       expect(result).toHaveLength(4);
       expect(result[0].statusCode).toBe('200');
-      expect(result[0].field).toEqual(handler.response.items);
+      // The success response maps the array itself, not its item type, so the
+      // generated model keeps the `array` wrapper.
+      expect(result[0].field).toEqual(handler.response);
       expect(result[1].statusCode).toBe('400');
       expect(result[2].statusCode).toBe('404');
+    });
+
+    it('should keep the array field while reading the status codes from the item payload', () => {
+      const handler = {
+        method: Method.GET,
+        response: {
+          type: 'Array',
+          items: {
+            type: 'Object',
+            payload: {
+              defaultCode: 206,
+              selectionPattern: '2\\d{2}',
+            },
+            properties: [],
+          },
+        },
+      } as any;
+
+      const responseHelper = new ResponseHelper(handler);
+      const result = responseHelper.handlerResponse;
+
+      expect(result[0].statusCode).toBe('206');
+      expect(result[0].selectionPattern).toBe('2\\d{2}');
+      expect(result[0].field).toBe(handler.response);
+      expect((result[0].field as any).type).toBe('Array');
     });
 
     it('should use method-specific default status codes', () => {

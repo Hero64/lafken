@@ -86,7 +86,7 @@ describe('Lambda handler', () => {
         services: ['s3'],
         env: { foo: 'bar' },
         memory: 200,
-        runtime: 20,
+        runtime: 24,
         timeout: 100,
         tags: {
           foo: 'bar',
@@ -105,7 +105,7 @@ describe('Lambda handler', () => {
       function_name: 'test-app',
       handler: 'index.lambda-test_test',
       memory_size: 200,
-      runtime: 'nodejs20.x',
+      runtime: 'nodejs24.x',
       timeout: 100,
       tracing_config: {
         mode: 'Active',

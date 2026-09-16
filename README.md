@@ -1,4 +1,17 @@
-# Lafken
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.png">
+    <img src="assets/logo-light.png" alt="Lafken" width="320">
+  </picture>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@lafken/main"><img src="https://img.shields.io/npm/v/@lafken/main?color=cb3837&logo=npm" alt="npm version"></a>
+  <a href="https://github.com/Hero64/lafken/actions/workflows/test.yml"><img src="https://github.com/Hero64/lafken/actions/workflows/test.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/@lafken/main" alt="Node"></a>
+</p>
 
 **A TypeScript framework for building serverless applications on AWS using decorators.**
 
@@ -42,7 +55,7 @@ npm install @lafken/main @lafken/api @lafken/common
 
 ### System Requirements
 
-- Node.js >= 20.19
+- Node.js >= 22.13
 - pnpm >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
 - TypeScript >= 5.0 (with `experimentalDecorators` and `emitDecoratorMetadata` enabled)
 

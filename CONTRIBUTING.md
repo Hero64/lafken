@@ -30,8 +30,8 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://www.c
 
 ### System Requirements
 
-- **Node.js**: >= 20.19
-- **pnpm**: >= 10.20.0
+- **Node.js**: >= 22.13
+- **pnpm**: >= 11.14.0 (the repository is managed with `pnpm@11.14.0`)
 - **Git**: Recent version
 
 ## 🐛 Reporting Bugs
@@ -224,8 +224,37 @@ pnpm test:coverage
 pnpm test --watch
 
 # For a specific package
-pnpm test --filter=@lafken/api
+pnpm --filter @lafken/api test
 ```
+
+### Coverage
+
+Every published package measures itself and enforces its own thresholds:
+
+```bash
+pnpm test:coverage                       # all packages, fails under threshold
+pnpm --filter @lafken/api test:coverage  # just one
+node scripts/coverage-report.js          # one table out of the 12 reports
+```
+
+Each package writes `packages/<name>/coverage/` (gitignored); open
+`index.html` there to see which lines are missing. The 📊 Coverage job on CI
+prints the same table in its summary and uploads the HTML reports as an
+artifact; it runs on one Node version only, since coverage measures which lines
+the suite reaches and that does not change between releases. The `Total` row is
+weighted by size, not an average of the twelve percentages.
+
+The thresholds live in each package's `vitest.config.mts` and are set two
+points below what the package already reaches. **They are a ratchet.** Raise
+them when coverage improves; if a change pushes a package below its floor, add
+the missing tests rather than lowering the number. Everything shared — the
+provider, what is included and excluded, the reporters — lives in
+`vitest.coverage.mts` at the repository root.
+
+`.types.ts`, `index.ts` and `*.d.ts` files are excluded: they compile to
+nothing, so they would report as uncovered and distort every number.
+`apps/example` is not measured — it exercises the framework as a user would,
+which says nothing about the framework's own tests.
 
 ### Writing Tests
 
@@ -302,6 +331,65 @@ Supported conventional formats:
    - Implement the changes
    - Push to the same branch
    - The PR will update automatically
+
+## 🚀 Releasing
+
+Only maintainers cut releases. Everything runs through the **🚀 Release**
+workflow on GitHub Actions — nothing is published from a laptop, and the repo
+holds no npm token: publishing authenticates with npm through OIDC
+(trusted publishing).
+
+All 12 `@lafken/*` packages share a single version. There are no per-package
+releases.
+
+### 1. Prepare the changelog
+
+The workflow refuses to publish a version whose section is missing from
+`CHANGELOG.md`:
+
+```bash
+node scripts/changelog-section.js 0.16.0   # must print the section
+```
+
+Add a `## 0.16.0` block at the top of `CHANGELOG.md`, above the previous
+version, with `### Minor Changes` before `### Patch Changes`. Only user-visible
+changes to published packages belong there — CI, tooling and `apps/example`
+are left out. Merge the changelog to `main` before releasing.
+
+### 2. Run the workflow
+
+**Actions → 🚀 Release → Run workflow**, on `main`:
+
+| Input | Value |
+|---|---|
+| `version` | the exact version, e.g. `0.16.0` or `0.16.0-beta.0` |
+| `dry_run` | `true` first, then `false` for the real run |
+
+A version with a pre-release suffix (`-beta.0`) publishes under the `next`
+dist-tag; everything else publishes under `latest`. The workflow refuses a
+version whose tag already exists.
+
+The dry run builds, tests, packs and exercises the OIDC handshake, but pushes
+nothing and publishes nothing. Run it whenever a release is not routine.
+
+### 3. What the workflow does
+
+1. Validates the version and extracts its `CHANGELOG.md` section
+2. Lint → build → check types → test
+3. Bumps every `packages/*/package.json` with `scripts/set-version.js`
+4. Commits `chore(release): <version>` and tags it
+5. Pushes the commit to `chore/release-<version>` — **before** publishing, so a
+   rejected push never leaves npm ahead of the repo
+6. Publishes all packages to npm (`pnpm -r publish`, provenance included)
+7. Pushes the tag and creates the GitHub release from the changelog section
+8. Opens a pull request from `chore/release-<version>` into `main`
+
+### 4. Merge the release pull request
+
+The bump reaches `main` through that PR, like any other change — the default
+branch is protected and the workflow does not write to it directly. Merge it
+with a **merge commit**, not a squash: a squash would rewrite the commit the
+tag points at and leave the tag dangling outside the history of `main`.
 
 ## 🎯 Areas of Focus
 

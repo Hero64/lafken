@@ -66,7 +66,8 @@ await createApp({
     region: 'us-east-1',
     profile: 'my-aws-profile',
   },
-  s3Backend: {
+  state: {
+    type: 's3',
     bucket: 'my-terraform-state',
     key: 'app/terraform.tfstate',
     region: 'us-east-1',
@@ -86,7 +87,7 @@ await createApp({
 | `resolvers`         | `ResolverType[]`    | Yes      | Resolvers that process decorated resources                 |
 | `globalConfig`      | `GlobalConfig`      | No       | Shared Lambda and tag settings for all resources           |
 | `awsProviderConfig` | `AwsProviderConfig` | No       | AWS provider settings (region, profile, etc.)              |
-| `s3Backend`         | `S3BackendConfig`   | No       | Remote S3 backend for Terraform state                      |
+| `state`             | `StateConfig`       | No       | Terraform state backend (`s3` or `local`)                  |
 | `extend`            | `(scope) => void`   | No       | Callback invoked after all resolvers finish                |
 
 ### createModule
@@ -132,7 +133,7 @@ App globalConfig → Module globalConfig → Resource-level config
 | ------------- | ---------------- | --------------------------------------------------------- |
 | `memory`      | `number`         | Memory allocation in MB                                   |
 | `timeout`     | `number`         | Execution timeout in seconds                              |
-| `runtime`     | `20 \| 22 \| 24` | Node.js runtime version                                   |
+| `runtime`     | `22 \| 24` | Node.js runtime version                                   |
 | `services`    | `Services[]`     | AWS services the Lambda can access (creates IAM role)     |
 | `enableTrace` | `boolean`        | Enable AWS X-Ray tracing                                  |
 | `env`         | `EnvironmentValue` | Environment variables for Lambda functions              |
@@ -187,18 +188,33 @@ globalConfig: {
 
 Lafken also adds automatic tags: `lafken:app` with the app name and `lafken:module` with the module name.
 
-### S3 Backend
+### State Backend
 
-Store Terraform state remotely in an S3 bucket for team collaboration and state locking:
+The `state` option selects where the Terraform state file is stored. It is a discriminated union on `type`, so each backend only accepts its own options. When omitted, no backend block is generated and Terraform keeps its default behaviour.
+
+Use `s3` to store the state remotely for team collaboration and state locking:
 
 ```typescript
 await createApp({
   name: 'my-app',
-  s3Backend: {
+  state: {
+    type: 's3',
     bucket: 'terraform-state-bucket',
     key: 'apps/my-app/terraform.tfstate',
     region: 'us-east-1',
     dynamodbTable: 'terraform-locks',
+  },
+});
+```
+
+Use `local` to store the state on the local filesystem, which is convenient for local development and single-developer workflows:
+
+```typescript
+await createApp({
+  name: 'my-app',
+  state: {
+    type: 'local',
+    path: './terraform.tfstate',
   },
 });
 ```

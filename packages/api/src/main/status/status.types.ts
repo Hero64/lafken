@@ -1,3 +1,7 @@
+/**
+ * Map of HTTP status codes to their standard reason phrases.
+ * Used to generate API Gateway response integration mappings.
+ */
 export const HTTP_STATUS_CODE = {
   200: 'OK',
   201: 'CREATED',
@@ -59,5 +63,12 @@ export const HTTP_STATUS_CODE = {
   511: 'NETWORK_AUTHENTICATION_REQUIRED',
 } as const;
 
+/**
+ * Union of valid HTTP status code numbers (e.g. `200`, `404`, `500`).
+ */
 export type HTTP_STATUS_CODE_NUMBER = keyof typeof HTTP_STATUS_CODE;
+
+/**
+ * Union of HTTP status code reason phrases (e.g. `'OK'`, `'NOT_FOUND'`).
+ */
 export type HTTP_STATUS_CODE_VALUE = (typeof HTTP_STATUS_CODE)[HTTP_STATUS_CODE_NUMBER];

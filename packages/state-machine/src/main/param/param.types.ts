@@ -142,14 +142,21 @@ export type TaskParamContext = ParamContextBase<'task', TaskSource>;
  * Parameter context for supplying an arbitrary static or computed value
  * that does not originate from execution, state, or task runtime data.
  */
+/**
+ * Parameter context for supplying an arbitrary static or computed value
+ * that does not originate from execution, state, or task runtime data.
+ */
 export type CustomParamContext = {
   context: 'custom';
   /**
-   * A simple value
+   * Static value to inject as the parameter.
+   * Can be a string, number, boolean, or any other JSON-serializable value.
    */
   value?: any;
   /**
-   * You can extend this value with other
+   * Optional type constructor used to cast or transform the value at runtime.
+   * When provided, the raw value is converted to the specified type
+   * (e.g. `String`, `Number`, `Boolean`, or a custom transformer function).
    */
   type?: String | Number | Boolean | Function;
 };

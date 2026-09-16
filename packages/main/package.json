@@ -1,6 +1,6 @@
 {
   "name": "@lafken/main",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "private": false,
   "description": "Lafken core engine - orchestrate AWS serverless infrastructure using decorators with automatic CDKTN code generation",
   "keywords": [
@@ -34,7 +34,8 @@
     "clean": "rm -rf ./lib",
     "dev": "tsc -w",
     "prepublishOnly": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@lafken/resolver": "workspace:*",
@@ -44,9 +45,10 @@
     "@cdktn/provider-aws": "catalog:",
     "@lafken/common": "workspace:*",
     "cdktn": "catalog:",
-    "cdktn-vitest": "catalog:",
+    "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",
     "typescript": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
@@ -56,7 +58,7 @@
     "constructs": ">=10.7.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "publishConfig": {
     "access": "public"

@@ -78,6 +78,63 @@ describe('Params', () => {
     });
   });
 
+  describe('BodyParam array items', () => {
+    it('should apply item constraints to the array items metadata', () => {
+      class Request {
+        @BodyParam({
+          type: [String],
+          minItems: 1,
+          uniqueItems: true,
+          items: { enum: ['a', 'b', 'c'], minLength: 1 },
+        })
+        tags: string[];
+      }
+
+      const params = getMetadataPrototypeByKey(Request, key);
+      expect(params).toStrictEqual([
+        {
+          destinationName: 'tags',
+          minItems: 1,
+          name: 'tags',
+          required: true,
+          source: 'body',
+          type: 'Array',
+          uniqueItems: true,
+          items: {
+            destinationName: 'String',
+            enum: ['a', 'b', 'c'],
+            minLength: 1,
+            name: 'String',
+            type: 'String',
+          },
+        },
+      ]);
+    });
+
+    it('should keep the array items metadata untouched when no item props are given', () => {
+      class Request {
+        @BodyParam({ type: [String] })
+        tags: string[];
+      }
+
+      const params = getMetadataPrototypeByKey(Request, key);
+      expect(params).toStrictEqual([
+        {
+          destinationName: 'tags',
+          name: 'tags',
+          required: true,
+          source: 'body',
+          type: 'Array',
+          items: {
+            destinationName: 'String',
+            name: 'String',
+            type: 'String',
+          },
+        },
+      ]);
+    });
+  });
+
   describe('PathParam', () => {
     it('should create a path param', () => {
       class Request {
@@ -115,6 +172,32 @@ describe('Params', () => {
           initialValue: undefined,
           destinationName: 'name',
           name: 'name',
+        },
+      ]);
+    });
+  });
+
+  describe('QueryParam array items', () => {
+    it('should apply item constraints to the array items metadata', () => {
+      class Request {
+        @QueryParam({ type: [String], items: { enum: ['a', 'b'] } })
+        tags: string[];
+      }
+
+      const params = getMetadataPrototypeByKey(Request, key);
+      expect(params).toStrictEqual([
+        {
+          destinationName: 'tags',
+          name: 'tags',
+          required: true,
+          source: 'query',
+          type: 'Array',
+          items: {
+            destinationName: 'String',
+            enum: ['a', 'b'],
+            name: 'String',
+            type: 'String',
+          },
         },
       ]);
     });

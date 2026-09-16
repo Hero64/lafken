@@ -119,6 +119,7 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
 
       if (arrayPrimitiveType) {
         items = {
+          ...fieldProps.overrideItems,
           type: arrayPrimitiveType,
           name: arrayPrimitiveType,
           destinationName: arrayPrimitiveType,
@@ -163,6 +164,23 @@ const getFieldMetadata = (props: GetFieldMetadataProps): FieldMetadata => {
   };
 };
 
+/**
+ * Drops the fields resolved by `getFieldMetadata` so a decorator's own metadata
+ * can be applied last without overwriting them, along with `overrideItems`,
+ * which is a directive rather than metadata.
+ */
+const omitResolvedFields = <T extends object>(metadata: T) => {
+  const { type, name, destinationName, items, overrideItems, ...rest } = metadata as T & {
+    type?: unknown;
+    name?: unknown;
+    destinationName?: unknown;
+    items?: unknown;
+    overrideItems?: unknown;
+  };
+
+  return rest;
+};
+
 export const createFieldDecorator =
   <T extends FieldProps, M>({
     prefix,
@@ -181,22 +199,24 @@ export const createFieldDecorator =
     const fields = getMetadataByKey<M & BaseFieldMetadata[]>(target, filedKey) || [];
 
     const propertyType = Reflect.getMetadata('design:type', target, destinationName).name;
-    const parentMetadata = getMetadata(props);
+    const declaredMetadata = getMetadata(props);
+    const parentMetadata = omitResolvedFields(declaredMetadata);
 
     const metadata = [
       ...fields,
       {
-        ...parentMetadata,
         ...getFieldMetadata({
           destinationName,
           type: propertyType,
           fieldProps: {
             ...props,
             type: parentMetadata.forceType ?? props?.type,
+            overrideItems: declaredMetadata.overrideItems,
           },
           prefix,
           disablePropertiesValidation,
         }),
+        ...parentMetadata,
       },
     ];
     Reflect.defineMetadata(filedKey, metadata, target);

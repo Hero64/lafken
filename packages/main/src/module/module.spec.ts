@@ -48,7 +48,7 @@ describe('Module', () => {
       globalConfig: {
         lambda: {
           memory: 100,
-          runtime: 20,
+          runtime: 24,
           timeout: 30,
         },
       },
@@ -59,7 +59,7 @@ describe('Module', () => {
     expect(stackModule.node.tryGetContext(ContextName.module)).toStrictEqual({
       contextCreator: 'testing-module',
       memory: 100,
-      runtime: 20,
+      runtime: 24,
       timeout: 30,
       bundler: undefined,
     });

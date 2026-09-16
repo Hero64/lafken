@@ -150,6 +150,20 @@ export interface ExternalQueueProps extends SourceMappingProps {
   /**
    *
    */
+  /**
+   * Name or resolver function that resolves the name of the external SQS queue.
+   *
+   * Can be a literal queue name or a callback that receives `GetResourceProps`
+   * to dynamically resolve the queue identifier from another resource.
+   *
+   * @example
+   * // Literal name
+   * queueName: 'my-existing-queue'
+   *
+   * @example
+   * // Dynamic reference
+   * queueName: (props) => props.getResourceValue('module::queue::name', 'id')
+   */
   queueName: string | ((props: GetResourceProps) => string);
   /**
    * Lambda configuration for processing messages from this queue.
@@ -172,10 +186,17 @@ export interface InternalFifoProps extends InternalStandardProps {
 export type StandardProps = InternalStandardProps | ExternalQueueProps;
 export type FifoProps = InternalFifoProps | ExternalQueueProps;
 
+/**
+ * Resolved metadata for an SQS queue Lambda handler, used internally
+ * by the resolver to generate the Lambda function and event source mapping.
+ */
 export interface QueueLambdaMetadata
   extends LambdaMetadata,
     Omit<InternalFifoProps, 'queueName' | 'isExternal'> {
+  /** Resolved queue name (literal or callback). */
   queueName: ExternalQueueProps['queueName'];
+  /** Whether this is a FIFO queue. */
   isFifo: boolean;
+  /** Whether this queue references an externally managed SQS resource. */
   isExternal: boolean;
 }

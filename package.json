@@ -3,16 +3,15 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "check-types": "turbo run check-types",
+    "check-types": "turbo run check-types && tsc --noEmit -p configs/tsconfig.tooling.json",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "format": "pnpm biome format --write . ",
-    "lint": "turbo run lint",
+    "lint": "pnpm biome check .",
     "modules:clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf {} +",
     "prepare": "husky",
-    "release": "turbo run build && pnpm -r publish --access public --no-git-checks",
     "test": "turbo run test --concurrency=4",
-    "update-version": "node scripts/version.js"
+    "test:coverage": "turbo run test:coverage --concurrency=4"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
@@ -22,10 +21,11 @@
     "husky": "catalog:",
     "lint-staged": "catalog:",
     "turbo": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "packageManager": "pnpm@11.14.0"
 }
