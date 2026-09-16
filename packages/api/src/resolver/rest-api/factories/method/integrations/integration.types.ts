@@ -3,7 +3,7 @@ import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-metho
 import type { ClassResource } from '@lafken/common';
 import type { Construct } from 'constructs';
 import type { ApiLambdaMetadata, ApiResourceMetadata } from '../../../../../main';
-import type { RestApi } from '../../../../resolver.types';
+import type { CorsOptions, RestApi } from '../../../../resolver.types';
 import type { ResponseObject, XAmazonIntegration } from '../../openapi/openapi.types';
 import type { IntegrationHelper } from '../helpers/integration/integration';
 import type { ParamHelper } from '../helpers/param/param';
@@ -52,6 +52,7 @@ export interface IntegrationProps {
   resourceMetadata: ApiResourceMetadata;
   proxyHelper: ProxyHelper;
   classResource: ClassResource;
+  cors?: CorsOptions;
 }
 
 export type InitializedClass<R> = Record<

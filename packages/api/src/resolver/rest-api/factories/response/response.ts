@@ -3,7 +3,8 @@ import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gatew
 import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import type { TerraformResource } from 'cdktn';
-import type { RestApi } from '../../../resolver.types';
+import type { CorsOptions, RestApi } from '../../../resolver.types';
+import { CorsHelper } from '../method/helpers/cors/cors';
 import type { ResponseHandler } from '../method/helpers/response/response.types';
 import type {
   ResponseObject,
@@ -14,6 +15,7 @@ const METHOD_RESPONSE_HEADER_PREFIX = 'method.response.header.';
 
 export class ResponseFactory {
   private responses: TerraformResource[] = [];
+  private corsHelper = new CorsHelper();
   constructor(private scope: RestApi) {}
 
   get resources() {
@@ -25,13 +27,22 @@ export class ResponseFactory {
    * `responses` map and the `x-amazon-apigateway-integration.responses` map
    * from the same {@link ResponseHandler} data, without creating any resource.
    */
-  public buildResponseFragments(responses: ResponseHandler[], baseName: string) {
+  public buildResponseFragments(
+    responses: ResponseHandler[],
+    baseName: string,
+    cors?: CorsOptions
+  ) {
     const operationResponses: Record<string, ResponseObject> = {};
     const integrationResponses: Record<string, XAmazonIntegrationResponse> = {};
 
     for (const response of responses) {
       const responseName = `${baseName}-${response.statusCode}`;
-      const headers = this.buildResponseHeaders(response.methodParameters);
+      const { methodParameters, integrationParameters } = this.mergeCorsParameters(
+        response,
+        cors
+      );
+
+      const headers = this.buildResponseHeaders(methodParameters);
       const content = this.buildResponseContent(response, responseName);
 
       operationResponses[response.statusCode] = {
@@ -46,11 +57,28 @@ export class ResponseFactory {
         responseTemplates: response.template
           ? { 'application/json': response.template }
           : undefined,
-        responseParameters: response.integrationParameters,
+        responseParameters:
+          Object.keys(integrationParameters).length > 0
+            ? integrationParameters
+            : undefined,
       };
     }
 
     return { operationResponses, integrationResponses };
+  }
+
+  private mergeCorsParameters(response: ResponseHandler, cors?: CorsOptions) {
+    const corsHeaders = this.corsHelper.isEnabled(cors)
+      ? this.corsHelper.buildActualResponseHeaders(cors, response.statusCode)
+      : {};
+
+    return {
+      methodParameters: {
+        ...response.methodParameters,
+        ...this.corsHelper.buildMethodResponseParameters(corsHeaders),
+      },
+      integrationParameters: { ...response.integrationParameters, ...corsHeaders },
+    };
   }
 
   private buildResponseHeaders(methodParameters?: Record<string, boolean>) {
@@ -89,10 +117,16 @@ export class ResponseFactory {
     method: ApiGatewayMethod,
     integration: ApiGatewayIntegration,
     responses: ResponseHandler[],
-    baseName: string
+    baseName: string,
+    cors?: CorsOptions
   ) {
     for (const response of responses) {
       const responseName = `${baseName}-${response.statusCode}`;
+      const { methodParameters, integrationParameters } = this.mergeCorsParameters(
+        response,
+        cors
+      );
+
       const methodResponse = new ApiGatewayMethodResponse(
         this.scope,
         `${responseName}-method-response`,
@@ -101,7 +135,8 @@ export class ResponseFactory {
           resourceId: method.resourceId,
           restApiId: this.scope.id,
           statusCode: response.statusCode,
-          responseParameters: response.methodParameters,
+          responseParameters:
+            Object.keys(methodParameters).length > 0 ? methodParameters : undefined,
           dependsOn: [method, integration],
           responseModels:
             response.field &&
@@ -125,12 +160,13 @@ export class ResponseFactory {
           resourceId: integration.resourceId,
           restApiId: this.scope.id,
           statusCode: response.statusCode,
-          responseParameters: response.integrationParameters,
+          responseParameters:
+            Object.keys(integrationParameters).length > 0
+              ? integrationParameters
+              : undefined,
           selectionPattern: response.selectionPattern,
           responseTemplates: response.template
-            ? {
-                'application/json': response.template,
-              }
+            ? { 'application/json': response.template }
             : undefined,
           dependsOn: [integration, methodResponse],
         }

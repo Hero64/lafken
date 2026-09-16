@@ -80,21 +80,38 @@ export type CorsHttpMethod =
   | 'OPTIONS';
 
 /**
- * CORS configuration options for API Gateway
+ * CORS configuration options for API Gateway.
+ *
+ * Generates the `OPTIONS` preflight method and adds the CORS headers to the
+ * responses declared by each handler. Two cases are out of reach and must be
+ * handled elsewhere:
+ *
+ * - Handlers using `integrationType: 'aws-proxy'`. A proxy integration returns
+ *   the Lambda response verbatim, so API Gateway never applies response
+ *   mappings: the Lambda itself has to return the CORS headers.
+ * - API Gateway's own gateway responses, see
+ *   {@link CorsOptions.addToErrorResponses}.
  */
 export interface CorsOptions {
   /**
-   * Specifies the origins that are allowed to make requests to the API.
+   * Specifies the origin that is allowed to make requests to the API.
    * Can be:
-   * - `true`: Allow all origins (*)
-   * - `false`: Disable CORS
+   * - `true`: Allow all origins (`*`)
+   * - `false`: Disable CORS, no header is emitted
    * - `string`: Single origin (e.g., 'https://example.com')
-   * - `string[]`: Multiple specific origins
-   * - `RegExp`: Pattern to match origins
+   *
+   * Only one origin is supported. `Access-Control-Allow-Origin` holds a single
+   * value, and the gateway responses API Gateway emits before reaching the
+   * integration are rendered by a non-VTL template that cannot match the
+   * request origin against a list, so a multi-origin API would answer its
+   * errors for one origin only. Configure the origin per deployment instead.
+   *
+   * `*` cannot be combined with {@link CorsOptions.allowCredentials} — browsers
+   * reject that pair.
    *
    * @default false
    */
-  allowOrigins?: boolean | string | string[] | RegExp;
+  allowOrigins?: boolean | string;
 
   /**
    * Specifies the HTTP methods that are allowed when accessing the resource.
@@ -140,6 +157,11 @@ export interface CorsOptions {
   /**
    * Indicates whether to add CORS headers to error responses.
    * This is useful for handling CORS in error scenarios.
+   *
+   * Only covers the responses declared by the handler. API Gateway's own
+   * gateway responses (request validation, authorizer rejections, throttling)
+   * are emitted before the integration runs and carry no CORS header, so a
+   * browser reports those as a CORS failure rather than as the status code.
    *
    * @default true
    */

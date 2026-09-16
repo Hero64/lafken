@@ -40,7 +40,8 @@ export class BucketBaseIntegration implements Integration {
       apiGatewayMethod,
       integration,
       compute.responseHandlers,
-      compute.name
+      compute.name,
+      this.props.cors
     );
 
     if (compute.resolveResource.hasUnresolved()) {
@@ -61,7 +62,8 @@ export class BucketBaseIntegration implements Integration {
     const { operationResponses, integrationResponses } =
       restApi.responseFactory.buildResponseFragments(
         compute.responseHandlers,
-        compute.name
+        compute.name,
+        this.props.cors
       );
 
     const integration = toXAmazonIntegration(

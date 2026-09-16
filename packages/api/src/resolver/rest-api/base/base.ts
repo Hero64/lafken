@@ -20,6 +20,7 @@ import {
 } from '../../resolver.types';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
 import { DocsFactory } from '../factories/docs/docs.factories';
+import { CorsHelper } from '../factories/method/helpers/cors/cors';
 import { MethodFactory } from '../factories/method/method';
 import type { CreateMethodProps } from '../factories/method/method.types';
 import { ModelFactory } from '../factories/model/model';
@@ -71,6 +72,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
     public openapiFactory!: OpenApiFactory;
     public vpcIds: string[];
     public stages: ApiGatewayStage[] = [];
+    public gatewayResponses: ApiGatewayGatewayResponse[] = [];
     public openApiRegion?: DataAwsRegion;
 
     public initialize(props: BaseApiProps & Pick<RestApiProps, 'definition'>) {
@@ -241,6 +243,8 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
         ...this.modelFactory.resources,
         ...this.responseFactory.resources,
         ...this.docsFactory.resources,
+        // Only live once part of a deployed snapshot, so the deployment waits.
+        ...this.gatewayResponses,
       ];
 
       const version = this.docsFactory.createVersion();
@@ -405,23 +409,41 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
 
     public addApiGatewayResponse() {
       const { defaultResponses = {} } = apiProps;
-      for (const responseKey in defaultResponses) {
-        const key = responseKey as ApiDefaultResponseType;
+      const corsHelper = new CorsHelper();
+      const corsHeaders = corsHelper.isEnabled(apiProps.cors)
+        ? corsHelper.buildGatewayResponseHeaders(apiProps.cors)
+        : {};
+      const hasCors = Object.keys(corsHeaders).length > 0;
+
+      const keys = new Set(Object.keys(defaultResponses) as ApiDefaultResponseType[]);
+      if (hasCors) {
+        // Emitted before the integration runs, so they never pass through the
+        // method response mappings that carry the CORS headers. These two catch
+        // every type the user did not override.
+        keys.add('default4xx');
+        keys.add('default5xx');
+      }
+
+      for (const key of keys) {
         const response = defaultResponses[key];
-        if (!response) {
+        if (!response && !hasCors) {
           continue;
         }
 
         const isCustomResponse = response instanceof ApiGatewayResponse;
-        const statusCode = isCustomResponse
-          ? response.statusCode
-          : apiResponseStatusCode[key];
         const template = isCustomResponse ? response.template : response;
+        const statusCode = response
+          ? isCustomResponse
+            ? response.statusCode
+            : apiResponseStatusCode[key]
+          : undefined;
+
         const gatewayResponse = {
           statusCode: statusCode?.toString(),
-          responseTemplates: {
-            'application/json': JSON.stringify(template),
-          },
+          responseTemplates: template
+            ? { 'application/json': JSON.stringify(template) }
+            : undefined,
+          responseParameters: hasCors ? corsHeaders : undefined,
         };
 
         if (this.openapiFactory.isEnabled) {
@@ -429,12 +451,14 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           continue;
         }
 
-        new ApiGatewayGatewayResponse(restApi, `${apiProps.name}-${responseKey}`, {
-          restApiId: restApi.id,
-          responseType: apiResponseName[key],
-          ...gatewayResponse,
-          dependsOn: [restApi],
-        });
+        this.gatewayResponses.push(
+          new ApiGatewayGatewayResponse(restApi, `${apiProps.name}-${key}`, {
+            restApiId: restApi.id,
+            responseType: apiResponseName[key],
+            ...gatewayResponse,
+            dependsOn: [restApi],
+          })
+        );
       }
     }
   }

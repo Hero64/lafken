@@ -216,6 +216,90 @@ describe('Response factory', () => {
       status_code: '200',
     });
   });
+
+  it('should add Access-Control-Allow-Origin to a real response when cors is set', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [{ statusCode: '200' }, { statusCode: '400' }],
+      'test',
+      { allowOrigins: 'https://example.com' }
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '200',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+        'method.response.header.Vary': "'Origin'",
+      },
+    });
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '400',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+        'method.response.header.Vary': "'Origin'",
+      },
+    });
+  });
+
+  it('should not add cors headers to error responses when addToErrorResponses is false', () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    const method = new ApiGatewayMethod(stack, 'test-method', {
+      authorization: 'NONE',
+      httpMethod: 'GET',
+      resourceId: '',
+      restApiId: restApi.id,
+    });
+
+    const integration = new ApiGatewayIntegration(stack, 'test-integration', {
+      httpMethod: method.httpMethod,
+      resourceId: '',
+      restApiId: restApi.id,
+      type: '',
+    });
+
+    restApi.responseFactory.createResponses(
+      method,
+      integration,
+      [{ statusCode: '200' }, { statusCode: '500' }],
+      'test',
+      { allowOrigins: '*', addToErrorResponses: false }
+    );
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
+      status_code: '200',
+      response_parameters: {
+        'method.response.header.Access-Control-Allow-Origin': "'*'",
+      },
+    });
+    const errorResponse =
+      JSON.parse(synthesized).resource.aws_api_gateway_integration_response;
+    const errorEntry = Object.values(errorResponse).find(
+      (entry: any) => entry.status_code === '500'
+    ) as any;
+    expect(errorEntry.response_parameters).toBeUndefined();
+  });
 });
 
 describe('Response factory - openapi mode', () => {
@@ -319,5 +403,29 @@ describe('Response factory - openapi mode', () => {
 
     expect(operationResponses['204'].content).toBeUndefined();
     expect(integrationResponses['2\\d{2}'].statusCode).toBe('204');
+  });
+
+  it('should add Access-Control-Allow-Origin to a real response when cors is set', () => {
+    const { restApi } = setupInternalTestingRestApi({ definition: 'openapi' });
+
+    const { operationResponses, integrationResponses } =
+      restApi.responseFactory.buildResponseFragments(
+        [{ statusCode: '200' }, { statusCode: '400', selectionPattern: '.*BAD.*' }],
+        'test',
+        { allowOrigins: 'https://example.com' }
+      );
+
+    expect(operationResponses['200'].headers).toEqual({
+      'Access-Control-Allow-Origin': { schema: { type: 'string' } },
+      Vary: { schema: { type: 'string' } },
+    });
+    expect(integrationResponses.default.responseParameters).toEqual({
+      'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+      'method.response.header.Vary': "'Origin'",
+    });
+    expect(integrationResponses['.*BAD.*'].responseParameters).toEqual({
+      'method.response.header.Access-Control-Allow-Origin': "'https://example.com'",
+      'method.response.header.Vary': "'Origin'",
+    });
   });
 });
