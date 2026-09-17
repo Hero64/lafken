@@ -1,27 +1,10 @@
 import { AppsyncChannelNamespace } from '@cdktn/provider-aws/lib/appsync-channel-namespace';
 import { AppsyncDatasource } from '@cdktn/provider-aws/lib/appsync-datasource';
 import { LambdaHandler, lafkenResource, Role } from '@lafken/resolver';
-import {
-  type ChannelAuthorizer,
-  type ChannelLambdaMetadata,
-  ChannelOperation,
-} from '../../main';
-import type { AuthorizerFactory } from '../authorizer/authorizer';
-import type { EventApi } from '../event-api/event-api';
+import { type ChannelLambdaMetadata, ChannelOperation } from '../../main';
+import type { EventApi } from '../event-api';
 import type { NamespaceProps } from './namespace.types';
-
-const sanitizeName = (value: string) => value.replace(/[^a-zA-Z0-9_]/g, '_');
-
-const buildAuthMode = (
-  authorizerFactory: AuthorizerFactory,
-  auth?: ChannelAuthorizer | false
-) => {
-  if (!auth) {
-    return undefined;
-  }
-
-  return [{ authType: authorizerFactory.getAuthType(auth.authorizerName) }];
-};
+import { buildAuthMode, sanitizeName } from './namespace.utils';
 
 export class Namespace extends lafkenResource.make(AppsyncChannelNamespace) {
   constructor(
@@ -45,39 +28,6 @@ export class Namespace extends lafkenResource.make(AppsyncChannelNamespace) {
     super(scope, id, {
       apiId: scope.apiId,
       name,
-      handlerConfigs:
-        onPublish || onSubscribe
-          ? [
-              {
-                onPublish: onPublish
-                  ? [
-                      {
-                        behavior: 'DIRECT',
-                        integration: [
-                          {
-                            dataSourceName: publishDataSourceName,
-                            lambdaConfig: [{ invokeType: 'REQUEST_RESPONSE' }],
-                          },
-                        ],
-                      },
-                    ]
-                  : undefined,
-                onSubscribe: onSubscribe
-                  ? [
-                      {
-                        behavior: 'DIRECT',
-                        integration: [
-                          {
-                            dataSourceName: subscribeDataSourceName,
-                            lambdaConfig: [{ invokeType: 'REQUEST_RESPONSE' }],
-                          },
-                        ],
-                      },
-                    ]
-                  : undefined,
-              },
-            ]
-          : undefined,
       publishAuthMode: buildAuthMode(
         scope.authorizerFactory,
         resourceMetadata.publishAuth ?? resourceMetadata.auth
@@ -88,12 +38,42 @@ export class Namespace extends lafkenResource.make(AppsyncChannelNamespace) {
       ),
     });
 
+    if (onPublish || onSubscribe) {
+      this.putHandlerConfigs([
+        {
+          onPublish: this.buildOperationHandler(onPublish, publishDataSourceName),
+          onSubscribe: this.buildOperationHandler(onSubscribe, subscribeDataSourceName),
+        },
+      ]);
+    }
+
     if (onPublish) {
       this.createHandlerDataSource(publishDataSourceName, props, onPublish);
     }
     if (onSubscribe) {
       this.createHandlerDataSource(subscribeDataSourceName, props, onSubscribe);
     }
+  }
+
+  private buildOperationHandler(
+    handler: ChannelLambdaMetadata | undefined,
+    dataSourceName: string
+  ) {
+    if (!handler) {
+      return undefined;
+    }
+
+    return [
+      {
+        behavior: 'DIRECT',
+        integration: [
+          {
+            dataSourceName,
+            lambdaConfig: [{ invokeType: 'REQUEST_RESPONSE' }],
+          },
+        ],
+      },
+    ];
   }
 
   private createHandlerDataSource(

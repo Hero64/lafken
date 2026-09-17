@@ -14,6 +14,7 @@ import {
   ApiKeyAuthorizer,
   Channel,
   CognitoAuthorizer,
+  IamAuthorizer,
   OnPublish,
   OnSubscribe,
 } from '../main';
@@ -164,6 +165,38 @@ describe('channel resolver', () => {
           ],
         }),
       ],
+    });
+  });
+
+  it('applies the defaultAuthorizerName to channels without an explicit auth', () => {
+    @ApiKeyAuthorizer({ name: 'public-key' })
+    class PublicKeyAuth {}
+
+    @IamAuthorizer({ name: 'backend-auth' })
+    class BackendAuth {}
+
+    @Channel({ namespace: 'chat' })
+    class ChatChannel {
+      @OnPublish()
+      onMessage() {}
+    }
+
+    const { stack, module } = setupTestingStackWithModule();
+    const resolver = new PubSubResolver({
+      name: 'events-api',
+      authorizers: [PublicKeyAuth, BackendAuth],
+      defaultAuthorizerName: 'backend-auth',
+    });
+
+    resolver.beforeCreate(module as unknown as AppStack);
+    resolver.create(module as unknown as AppModule, ChatChannel);
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(AppsyncChannelNamespace, {
+      name: 'chat',
+      publish_auth_mode: [{ auth_type: 'AWS_IAM' }],
+      subscribe_auth_mode: [{ auth_type: 'AWS_IAM' }],
     });
   });
 

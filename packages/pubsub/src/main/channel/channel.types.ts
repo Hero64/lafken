@@ -40,9 +40,12 @@ export interface ChannelProps extends ResourceProps {
    * Authorizer applied to both publishing and subscribing on this namespace.
    *
    * Overrides the Event API's default authorization modes. Ignored for an
-   * operation that also defines its own `publishAuth`/`subscribeAuth`.
+   * operation that also defines its own `publishAuth`/`subscribeAuth`. Pass
+   * `false` to always inherit every registered authorizer, bypassing the
+   * resolver's `defaultAuthorizerName` if one is configured.
    *
-   * @default inherits the Event API's default authorization modes
+   * @default the resolver's `defaultAuthorizerName`, if configured;
+   * otherwise every registered authorizer
    */
   auth?: ChannelAuthorizer | false;
   /**

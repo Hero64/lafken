@@ -1,5 +1,5 @@
 import type { PublishEventProps } from './publish.types';
-import { signPublishRequest } from './sign';
+import { signPublishRequest } from './sign.utils';
 
 const MAX_EVENTS_PER_BATCH = 5;
 

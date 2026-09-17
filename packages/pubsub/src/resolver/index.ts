@@ -1,2 +1,2 @@
-export * from './event-api/event-api.types';
+export type { EventApiOptions } from './event-api';
 export * from './resolver';

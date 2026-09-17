@@ -1,5 +1,4 @@
-import { Publish } from './publish/publish';
-import type { PublishEventProps } from './publish/publish.types';
+import { Publish, type PublishEventProps } from './publish';
 
 export class PubSubService {
   static async publish(props: PublishEventProps) {

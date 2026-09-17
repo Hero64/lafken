@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { signPublishRequest } from './sign';
+import { signPublishRequest } from './sign.utils';
 
 describe('signPublishRequest', () => {
   const originalEnv = { ...process.env };

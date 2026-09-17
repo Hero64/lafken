@@ -19,4 +19,11 @@ export interface EventApiOptions {
    * @default a single `API_KEY` authorizer
    */
   authorizers?: ClassResource[];
+  /**
+   * Name of a registered authorizer (see `authorizers`) applied to any
+   * `@Channel` that doesn't declare its own `auth`/`publishAuth`/`subscribeAuth`.
+   *
+   * @default none — such channels inherit every registered authorizer
+   */
+  defaultAuthorizerName?: string;
 }

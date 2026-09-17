@@ -135,6 +135,16 @@ export class PrivateRoom {
 }
 ```
 
+To restrict channels to a single authorizer by default — instead of every registered one — set `defaultAuthorizerName` on the resolver. Channels that don't declare their own `auth`/`publishAuth`/`subscribeAuth` fall back to it; pass `auth: false` on a channel to opt back out and inherit every registered authorizer:
+
+```ts
+new PubSubResolver({
+  name: 'chat-app-events',
+  authorizers: [PublicKeyAuth, AppUsersAuth, TokenAuth, BackendAuth],
+  defaultAuthorizerName: 'app-users',
+});
+```
+
 ## Multiple Event APIs
 
 Pass one or more options to `PubSubResolver` and set `eventApiName` on each `@Channel` to route it to the right one:

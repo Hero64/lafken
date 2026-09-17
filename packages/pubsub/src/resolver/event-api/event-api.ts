@@ -1,7 +1,7 @@
 import { AppsyncApi } from '@cdktn/provider-aws/lib/appsync-api';
 import { lafkenResource } from '@lafken/resolver';
 import type { Construct } from 'constructs';
-import { AuthorizerFactory } from '../authorizer/authorizer';
+import { AuthorizerFactory } from '../authorizer';
 import type { EventApiOptions } from './event-api.types';
 
 export class EventApi extends lafkenResource.make(AppsyncApi) {
@@ -18,6 +18,7 @@ export class EventApi extends lafkenResource.make(AppsyncApi) {
 
     this.authorizerFactory = new AuthorizerFactory(this, {
       authorizers: props.authorizers || [],
+      defaultAuthorizerName: props.defaultAuthorizerName,
     });
 
     const authModes = this.authorizerFactory.authProviders.map((provider) => ({

@@ -20,11 +20,12 @@ import {
   type CognitoAuthorizerMetadata,
   type LambdaAuthorizerMetadata,
 } from '../../main';
-import type { EventApi } from '../event-api/event-api';
+import type { EventApi } from '../event-api';
 import type { AuthorizerFactoryProps } from './authorizer.types';
 
 export class AuthorizerFactory {
   public readonly authProviders: AppsyncApiEventConfigAuthProvider[] = [];
+  public readonly defaultAuthorizerName?: string;
   private authTypeByName: Record<string, string> = {};
   private hasLambdaAuthorizer = false;
 
@@ -32,6 +33,8 @@ export class AuthorizerFactory {
     private scope: EventApi,
     props: AuthorizerFactoryProps
   ) {
+    this.defaultAuthorizerName = props.defaultAuthorizerName;
+
     for (const resource of props.authorizers) {
       const metadata = getResourceMetadata<any>(resource);
 
@@ -56,6 +59,10 @@ export class AuthorizerFactory {
     if (this.authProviders.length === 0) {
       this.authProviders.push({ authType: 'API_KEY' });
       this.authTypeByName.default = 'API_KEY';
+    }
+
+    if (this.defaultAuthorizerName) {
+      this.getAuthType(this.defaultAuthorizerName);
     }
   }
 

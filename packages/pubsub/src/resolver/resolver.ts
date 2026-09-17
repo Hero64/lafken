@@ -15,9 +15,8 @@ import {
   type ChannelResourceMetadata,
   RESOURCE_TYPE,
 } from '../main';
-import { EventApi } from './event-api/event-api';
-import type { EventApiOptions } from './event-api/event-api.types';
-import { Namespace } from './namespace/namespace';
+import { EventApi, type EventApiOptions } from './event-api';
+import { Namespace } from './namespace';
 
 export class PubSubResolver implements ResolverType {
   public type = RESOURCE_TYPE;

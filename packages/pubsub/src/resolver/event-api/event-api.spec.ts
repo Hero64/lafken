@@ -1,6 +1,6 @@
 import { AppsyncApi } from '@cdktn/provider-aws/lib/appsync-api';
 import { AppsyncApiKey } from '@cdktn/provider-aws/lib/appsync-api-key';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { createResourceDecorator, enableBuildEnvVariable } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
@@ -200,6 +200,23 @@ describe('EventApi', () => {
     ).toThrow('an AppSync Event API supports only one AWS_LAMBDA authorizer');
   });
 
+  it('throws for a registered authorizer with an unsupported type', () => {
+    const UnsupportedAuthorizer = createResourceDecorator({ type: 'unsupported' });
+
+    @UnsupportedAuthorizer({ name: 'weird-auth' })
+    class WeirdAuth {}
+
+    const { module } = setupTestingStackWithModule();
+
+    expect(
+      () =>
+        new EventApi(module, 'events', {
+          name: 'events',
+          authorizers: [WeirdAuth],
+        })
+    ).toThrow('unsupported channel authorizer type: unsupported');
+  });
+
   it('throws when resolving an unknown authorizer name', () => {
     const { module } = setupTestingStackWithModule();
     const eventApi = new EventApi(module, 'events', { name: 'events' });
@@ -207,5 +224,38 @@ describe('EventApi', () => {
     expect(() => eventApi.authorizerFactory.getAuthType('missing')).toThrow(
       'channel authorizer "missing" not found'
     );
+  });
+
+  it('exposes the configured defaultAuthorizerName', () => {
+    @ApiKeyAuthorizer({ name: 'public-key' })
+    class PublicKeyAuth {}
+
+    @IamAuthorizer({ name: 'backend-auth' })
+    class BackendAuth {}
+
+    const { module } = setupTestingStackWithModule();
+    const eventApi = new EventApi(module, 'events', {
+      name: 'events',
+      authorizers: [PublicKeyAuth, BackendAuth],
+      defaultAuthorizerName: 'backend-auth',
+    });
+
+    expect(eventApi.authorizerFactory.defaultAuthorizerName).toBe('backend-auth');
+  });
+
+  it('throws when defaultAuthorizerName does not match a registered authorizer', () => {
+    @ApiKeyAuthorizer({ name: 'public-key' })
+    class PublicKeyAuth {}
+
+    const { module } = setupTestingStackWithModule();
+
+    expect(
+      () =>
+        new EventApi(module, 'events', {
+          name: 'events',
+          authorizers: [PublicKeyAuth],
+          defaultAuthorizerName: 'missing',
+        })
+    ).toThrow('channel authorizer "missing" not found');
   });
 });
