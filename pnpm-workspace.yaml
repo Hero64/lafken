@@ -36,7 +36,7 @@ catalog:
   turbo: 2.10.8
   typescript: 7.0.2
   unplugin-swc: ^1.5.10
-  vitest: ^4.1.10
+  vitest: ^5.0.1
 
 minimumReleaseAgeExclude:
   - '@aws-sdk/client-dynamodb@3.1090.0'
