@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   '@swc/core': false
+  esbuild: true
 
 catalog:
   '@aws-sdk/client-dynamodb': ^3.1106.0
