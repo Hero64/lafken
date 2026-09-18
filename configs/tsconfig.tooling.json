@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "declaration": false,
+    "declarationMap": false,
     "types": ["node"]
   },
   "include": ["../vitest.coverage.mts"]
