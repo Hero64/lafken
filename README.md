@@ -243,6 +243,7 @@ Lafken is organized into focused packages. Here's what each does:
 | **@lafken/api** | REST APIs with API Gateway |
 | **@lafken/queue** | SQS queues and message processing |
 | **@lafken/event** | EventBridge event rules and buses |
+| **@lafken/pubsub** | AppSync Events channels for real-time pub/sub |
 | **@lafken/schedule** | Scheduled Lambda functions |
 | **@lafken/state-machine** | Step Functions workflows |
 | **@lafken/bucket** | S3 bucket management |
@@ -258,6 +259,7 @@ Lafken is organized into focused packages. Here's what each does:
 - [API Module](packages/api/README.md) - Create REST APIs
 - [Queue Module](packages/queue/README.md) - SQS queues and workers
 - [Event Module](packages/event/README.md) - EventBridge event rules
+- [PubSub Module](packages/pubsub/README.md) - AppSync Events channels
 - [Schedule Module](packages/schedule/README.md) - Scheduled tasks
 - [State Machine Module](packages/state-machine/README.md) - Step Functions
 - [Bucket Module](packages/bucket/README.md) - S3 buckets
