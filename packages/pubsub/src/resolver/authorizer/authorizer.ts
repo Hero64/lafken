@@ -57,8 +57,7 @@ export class AuthorizerFactory {
     }
 
     if (this.authProviders.length === 0) {
-      this.authProviders.push({ authType: 'API_KEY' });
-      this.authTypeByName.default = 'API_KEY';
+      this.createApiKeyAuthorizer({ name: 'default' } as ApiKeyAuthorizerMetadata);
     }
 
     if (this.defaultAuthorizerName) {
@@ -163,7 +162,11 @@ export class AuthorizerFactory {
       authType: 'AWS_LAMBDA',
       lambdaAuthorizerConfig: [
         {
-          authorizerUri: lambdaHandler.invokeArn,
+          // AppSync's AWS_LAMBDA authorizer requires the Lambda function
+          // ARN itself, not the API Gateway-style invoke ARN — passing
+          // `invokeArn` fails with "Lambda Authorizer URI must be a valid
+          // Lambda function ARN" on `UpdateApi`.
+          authorizerUri: lambdaHandler.arn,
           authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
         },
       ],

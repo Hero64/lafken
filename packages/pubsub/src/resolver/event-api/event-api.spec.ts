@@ -2,7 +2,7 @@ import { AppsyncApi } from '@cdktn/provider-aws/lib/appsync-api';
 import { AppsyncApiKey } from '@cdktn/provider-aws/lib/appsync-api-key';
 import { createResourceDecorator, enableBuildEnvVariable } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
-import { Testing } from 'cdktn';
+import { TerraformOutput, Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
 import {
   ApiKeyAuthorizer,
@@ -50,8 +50,17 @@ describe('EventApi', () => {
     });
   });
 
+  it('creates an api key resource for the implicit default authorizer', () => {
+    const { stack, module } = setupTestingStackWithModule();
+    new EventApi(module, 'events', { name: 'events' });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toHaveResourceWithProperties(AppsyncApiKey, {});
+  });
+
   it('exposes httpDomain/realtimeDomain and registers itself for getResourceValue', () => {
-    const { module } = setupTestingStackWithModule();
+    const { stack, module } = setupTestingStackWithModule();
     const eventApi = new EventApi(module, 'events', { name: 'events' });
 
     expect(eventApi.httpDomain).toBeTruthy();
@@ -61,6 +70,17 @@ describe('EventApi', () => {
     const registered = lafkenResource.getResource<EventApi>('event-api', 'events');
     expect(registered).toBe(eventApi);
     expect(registered.httpDomain).toBeTruthy();
+
+    // Regression guard: the AWS provider's `dns` map is keyed by `HTTP`
+    // and `REALTIME` (uppercase) — a lowercase lookup silently resolves to
+    // an empty value at apply time, which no synth-only assertion above
+    // would catch (the token is "truthy" regardless of key casing).
+    new TerraformOutput(stack, 'httpOut', { value: eventApi.httpDomain });
+    new TerraformOutput(stack, 'realtimeOut', { value: eventApi.realtimeDomain });
+
+    const synthesized = JSON.parse(Testing.synth(stack));
+    expect(synthesized.output.httpOut.value).toMatch(/\.dns\["HTTP"\]}$/);
+    expect(synthesized.output.realtimeOut.value).toMatch(/\.dns\["REALTIME"\]}$/);
   });
 
   it('creates an api key resource for @ApiKeyAuthorizer', () => {
@@ -140,7 +160,7 @@ describe('EventApi', () => {
     });
   });
 
-  it('wires a lambda authorizer with the handler invoke arn', () => {
+  it('wires a lambda authorizer with the handler function arn', () => {
     @LambdaAuthorizer({ name: 'token-auth', authorizerResultTtlInSeconds: 30 })
     class TokenAuth {
       @AuthorizerHandler()
@@ -165,7 +185,7 @@ describe('EventApi', () => {
               auth_type: 'AWS_LAMBDA',
               lambda_authorizer_config: [
                 {
-                  authorizer_uri: 'test-authorizer-invoke-arn',
+                  authorizer_uri: 'test-authorizer-arn',
                   authorizer_result_ttl_in_seconds: 30,
                 },
               ],

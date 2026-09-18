@@ -37,16 +37,17 @@ export class EventApi extends lafkenResource.make(AppsyncApi) {
 
   /**
    * HTTP domain used to publish events (`POST https://{httpDomain}/event`).
-   * `dns` is a Terraform map (`{ http, realtime }`); this reads out the
-   * single value so it can flow into a Lambda env var via
+   * `dns` is a Terraform map keyed by `HTTP`/`REALTIME` (uppercase, per the
+   * AWS provider schema — not `http`/`realtime`); this reads out the single
+   * value so it can flow into a Lambda env var via
    * `getResourceValue('event-api::<name>', 'httpDomain')`.
    */
   get httpDomain() {
-    return this.dns.lookup('http');
+    return this.dns.lookup('HTTP');
   }
 
   /** WebSocket domain used to connect/subscribe (`wss://{realtimeDomain}/event/realtime`). */
   get realtimeDomain() {
-    return this.dns.lookup('realtime');
+    return this.dns.lookup('REALTIME');
   }
 }

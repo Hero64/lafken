@@ -1,6 +1,7 @@
 import { AppsyncChannelNamespace } from '@cdktn/provider-aws/lib/appsync-channel-namespace';
 import { AppsyncDatasource } from '@cdktn/provider-aws/lib/appsync-datasource';
 import { LambdaHandler, lafkenResource, Role } from '@lafken/resolver';
+import { dependable } from 'cdktn';
 import { type ChannelLambdaMetadata, ChannelOperation } from '../../main';
 import type { EventApi } from '../event-api';
 import type { NamespaceProps } from './namespace.types';
@@ -101,7 +102,7 @@ export class Namespace extends lafkenResource.make(AppsyncChannelNamespace) {
       ],
     });
 
-    new AppsyncDatasource(this, `${dataSourceName}-datasource`, {
+    const datasource = new AppsyncDatasource(this, `${dataSourceName}-datasource`, {
       apiId: this.scope.apiId,
       name: dataSourceName,
       type: 'AWS_LAMBDA',
@@ -109,5 +110,11 @@ export class Namespace extends lafkenResource.make(AppsyncChannelNamespace) {
       lambdaConfig: { functionArn: lambdaHandler.arn },
       dependsOn: [role, role.policy],
     });
+
+    // The channel namespace only references the data source by name (a
+    // plain string), so Terraform can't infer the dependency on its own —
+    // without this, AppSync may try to create the namespace before its
+    // data source exists and fail with "DataSource not found".
+    this.dependsOn = [...(this.dependsOn ?? []), dependable(datasource)];
   }
 }

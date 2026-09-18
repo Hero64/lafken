@@ -110,6 +110,21 @@ describe('channel resolver', () => {
       lambda_config: { function_arn: 'test-function-arn' },
     });
 
+    const resources = JSON.parse(synthesized).resource;
+    const namespace = Object.entries<{ depends_on: string[] }>(
+      resources.aws_appsync_channel_namespace
+    )[0][1];
+    const dataSourceIds = Object.keys(resources.aws_appsync_datasource);
+
+    // Regression guard: AppSync rejects channel namespace creation with
+    // "DataSource not found" when the namespace isn't told to wait for its
+    // data sources — the reference is a plain string, so Terraform can't
+    // infer the dependency on its own.
+    expect(dataSourceIds).toHaveLength(2);
+    for (const id of dataSourceIds) {
+      expect(namespace.depends_on).toContain(`aws_appsync_datasource.${id}`);
+    }
+
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
