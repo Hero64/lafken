@@ -21,7 +21,7 @@ catalog:
   '@swc/core': ^1.15.47
   '@swc/helpers': ^0.5.23
   '@types/aws-lambda': ^8.10.162
-  '@types/node': 26.2.0
+  '@types/node': 26.6.0
   '@vitest/coverage-v8': ^4.1.10
   '@vitest/runner': ^4.1.10
   aws-sdk-client-mock: ^4.1.0
