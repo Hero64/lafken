@@ -22,8 +22,7 @@ catalog:
   '@swc/helpers': ^0.5.23
   '@types/aws-lambda': ^8.10.162
   '@types/node': 26.2.0
-  '@vitest/coverage-v8': ^4.1.10
-  '@vitest/runner': ^4.1.10
+  '@vitest/coverage-v8': ^5.0.1
   aws-sdk-client-mock: ^4.1.0
   cdktn: ^0.24.0
   cdktn-cli: ^0.24.0
