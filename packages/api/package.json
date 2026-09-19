@@ -68,7 +68,6 @@
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "@vitest/runner": "catalog:",
     "cdktn": "catalog:",
     "@cdktn/vitest": "catalog:",
     "constructs": "catalog:",

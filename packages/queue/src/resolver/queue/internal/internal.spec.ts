@@ -125,11 +125,11 @@ describe('Queue', () => {
 
     expect(LambdaHandler).toHaveBeenCalledWith(
       expect.anything(),
-      'fifo-handler',
+      'standard-handler',
       expect.objectContaining({
         filename: 'test.js',
-        isFifo: true,
-        name: 'fifo',
+        isFifo: false,
+        name: 'standard',
         foldername: __dirname,
         suffix: 'queue',
       })

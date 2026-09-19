@@ -44,7 +44,6 @@
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "@vitest/runner": "catalog:",
     "@cdktn/vitest": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
