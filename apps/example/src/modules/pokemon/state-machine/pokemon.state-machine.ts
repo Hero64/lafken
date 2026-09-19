@@ -1,3 +1,4 @@
+import { Refs } from '@lafken/common';
 import { Event, State, StateMachine } from '@lafken/state-machine/main';
 
 @StateMachine({
