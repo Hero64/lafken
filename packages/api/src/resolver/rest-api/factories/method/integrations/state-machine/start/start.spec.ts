@@ -5,7 +5,7 @@ import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -15,10 +15,8 @@ import {
   ApiRequest,
   BodyParam,
   Event,
-  IntegrationOptions,
   PathParam,
   Post,
-  type StateMachineIntegrationOption,
   type StateMachineStartIntegrationResponse,
 } from '../../../../../../../main';
 import {
@@ -64,14 +62,12 @@ describe('State machine start integration', () => {
       action: 'Start',
       path: 'start',
     })
-    startWithResource(
-      @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption
-    ): StateMachineStartIntegrationResponse {
+    startWithResource(): StateMachineStartIntegrationResponse {
       return {
         input: {
           name: 'test',
         },
-        stateMachineArn: getResourceValue('testing::test', 'arn'),
+        stateMachineArn: Refs.resourceValue('testing::test', 'arn'),
       };
     }
 

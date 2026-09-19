@@ -5,14 +5,10 @@ import {
   getMetadataPrototypeByKey,
   getResourceMetadata,
   type LambdaMetadata,
+  Refs,
   type ResourceMetadata,
 } from '@lafken/common';
-import {
-  getExternalValues,
-  initLambdaAssetMetadata,
-  LambdaHandler,
-  resolveCallbackResource,
-} from '@lafken/resolver';
+import { initLambdaAssetMetadata, LambdaHandler } from '@lafken/resolver';
 import {
   type ApiKeyAuthorizerMetadata,
   AuthorizerReflectKeys,
@@ -92,34 +88,12 @@ export class AuthorizerFactory {
   }
 
   private createCognitoAuthorizer(metadata: CognitoAuthorizerMetadata) {
-    const index = this.authProviders.length;
     this.authTypeByName[metadata.name] = 'AMAZON_COGNITO_USER_POOLS';
-
-    const userPoolId = resolveCallbackResource(this.scope, metadata.userPoolId);
-    const { region } = getExternalValues(this.scope);
 
     this.authProviders.push({
       authType: 'AMAZON_COGNITO_USER_POOLS',
-      cognitoConfig: [{ awsRegion: region, userPoolId: userPoolId || '' }],
+      cognitoConfig: [{ awsRegion: Refs.region(), userPoolId: metadata.userPoolId }],
     });
-
-    if (!userPoolId) {
-      this.scope.onResolve(() => {
-        const resolvedUserPoolId = resolveCallbackResource(
-          this.scope,
-          metadata.userPoolId
-        );
-
-        if (!resolvedUserPoolId) {
-          throw new Error(`userPoolId not found for channel authorizer ${metadata.name}`);
-        }
-
-        this.scope.addOverride(
-          `event_config.0.auth_provider.${index}.cognito_config.0.user_pool_id`,
-          resolvedUserPoolId
-        );
-      });
-    }
   }
 
   private createLambdaAuthorizer(

@@ -10,6 +10,7 @@ import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
   getResourceMetadata,
+  Refs,
 } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
@@ -19,11 +20,9 @@ import {
   type ApiLambdaMetadata,
   ApiRequest,
   type ApiResourceMetadata,
-  type BucketIntegrationOption,
   type BucketIntegrationResponse,
   Event,
   Get,
-  IntegrationOptions,
   PathParam,
   QueryParam,
 } from '../../../../../../../main';
@@ -60,11 +59,9 @@ describe('Bucket upload integration', () => {
       action: 'Upload',
       integration: 'bucket',
     })
-    uploadGlobalResource(
-      @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
-    ): BucketIntegrationResponse {
+    uploadGlobalResource(): BucketIntegrationResponse {
       return {
-        bucket: getResourceValue('bucket::test', 'id'),
+        bucket: Refs.resourceValue('bucket::test', 'id'),
         object: 'test.json',
       };
     }

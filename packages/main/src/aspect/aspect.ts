@@ -1,6 +1,5 @@
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import type { VpcConfig } from '@lafken/common';
-import { Environment, getExternalValues } from '@lafken/resolver';
 import type { IAspect } from 'cdktn';
 import type { Construct, IConstruct } from 'constructs';
 import type {
@@ -19,8 +18,8 @@ export class AppAspect implements IAspect {
   private vpcConfig: VpcConfig;
 
   constructor(
-    private scope: Construct,
-    private id: string,
+    _scope: Construct,
+    _id: string,
     private props: AppAspectProps
   ) {
     this.initializeEnvironment();
@@ -44,17 +43,7 @@ export class AppAspect implements IAspect {
       return;
     }
 
-    const values = new Environment(
-      this.scope,
-      `${this.id}-env`,
-      this.props.environment
-    ).getValues();
-
-    if (values === false) {
-      throw new Error(`resources in ${this.id} env not found`);
-    }
-
-    this.env = values;
+    this.env = this.props.environment;
   }
 
   private initializeVpcConfig() {
@@ -62,10 +51,7 @@ export class AppAspect implements IAspect {
       return;
     }
 
-    this.vpcConfig =
-      typeof this.props.vpc === 'function'
-        ? this.props.vpc(getExternalValues(this.scope))
-        : this.props.vpc;
+    this.vpcConfig = this.props.vpc;
   }
 
   private addEnvironmentValues(node: LambdaFunction) {

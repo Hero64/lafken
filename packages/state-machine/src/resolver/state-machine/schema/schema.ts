@@ -1,13 +1,12 @@
 import {
   type ClassResource,
-  type GetResourceProps,
   getMetadataPrototypeByKey,
   getResourceHandlerMetadata,
   getResourceMetadata,
   type LambdaMetadata,
   LambdaReflectKeys,
 } from '@lafken/common';
-import { initLambdaAssetMetadata, resolveCallbackResource } from '@lafken/resolver';
+import { initLambdaAssetMetadata } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import type { Construct } from 'constructs';
 import {
@@ -58,7 +57,6 @@ export class Schema {
   private handlers: Record<string, LambdaStateMetadata> = {};
   private stateNames: StateNames;
   private lambdaStates: LambdaStates;
-  private unresolvedDependency: boolean = false;
   private bucketPermissions: BucketPermission = {};
   private lambdaResources: TerraformResource[] = [];
   private handlerStateNames: Map<string, string> = new Map();
@@ -106,10 +104,6 @@ export class Schema {
     }
 
     return definition;
-  }
-
-  get hasUnresolvedDependency() {
-    return this.unresolvedDependency;
   }
 
   get buckets() {
@@ -216,7 +210,6 @@ export class Schema {
           this.lambdaResources.push(...branchSchema.resources);
           branchStates.push(branchSchema.definition);
           this.mergeBucketPermissions(branchSchema.buckets);
-          this.setUnresolvedDependency(branchSchema.unresolvedDependency);
         }
 
         this.states[stateName] = {
@@ -241,7 +234,6 @@ export class Schema {
         this.lambdaResources.push(...mapSchema.resources);
         this.mergeBucketPermissions(mapSchema.buckets);
         const mapState = mapSchema.definition;
-        this.setUnresolvedDependency(mapSchema.hasUnresolvedDependency);
 
         const itemProcessor: Partial<ItemProcessor> = {
           ...mapState,
@@ -357,24 +349,10 @@ export class Schema {
       Resource: handler.integrationResource,
       Output: handler.output,
     };
-    const resource: Record<
-      string,
-      (event: Record<string, any>, context: GetResourceProps) => any
-    > = new this.resource();
+    const resource: Record<string, (event: Record<string, any>) => any> =
+      new this.resource();
 
-    this.unresolvedDependency = true;
-
-    task.Arguments = async () => {
-      const argumentValues = await resolveCallbackResource(this.scope, (props) =>
-        resource[handler.name]({}, props)
-      );
-
-      if (!argumentValues) {
-        throw new Error('The schema has a unresolved dependency');
-      }
-
-      return argumentValues;
-    };
+    task.Arguments = async () => resource[handler.name]({});
 
     return task;
   }
@@ -574,12 +552,6 @@ export class Schema {
   private addRetryAndCatch(state: RetryCatchTypes<any>, stateName: string) {
     this.addCatch(state, stateName);
     this.addRetry(state, stateName);
-  }
-
-  private setUnresolvedDependency(unresolved: boolean) {
-    if (unresolved) {
-      this.unresolvedDependency = true;
-    }
   }
 
   private mergeBucketPermissions(bucketPermissions: BucketPermission) {

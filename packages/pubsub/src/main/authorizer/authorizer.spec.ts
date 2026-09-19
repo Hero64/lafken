@@ -26,13 +26,13 @@ describe('Channel authorizer decorators', () => {
   });
 
   it('registers a cognito authorizer resource', () => {
-    @CognitoAuthorizer({ userPoolId: () => 'us-east-1_test' })
+    @CognitoAuthorizer({ userPoolId: 'us-east-1_test' })
     class AppUsersAuth {}
 
     const metadata = Reflect.getMetadata(ResourceReflectKeys.resource, AppUsersAuth);
 
     expect(metadata.type).toBe(ChannelAuthorizerType.cognito);
-    expect(metadata.userPoolId()).toBe('us-east-1_test');
+    expect(metadata.userPoolId).toBe('us-east-1_test');
   });
 
   it('registers a lambda authorizer resource and its handler', () => {

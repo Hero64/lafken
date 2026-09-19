@@ -1,11 +1,10 @@
 import 'reflect-metadata';
 import {
-  Context,
   createLambdaDecorator,
   createResourceDecorator,
   getEventFields,
   LambdaReflectKeys,
-  type ServicesValues,
+  type Services,
 } from '@lafken/common';
 import { type ApiObjectMetadata, PARAM_PREFIX, type Source } from '../request';
 import { RESPONSE_PREFIX, type ResponseFieldMetadata } from '../response';
@@ -29,7 +28,7 @@ const createMethodDecorator = (method: Method) =>
     getLambdaMetadata: (params, methodName) => {
       const { path = '/' } = params;
       let action: string | undefined;
-      let additionalServices: ServicesValues | undefined;
+      let additionalServices: Services[] | undefined;
       if (params.integration) {
         action = 'action' in params ? params.action : undefined;
         additionalServices = params.additionalServices;
@@ -250,20 +249,3 @@ export const Head = createMethodDecorator(Method.HEAD);
  * @param props - Method options (path, auth, response, description, integration, lambda).
  */
 export const Any = createMethodDecorator(Method.ANY);
-
-/**
- * Parameter decorator that injects the API Gateway integration options
- * into a handler method argument.
- *
- * Provides access to the underlying request context, such as headers,
- * query parameters, and path parameters forwarded by API Gateway.
- *
- * @example
- * ```ts
- * @Get({ path: '/{id}' })
- * getUser(@IntegrationOptions() ctx: any) {
- *   const userId = ctx.pathParameters.id;
- * }
- * ```
- */
-export const IntegrationOptions = Context;

@@ -44,13 +44,6 @@ export class BucketBaseIntegration implements Integration {
       this.props.cors
     );
 
-    if (compute.resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const uri = await compute.rebuildUri();
-        integration.addOverride('uri', uri);
-      });
-    }
-
     return integration;
   }
 
@@ -77,12 +70,6 @@ export class BucketBaseIntegration implements Integration {
       integrationResponses
     );
 
-    if (compute.resolveResource.hasUnresolved()) {
-      restApi.openapiFactory.addDeferred(async () => {
-        integration.uri = await compute.rebuildUri();
-      });
-    }
-
     return { integration, responses: operationResponses };
   }
 
@@ -106,11 +93,8 @@ export class BucketBaseIntegration implements Integration {
 
     const resource: InitializedClass<BucketIntegrationResponse> = new classResource();
 
-    const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions(restApi);
     const integrationResponse: BucketIntegrationResponse = await resource[handler.name](
-      proxyHelper.createEvent(),
-      options
+      proxyHelper.createEvent()
     );
 
     const name = `${resourceMetadata.name}-${handler.name}`;
@@ -134,28 +118,15 @@ export class BucketBaseIntegration implements Integration {
       'method.response.header.Content-Type': 'integration.response.header.Content-Type',
     };
 
-    const rebuildUri = async () => {
-      const rebuilt: BucketIntegrationResponse = await resource[handler.name](
-        proxyHelper.createEvent(),
-        options
-      );
-      if (resolveResource.hasUnresolved()) {
-        throw new Error(`unresolved dependencies in ${handler.name} integration`);
-      }
-      return this.getUri(rebuilt);
-    };
-
     return {
       name,
       role,
-      resolveResource,
       uri,
       requestParameters,
       responseHandlers: integrationHelper.generateResponseTemplate(
         responses,
         responseTemplateHelper
       ),
-      rebuildUri,
     };
   }
 

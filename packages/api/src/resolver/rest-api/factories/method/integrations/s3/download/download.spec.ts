@@ -9,6 +9,7 @@ import {
   enableBuildEnvVariable,
   getResourceHandlerMetadata,
   getResourceMetadata,
+  Refs,
 } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
@@ -18,11 +19,9 @@ import {
   type ApiLambdaMetadata,
   ApiRequest,
   type ApiResourceMetadata,
-  type BucketIntegrationOption,
   type BucketIntegrationResponse,
   Event,
   Get,
-  IntegrationOptions,
   PathParam,
   QueryParam,
 } from '../../../../../../../main';
@@ -59,11 +58,9 @@ describe('Bucket download integration', () => {
       action: 'Download',
       integration: 'bucket',
     })
-    downloadGlobalResource(
-      @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
-    ): BucketIntegrationResponse {
+    downloadGlobalResource(): BucketIntegrationResponse {
       return {
-        bucket: getResourceValue('bucket::test', 'id'),
+        bucket: Refs.resourceValue('bucket::test', 'id'),
         object: 'test.json',
       };
     }

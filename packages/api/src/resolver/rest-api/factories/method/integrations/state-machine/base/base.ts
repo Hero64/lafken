@@ -30,15 +30,6 @@ export class StateMachineBaseIntegration<T> implements Integration {
       },
     });
 
-    if (compute.resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        integration.addOverride(
-          'request_templates.application/json',
-          await compute.rebuildTemplate()
-        );
-      });
-    }
-
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
@@ -76,14 +67,6 @@ export class StateMachineBaseIntegration<T> implements Integration {
       integrationResponses
     );
 
-    if (compute.resolveResource.hasUnresolved()) {
-      restApi.openapiFactory.addDeferred(async () => {
-        integration.requestTemplates = {
-          'application/json': await compute.rebuildTemplate(),
-        };
-      });
-    }
-
     return { integration, responses: operationResponses };
   }
 
@@ -100,8 +83,7 @@ export class StateMachineBaseIntegration<T> implements Integration {
       createTemplate,
     } = this.props;
 
-    const { integrationResponse, resolveResource } =
-      await this.callIntegrationMethod<T>();
+    const integrationResponse = await this.callIntegrationMethod<T>();
 
     const name = `${resourceMetadata.name}-${handler.name}`;
 
@@ -112,46 +94,24 @@ export class StateMachineBaseIntegration<T> implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const rebuildTemplate = async () => {
-      const rebuilt = await this.callIntegrationMethod<T>();
-      if (rebuilt.resolveResource.hasUnresolved()) {
-        throw new Error(`unresolved dependencies in ${handler.name} integration`);
-      }
-      return createTemplate(rebuilt.integrationResponse);
-    };
-
     return {
       name,
       role,
-      resolveResource,
       uri: this.getUri(action),
-      requestTemplate: resolveResource.hasUnresolved()
-        ? ''
-        : createTemplate(integrationResponse),
+      requestTemplate: createTemplate(integrationResponse),
       responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      rebuildTemplate,
     };
   }
 
   protected async callIntegrationMethod<R>() {
-    const { classResource, handler, proxyHelper, integrationHelper, restApi } =
-      this.props;
+    const { classResource, handler, proxyHelper } = this.props;
 
     const resource: InitializedClass<R> = new classResource();
-    const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions(restApi);
-    const integrationResponse = await resource[handler.name](
-      proxyHelper.createEvent(),
-      options
-    );
 
-    return {
-      integrationResponse,
-      resolveResource,
-    };
+    return resource[handler.name](proxyHelper.createEvent());
   }
 
   private getUri(action: string) {

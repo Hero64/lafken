@@ -37,15 +37,6 @@ export class PutEventsIntegration implements Integration {
       },
     });
 
-    if (compute.resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        integration.addOverride(
-          'request_templates.application/json',
-          await compute.rebuildTemplate()
-        );
-      });
-    }
-
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
@@ -87,14 +78,6 @@ export class PutEventsIntegration implements Integration {
       integrationResponses
     );
 
-    if (compute.resolveResource.hasUnresolved()) {
-      restApi.openapiFactory.addDeferred(async () => {
-        integration.requestTemplates = {
-          'application/json': await compute.rebuildTemplate(),
-        };
-      });
-    }
-
     return { integration, responses: operationResponses };
   }
 
@@ -110,16 +93,11 @@ export class PutEventsIntegration implements Integration {
       responseTemplateHelper,
     } = this.props;
 
-    const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions(restApi);
     const name = `${resourceMetadata.name}-${handler.name}`;
 
     const resource: InitializedClass<EventBridgePutEventsIntegrationResponse> =
       new classResource();
-    const integrationResponse = await resource[handler.name](
-      proxyHelper.createEvent(),
-      options
-    );
+    const integrationResponse = await resource[handler.name](proxyHelper.createEvent());
 
     const role = integrationHelper.createRole({
       name,
@@ -131,26 +109,14 @@ export class PutEventsIntegration implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const rebuildTemplate = async () => {
-      const rebuilt = await resource[handler.name](proxyHelper.createEvent(), options);
-      if (resolveResource.hasUnresolved()) {
-        throw new Error(`unresolved dependencies in ${handler.name} integration`);
-      }
-      return this.createTemplate(rebuilt);
-    };
-
     return {
       name,
       role,
-      resolveResource,
-      requestTemplate: resolveResource.hasUnresolved()
-        ? ''
-        : this.createTemplate(integrationResponse),
+      requestTemplate: this.createTemplate(integrationResponse),
       responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      rebuildTemplate,
     };
   }
 

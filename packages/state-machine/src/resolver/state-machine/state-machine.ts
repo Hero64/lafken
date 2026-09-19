@@ -43,18 +43,10 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     const { classResource } = this.props;
 
     const schema = new Schema(this, classResource, { minify: this.props.minify });
-    const definition = await schema.definition;
+    const definition = await schema.resolveArguments(schema.definition);
     this.overrideRole(schema);
-
-    if (!schema.hasUnresolvedDependency) {
-      this.overrideDefinition(definition);
-      this.addDependency(...schema.resources);
-    } else {
-      this.onResolve(async () => {
-        this.overrideDefinition(await schema.resolveArguments(definition));
-        this.addDependency(...schema.resources);
-      });
-    }
+    this.overrideDefinition(definition);
+    this.addDependency(...schema.resources);
   }
 
   private overrideDefinition(definition: DefinitionSchema) {
@@ -88,14 +80,12 @@ export class StateMachine extends lafkenResource.make(SfnStateMachine) {
     const roleName = `${resourceMetadata.name}-${moduleName}-role`;
     const role = new Role(this, roleName, {
       name: roleName,
-      services: (props) => {
-        const basePermissions: Services[] = ['cloudwatch', 'lambda', ...bucketServices];
-        if (typeof resourceMetadata.services === 'function') {
-          return [...basePermissions, ...resourceMetadata.services(props)];
-        }
-
-        return [...basePermissions, ...(resourceMetadata.services || [])];
-      },
+      services: [
+        'cloudwatch',
+        'lambda',
+        ...bucketServices,
+        ...(resourceMetadata.services || []),
+      ],
       principal: 'states.amazonaws.com',
     });
     this.addDependency(role, role.policy);

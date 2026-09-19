@@ -1,6 +1,5 @@
 import {
   type ClassResource,
-  Context,
   createEventDecorator,
   createFieldDecorator,
   createFieldName,
@@ -74,30 +73,6 @@ export const Payload = createPayloadDecorator({
   prefix: RESOURCE_TYPE,
   createUniqueId: false,
 });
-
-/**
- * Parameter decorator that injects the integration options
- *
- * Use it to receive a `GetResourceProps` object (or custom integration
- * parameters) that provides access to `getResourceValue`, allowing you
- * to reference other infrastructure resources (queues, buckets, tables,
- * etc.) when building the integration payload returned by the handler.
- *
- * @example
- * ```ts
- * @StateMachine({ startAt: 'send' })
- * export class OrderFlow {
- *   @State({ integrationService: 'sqs', action: 'sendMessage', mode: 'token' })
- *   send(@IntegrationOptions() { getResourceValue }: GetResourceProps) {
- *     return {
- *       QueueUrl: getResourceValue('queue::orders', 'id'),
- *       MessageBody: { message: 'new order' },
- *     };
- *   }
- * }
- * ```
- */
-export const IntegrationOptions = Context;
 
 /**
  * Property decorator that maps a class field to a value extracted from

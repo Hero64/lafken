@@ -4,7 +4,7 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -13,9 +13,7 @@ import {
   ApiRequest,
   Event,
   Get,
-  IntegrationOptions,
   PathParam,
-  type StateMachineIntegrationOption,
   type StateMachineStatusIntegrationResponse,
 } from '../../../../../../../main';
 import {
@@ -50,11 +48,9 @@ describe('State machine status integration', () => {
       action: 'Stop',
       path: 'stop',
     })
-    statusWithResource(
-      @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption
-    ): StateMachineStatusIntegrationResponse {
+    statusWithResource(): StateMachineStatusIntegrationResponse {
       return {
-        executionArn: getResourceValue('state-machine::test', 'arn'),
+        executionArn: Refs.resourceValue('state-machine::test', 'arn'),
       };
     }
 

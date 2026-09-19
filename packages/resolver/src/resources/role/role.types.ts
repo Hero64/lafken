@@ -1,10 +1,10 @@
-import type { ServicesValues } from '@lafken/common';
+import type { Services } from '@lafken/common';
 
 export interface RoleProps {
   /**
    * List of services for enable permissions in role
    */
-  services: ServicesValues;
+  services: Services[];
   /**
    * Role name
    */

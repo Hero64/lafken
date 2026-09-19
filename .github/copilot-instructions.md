@@ -69,7 +69,7 @@ Complex resolvers use factories to build infrastructure incrementally:
 Resources can register globally using `isGlobal(module, id)` and reference each other:
 
 ```typescript
-getResourceValue('module::resourceId', 'arn') // Retrieves registered resources
+Refs.resourceValue('module::resourceId', 'arn') // Retrieves registered resources
 ```
 
 This is implemented via `lafkenResource.make()` which wraps CDKTN Constructs and enables global registration via `isDependent()` callbacks.
@@ -77,8 +77,8 @@ This is implemented via `lafkenResource.make()` which wraps CDKTN Constructs and
 ### 5. Environment Variables & Context
 Lambda environment variables support:
 - **Static values**: `{ FOO: 'bar' }`
-- **Dynamic values**: `getResourceValue()` callbacks to reference other resources
-- **SSM Parameter Store**: `'SSM::STRING::/path/to/param'` notation
+- **Dynamic values**: call `Refs.resourceValue()` directly to reference other resources — no callback, no injected `props` object
+- **SSM Parameter Store**: call `Refs.ssmValue('/path/to/param')` directly
 
 Context is managed per-app and per-module via `AppContext` with global config for memory, timeout, runtime, services.
 
@@ -114,8 +114,8 @@ Without this, metadata reflection fails and decorated classes won't be recognize
 
 ### Cross-Resource References
 1. Register resource globally: `bucket.isGlobal('bucket', 'my-bucket')`
-2. In other handlers: `getResourceValue('bucket::my-bucket', 'arn')`
-3. The resolver's `resolveCallbackResource()` validates references exist before deployment
+2. In other handlers: `Refs.resourceValue('bucket::my-bucket', 'arn')` — a member of the `Refs` namespace from `@lafken/common` that returns a real, deferred CDKTN token directly, no callback or injected `props` object needed
+3. The reference is resolved lazily at synth time; if the target resource was never registered, `ResolveResources.getResourceValue()` (`packages/resolver/src/utils/resolve-resource.utils.ts`) throws
 
 ## Key Files to Reference
 
@@ -135,7 +135,7 @@ Without this, metadata reflection fails and decorated classes won't be recognize
 ## Common Pitfalls
 
 1. **Metadata not captured**: Forget `enableBuildEnvVariable()` in tests
-2. **Unresolved dependencies**: Reference non-existent resources via `getResourceValue()`
+2. **Unresolved dependencies**: Reference non-existent resources via `Refs.resourceValue()`
 3. **Wrong formatter**: Use Biome (`pnpm format`) not Prettier
 4. **Missing resolver**: Decorator @type must match a registered resolver
 5. **Lambda path issues**: `filename`/`foldername` must match actual file locations used by bundler

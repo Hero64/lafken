@@ -1,4 +1,4 @@
-import type { EnvironmentValue, VpcConfigValue } from '@lafken/common';
+import type { EnvironmentValue, VpcConfig } from '@lafken/common';
 import type { Construct } from 'constructs';
 
 export interface TaggableResource extends Construct {
@@ -9,7 +9,7 @@ export interface TaggableResource extends Construct {
 export interface AppAspectProps {
   tags?: Record<string, string>;
   environment?: EnvironmentValue;
-  vpc?: VpcConfigValue;
+  vpc?: VpcConfig;
 }
 
 export interface OriginalLambdaValue {

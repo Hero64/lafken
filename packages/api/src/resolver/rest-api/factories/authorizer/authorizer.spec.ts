@@ -119,7 +119,7 @@ describe('authorizer factory', () => {
   it('should create a cognito authorizer', () => {
     @CognitoAuthorizer({
       name: 'cognito-auth',
-      userPoolArn: () => 'testing-user-pool',
+      userPoolArn: 'testing-user-pool',
     })
     class CognitoAuthTest {}
 

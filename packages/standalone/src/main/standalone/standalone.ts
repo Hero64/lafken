@@ -38,7 +38,7 @@ export const Standalone = createResourceDecorator({
  *   invoke: {
  *     permission: {
  *       principal: 'apigateway.amazonaws.com',
- *       sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+ *       sourceArn: Refs.resourceValue('api::orders', 'arn'),
  *     },
  *     role: {
  *       principal: 'apigateway.amazonaws.com',

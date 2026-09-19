@@ -1,4 +1,4 @@
-import type { GetResourceProps, ResourceMetadata, ResourceProps } from '@lafken/common';
+import type { ResourceMetadata, ResourceProps } from '@lafken/common';
 
 export enum ChannelAuthorizerType {
   apiKey = 'channel-api-key',
@@ -26,10 +26,11 @@ export interface CognitoAuthorizerProps extends ResourceProps {
   /**
    * Cognito User Pool id.
    *
-   * References the id of a Cognito User Pool resource created or loaded by
-   * `@lafken/auth`'s `AuthResolver`, via `getResourceValue`.
+   * The id of a Cognito User Pool resource created or loaded by
+   * `@lafken/auth`'s `AuthResolver`, typically supplied via a
+   * `Refs.resourceValue()` Refs.
    */
-  userPoolId: (props: GetResourceProps) => string;
+  userPoolId: string;
 }
 
 export interface LambdaAuthorizerProps extends ResourceProps {

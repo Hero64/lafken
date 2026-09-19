@@ -70,20 +70,14 @@ export class MockIntegration implements Integration {
       proxyHelper,
       paramHelper,
       templateHelper,
-      restApi,
       resourceMetadata,
-      integrationHelper,
       responseHelper,
     } = this.props;
 
     const name = `${resourceMetadata.name}-${handler.name}`;
-    const { options } = integrationHelper.generateIntegrationOptions(restApi);
 
     const resource: InitializedClass<Record<string, any>> = new classResource();
-    const integrationResponse = await resource[handler.name](
-      proxyHelper.createEvent(),
-      options
-    );
+    const integrationResponse = await resource[handler.name](proxyHelper.createEvent());
 
     const responseTemplate = templateHelper.generateTemplateByObject({
       value: integrationResponse,

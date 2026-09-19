@@ -1,59 +1,12 @@
 import type {
-  AvailableReference,
   BucketNames,
   DynamoTableNames,
   EventBusNames,
-  GetExternalValues,
-  GetResourceValue,
   KinesisStreamNames,
   OnlyNumberString,
   OnlyOne,
   QueueNames,
 } from '@lafken/common';
-
-/**
- * Base interface for integration options injected via `@IntegrationOptions()`.
- * Provides helper methods to resolve resource references and obtain contextual data.
- *
- * @typeParam T - The type of resource identifier accepted by `getResourceValue` (e.g. `BucketNames`, `QueueScopedNames`).
- * @typeParam V - The attribute types that can be retrieved (defaults to `'arn' | 'id'`).
- *
- * @example
- * ```typescript
- * @Get({ integration: 'dynamodb', action: 'Put' })
- * put(
- *   @IntegrationOptions() { getResourceValue, getCurrentDate }: IntegrationOptionBase
- * ): DynamoPutIntegrationResponse {
- *   return {
- *     data: { name: 'foo', date: getCurrentDate() },
- *     tableName: getResourceValue('dynamo::users', 'id'),
- *   };
- * }
- * ```
- */
-export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'>
-  extends GetExternalValues {
-  /**
-   * Retrieves a registered resource attribute (e.g. ARN or ID) by its scoped identifier.
-   *
-   * @example
-   * ```typescript
-   * getResourceValue('dynamo::users', 'arn')
-   * getResourceValue('pokemon-module::queue::createPokemon', 'name')
-   * ```
-   */
-  getResourceValue: GetResourceValue<T, V>;
-  /**
-   * Returns the current date as a formatted string.
-   * Useful for injecting timestamps into DynamoDB records or other integration payloads.
-   *
-   * @example
-   * ```typescript
-   * { date: getCurrentDate() }
-   * ```
-   */
-  getCurrentDate: () => string;
-}
 
 /**
  * Response shape for S3 bucket integrations (Download/Upload actions).
@@ -64,7 +17,7 @@ export interface IntegrationOptionBase<T = string, V = 'arn' | 'id'>
  * @Get({ path: 'download', action: 'Download', integration: 'bucket' })
  * download(): BucketIntegrationResponse {
  *   return {
- *     bucket: 'my-bucket',
+ *     bucket: Refs.resourceValue('bucket::my-bucket', 'id'),
  *     object: 'reports/monthly.json',
  *   };
  * }
@@ -78,25 +31,6 @@ export interface BucketIntegrationResponse {
 }
 
 /**
- * Integration options scoped to S3 bucket resources.
- * Allows resolving bucket identifiers via `getResourceValue`.
- *
- * @example
- * ```typescript
- * @Get({ path: 'download', action: 'Download', integration: 'bucket' })
- * download(
- *   @IntegrationOptions() { getResourceValue }: BucketIntegrationOption
- * ): BucketIntegrationResponse {
- *   return {
- *     bucket: getResourceValue('test', 'id'),
- *     object: 'test.json',
- *   };
- * }
- * ```
- */
-export type BucketIntegrationOption = IntegrationOptionBase<AvailableReference>;
-
-/**
  * Response shape for starting a Step Functions state machine execution.
  *
  * @typeParam T - The type of the input payload passed to the state machine.
@@ -104,11 +38,9 @@ export type BucketIntegrationOption = IntegrationOptionBase<AvailableReference>;
  * @example
  * ```typescript
  * @Post({ path: 'start', integration: 'state-machine', action: 'Start' })
- * start(
- *   @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption
- * ): StateMachineStartIntegrationResponse {
+ * start(): StateMachineStartIntegrationResponse {
  *   return {
- *     stateMachineArn: getResourceValue('module::state-machine::workflow', 'arn'),
+ *     stateMachineArn: Refs.resourceValue('module::state-machine::workflow', 'arn'),
  *     input: { name: 'test' },
  *   };
  * }
@@ -153,18 +85,6 @@ export interface StateMachineStopIntegrationResponse
   extends StateMachineStatusIntegrationResponse {}
 
 /**
- * Integration options scoped to Step Functions state machine resources.
- * Resource identifiers follow the format `module::state-machine::name`.
- */
-export type StateMachineIntegrationOption = IntegrationOptionBase<AvailableReference>;
-
-/**
- * Integration options scoped to DynamoDB table resources.
- * Resource identifiers follow the format `dynamo::tableName`.
- */
-export type DynamoIntegrationOption = IntegrationOptionBase<AvailableReference>;
-
-/**
  * Base interface for DynamoDB integration responses that require a table name.
  */
 interface DynamoIntegrationBase {
@@ -175,7 +95,7 @@ interface DynamoIntegrationBase {
    * ```typescript
    * { tableName: 'users' }
    * // or using a resource reference:
-   * { tableName: getResourceValue('dynamo::users', 'id') }
+   * { tableName: Refs.resourceValue('dynamo::users', 'id') }
    * ```
    */
   tableName: DynamoTableNames;
@@ -243,11 +163,9 @@ export interface DynamoQueryIntegrationResponse<T = any>
  * @example
  * ```typescript
  * @Get({ integration: 'dynamodb', action: 'Put' })
- * put(
- *   @IntegrationOptions() { getResourceValue, getCurrentDate }: DynamoIntegrationOption
- * ): DynamoPutIntegrationResponse {
+ * put(): DynamoPutIntegrationResponse {
  *   return {
- *     tableName: getResourceValue('dynamo::users', 'id'),
+ *     tableName: Refs.resourceValue('dynamo::users', 'id'),
  *     data: { name: 'foo', createdAt: getCurrentDate() },
  *   };
  * }
@@ -293,29 +211,6 @@ export interface DynamoPutIntegrationResponse<T = any> extends DynamoIntegration
  */
 export interface DynamoDeleteIntegrationResponse<T = any>
   extends DynamoIntegrationPartitionBase<T> {}
-
-/**
- * Integration options scoped to SQS queue resources.
- * Resource identifiers follow the format `module::queue::name`.
- * Allows resolving queue `id`, `arn`, or `name`.
- *
- * @example
- * ```typescript
- * @Get({ path: '/send', integration: 'queue', action: 'SendMessage' })
- * send(
- *   @IntegrationOptions() { getResourceValue }: QueueIntegrationOption
- * ): QueueSendMessageIntegrationResponse {
- *   return {
- *     queueName: getResourceValue('pokemon-module::queue::createPokemon', 'name'),
- *     body: 'hello',
- *   };
- * }
- * ```
- */
-export type QueueIntegrationOption = IntegrationOptionBase<
-  AvailableReference,
-  'id' | 'arn' | 'name'
->;
 
 /**
  * Response shape for the SQS SendMessage integration.
@@ -382,28 +277,6 @@ export interface QueueSendMessageIntegrationResponse {
 }
 
 /**
- * Option helper injected via `@IntegrationOptions()` for Kinesis integrations.
- *
- * @example
- * ```typescript
- * @Post({ integration: 'kinesis', action: 'PutRecord' })
- * putRecord(
- *   @IntegrationOptions() { getResourceValue }: KinesisIntegrationOption
- * ): KinesisPutRecordIntegrationResponse {
- *   return {
- *     streamName: getResourceValue('kinesis::events', 'name'),
- *     data: 'hello',
- *     partitionKey: 'my-key',
- *   };
- * }
- * ```
- */
-export type KinesisIntegrationOption = IntegrationOptionBase<
-  AvailableReference,
-  'id' | 'arn' | 'name'
->;
-
-/**
  * Response shape for the Kinesis PutRecord integration.
  * Specifies the target stream, record data, and partition key.
  *
@@ -431,32 +304,6 @@ export interface KinesisPutRecordIntegrationResponse {
 }
 
 /**
- * Option helper injected via `@IntegrationOptions()` for EventBridge integrations.
- *
- * Resource identifiers follow the format `event-bus::busName`.
- * Allows resolving event bus `id` (the bus name) or `arn`.
- *
- * @example
- * ```typescript
- * @Post({ integration: 'event-bridge', action: 'PutEvents' })
- * publish(
- *   @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
- * ): EventBridgePutEventsIntegrationResponse {
- *   return {
- *     eventBusName: getResourceValue('event-bus::orders', 'id'),
- *     source: 'orders',
- *     detailType: 'OrderCreated',
- *     detail: { orderId: '123' },
- *   };
- * }
- * ```
- */
-export type EventBridgeIntegrationOption = IntegrationOptionBase<
-  AvailableReference,
-  'id' | 'arn'
->;
-
-/**
  * Response shape for the EventBridge PutEvents integration.
  * Publishes a single event entry to an event bus.
  *
@@ -476,7 +323,7 @@ export type EventBridgeIntegrationOption = IntegrationOptionBase<
 export interface EventBridgePutEventsIntegrationResponse {
   /**
    * The EventBridge event bus name to publish the event to.
-   * Can be a literal or resolved with `getResourceValue('event-bus::name', 'id')`.
+   * Can be a literal or resolved with `Refs.resourceValue('event-bus::name', 'id')`.
    * When omitted, the default event bus is used.
    */
   eventBusName?: EventBusNames;

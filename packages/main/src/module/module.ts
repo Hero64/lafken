@@ -1,4 +1,4 @@
-import { getResourceMetadata, type ServicesValues } from '@lafken/common';
+import { getResourceMetadata, type Services } from '@lafken/common';
 import { ContextName, Role } from '@lafken/resolver';
 import { Aspects } from 'cdktn';
 import { Construct } from 'constructs';
@@ -55,14 +55,7 @@ export class StackModule extends Construct {
 
     const lambdaRole = new Role(this, roleName, {
       name: roleName,
-      services: (props) => {
-        return [
-          ...(Array.isArray(this.props.globalServices)
-            ? this.props.globalServices
-            : this.props.globalServices(props)),
-          ...(Array.isArray(services) ? services : services(props)),
-        ];
-      },
+      services: [...this.props.globalServices, ...services],
     });
 
     lambdaRole.register('module', roleName);
@@ -111,7 +104,7 @@ export const createModule =
   async (
     scope: ModuleConstruct,
     resolvers: Record<string, ModuleResolverType>,
-    globalServices: ServicesValues = []
+    globalServices: Services[] = []
   ) => {
     const module = new StackModule(scope, props.name, {
       ...props,

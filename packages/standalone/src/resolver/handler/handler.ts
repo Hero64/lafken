@@ -48,10 +48,8 @@ export class Handler extends GlobalLambdaHandler {
     const invokeRole = new Role(this, 'handler-role', {
       name: `${appContext.contextCreator}-${id.toLocaleLowerCase()}-invoke-role`,
       principal: role.principal,
-      services: (props) => [
-        ...(Array.isArray(role.services) || role.services === undefined
-          ? role.services || []
-          : role.services(props)),
+      services: [
+        ...(role.services ?? []),
         {
           type: 'lambda',
           permissions: ['InvokeFunction'],
