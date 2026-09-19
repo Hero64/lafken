@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   fn,
   getAccountId,
+  getCallerArn,
+  getDnsSuffix,
+  getPartition,
+  getRegion,
   getResourceValue,
   getSSMValue,
   registerRefResolvers,
@@ -43,13 +47,22 @@ describe('registerRefResolvers', () => {
     getRegion: () => 'region',
     getPartition: () => 'partition',
     getDnsSuffix: () => 'dns-suffix',
-    fn: {} as any,
-    token: {} as any,
+    fn: { upper: (value: string) => value.toUpperCase() } as any,
+    token: { isUnresolved: () => false } as any,
   };
 
-  it('accepts the first registration', () => {
+  it('accepts the first registration and resolves through the injected resolvers', () => {
     expect(() => registerRefResolvers(mockResolvers)).not.toThrow();
+
     expect(getResourceValue('bucket::test', 'id')).toBe('resolved-value');
+    expect(getSSMValue('/example/path')).toBe('ssm-value');
+    expect(getAccountId()).toBe('account-id');
+    expect(getCallerArn()).toBe('caller-arn');
+    expect(getRegion()).toBe('region');
+    expect(getPartition()).toBe('partition');
+    expect(getDnsSuffix()).toBe('dns-suffix');
+    expect(fn.upper('hello')).toBe('HELLO');
+    expect(token.isUnresolved('hello')).toBe(false);
   });
 
   it('throws on a second registration', () => {

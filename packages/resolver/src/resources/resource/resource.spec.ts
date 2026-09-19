@@ -3,6 +3,10 @@ import {
   enableBuildEnvVariable,
   fn,
   getAccountId,
+  getCallerArn,
+  getDnsSuffix,
+  getPartition,
+  getRegion,
   getResourceValue,
   getSSMValue,
   token,
@@ -88,6 +92,19 @@ describe('Lafken resource', () => {
     expect(() => Testing.synth(stack)).toThrow();
   });
 
+  it('should throw at synth time when the referenced property does not exist on the resource', () => {
+    const { stack } = setupTestingStack();
+
+    const source = new Bucket(stack, 'source', {});
+    source.register('bucket', 'source');
+
+    new Bucket(stack, 'target', {
+      bucket: getResourceValue('bucket::source', 'notAnAttribute' as any),
+    });
+
+    expect(() => Testing.synth(stack)).toThrow(/notAnAttribute/);
+  });
+
   it('should resolve a getSSMValue() reference embedded directly in the config', () => {
     const { stack } = setupTestingStack();
 
@@ -134,5 +151,25 @@ describe('Lafken resource', () => {
 
     expect(synthesized).toContain('data.aws_caller_identity');
     expect(synthesized).toContain('upper(');
+  });
+
+  it('should resolve getCallerArn()/getRegion()/getPartition()/getDnsSuffix() embedded directly in the config', () => {
+    const { stack } = setupTestingStack();
+
+    new Bucket(stack, 'target', {
+      bucket: 'plain-name',
+      tags: {
+        callerArn: getCallerArn(),
+        region: getRegion(),
+        partition: getPartition(),
+        dnsSuffix: getDnsSuffix(),
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toContain('data.aws_caller_identity');
+    expect(synthesized).toContain('data.aws_region');
+    expect(synthesized).toContain('data.aws_partition');
   });
 });
