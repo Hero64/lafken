@@ -11,7 +11,7 @@ catalog:
   '@aws-sdk/client-sqs': ^3.1106.0
   '@aws-sdk/credential-provider-node': ^3.972.0
   '@aws-sdk/util-dynamodb': ^3.996.7
-  '@biomejs/biome': 2.5.7
+  '@biomejs/biome': 2.5.13
   '@cdktn/provider-aws': ^25.0.0
   '@cdktn/vitest': ^0.1.0
   '@commitlint/cli': ^21.2.1
