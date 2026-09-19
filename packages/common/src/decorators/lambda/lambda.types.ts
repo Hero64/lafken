@@ -270,7 +270,7 @@ export interface LambdaProps {
    */
   functionName?: string;
   /**
-   * Registers this Lambda as a named global Refs.
+   * Registers this Lambda as a named global reference.
    *
    * Allows other resources to look up this function by name via
    * `lafkenResource.getResource('lambda', ref)`.
