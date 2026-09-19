@@ -1,14 +1,8 @@
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
-import type {
-  ServiceFunction,
-  Services,
-  ServicesName,
-  ServicesValues,
-} from '@lafken/common';
+import type { Services, ServicesName } from '@lafken/common';
 import { Fn } from 'cdktn';
 import type { Construct } from 'constructs';
-import { resolveCallbackResource } from '../../utils';
 import { lafkenResource } from '../resource';
 import type { RoleProps } from './role.types';
 
@@ -120,7 +114,7 @@ const RolePolicy = lafkenResource.make(IamRolePolicy);
 
 export class Role extends lafkenResource.make(IamRole) {
   public policy: InstanceType<typeof RolePolicy>;
-  public services: ServicesValues;
+  public services: Services[];
 
   constructor(
     scope: Construct,
@@ -149,25 +143,14 @@ export class Role extends lafkenResource.make(IamRole) {
   private createPolicy() {
     const policyName = `${this.props.name}-policy`;
 
-    const statement = this.createPolicyStatement(this.props.services);
+    const statement = this.getPolice(this.props.services);
 
     this.policy = new RolePolicy(this, policyName, {
       name: policyName.slice(0, 63),
       role: this.id,
-      policy: statement ? Fn.jsonencode(statement) : '',
+      policy: Fn.jsonencode(statement),
       dependsOn: [this],
     });
-
-    if (!statement) {
-      this.policy.onResolve(() => {
-        const statement = this.createPolicyStatement(this.props.services);
-        if (!statement) {
-          throw new Error('The role policy could not resolve one of its dependencies');
-        }
-
-        this.policy.addOverride('policy', Fn.jsonencode(statement));
-      });
-    }
   }
 
   private getPolice(services: Services[]) {
@@ -203,22 +186,5 @@ export class Role extends lafkenResource.make(IamRole) {
       Version: '2012-10-17',
       Statement: statements,
     };
-  }
-
-  private resolveServices = (getServices: ServiceFunction) => {
-    const services = resolveCallbackResource(this, getServices);
-    if (!services) {
-      return false;
-    }
-
-    return this.getPolice(services);
-  };
-
-  private createPolicyStatement(services: ServicesValues) {
-    if (Array.isArray(services)) {
-      return this.getPolice(services);
-    }
-
-    return this.resolveServices(services);
   }
 }

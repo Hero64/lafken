@@ -108,7 +108,7 @@ class NotificationService {
 | `timeout`     | `number`            | Execution timeout in seconds                  |
 | `memory`      | `number`            | Memory allocation in MB                       |
 | `runtime`     | `24 \| 22`   | Node.js runtime version                       |
-| `services`    | `ServicesValues`    | IAM service permissions                       |
+| `services`    | `Services[]`        | IAM service permissions                       |
 | `env`         | `EnvironmentValue`  | Environment variables (static or dynamic)     |
 | `tags`        | `Record<string, string>` | Resource tags                            |
 | `enableTrace` | `boolean`           | Enable AWS X-Ray tracing                      |
@@ -311,15 +311,16 @@ Supported service types: `dynamodb`, `s3`, `lambda`, `cloudwatch`, `sqs`, `state
 ### Environment Variables
 
 ```typescript
+import { getResourceValue } from '@lafken/common';
 import type { EnvironmentValue } from '@lafken/common';
 
 // Static values
 const env: EnvironmentValue = { TABLE_NAME: 'users' };
 
 // Dynamic values — resolved at deploy time via resource references
-const env: EnvironmentValue = ({ getResourceValue }) => ({
+const env: EnvironmentValue = {
   TABLE_ARN: getResourceValue('dynamo::users-table', 'arn'),
-});
+};
 ```
 
 ### Duration
@@ -330,6 +331,45 @@ import type { Duration } from '@lafken/common';
 const timeout: Duration = 30;                              // seconds
 const ttl: Duration = { type: 'days', duration: 7 };       // 7 days
 ```
+
+### Cross-Resource References
+
+`@lafken/common` exposes a small set of free functions that resolve real infrastructure values — the ARN of another resource, an SSM parameter, the current account ID, a Terraform built-in function — and can be dropped directly as the value of any resource or lambda config property, at any depth (env vars, plain strings, arrays, nested objects). No callback, no injected `props` object — just call the function where you need the value.
+
+```typescript
+import { fn, getAccountId, getResourceValue, getSSMValue, token } from '@lafken/common';
+
+@Api({ path: '/users' })
+export class UserApi {
+  @Get({
+    lambda: {
+      env: {
+        TABLE_ARN: getResourceValue('dynamo::users-table', 'arn'),
+        API_KEY: getSSMValue('/my-app/api-key'),
+        ACCOUNT_ID: getAccountId(),
+        BUCKET_NAME: fn.upper('my-bucket'),
+      },
+    },
+  })
+  getUser() { /* ... */ }
+}
+```
+
+| Function                      | Description                                                          |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `getResourceValue(ref, attr)` | References an attribute (e.g. `arn`, `id`) of another Lafken resource |
+| `getSSMValue(path, secure?)`  | References a value from AWS Systems Manager Parameter Store           |
+| `getAccountId()`              | AWS account ID where the stack is deployed                            |
+| `getCallerArn()`              | ARN of the caller credentials used during deployment                  |
+| `getRegion()`                 | AWS region where the stack is deployed                                |
+| `getPartition()`              | AWS partition (`aws`, `aws-cn`, `aws-us-gov`)                          |
+| `getDnsSuffix()`              | Base DNS domain for the current partition (e.g. `amazonaws.com`)      |
+| `fn`                          | Terraform built-in functions (backed by CDKTN's `Fn`)                 |
+| `token`                       | Terraform token utilities (backed by CDKTN's `Token`)                 |
+
+Every one of these functions is resolved lazily: the actual value is only computed once the whole app has been built and synthesized, regardless of the declaration order between the resources involved. Outside of build mode (e.g. inside the deployed Lambda handler itself, or a unit test that only exercises business logic), they are safe no-ops that return `undefined` without throwing — `@lafken/common` never imports `cdktn`, so calling them from Lambda runtime code has no cost.
+
+`registerRefResolvers()` is the injection point `@lafken/resolver` uses to wire the real CDKTN-backed implementation into these functions; application code never calls it directly.
 
 ### Type-Safe Resource References
 
@@ -385,6 +425,16 @@ declare module '@lafken/common' {
 | `cleanString`             | Strip non-alphanumeric characters        |
 | `cleanAndCapitalize`      | Clean and capitalize each word           |
 | `cleanTemplateString`     | Collapse multiline string to one line    |
+| `getResourceValue`        | Reference another Lafken resource's attribute |
+| `getSSMValue`             | Reference an SSM Parameter Store value        |
+| `getAccountId`            | Current AWS account ID                        |
+| `getCallerArn`            | ARN of the deployment caller                  |
+| `getRegion`               | Current AWS region                            |
+| `getPartition`            | Current AWS partition                         |
+| `getDnsSuffix`            | Current partition's DNS suffix                |
+| `fn`                      | Terraform built-in functions namespace        |
+| `token`                   | Terraform token utilities namespace           |
+| `registerRefResolvers`    | Injection point used by `@lafken/resolver`    |
 
 ### Constants
 
@@ -404,11 +454,11 @@ declare module '@lafken/common' {
 | `FieldMetadata`      | Discriminated union of field types                   |
 | `PayloadMetadata`    | Metadata shape for payload classes                   |
 | `Services`           | IAM permission declaration type                      |
-| `ServicesValues`     | Array or function returning `Services[]`             |
 | `EnvironmentValue`   | Static or dynamic environment variables              |
 | `Duration`           | Seconds or `{ type, duration }` object               |
 | `ClassResource`      | Generic class constructor type                       |
-| `GetResourceValue`   | Callback type for cross-resource references          |
+| `TerraformFn`        | Type of the `fn` namespace                           |
+| `TerraformToken`     | Type of the `token` namespace                        |
 | `DeepPartial<T>`     | Recursive partial type utility                       |
 
 ## License

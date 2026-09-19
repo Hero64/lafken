@@ -1,4 +1,3 @@
-import { getExternalValues } from '@lafken/resolver';
 import { Construct } from 'constructs';
 import type { ExternalUserPoolClientProps } from '../user-pool-client.types';
 import { DataExternalUserPoolClient } from '../user-pool-client.utils';
@@ -9,10 +8,7 @@ export class ExternalUserPoolClient extends Construct {
     super(scope, 'user-pool-client');
 
     this.cognitoUserPoolClient = new DataExternalUserPoolClient(this, id, {
-      clientId:
-        typeof props.clientId === 'string'
-          ? props.clientId
-          : props.clientId(getExternalValues(scope)),
+      clientId: props.clientId,
       userPoolId: props.userPoolId,
     });
     if (props.ref) {

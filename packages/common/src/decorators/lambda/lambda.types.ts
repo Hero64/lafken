@@ -1,10 +1,9 @@
 import type {
   EnvironmentValue,
-  GetResourceProps,
   LambdaReferenceNames,
   ResourceOutputType,
 } from '../../types';
-import type { ServicesValues } from '../../types/services.types';
+import type { Services } from '../../types/services.types';
 
 export type LambdaOutputAttributes = 'arn' | 'invokeArn' | 'qualifiedArn';
 
@@ -36,10 +35,6 @@ export interface VpcConfig {
    */
   subnetIds: string[];
 }
-
-export type VpcConfigValue =
-  | VpcConfig
-  | ((props: Omit<GetResourceProps, 'getResourceValue'>) => VpcConfig);
 
 export interface AliasConfig {
   /**
@@ -136,7 +131,7 @@ export interface LambdaProps {
    * Internally, a role is created with the specified service permissions,
    * granting the Lambda the ability to interact with those resources.
    */
-  services?: ServicesValues;
+  services?: Services[];
   /**
    * Lambda environments.
    *
@@ -199,7 +194,7 @@ export interface LambdaProps {
    *
    * Requires specifying at least one subnet and one security group.
    */
-  vpcConfig?: VpcConfigValue;
+  vpcConfig?: VpcConfig;
   /**
    * Ephemeral storage size for the Lambda function.
    *

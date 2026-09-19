@@ -4,18 +4,17 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { DynamodbTable } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import {
   Api,
   ApiRequest,
-  type DynamoIntegrationOption,
   type DynamoPutIntegrationResponse,
   Event,
   Get,
-  IntegrationOptions,
+  getCurrentDate,
   PathParam,
   QueryParam,
 } from '../../../../../../../main';
@@ -66,9 +65,7 @@ describe('Dynamo put integration', () => {
       integration: 'dynamodb',
       action: 'Put',
     })
-    putWithResource(
-      @IntegrationOptions() { getResourceValue, getCurrentDate }: DynamoIntegrationOption
-    ): DynamoPutIntegrationResponse {
+    putWithResource(): DynamoPutIntegrationResponse {
       return {
         data: {
           name: 'foo',

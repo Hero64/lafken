@@ -1,6 +1,7 @@
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { getResourceValue } from '@lafken/common';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import { setupTestingStack } from '../../utils';
@@ -85,7 +86,7 @@ describe('Role', () => {
     new Role(stack, 'testing', {
       name: 'testing',
       principal: 's3.amazon.com',
-      services: ({ getResourceValue }) => [
+      services: [
         {
           type: 's3',
           permissions: ['GetObject', 'GetObjectAttributes'],
@@ -102,13 +103,13 @@ describe('Role', () => {
     });
   });
 
-  it('should throw error when exist a unresolved dependency', async () => {
+  it('should throw error when exist a unresolved dependency', () => {
     const { stack } = setupTestingStack();
 
     new Role(stack, 'testing', {
       name: 'testing',
       principal: 's3.amazon.com',
-      services: ({ getResourceValue }) => [
+      services: [
         {
           type: 'sqs',
           permissions: ['DeleteMessage', 'GetQueueUrl'],
@@ -117,6 +118,6 @@ describe('Role', () => {
       ],
     });
 
-    await expect(lafkenResource.resolve()).rejects.toThrow();
+    expect(() => Testing.synth(stack)).toThrow();
   });
 });

@@ -1,10 +1,5 @@
-import { IntegrationOptions } from '@lafken/api/main';
-import {
-  Event,
-  type IntegrationOptionsParams,
-  State,
-  StateMachine,
-} from '@lafken/state-machine/main';
+import { getResourceValue } from '@lafken/common';
+import { Event, State, StateMachine } from '@lafken/state-machine/main';
 
 @StateMachine({
   startAt: 'getPokemon',
@@ -17,7 +12,7 @@ export class PokemonStateMachine {
     next: 'showPokemon',
     output: '{% $states.result.Item %}',
   })
-  getPokemon(@IntegrationOptions() { getResourceValue }: IntegrationOptionsParams) {
+  getPokemon() {
     return {
       TableName: getResourceValue('dynamo::pokemons', 'id'),
       Key: {

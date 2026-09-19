@@ -3,16 +3,14 @@ import {
   Api,
   Delete,
   Event,
-  type EventBridgeIntegrationOption,
   type EventBridgePutEventsIntegrationResponse,
   Get,
-  IntegrationOptions,
   Post,
   Put,
-  type QueueIntegrationOption,
   type QueueSendMessageIntegrationResponse,
   response,
 } from '@lafken/api/main';
+import { getResourceValue } from '@lafken/common';
 import { pokemonRepository } from '../../../infra/models/pokemon.model';
 import {
   BasePokemonPayload,
@@ -69,9 +67,9 @@ export class PokeApi {
   @Post({
     response: PokemonResponse,
     lambda: {
-      env: ({ getResourceValue }) => ({
+      env: {
         queueArn: getResourceValue('queue::create-pokemon', 'id'),
-      }),
+      },
     },
   })
   async createPokemon(@Event(CreatePokemonPayload) e: CreatePokemonPayload) {
@@ -110,9 +108,9 @@ export class PokeApi {
   @Delete({
     path: '/{name}',
     lambda: {
-      env: ({ getResourceValue }) => ({
+      env: {
         stateMachineArn: getResourceValue('state-machine::get-pokemon', 'arn'),
-      }),
+      },
     },
   })
   async deletePokemon(@Event(BasePokemonPayload) e: BasePokemonPayload) {
@@ -136,9 +134,7 @@ export class PokeApi {
     integration: 'queue',
     action: 'SendMessage',
   })
-  async viewPokedex(
-    @IntegrationOptions() { getResourceValue }: QueueIntegrationOption
-  ): Promise<QueueSendMessageIntegrationResponse> {
+  async viewPokedex(): Promise<QueueSendMessageIntegrationResponse> {
     return {
       queueName: getResourceValue('queue::create-pokemon', 'name'),
       body: {
@@ -156,9 +152,7 @@ export class PokeApi {
     integration: 'event-bridge',
     action: 'PutEvents',
   })
-  async publishEvent(
-    @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
-  ): Promise<EventBridgePutEventsIntegrationResponse> {
+  async publishEvent(): Promise<EventBridgePutEventsIntegrationResponse> {
     return {
       eventBusName: getResourceValue('event-bus::pokemon-bus', 'id'),
       source: 'pokemons',

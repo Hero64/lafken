@@ -1,9 +1,4 @@
-import type {
-  ApiAuthorizerNames,
-  GetResourceProps,
-  ResourceMetadata,
-  ResourceProps,
-} from '@lafken/common';
+import type { ApiAuthorizerNames, ResourceMetadata, ResourceProps } from '@lafken/common';
 import type { APIGatewayRequestAuthorizerEvent } from 'aws-lambda';
 
 import type { Method } from '../api';
@@ -24,13 +19,10 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
    */
   name?: ApiAuthorizerNames;
   /**
-   * Auth resource name.
-   *
-   * References the name of a Cognito User Pool resource created or loaded
-   * by the `AuthResolver`. This name must match the `name` property
-   * defined in the `AuthResolver` options.
+   * ARN of the Cognito User Pool resource created or loaded by the
+   * `AuthResolver`, typically supplied via a `getResourceValue()` reference.
    */
-  userPoolArn: (props: GetResourceProps) => string;
+  userPoolArn: string;
   /**
    * Authorization header.
    *

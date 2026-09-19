@@ -6,7 +6,7 @@ import type {
   LambdaProps,
   ResourceMetadata,
   ResourceProps,
-  ServicesValues,
+  Services,
 } from '@lafken/common';
 import type { ResponseFieldMetadata } from '../response';
 
@@ -292,7 +292,7 @@ export interface ApiIntegrationBaseProps extends ApiLambdaBaseProps {
    * Extends the base IAM permissions granted to the method's Lambda function,
    * allowing it to interact with extra AWS services (e.g., SQS, DynamoDB).
    */
-  additionalServices?: ServicesValues;
+  additionalServices?: Services[];
 }
 
 export interface ApiLambdaIntegrationProps extends ApiLambdaBaseProps {
@@ -717,7 +717,7 @@ export interface ApiLambdaMetadata extends LambdaMetadata {
   /** Tags for OpenAPI grouping. */
   tags?: string[];
   /** Additional AWS service permissions granted to the Lambda. */
-  additionalServices?: ServicesValues;
+  additionalServices?: Services[];
   /** Method-level cache, logging, metrics, and throttling settings. */
   methodSettings?: MethodSettingsConfig;
 }

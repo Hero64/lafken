@@ -18,7 +18,6 @@ import {
   initLambdaAssetMetadata,
   LambdaHandler,
   lafkenResource,
-  resolveCallbackResource,
 } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import {
@@ -342,18 +341,7 @@ export class AuthorizerFactory {
       };
       this.scope.openapiFactory.addSecurityScheme(metadata.name, scheme);
 
-      const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
-      if (userPoolArn) {
-        xAuthorizer.providerARNs = [userPoolArn];
-      } else {
-        this.scope.openapiFactory.addDeferred(() => {
-          const resolvedArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
-          if (!resolvedArn) {
-            throw new Error('userPoolArn not found, please check user pool ref');
-          }
-          xAuthorizer.providerARNs = [resolvedArn];
-        });
-      }
+      xAuthorizer.providerARNs = [metadata.userPoolArn];
 
       this.authorizerIds[metadata.name] = metadata.name;
       return;
@@ -369,21 +357,7 @@ export class AuthorizerFactory {
       authorizerResultTtlInSeconds: metadata.authorizerResultTtlInSeconds,
     });
 
-    const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
-
-    if (userPoolArn) {
-      authorizer.providerArns = [userPoolArn];
-    } else {
-      authorizer.onResolve(() => {
-        const userPoolArn = resolveCallbackResource(this.scope, metadata.userPoolArn);
-
-        if (!userPoolArn) {
-          throw new Error('userPoolArn not found, please check user pool ref');
-        }
-
-        authorizer.providerArns = [userPoolArn];
-      });
-    }
+    authorizer.providerArns = [metadata.userPoolArn];
 
     this.authResources.push(authorizer);
     this.createDoc(metadata.name, metadata.description);

@@ -131,7 +131,7 @@ export const StateMachine =
  * ```ts
  * // AWS service integration (SQS)
  * @State({ integrationService: 'sqs', action: 'sendMessage', mode: 'token' })
- * send(@IntegrationOptions() { getResourceValue }: GetResourceProps) {
+ * send() {
  *   return { QueueUrl: getResourceValue('queue::orders', 'id') };
  * }
  * ```

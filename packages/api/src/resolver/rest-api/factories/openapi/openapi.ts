@@ -30,7 +30,6 @@ export class OpenApiFactory {
   private policy?: Record<string, unknown>;
   private gatewayResponses: Record<string, GatewayResponseObject> = {};
   private documentationParts: DocumentationPartObject[] = [];
-  private deferred: Array<() => void | Promise<void>> = [];
 
   constructor(
     private scope: RestApi,
@@ -99,16 +98,6 @@ export class OpenApiFactory {
   }
 
   /**
-   * Registers a callback to rebuild spec fragments whose values are not yet
-   * resolvable at synth time (mirrors the per-integration `onResolve` used in
-   * "resource" mode). Callbacks run once during resolution, after which the
-   * body is re-serialized.
-   */
-  public addDeferred(callback: () => void | Promise<void>) {
-    this.deferred.push(callback);
-  }
-
-  /**
    * Serializes the accumulated document into `restApi.body`. The document holds
    * Terraform tokens (lambda `invokeArn`, role `arn`, region, …) as string
    * placeholders; `JSON.stringify` keeps those markers so CDKTN resolves them
@@ -123,15 +112,6 @@ export class OpenApiFactory {
 
     const body = this.serialize();
     this.setBody(body);
-
-    if (this.deferred.length > 0) {
-      this.scope.onResolve(async () => {
-        for (const callback of this.deferred) {
-          await callback();
-        }
-        this.setBody(this.serialize());
-      });
-    }
 
     return body;
   }

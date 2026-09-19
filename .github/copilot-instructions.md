@@ -77,8 +77,8 @@ This is implemented via `lafkenResource.make()` which wraps CDKTN Constructs and
 ### 5. Environment Variables & Context
 Lambda environment variables support:
 - **Static values**: `{ FOO: 'bar' }`
-- **Dynamic values**: `getResourceValue()` callbacks to reference other resources
-- **SSM Parameter Store**: `'SSM::STRING::/path/to/param'` notation
+- **Dynamic values**: call `getResourceValue()` directly to reference other resources — no callback, no injected `props` object
+- **SSM Parameter Store**: call `getSSMValue('/path/to/param')` directly
 
 Context is managed per-app and per-module via `AppContext` with global config for memory, timeout, runtime, services.
 
@@ -114,8 +114,8 @@ Without this, metadata reflection fails and decorated classes won't be recognize
 
 ### Cross-Resource References
 1. Register resource globally: `bucket.isGlobal('bucket', 'my-bucket')`
-2. In other handlers: `getResourceValue('bucket::my-bucket', 'arn')`
-3. The resolver's `resolveCallbackResource()` validates references exist before deployment
+2. In other handlers: `getResourceValue('bucket::my-bucket', 'arn')` — a free function from `@lafken/common` that returns a real, deferred CDKTN token directly, no callback or injected `props` object needed
+3. The reference is resolved lazily at synth time; if the target resource was never registered, `ResolveResources.getResourceValue()` (`packages/resolver/src/utils/resolve-resource.utils.ts`) throws
 
 ## Key Files to Reference
 

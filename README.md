@@ -146,24 +146,26 @@ That's it! Lafken generates all the AWS infrastructure:
 Define environment variables for your Lambda functions with support for static and dynamic values:
 
 ```ts
+import { getResourceValue, getSSMValue } from '@lafken/common';
+
 @Api({ path: '/users' })
 export class UserApi {
   @Get({
     path: '/{id}',
     lambda: {
-      env: ({ getResourceValue, getSSMValue }) => ({
+      env: {
         // Static value
         APP_NAME: 'my-app',
-        
+
         // Environment variable
         DEBUG: process.env.DEBUG || 'false',
-        
+
         // Dynamic reference to another resource
         TABLE_NAME: getResourceValue('dynamo::users', 'name'),
-        
+
         // AWS Systems Manager Parameter Store
-        API_KEY: getSSMValue('/my-app/api-key')
-      }),
+        API_KEY: getSSMValue('/my-app/api-key'),
+      },
     }
   })
   getUser() { /* ... */ }
@@ -218,6 +220,10 @@ Now you get full autocomplete:
 getResourceValue('dynamo::my-table', 'arn')    // ✓ TypeScript knows this is valid
 getResourceValue('dynamo::invalid', 'arn')      // ✗ TypeScript error
 ```
+
+### More Reference Functions
+
+Besides `getResourceValue` and `getSSMValue`, `@lafken/common` exposes `getAccountId`, `getCallerArn`, `getRegion`, `getPartition`, `getDnsSuffix`, `fn` (Terraform built-in functions) and `token` (Terraform token utilities) — all safe to call directly anywhere a resource or lambda config value is expected. See [`@lafken/common`'s README](packages/common/README.md#cross-resource-references) for the full list.
 
 ### Creating Custom Resolvers
 

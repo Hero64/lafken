@@ -1,5 +1,3 @@
-import type { GetResourceProps } from './resource.types';
-
 export type ServicesName =
   | 'dynamodb'
   | 's3'
@@ -128,7 +126,3 @@ export type Services =
   | PermissionService<'event', EventPermissions>
   | PermissionService<'kinesis', KinesisPermissions>
   | (PermissionService<'custom', string> & { serviceName: string });
-
-export type ServiceFunction = (props: GetResourceProps) => Services[];
-
-export type ServicesValues = Services[] | ServiceFunction;

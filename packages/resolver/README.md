@@ -282,7 +282,7 @@ Each service name maps to a default set of IAM actions:
 | Property | Type | Required | Description |
 |---|---|---|---|
 | `name` | `string` | Yes | IAM role name. |
-| `services` | `ServicesValues` | Yes | Service permissions — either an array of service names or a callback for dynamic resolution. |
+| `services` | `Services[]` | Yes | Service permissions — an array of service names or fine-grained permission objects. |
 | `principal` | `string` | No | AWS service principal for `AssumeRole`. Defaults to `lambda.amazonaws.com`. |
 
 ### Custom Service Permissions
@@ -386,51 +386,24 @@ Builds all registered Lambda assets. Called automatically by the framework after
 | `methods` | `string[]` | Method names to export from the bundle. |
 | `afterBuild` | `(outputPath: string) => void` | Optional post-build hook. |
 
-## Environment
+## Environment Variables
 
-`Environment` manages Lambda environment variables, supporting static values, dynamic resource references, and SSM Parameter Store resolution.
-
-```typescript
-import { Environment } from '@lafken/resolver';
-
-// Static values
-const env = new Environment(scope, 'handler-env', {
-  TABLE_NAME: 'orders',
-  REGION: 'us-east-1',
-});
-
-// SSM-backed values
-const envWithSSM = new Environment(scope, 'handler-env', {
-  API_KEY: 'SSM::STRING::/config/api-key',
-  DB_PASSWORD: 'SSM::SECURE_STRING::/config/db-password',
-});
-```
-
-### SSM Parameter Store
-
-Environment variables can resolve values from AWS SSM at deployment time using the syntax:
-
-```
-SSM::{TYPE}::/path/to/parameter
-```
-
-| Type | Description |
-|---|---|
-| `SSM::STRING` | Resolves an SSM `String` parameter. |
-| `SSM::SECURE_STRING` | Resolves an SSM `SecureString` parameter (decrypted at deploy time). |
-
-### Dynamic Resource References
-
-Environment values can also be callback functions that reference other resources:
+Lambda environment variables (`EnvironmentValue = Record<string, string>`) are passed straight through to the underlying `aws_lambda_function` resource — there is no dedicated `Environment` construct or SSM-string convention to parse. Static values are plain strings; dynamic values are produced by calling `getResourceValue`/`getSSMValue` (from `@lafken/common`) directly, since both already return a real, deferred CDKTN token by the time they land in the config:
 
 ```typescript
-const env = new Environment(scope, 'handler-env', (ctx) => ({
-  TABLE_ARN: ctx.getResourceValue('database::orders-table', 'arn'),
-  QUEUE_URL: ctx.getResourceValue('messaging::order-queue', 'url'),
-}));
+import { getResourceValue, getSSMValue } from '@lafken/common';
+
+lambda: {
+  env: {
+    TABLE_NAME: 'orders',
+    TABLE_ARN: getResourceValue('database::orders-table', 'arn'),
+    API_KEY: getSSMValue('/config/api-key'),
+    DB_PASSWORD: getSSMValue('/config/db-password', true), // secure string
+  },
+}
 ```
 
-The callback receives a `GetResourceProps` object with `getResourceValue(moduleId, property)`. If any referenced resource is not yet available, resolution is deferred via `isDependent()`.
+These functions are resolved lazily by CDKTN at synth time, regardless of the declaration order between the resources involved — see [`@lafken/common`'s Cross-Resource References](../common/README.md#cross-resource-references) for the full list of available reference functions (`getResourceValue`, `getSSMValue`, `getAccountId`, `getCallerArn`, `getRegion`, `getPartition`, `getDnsSuffix`, `fn`, `token`) and how `registerRefResolvers` wires this resolver package's implementation into them.
 
 ## Testing Utilities
 

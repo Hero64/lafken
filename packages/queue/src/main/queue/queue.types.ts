@@ -1,5 +1,4 @@
 import type {
-  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   QueueNames,
@@ -151,10 +150,10 @@ export interface ExternalQueueProps extends SourceMappingProps {
    *
    */
   /**
-   * Name or resolver function that resolves the name of the external SQS queue.
+   * Name of the external SQS queue.
    *
-   * Can be a literal queue name or a callback that receives `GetResourceProps`
-   * to dynamically resolve the queue identifier from another resource.
+   * Can be a literal queue name or a `getResourceValue()` reference that
+   * resolves the queue identifier from another resource.
    *
    * @example
    * // Literal name
@@ -162,9 +161,9 @@ export interface ExternalQueueProps extends SourceMappingProps {
    *
    * @example
    * // Dynamic reference
-   * queueName: (props) => props.getResourceValue('module::queue::name', 'id')
+   * queueName: getResourceValue('module::queue::name', 'id')
    */
-  queueName: string | ((props: GetResourceProps) => string);
+  queueName: string;
   /**
    * Lambda configuration for processing messages from this queue.
    */

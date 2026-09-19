@@ -4,7 +4,7 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { CloudwatchEventBus } from '@cdktn/provider-aws/lib/cloudwatch-event-bus';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
-import { enableBuildEnvVariable } from '@lafken/common';
+import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -13,9 +13,7 @@ import {
   ApiRequest,
   BodyParam,
   Event,
-  type EventBridgeIntegrationOption,
   type EventBridgePutEventsIntegrationResponse,
-  IntegrationOptions,
   Post,
 } from '../../../../../../../main';
 import {
@@ -56,9 +54,7 @@ describe('EventBridge put events integration', () => {
       integration: 'event-bridge',
       action: 'PutEvents',
     })
-    publishWithResource(
-      @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption
-    ): EventBridgePutEventsIntegrationResponse {
+    publishWithResource(): EventBridgePutEventsIntegrationResponse {
       return {
         eventBusName: getResourceValue('event-bus::test', 'id'),
         source: 'orders',

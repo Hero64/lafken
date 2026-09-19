@@ -1,9 +1,8 @@
 import type {
-  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   LambdaReferenceNames,
-  ServicesValues,
+  Services,
 } from '@lafken/common';
 
 export const RESOURCE_TYPE = 'standalone';
@@ -41,7 +40,7 @@ export interface HandlerProps {
    * invoke: {
    *   permission: {
    *     principal: 'apigateway.amazonaws.com',
-   *     sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+   *     sourceArn: getResourceValue('api::orders', 'arn'),
    *   },
    *   role: {
    *     principal: 'apigateway.amazonaws.com',
@@ -90,13 +89,12 @@ export interface InvokePermission {
 
   /**
    * Restricts invocation to a specific source ARN. Accepts either a literal
-   * string or a resolver callback `(props: GetResourceProps) => string` used to
-   * reference another Lafken resource's ARN.
+   * string or a `getResourceValue()` reference to another Lafken resource's ARN.
    *
    * @example
-   * sourceArn: (props) => props.getResourceValue('api::orders', 'arn')
+   * sourceArn: getResourceValue('api::orders', 'arn')
    */
-  sourceArn?: string | ((props: GetResourceProps) => string);
+  sourceArn?: string;
 
   /**
    * Restricts invocation to a specific source AWS account.
@@ -114,7 +112,7 @@ export interface InvokeRole {
   /**
    * Additional IAM policy statements to attach to the role.
    */
-  services?: ServicesValues;
+  services?: Services[];
 
   /**
    * Registers the created invoke role as a named global reference so other

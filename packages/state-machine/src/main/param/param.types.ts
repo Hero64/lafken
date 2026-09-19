@@ -2,7 +2,6 @@ import type {
   AllowedTypes,
   ArrayField,
   BooleanField,
-  GetResourceProps,
   NumberField,
   ObjectField,
   StringField,
@@ -255,11 +254,3 @@ export type StateMachineParamMetadata =
   | StateMachineBooleanParam
   | StateMachineObjectParam
   | StateMachineArrayParam;
-
-/**
- * Parameters passed to integration options when configuring a state machine
- * task integration (e.g. Lambda, SQS, DynamoDB).
- *
- * Alias of {@link GetResourceProps} from `@lafken/common`.
- */
-export type IntegrationOptionsParams = GetResourceProps;

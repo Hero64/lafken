@@ -53,7 +53,7 @@ Service packages expose two entry points: `@lafken/{pkg}/main` (decorators, used
 
 ### Cross-resource references
 
-Resources register globally with `isGlobal(module, id)` and are referenced elsewhere via `getResourceValue('scope::resourceId', 'arn')` (implemented in `packages/resolver/src/resources/resource/resource.ts` via `lafkenResource.make()`). Lambda env vars support static values, `getResourceValue()` callbacks, and SSM (`getSSMValue()` / `'SSM::STRING::/path'`). References are validated by `resolveCallbackResource()` before deployment.
+Resources register globally with `isGlobal(module, id)` and are referenced elsewhere via `getResourceValue('scope::resourceId', 'arn')` — a free function from `@lafken/common` that returns a real, deferred CDKTN token directly (no callback, no injected `props` object), implemented in `packages/resolver/src/utils/resolve-resource.utils.ts` on top of `lafkenResource.make()` (`packages/resolver/src/resources/resource/resource.ts`). The same free-function pattern covers `getSSMValue()` (SSM Parameter Store), `getAccountId()`, `getCallerArn()`, `getRegion()`, `getPartition()`, `getDnsSuffix()`, `fn` and `token` — all backed by `registerRefResolvers()`, a module-level injection `@lafken/resolver` performs into `@lafken/common` so app code can import and call these functions directly, anywhere a resource or lambda config value is expected, with no dedicated `value | callback` type per property.
 
 Complex resolvers use factory chains, e.g. API: RestApi → ResourceFactory → MethodFactory → IntegrationFactory (`packages/api/src/resolver/rest-api/`).
 

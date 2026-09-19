@@ -1,7 +1,18 @@
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import {
+  enableBuildEnvVariable,
+  fn,
+  getAccountId,
+  getResourceValue,
+  getSSMValue,
+  token,
+} from '@lafken/common';
+import { Testing } from 'cdktn';
 import { describe, expect, it, vitest } from 'vitest';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from './resource';
+
+enableBuildEnvVariable();
 
 describe('Lafken resource', () => {
   const Bucket = lafkenResource.make(S3Bucket);
@@ -37,5 +48,91 @@ describe('Lafken resource', () => {
     await lafkenResource.resolve();
 
     expect(dependentFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should resolve a getResourceValue() reference embedded directly in the config, without a callback', () => {
+    const { stack } = setupTestingStack();
+
+    const source = new Bucket(stack, 'source', {});
+    source.register('bucket', 'source');
+
+    new Bucket(stack, 'target', {
+      bucket: getResourceValue('bucket::source', 'id'),
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toContain('aws_s3_bucket.source.id');
+  });
+
+  it('should resolve a getResourceValue() reference even when the target resource is created later', () => {
+    const { stack } = setupTestingStack();
+
+    new Bucket(stack, 'target', {
+      bucket: getResourceValue('bucket::later', 'id'),
+    });
+
+    const source = new Bucket(stack, 'later', {});
+    source.register('bucket', 'later');
+
+    expect(() => Testing.synth(stack)).not.toThrow();
+  });
+
+  it('should throw at synth time when a getResourceValue() reference never resolves', () => {
+    const { stack } = setupTestingStack();
+
+    new Bucket(stack, 'target', {
+      bucket: getResourceValue('bucket::missing', 'id'),
+    });
+
+    expect(() => Testing.synth(stack)).toThrow();
+  });
+
+  it('should resolve a getSSMValue() reference embedded directly in the config', () => {
+    const { stack } = setupTestingStack();
+
+    new Bucket(stack, 'target', {
+      bucket: getSSMValue('/example/bucket-name'),
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toContain('data.aws_ssm_parameter');
+  });
+
+  it('should resolve a reference nested inside an object/array property', () => {
+    const { stack } = setupTestingStack();
+
+    const source = new Bucket(stack, 'source', {});
+    source.register('bucket', 'source');
+
+    new Bucket(stack, 'target', {
+      bucket: 'plain-name',
+      tags: {
+        sourceId: getResourceValue('bucket::source', 'id'),
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toContain('"bucket": "plain-name"');
+    expect(synthesized).toContain('aws_s3_bucket.source.id');
+  });
+
+  it('should resolve fn/token/getAccountId() embedded directly in the config', () => {
+    const { stack } = setupTestingStack();
+
+    new Bucket(stack, 'target', {
+      bucket: fn.upper('hello'),
+      tags: {
+        account: getAccountId(),
+        wasResolved: String(token.isUnresolved(getAccountId())),
+      },
+    });
+
+    const synthesized = Testing.synth(stack);
+
+    expect(synthesized).toContain('data.aws_caller_identity');
+    expect(synthesized).toContain('upper(');
   });
 });

@@ -5,15 +5,14 @@ import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
 import {
   type ClassResource,
   enableBuildEnvVariable,
-  type GetResourceProps,
   getResourceMetadata,
+  getResourceValue,
 } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   Event,
-  IntegrationOptions,
   NestedStateMachine,
   Param,
   Payload,
@@ -42,7 +41,7 @@ const createStateMachine = async (classResource: ClassResource) => {
     moduleName: 'testing',
   });
 
-  stateMachine.attachDefinition();
+  await stateMachine.attachDefinition();
 
   return {
     stack,
@@ -291,7 +290,7 @@ describe('State Machine', () => {
       @State({
         integrationResource: 'arn:aws:states:::sqs:sendMessage.waitForTaskToken',
       })
-      integration(@IntegrationOptions() { getResourceValue }: GetResourceProps) {
+      integration() {
         return {
           QueueUrl: getResourceValue('queue::test', 'id'),
           MessageBody: {
@@ -327,7 +326,7 @@ describe('State Machine', () => {
       @State({
         integrationResource: 'arn:aws:states:::sqs:sendMessage.waitForTaskToken',
       })
-      integration(@IntegrationOptions() { getResourceValue }: GetResourceProps) {
+      integration() {
         return {
           QueueUrl: getResourceValue('queue::test', 'id'),
           MessageBody: {
@@ -338,11 +337,9 @@ describe('State Machine', () => {
       }
     }
 
-    await createStateMachine(TestingSM);
+    const { stack } = await createStateMachine(TestingSM);
 
-    await expect(lafkenResource.resolve()).rejects.toThrow(
-      'The schema has a unresolved dependency'
-    );
+    expect(() => Testing.synth(stack)).toThrow();
   });
 
   it('should create a simple state machine role', async () => {
@@ -403,7 +400,7 @@ describe('State Machine', () => {
 
   it('should include custom services to state machine role', async () => {
     @StateMachine({
-      services: ({ getResourceValue }) => [
+      services: [
         {
           type: 'sqs',
           permissions: ['GetQueueUrl', 'ReceiveMessage'],

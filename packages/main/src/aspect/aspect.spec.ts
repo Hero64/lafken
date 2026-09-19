@@ -1,6 +1,7 @@
 import { beforeEach } from 'node:test';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
+import { getSSMValue } from '@lafken/common';
 import { lafkenResource, setupTestingStack } from '@lafken/resolver';
 import { Aspects, Testing } from 'cdktn';
 import { Construct } from 'constructs';
@@ -213,7 +214,7 @@ describe('App Aspect', () => {
     });
   });
 
-  it('should add vpc config from callback with SSM values', () => {
+  it('should add vpc config with getSSMValue() references', () => {
     const { stack } = setupTestingStack();
 
     class TestModule extends Construct {
@@ -228,10 +229,10 @@ describe('App Aspect', () => {
 
         Aspects.of(this).add(
           new AppAspect(scope, 'test', {
-            vpc: ({ getSSMValue }) => ({
+            vpc: {
               securityGroupIds: [getSSMValue('/vpc/sg-id')],
               subnetIds: [getSSMValue('/vpc/subnet-id')],
-            }),
+            },
           })
         );
       }
