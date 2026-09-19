@@ -6,22 +6,22 @@ allowBuilds:
   '@swc/core': false
 
 catalog:
-  '@aws-sdk/client-dynamodb': ^3.1106.0
-  '@aws-sdk/client-s3': ^3.1106.0
-  '@aws-sdk/client-sqs': ^3.1106.0
-  '@aws-sdk/credential-provider-node': ^3.972.0
+  '@aws-sdk/client-dynamodb': ^3.1134.0
+  '@aws-sdk/client-s3': ^3.1134.0
+  '@aws-sdk/client-sqs': ^3.1134.0
+  '@aws-sdk/credential-provider-node': ^3.972.83
   '@aws-sdk/util-dynamodb': ^3.996.7
   '@biomejs/biome': 2.5.13
-  '@cdktn/provider-aws': ^25.0.0
+  '@cdktn/provider-aws': ^25.5.0
   '@cdktn/vitest': ^0.1.0
   '@commitlint/cli': ^21.2.1
   '@commitlint/config-conventional': ^21.2.0
   '@smithy/signature-v4': ^5.7.0
   '@smithy/types': ^4.18.0
-  '@swc/core': ^1.15.47
+  '@swc/core': ^1.16.2
   '@swc/helpers': ^0.5.23
   '@types/aws-lambda': ^8.10.162
-  '@types/node': 26.2.0
+  '@types/node': 26.6.1
   '@vitest/coverage-v8': ^5.0.1
   aws-sdk-client-mock: ^4.1.0
   cdktn: ^0.24.0
@@ -29,12 +29,12 @@ catalog:
   constructs: ^10.8.0
   dayjs: 1.11.21
   husky: 9.1.7
-  lint-staged: 17.3.0
+  lint-staged: 17.5.1
   reflect-metadata: ^0.2.2
-  rolldown: 1.2.3
-  turbo: 2.10.8
+  rolldown: 1.2.9
+  turbo: 2.10.13
   typescript: 7.0.2
-  unplugin-swc: ^1.5.10
+  unplugin-swc: ^1.6.0
   vitest: ^5.0.1
 
 minimumReleaseAgeExclude:
