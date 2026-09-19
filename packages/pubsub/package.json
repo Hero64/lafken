@@ -1,0 +1,102 @@
+{
+  "name": "@lafken/pubsub",
+  "version": "0.15.1",
+  "private": false,
+  "description": "Define AppSync Events channels and publish/subscribe handlers using TypeScript decorators - automatic infrastructure generation with Lafken",
+  "keywords": [
+    "aws",
+    "appsync",
+    "appsync events",
+    "websocket",
+    "pubsub",
+    "serverless",
+    "typescript",
+    "decorators",
+    "lafken"
+  ],
+  "homepage": "https://github.com/Hero64/lafken#readme",
+  "bugs": "https://github.com/Hero64/lafken/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hero64/lafken",
+    "directory": "packages/pubsub"
+  },
+  "license": "MIT",
+  "author": "Aníbal Jorquera",
+  "exports": {
+    "./main": {
+      "import": "./lib/main/index.js",
+      "types": "./lib/main/index.d.ts",
+      "require": "./lib/main/index.js"
+    },
+    "./service": {
+      "import": "./lib/service/index.js",
+      "types": "./lib/service/index.d.ts",
+      "require": "./lib/service/index.js"
+    },
+    "./resolver": {
+      "import": "./lib/resolver/index.js",
+      "types": "./lib/resolver/index.d.ts",
+      "require": "./lib/resolver/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "main": [
+        "./lib/main/index.d.ts"
+      ],
+      "service": [
+        "./lib/service/index.d.ts"
+      ],
+      "resolver": [
+        "./lib/resolver/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "pnpm clean && tsc -p ./tsconfig.build.json",
+    "check-types": "tsc --noEmit -p ./tsconfig.build.json",
+    "clean": "rm -rf ./lib",
+    "dev": "tsc -w",
+    "prepublishOnly": "pnpm build",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@aws-sdk/credential-provider-node": "catalog:",
+    "@lafken/resolver": "workspace:*",
+    "@smithy/signature-v4": "catalog:",
+    "reflect-metadata": "catalog:"
+  },
+  "devDependencies": {
+    "@cdktn/provider-aws": "catalog:",
+    "@lafken/common": "workspace:*",
+    "@smithy/types": "catalog:",
+    "@swc/core": "catalog:",
+    "@swc/helpers": "catalog:",
+    "@types/aws-lambda": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/runner": "catalog:",
+    "cdktn": "catalog:",
+    "@cdktn/vitest": "catalog:",
+    "constructs": "catalog:",
+    "typescript": "catalog:",
+    "unplugin-swc": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@cdktn/provider-aws": ">=23.0.0",
+    "@lafken/common": "workspace:*",
+    "cdktn": ">=0.22.0",
+    "constructs": ">=10.7.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

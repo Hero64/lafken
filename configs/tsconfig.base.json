@@ -11,6 +11,7 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "declaration": true,
+    "declarationMap": true,
     "isolatedModules": true
   }
 }
