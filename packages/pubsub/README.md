@@ -95,13 +95,14 @@ Authorizers are separate decorated classes, registered on the resolver and refer
 
 ```ts
 import { ApiKeyAuthorizer, CognitoAuthorizer, LambdaAuthorizer, IamAuthorizer, AuthorizerHandler } from '@lafken/pubsub/main';
+import { getResourceValue } from '@lafken/common';
 
 @ApiKeyAuthorizer({ name: 'public-key' })
 export class PublicKeyAuth {}
 
 @CognitoAuthorizer({
   name: 'app-users',
-  userPoolId: ({ getResourceValue }) => getResourceValue('user-pool::app', 'id'),
+  userPoolId: getResourceValue('user-pool::app', 'id'),
 })
 export class AppUsersAuth {}
 

@@ -129,7 +129,7 @@ describe('EventApi', () => {
   });
 
   it('wires a cognito authorizer with the resolved user pool id and region', () => {
-    @CognitoAuthorizer({ name: 'app-users', userPoolId: () => 'us-east-1_test' })
+    @CognitoAuthorizer({ name: 'app-users', userPoolId: 'us-east-1_test' })
     class AppUsersAuth {}
 
     const { stack, module } = setupTestingStackWithModule();

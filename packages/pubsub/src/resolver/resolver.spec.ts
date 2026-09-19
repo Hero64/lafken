@@ -138,7 +138,7 @@ describe('channel resolver', () => {
 
     @CognitoAuthorizer({
       name: 'app-users',
-      userPoolId: () => 'us-east-1_test',
+      userPoolId: 'us-east-1_test',
     })
     class AppUsersAuth {}
 
