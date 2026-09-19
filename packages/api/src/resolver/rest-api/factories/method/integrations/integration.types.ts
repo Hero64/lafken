@@ -55,9 +55,6 @@ export interface IntegrationProps {
   cors?: CorsOptions;
 }
 
-export type InitializedClass<R> = Record<
-  string,
-  (event: Record<string, any>, context: any) => R
->;
+export type InitializedClass<R> = Record<string, (event: Record<string, any>) => R>;
 
 export const JSON_TYPE = 'application/json';

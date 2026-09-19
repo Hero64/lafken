@@ -298,7 +298,7 @@ class AuditedPayload {
 
 ### AWS Service Integrations
 
-HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and use `@IntegrationOptions` to reference other infrastructure resources via `getResourceValue`.
+HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and reference other infrastructure resources with `Refs.resourceValue`/`Refs.ssmValue`, imported directly from `@lafken/common`.
 
 Supported integrations:
 
@@ -313,14 +313,8 @@ Supported integrations:
 #### S3 Bucket Integration
 
 ```typescript
-import {
-  Api,
-  Get,
-  Put,
-  IntegrationOptions,
-  type BucketIntegrationOption,
-  type BucketIntegrationResponse,
-} from '@lafken/api/main';
+import { Api, Get, Put, type BucketIntegrationResponse } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/documents' })
 class DocumentApi {
@@ -328,11 +322,9 @@ class DocumentApi {
     integration: 'bucket',
     action: 'Download',
   })
-  download(
-    @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
-  ): BucketIntegrationResponse {
+  download(): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('bucket::project-documents', 'id'),
+      bucket: Refs.resourceValue('bucket::project-documents', 'id'),
       object: 'report.pdf',
     };
   }
@@ -341,11 +333,9 @@ class DocumentApi {
     integration: 'bucket',
     action: 'Upload',
   })
-  upload(
-    @IntegrationOptions() { getResourceValue }: BucketIntegrationOption,
-  ): BucketIntegrationResponse {
+  upload(): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('bucket::project-documents', 'id'),
+      bucket: Refs.resourceValue('bucket::project-documents', 'id'),
       object: 'new-report.pdf',
     };
   }
@@ -359,11 +349,10 @@ import {
   Api,
   Get,
   Post,
-  IntegrationOptions,
-  type DynamoIntegrationOption,
   type DynamoQueryIntegrationResponse,
   type DynamoPutIntegrationResponse,
 } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/products' })
 class ProductApi {
@@ -371,11 +360,9 @@ class ProductApi {
     integration: 'dynamodb',
     action: 'Query',
   })
-  search(
-    @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
-  ): DynamoQueryIntegrationResponse {
+  search(): DynamoQueryIntegrationResponse {
     return {
-      tableName: getResourceValue('dynamo::products-table', 'id'),
+      tableName: Refs.resourceValue('dynamo::products-table', 'id'),
       partitionKey: { category: 'electronics' },
     };
   }
@@ -384,11 +371,9 @@ class ProductApi {
     integration: 'dynamodb',
     action: 'Put',
   })
-  add(
-    @IntegrationOptions() { getResourceValue }: DynamoIntegrationOption,
-  ): DynamoPutIntegrationResponse {
+  add(): DynamoPutIntegrationResponse {
     return {
-      tableName: getResourceValue('dynamo::products-table', 'id'),
+      tableName: Refs.resourceValue('dynamo::products-table', 'id'),
       data: { name: 'Keyboard', price: 75 },
     };
   }
@@ -402,10 +387,9 @@ import {
   Api,
   Post,
   Event,
-  IntegrationOptions,
-  type QueueIntegrationOption,
   type QueueSendMessageIntegrationResponse,
 } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/notifications' })
 class NotificationApi {
@@ -413,11 +397,9 @@ class NotificationApi {
     integration: 'queue',
     action: 'SendMessage',
   })
-  enqueue(
-    @IntegrationOptions() { getResourceValue }: QueueIntegrationOption,
-  ): QueueSendMessageIntegrationResponse {
+  enqueue(): QueueSendMessageIntegrationResponse {
     return {
-      queueName: getResourceValue('queue::notification-queue', 'id'),
+      queueName: Refs.resourceValue('queue::notification-queue', 'id'),
       body: { type: 'welcome', recipient: 'new-user' },
     };
   }
@@ -453,11 +435,10 @@ import {
   Api,
   Post,
   Get,
-  IntegrationOptions,
-  type StateMachineIntegrationOption,
   type StateMachineStartIntegrationResponse,
   type StateMachineStatusIntegrationResponse,
 } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/workflows' })
 class WorkflowApi {
@@ -465,11 +446,9 @@ class WorkflowApi {
     integration: 'state-machine',
     action: 'Start',
   })
-  start(
-    @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
-  ): StateMachineStartIntegrationResponse {
+  start(): StateMachineStartIntegrationResponse {
     return {
-      stateMachineArn: getResourceValue('state-machine::processing-workflow', 'arn'),
+      stateMachineArn: Refs.resourceValue('state-machine::processing-workflow', 'arn'),
       input: { step: 'begin' },
     };
   }
@@ -478,11 +457,9 @@ class WorkflowApi {
     integration: 'state-machine',
     action: 'Status',
   })
-  status(
-    @IntegrationOptions() { getResourceValue }: StateMachineIntegrationOption,
-  ): StateMachineStatusIntegrationResponse {
+  status(): StateMachineStatusIntegrationResponse {
     return {
-      executionArn: getResourceValue('state-machine::processing-workflow', 'arn'),
+      executionArn: Refs.resourceValue('state-machine::processing-workflow', 'arn'),
     };
   }
 }
@@ -494,10 +471,9 @@ class WorkflowApi {
 import {
   Api,
   Post,
-  IntegrationOptions,
-  type EventBridgeIntegrationOption,
   type EventBridgePutEventsIntegrationResponse,
 } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/events' })
 class EventApi {
@@ -505,11 +481,9 @@ class EventApi {
     integration: 'event-bridge',
     action: 'PutEvents',
   })
-  publish(
-    @IntegrationOptions() { getResourceValue }: EventBridgeIntegrationOption,
-  ): EventBridgePutEventsIntegrationResponse {
+  publish(): EventBridgePutEventsIntegrationResponse {
     return {
-      eventBusName: getResourceValue('event-bus::orders-bus', 'id'),
+      eventBusName: Refs.resourceValue('event-bus::orders-bus', 'id'),
       source: 'orders',
       detailType: 'OrderCreated',
       detail: { orderId: '123' },
@@ -543,6 +517,19 @@ publishOrder(
 ```
 
 When `eventBusName` is omitted, the event is published to the default event bus.
+
+Direct integration methods can also use `getCurrentDate()` (from `@lafken/api/main`) to embed the API Gateway request timestamp into the generated VTL template:
+
+```typescript
+import { getCurrentDate } from '@lafken/api/main';
+
+add(): DynamoPutIntegrationResponse {
+  return {
+    tableName: Refs.resourceValue('dynamo::products-table', 'id'),
+    data: { name: 'Keyboard', createdAt: getCurrentDate() },
+  };
+}
+```
 
 ### Responses
 
@@ -716,13 +703,14 @@ The handler receives an `AuthorizationHandlerEvent` — the standard `APIGateway
 
 #### Cognito Authorizer
 
-Integrates with an Amazon Cognito User Pool for token-based authorization. Requires `@lafken/auth` to be configured first:
+Integrates with an Amazon Cognito User Pool for token-based authorization. Requires `@lafken/auth` to be configured first. `userPoolArn` typically references the pool created elsewhere in the app via `Refs.resourceValue()`:
 
 ```typescript
 import { CognitoAuthorizer } from '@lafken/api/main';
+import { Refs } from '@lafken/common';
 
 @CognitoAuthorizer({
-  userPool: 'main-user-pool',
+  userPoolArn: Refs.resourceValue('user-pool::main-user-pool', 'arn'),
   name: 'cognito-auth',
   header: 'Authorization',
   authorizerResultTtlInSeconds: 300,

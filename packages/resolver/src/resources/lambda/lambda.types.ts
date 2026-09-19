@@ -1,11 +1,9 @@
 import type {
-  GetResourceProps,
   LambdaMetadata,
   LambdaProps,
   ResourceMetadata,
-  ServicesValues,
+  Services,
 } from '@lafken/common';
-import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
 
 export interface ResolvedLambdaContext {
@@ -26,7 +24,7 @@ export interface LambdaHandlerProps
   filename: string;
   suffix?: string;
   principal?: string;
-  sourceArn?: string | ((props: GetResourceProps) => string);
+  sourceArn?: string;
   sourceAccount?: string;
 }
 
@@ -34,7 +32,7 @@ export interface GetRoleArnProps {
   name: string;
   appContext: GlobalContext;
   moduleContext?: GlobalContext;
-  services?: ServicesValues;
+  services?: Services[];
 }
 
 export interface CommonContextProps {
@@ -48,9 +46,4 @@ export interface GetCurrentOrContextValueProps<
 > extends CommonContextProps {
   key: T;
   defaultValue?: GlobalContext[T];
-}
-
-export interface GetEnvironmentProps extends CommonContextProps {
-  id: string;
-  scope: Construct;
 }

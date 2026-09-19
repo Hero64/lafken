@@ -43,14 +43,6 @@ export class SendMessageIntegration implements Integration {
       },
     });
 
-    if (compute.resolveResource.hasUnresolved()) {
-      integration.onResolve(async () => {
-        const rebuilt = await compute.rebuild();
-        integration.addOverride('uri', rebuilt.uri);
-        integration.addOverride('request_templates.application/json', rebuilt.template);
-      });
-    }
-
     restApi.responseFactory.createResponses(
       apiGatewayMethod,
       integration,
@@ -92,14 +84,6 @@ export class SendMessageIntegration implements Integration {
       integrationResponses
     );
 
-    if (compute.resolveResource.hasUnresolved()) {
-      restApi.openapiFactory.addDeferred(async () => {
-        const rebuilt = await compute.rebuild();
-        integration.uri = rebuilt.uri;
-        integration.requestTemplates = { 'application/json': rebuilt.template };
-      });
-    }
-
     return { integration, responses: operationResponses };
   }
 
@@ -115,16 +99,11 @@ export class SendMessageIntegration implements Integration {
       responseTemplateHelper,
     } = this.props;
 
-    const { options, resolveResource } =
-      integrationHelper.generateIntegrationOptions(restApi);
     const name = `${resourceMetadata.name}-${handler.name}`;
 
     const resource: InitializedClass<QueueSendMessageIntegrationResponse> =
       new classResource();
-    const integrationResponse = await resource[handler.name](
-      proxyHelper.createEvent(),
-      options
-    );
+    const integrationResponse = await resource[handler.name](proxyHelper.createEvent());
 
     const role = integrationHelper.createRole({
       name,
@@ -136,30 +115,15 @@ export class SendMessageIntegration implements Integration {
       additionalServices: handler.additionalServices,
     });
 
-    const rebuild = async () => {
-      const rebuilt = await resource[handler.name](proxyHelper.createEvent(), options);
-      if (resolveResource.hasUnresolved()) {
-        throw new Error(`unresolved dependencies in ${handler.name} integration`);
-      }
-      return {
-        uri: this.getUri(rebuilt),
-        template: this.createTemplate(rebuilt),
-      };
-    };
-
     return {
       name,
       role,
-      resolveResource,
-      uri: resolveResource.hasUnresolved() ? '' : this.getUri(integrationResponse),
-      requestTemplate: resolveResource.hasUnresolved()
-        ? ''
-        : this.createTemplate(integrationResponse),
+      uri: this.getUri(integrationResponse),
+      requestTemplate: this.createTemplate(integrationResponse),
       responseHandlers: integrationHelper.generateResponseTemplate(
         responseHelper.handlerResponse,
         responseTemplateHelper
       ),
-      rebuild,
     };
   }
 

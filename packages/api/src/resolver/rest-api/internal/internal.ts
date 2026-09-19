@@ -1,5 +1,5 @@
 import { ApiGatewayRestApi } from '@cdktn/provider-aws/lib/api-gateway-rest-api';
-import { getExternalValues, lafkenResource, ResourceOutput } from '@lafken/resolver';
+import { lafkenResource, ResourceOutput } from '@lafken/resolver';
 import type { Construct } from 'constructs';
 import type { ApiOutputAttributes, RestApiProps } from '../../resolver.types';
 import { RestApiBase } from '../base/base';
@@ -38,10 +38,7 @@ export class InternalRestApi extends RestApiBase(lafkenResource.make(ApiGatewayR
     }
 
     if (this.props.endpointConfiguration.type === 'private') {
-      this.vpcIds =
-        typeof this.props.endpointConfiguration.vpcEndpointIds === 'function'
-          ? this.props.endpointConfiguration.vpcEndpointIds(getExternalValues(this))
-          : this.props.endpointConfiguration.vpcEndpointIds;
+      this.vpcIds = this.props.endpointConfiguration.vpcEndpointIds;
 
       this.putEndpointConfiguration({
         types: [this.props.endpointConfiguration.type.toUpperCase()],

@@ -8,23 +8,15 @@ import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
 import {
   type AliasConfig,
-  type GetResourceProps,
   kebabCase,
   type LambdaOutputAttributes,
   type LoggingConfig,
-  type ServicesValues,
-  type VpcConfigValue,
+  type VpcConfig,
 } from '@lafken/common';
 import { dependable } from 'cdktn';
 import type { Construct } from 'constructs';
 import type { GlobalContext } from '../../types';
-import {
-  getAppContext,
-  getExternalValues,
-  getModuleContext,
-  resolveCallbackResource,
-} from '../../utils';
-import { Environment } from '../environment/environment';
+import { getAppContext, getModuleContext } from '../../utils';
 import { ResourceOutput } from '../output/output';
 import { lafkenResource } from '../resource';
 import { Role } from '../role';
@@ -32,7 +24,6 @@ import { lambdaAssets } from './asset/asset';
 import type {
   CommonContextProps,
   GetCurrentOrContextValueProps,
-  GetEnvironmentProps,
   GetRoleArnProps,
   LambdaHandlerProps,
   ResolvedLambdaContext,
@@ -49,21 +40,11 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     };
 
     const ctx = LambdaHandler.resolveContextValues(contextValueProps);
-    const environments = LambdaHandler.getCurrentEnvironment({
-      ...contextValueProps,
-      id,
-      scope,
-    });
-    let environmentValues = environments?.getValues() || undefined;
     const handlerName =
       props.lambda?.functionName ??
       LambdaHandler.buildFunctionName(id, appContext, moduleContext, props.suffix);
 
-    super(
-      scope,
-      id,
-      LambdaHandler.buildFunctionConfig(handlerName, ctx, props, environmentValues)
-    );
+    super(scope, id, LambdaHandler.buildFunctionConfig(handlerName, ctx, props));
 
     if (props.lambda?.ref) {
       this.register('lambda', props.lambda.ref);
@@ -77,18 +58,6 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       name: handlerName,
       services: props.lambda?.services,
     });
-
-    if (environments && !environmentValues) {
-      this.onResolve(() => {
-        environmentValues = environments.getValues() || undefined;
-
-        if (!environmentValues) {
-          throw new Error(`unresolved dependencies in ${props.name} lambda`);
-        }
-
-        this.putEnvironment({ variables: environmentValues });
-      });
-    }
 
     lambdaAssets.addLambda({
       filename: props.filename,
@@ -156,8 +125,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
   private static buildFunctionConfig(
     functionName: string,
     ctx: ResolvedLambdaContext,
-    props: LambdaHandlerProps,
-    environmentValues: Record<string, string> | undefined
+    props: LambdaHandlerProps
   ): LambdaFunctionConfig {
     return {
       functionName,
@@ -176,7 +144,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
         mode: props.lambda?.enableTrace ? 'Active' : 'PassThrough',
       },
       environment: {
-        variables: environmentValues ?? {},
+        variables: props.lambda?.env ?? {},
       },
     };
   }
@@ -186,33 +154,14 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
       return;
     }
 
-    const sourceArn =
-      typeof props.sourceArn === 'function'
-        ? resolveCallbackResource(this, props.sourceArn)
-        : props.sourceArn;
-
-    const permission = new LambdaPermission(this, 'permission', {
+    new LambdaPermission(this, 'permission', {
       functionName: name,
       action: 'lambda:InvokeFunction',
       principal: props.principal,
-      sourceArn: sourceArn || undefined,
+      sourceArn: props.sourceArn,
       sourceAccount: props.sourceAccount,
       dependsOn: [this],
     });
-
-    if (typeof props.sourceArn === 'function' && !sourceArn) {
-      const sourceArnCallback = props.sourceArn;
-
-      this.onResolve(() => {
-        const resolved = resolveCallbackResource(this, sourceArnCallback);
-
-        if (!resolved) {
-          throw new Error('sourceArn not found, please check the resource ref');
-        }
-
-        permission.sourceArn = resolved;
-      });
-    }
   }
 
   private addAlias(functionName: string, aliasConfig?: AliasConfig) {
@@ -238,14 +187,12 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     }
   }
 
-  private addVpcConfig(vpcConfig?: VpcConfigValue) {
+  private addVpcConfig(vpcConfig?: VpcConfig) {
     if (!vpcConfig) {
       return;
     }
 
-    this.putVpcConfig(
-      typeof vpcConfig === 'function' ? vpcConfig(getExternalValues(this)) : vpcConfig
-    );
+    this.putVpcConfig(vpcConfig);
   }
 
   private addLoggingConfig(name: string, loggingConfig?: LoggingConfig) {
@@ -283,20 +230,6 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
     return lambda?.[key] ?? moduleContext?.[key] ?? appContext?.[key] ?? defaultValue;
   }
 
-  private static getCurrentEnvironment(props: GetEnvironmentProps) {
-    const { lambda, scope, id } = props;
-
-    if (!lambda?.env) {
-      return undefined;
-    }
-
-    return new Environment(scope, `${id}-lambda-env`, lambda.env);
-  }
-
-  private getServiceRole(props: GetResourceProps, services: ServicesValues = []) {
-    return Array.isArray(services) ? services : services(props);
-  }
-
   private setRole(props: GetRoleArnProps) {
     const { services, appContext, moduleContext, name } = props;
     const appRole = lafkenResource.getResource<Role>(
@@ -318,13 +251,7 @@ export class LambdaHandler extends lafkenResource.make(LambdaFunction) {
 
     const role = new Role(this, 'lambda-role', {
       name: `${name}-role`,
-      services: (props) => {
-        return [
-          ...this.getServiceRole(props, appRole.services),
-          ...this.getServiceRole(props, moduleRole?.services),
-          ...this.getServiceRole(props, services),
-        ];
-      },
+      services: [...appRole.services, ...(moduleRole?.services ?? []), ...services],
     });
 
     this.role = role.arn;

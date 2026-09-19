@@ -1,9 +1,6 @@
 import { DataAwsSqsQueue } from '@cdktn/provider-aws/lib/data-aws-sqs-queue';
-import {
-  type AppModule,
-  lafkenResource,
-  resolveCallbackResource,
-} from '@lafken/resolver';
+import { type AppModule, lafkenResource } from '@lafken/resolver';
+import { Token } from 'cdktn';
 import { QueueBase } from '../base/base';
 import type { QueueProps } from '../queue.types';
 import { sqsName } from '../queue.utils';
@@ -33,24 +30,14 @@ export class ExternalQueue extends QueueBase(lafkenResource.make(DataAwsSqsQueue
   private setName() {
     const { handler } = this.props;
 
-    if (typeof handler.queueName === 'string') {
-      this.name = sqsName(handler.queueName, handler.isFifo ? '.fifo' : '');
+    // A `Refs.resourceValue()`/`Refs.ssmValue()` reference is already a real
+    // queue name (or a deferred token standing for one) — applying the
+    // suffix/length-truncation logic below would corrupt it.
+    if (Token.isUnresolved(handler.queueName)) {
+      this.name = handler.queueName;
       return;
     }
 
-    const queueName = resolveCallbackResource(this, handler.queueName);
-
-    if (!queueName) {
-      this.onResolve(() => {
-        this.setName();
-
-        if (!this.name) {
-          throw new Error('Unresolved external queue name');
-        }
-      });
-      return;
-    }
-
-    this.name = queueName;
+    this.name = sqsName(handler.queueName, handler.isFifo ? '.fifo' : '');
   }
 }

@@ -1,7 +1,5 @@
 export type OutputType = 'arn' | 'id' | (string & {});
 
-export type GetResourceValue<T = string, V = OutputType> = (value: T, type: V) => any;
-
 /**
  * Common fields shared by all resource output definitions.
  *

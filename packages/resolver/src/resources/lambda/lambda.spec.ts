@@ -4,6 +4,7 @@ import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { type TerraformStack, Testing } from 'cdktn';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ContextName } from '../../types';
@@ -13,6 +14,8 @@ import { lambdaAssets } from './asset/asset';
 import { LambdaHandler } from './lambda';
 
 describe('Lambda handler', () => {
+  enableBuildEnvVariable();
+
   let stack: TerraformStack;
   beforeEach(() => {
     const testing = setupTestingStack();
@@ -155,7 +158,7 @@ describe('Lambda handler', () => {
     });
   });
 
-  it('should create a lambda function with vpc config from callback', () => {
+  it('should create a lambda function with vpc config using Refs.ssmValue() references', () => {
     lambdaAssets.initializeMetadata({
       asset: {
         foldername: '/temp',
@@ -173,10 +176,10 @@ describe('Lambda handler', () => {
       foldername: '/temp',
       originalName: 'test',
       lambda: {
-        vpcConfig: ({ getSSMValue }) => ({
-          securityGroupIds: [getSSMValue('/vpc/security-group-id')],
-          subnetIds: [getSSMValue('/vpc/subnet-id')],
-        }),
+        vpcConfig: {
+          securityGroupIds: [Refs.ssmValue('/vpc/security-group-id')],
+          subnetIds: [Refs.ssmValue('/vpc/subnet-id')],
+        },
       },
     });
 
@@ -448,7 +451,7 @@ describe('Lambda handler', () => {
     });
   });
 
-  it('should resolve a source arn provided as a callback', () => {
+  it('should resolve a source arn provided as a Refs.ssmValue() reference', () => {
     lambdaAssets.initializeMetadata({
       asset: {
         foldername: '/temp',
@@ -466,7 +469,7 @@ describe('Lambda handler', () => {
       foldername: '/temp',
       originalName: 'test',
       principal: 'apigateway.amazonaws.com',
-      sourceArn: ({ getSSMValue }) => getSSMValue('/api/source-arn'),
+      sourceArn: Refs.ssmValue('/api/source-arn'),
     });
 
     const synthesized = Testing.synth(stack);

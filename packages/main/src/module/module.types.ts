@@ -1,4 +1,4 @@
-import type { ClassResource, ResourceMetadata, ServicesValues } from '@lafken/common';
+import type { ClassResource, ResourceMetadata, Services } from '@lafken/common';
 import type { ResolverType } from '@lafken/resolver';
 import type { Construct } from 'constructs';
 import type { GlobalConfig } from '../app/app.types';
@@ -32,7 +32,7 @@ export interface CreateModuleProps {
 
 export interface ModuleProps extends CreateModuleProps {
   resolvers: Record<string, ResolverType>;
-  globalServices: ServicesValues;
+  globalServices: Services[];
 }
 
 export interface ModuleResource {

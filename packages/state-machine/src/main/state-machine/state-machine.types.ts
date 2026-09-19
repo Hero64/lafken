@@ -6,7 +6,7 @@ import type {
   ResourceMetadata,
   ResourceOutputType,
   ResourceProps,
-  ServicesValues,
+  Services,
   StateMachineNames,
   StateMachineReferenceNames,
 } from '@lafken/common';
@@ -154,10 +154,9 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    * These permissions are merged with the base permissions automatically
    * granted to the state machine (e.g., `cloudwatch`, `lambda`).
    *
-   * Can be provided as:
-   * - A static array of service names or permission objects.
-   * - A callback function that receives `getResourceValue` and `getSSMValue`
-   *   helpers, allowing dynamic resolution of cross-resource references.
+   * An array of service names or permission objects. Use `Refs.resourceValue()`/
+   * `Refs.ssmValue()` directly inside a permission's `resources` to reference
+   * another resource.
    *
    * @example
    * {
@@ -166,16 +165,16 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    *
    * @example
    * {
-   *   services: ({ getResourceValue }) => [
+   *   services: [
    *     {
    *       type: 'sqs',
    *       permissions: ['GetQueueUrl', 'ReceiveMessage'],
-   *       resources: [getResourceValue('queue::test', 'id')],
+   *       resources: [Refs.resourceValue('queue::test', 'id')],
    *     },
    *   ]
    * }
    */
-  services?: ServicesValues;
+  services?: Services[];
 
   /**
    * Logging configuration for the state machine.

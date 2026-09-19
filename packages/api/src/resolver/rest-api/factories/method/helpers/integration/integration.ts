@@ -1,9 +1,8 @@
-import { getExternalValues, ResolveResources, Role } from '@lafken/resolver';
-import type { Construct } from 'constructs';
+import { Role } from '@lafken/resolver';
 import type { ResponseArrayField, ResponseObjectMetadata } from '../../../../../../main';
 import type { ResponseHandler } from '../response/response.types';
 import type { ResponseTemplateHelper } from '../response-template/response-template';
-import type { CreateRoleProps, IntegrationOption } from './integration.types';
+import type { CreateRoleProps } from './integration.types';
 
 export class IntegrationHelper {
   public createRole(props: CreateRoleProps) {
@@ -12,42 +11,10 @@ export class IntegrationHelper {
     const role = new Role(scope, `${name}-role`, {
       name: `${name}-integration`,
       principal: 'apigateway.amazonaws.com',
-      services: (props) => {
-        return [
-          service,
-          ...(Array.isArray(additionalServices)
-            ? additionalServices
-            : additionalServices(props)),
-        ];
-      },
+      services: [service, ...additionalServices],
     });
 
     return role;
-  }
-
-  public generateIntegrationOptions(
-    scope: Construct,
-    module?: string
-  ): IntegrationOption {
-    const resolveResource = new ResolveResources();
-
-    return {
-      options: {
-        getResourceValue(value, type) {
-          if (module) {
-            return resolveResource.getResourceValue(module, value, type);
-          }
-
-          const [internModule, resourceValue] = value.replace('::', '##').split('##');
-          return resolveResource.getResourceValue(internModule, resourceValue, type);
-        },
-        getCurrentDate() {
-          return '$context.requestTimeEpoch';
-        },
-        ...getExternalValues(scope),
-      },
-      resolveResource,
-    };
   }
 
   public generateResponseTemplate(

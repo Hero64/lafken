@@ -1,9 +1,12 @@
 import { TerraformStack, Testing } from 'cdktn';
 import { Construct } from 'constructs';
+import { rootScope } from '../resources/root-scope/root-scope';
 
 export const setupTestingStack = () => {
   const app = Testing.app();
   const stack = new TerraformStack(app, 'testing-stack');
+
+  rootScope.set(stack);
 
   return {
     app,

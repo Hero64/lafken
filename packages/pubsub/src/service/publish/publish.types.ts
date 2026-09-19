@@ -25,7 +25,7 @@ export interface PublishEventProps {
   /**
    * Event API HTTP domain (e.g. `abc123.appsync-api.us-east-1.amazonaws.com`),
    * without protocol. Typically injected via a Lambda environment variable
-   * resolved with `getResourceValue('event-api::<name>', 'httpDomain')`.
+   * resolved with `Refs.resourceValue('event-api::<name>', 'httpDomain')`.
    */
   httpDomain: string;
   /** Channel to publish to, e.g. `/default/room-1`. */

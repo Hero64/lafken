@@ -6,6 +6,7 @@ import {
   lambdaAssets,
   type ResolverType,
   Role,
+  rootScope,
 } from '@lafken/resolver';
 import { App, Aspects, LocalBackend, S3Backend, TerraformStack } from 'cdktn';
 import { AppAspect } from '../aspect/aspect';
@@ -165,6 +166,7 @@ export const createApp = async (props: CreateAppProps) => {
     skipValidation: true,
   });
   const appStack = new AppStack(app, props.name, props);
+  rootScope.set(appStack);
   await appStack.init();
 
   app.synth();

@@ -4,7 +4,6 @@ import type {
   ApiNames,
   ApiReferenceNames,
   ClassResource,
-  GetResourceProps,
   ResourceOutputType,
 } from '@lafken/common';
 import type { AppStack } from '@lafken/resolver';
@@ -38,9 +37,7 @@ export interface PrivateEndpointConfigurationOptions {
    * Set of VPC endpoint identifiers.
    * Supported only when endpoint type is `PRIVATE`.
    */
-  vpcEndpointIds:
-    | string[]
-    | ((props: Omit<GetResourceProps, 'getResourceValue'>) => string[]);
+  vpcEndpointIds: string[];
 }
 
 /**
