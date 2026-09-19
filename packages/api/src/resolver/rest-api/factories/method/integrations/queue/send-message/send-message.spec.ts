@@ -4,7 +4,7 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SqsQueue } from '@cdktn/provider-aws/lib/sqs-queue';
-import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -81,7 +81,7 @@ describe('Queue send message integration', () => {
     })
     sendMessageWithResource(): QueueSendMessageIntegrationResponse {
       return {
-        queueName: getResourceValue('testing::test', 'id'),
+        queueName: Refs.resourceValue('testing::test', 'id'),
       };
     }
 
@@ -131,7 +131,7 @@ describe('Queue send message integration', () => {
       return {
         queueName: 'test',
         body: {
-          queue: getResourceValue('testing::test', 'name'),
+          queue: Refs.resourceValue('testing::test', 'name'),
         },
       };
     }

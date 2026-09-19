@@ -1,4 +1,3 @@
-import { getResourceValue } from '@lafken/common';
 import { Event, State, StateMachine } from '@lafken/state-machine/main';
 
 @StateMachine({
@@ -14,7 +13,7 @@ export class PokemonStateMachine {
   })
   getPokemon() {
     return {
-      TableName: getResourceValue('dynamo::pokemons', 'id'),
+      TableName: Refs.resourceValue('dynamo::pokemons', 'id'),
       Key: {
         name: {
           S: '{% $states.input.name %}',

@@ -28,7 +28,7 @@ export const ApiKeyAuthorizer = createResourceDecorator<ApiKeyAuthorizerProps>({
  *
  * @example
  * ```ts
- * @CognitoAuthorizer({ userPoolId: getResourceValue('user-pool::app', 'id') })
+ * @CognitoAuthorizer({ userPoolId: Refs.resourceValue('user-pool::app', 'id') })
  * export class AppUserPoolAuth {}
  * ```
  */

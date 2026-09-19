@@ -3,9 +3,9 @@ import { AppsyncApiKey } from '@cdktn/provider-aws/lib/appsync-api-key';
 import {
   type ClassResource,
   getMetadataPrototypeByKey,
-  getRegion,
   getResourceMetadata,
   type LambdaMetadata,
+  Refs,
   type ResourceMetadata,
 } from '@lafken/common';
 import { initLambdaAssetMetadata, LambdaHandler } from '@lafken/resolver';
@@ -92,7 +92,7 @@ export class AuthorizerFactory {
 
     this.authProviders.push({
       authType: 'AMAZON_COGNITO_USER_POOLS',
-      cognitoConfig: [{ awsRegion: getRegion(), userPoolId: metadata.userPoolId }],
+      cognitoConfig: [{ awsRegion: Refs.region(), userPoolId: metadata.userPoolId }],
     });
   }
 

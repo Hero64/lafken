@@ -38,15 +38,16 @@ export class ResolveResources {
 const resolveResources = new ResolveResources();
 
 /**
- * Wires the real, cdktn-backed implementation into `@lafken/common`'s free
- * reference functions (`getResourceValue`, `getSSMValue`, `fn`, `token`,
- * `getAccountId`, etc.). Runs as a module side effect the moment any part of
- * `@lafken/resolver` is imported, which always happens before any decorated
- * app file is loaded (resolvers/`createApp` are imported first in every app
- * entry point). `getAccountId`/`getCallerArn`/`getRegion`/`getPartition`/
- * `getDnsSuffix` defer to `Lazy.stringValue` because `rootScope.set()` only
- * runs inside `createApp()`'s body, after the decorated files already
- * imported and potentially called these functions.
+ * Wires the real, cdktn-backed implementation into `@lafken/common`'s
+ * `Refs` namespace (`Refs.resourceValue`, `Refs.ssmValue`,
+ * `Refs.fn`, `Refs.token`, `Refs.accountId`, etc.). Runs as a
+ * module side effect the moment any part of `@lafken/resolver` is imported,
+ * which always happens before any decorated app file is loaded
+ * (resolvers/`createApp` are imported first in every app entry point).
+ * `Refs.accountId`/`callerArn`/`region`/`partition`/`dnsSuffix` defer
+ * to `Lazy.stringValue` because `rootScope.set()` only runs inside
+ * `createApp()`'s body, after the decorated files already imported and
+ * potentially called these functions.
  */
 registerRefResolvers({
   resolveResourceValue: (ref, attr) => {

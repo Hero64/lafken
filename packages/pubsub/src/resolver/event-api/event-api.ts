@@ -40,7 +40,7 @@ export class EventApi extends lafkenResource.make(AppsyncApi) {
    * `dns` is a Terraform map keyed by `HTTP`/`REALTIME` (uppercase, per the
    * AWS provider schema — not `http`/`realtime`); this reads out the single
    * value so it can flow into a Lambda env var via
-   * `getResourceValue('event-api::<name>', 'httpDomain')`.
+   * `Refs.resourceValue('event-api::<name>', 'httpDomain')`.
    */
   get httpDomain() {
     return this.dns.lookup('HTTP');

@@ -6,7 +6,7 @@ import {
   type ClassResource,
   enableBuildEnvVariable,
   getResourceMetadata,
-  getResourceValue,
+  Refs,
 } from '@lafken/common';
 import { lafkenResource, setupTestingStackWithModule } from '@lafken/resolver';
 import { Testing } from 'cdktn';
@@ -292,7 +292,7 @@ describe('State Machine', () => {
       })
       integration() {
         return {
-          QueueUrl: getResourceValue('queue::test', 'id'),
+          QueueUrl: Refs.resourceValue('queue::test', 'id'),
           MessageBody: {
             Message: 'test',
             TaskToken: '{% $states.context.Task.Token %}',
@@ -328,7 +328,7 @@ describe('State Machine', () => {
       })
       integration() {
         return {
-          QueueUrl: getResourceValue('queue::test', 'id'),
+          QueueUrl: Refs.resourceValue('queue::test', 'id'),
           MessageBody: {
             Message: 'test',
             TaskToken: '{% $states.context.Task.Token %}',
@@ -404,7 +404,7 @@ describe('State Machine', () => {
         {
           type: 'sqs',
           permissions: ['GetQueueUrl', 'ReceiveMessage'],
-          resources: [getResourceValue('queue::test', 'id')],
+          resources: [Refs.resourceValue('queue::test', 'id')],
         },
       ],
       startAt: {

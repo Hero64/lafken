@@ -155,13 +155,13 @@ retry(@Event('{% $states.input %}') input: any) {
 
 ### AWS Service Integrations
 
-Instead of invoking a Lambda function, a state can directly call an AWS service API. Use the `integrationResource` property to specify the service ARN, and reference other infrastructure resources with `getResourceValue`/`getSSMValue`, imported directly from `@lafken/common`.
+Instead of invoking a Lambda function, a state can directly call an AWS service API. Use the `integrationResource` property to specify the service ARN, and reference other infrastructure resources with `Refs.resourceValue`/`Refs.ssmValue`, imported directly from `@lafken/common`.
 
 This pattern eliminates the need for intermediate Lambda functions when you just need to call an AWS service (DynamoDB, SQS, SNS, etc.).
 
 ```typescript
 import { StateMachine, State, Event } from '@lafken/state-machine/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @StateMachine({
   startAt: 'saveItem',
@@ -174,7 +174,7 @@ export class InventoryWorkflow {
   })
   saveItem() {
     return {
-      TableName: getResourceValue('dynamo::inventory', 'id'),
+      TableName: Refs.resourceValue('dynamo::inventory', 'id'),
       Item: {
         sku: { S: '{% $states.input.sku %}' },
         quantity: { N: '{% $string($states.input.quantity) %}' },
@@ -199,7 +199,7 @@ A read example using `getItem`:
 })
 lookupUser() {
   return {
-    TableName: getResourceValue('dynamo::users', 'id'),
+    TableName: Refs.resourceValue('dynamo::users', 'id'),
     Key: {
       email: { S: '{% $states.input.email %}' },
     },

@@ -78,13 +78,13 @@ Configure how other principals are allowed to invoke the Lambda through the `inv
 - `role` — creates a dedicated IAM role another principal can assume to obtain `lambda:InvokeFunction` on this function (caller-side, identity-based access such as API Gateway integration credentials or cross-account calls).
 
 ```typescript
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Handler({
   invoke: {
     permission: {
       principal: 'apigateway.amazonaws.com',
-      sourceArn: getResourceValue('api::orders', 'arn'),
+      sourceArn: Refs.resourceValue('api::orders', 'arn'),
     },
     role: {
       principal: 'apigateway.amazonaws.com',
@@ -107,7 +107,7 @@ processOrder() { }
 | Option          | Type                                          | Description                                                                 |
 | --------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
 | `principal`     | `string`                                      | Service principal allowed to invoke the function (e.g. `apigateway.amazonaws.com`) |
-| `sourceArn`     | `string`                                      | Restricts invocation to a specific source ARN. Use `getResourceValue()` to reference another resource's ARN |
+| `sourceArn`     | `string`                                      | Restricts invocation to a specific source ARN. Use `Refs.resourceValue()` to reference another resource's ARN |
 | `sourceAccount` | `string`                                      | Restricts invocation to a specific source AWS account                       |
 
 #### `invoke.role` Options
@@ -118,7 +118,7 @@ processOrder() { }
 | `services`  | `Services[]`     | Additional IAM policy statements to attach to the role     |
 | `ref`       | `string`         | Name to register the created role as a global reference    |
 
-### Global References
+### Global Refss
 
 Use `ref` to register the Lambda function as a named global reference so other resources can access its attributes (e.g. ARN, function name):
 

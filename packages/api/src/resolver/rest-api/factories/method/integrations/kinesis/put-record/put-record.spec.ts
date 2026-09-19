@@ -4,7 +4,7 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { KinesisStream } from '@cdktn/provider-aws/lib/kinesis-stream';
-import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -54,7 +54,7 @@ describe('Kinesis put record integration', () => {
     })
     putRecordWithResource(): KinesisPutRecordIntegrationResponse {
       return {
-        streamName: getResourceValue('kinesis::test', 'name'),
+        streamName: Refs.resourceValue('kinesis::test', 'name'),
         data: 'hello',
         partitionKey: 'my-key',
       };

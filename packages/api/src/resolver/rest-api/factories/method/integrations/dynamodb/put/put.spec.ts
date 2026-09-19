@@ -4,7 +4,7 @@ import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-me
 import { DynamodbTable } from '@cdktn/provider-aws/lib/dynamodb-table';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
-import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -71,7 +71,7 @@ describe('Dynamo put integration', () => {
           name: 'foo',
           date: getCurrentDate(),
         },
-        tableName: getResourceValue('dynamo::test', 'id'),
+        tableName: Refs.resourceValue('dynamo::test', 'id'),
       };
     }
 

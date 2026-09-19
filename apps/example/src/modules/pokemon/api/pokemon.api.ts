@@ -10,7 +10,7 @@ import {
   type QueueSendMessageIntegrationResponse,
   response,
 } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 import { pokemonRepository } from '../../../infra/models/pokemon.model';
 import {
   BasePokemonPayload,
@@ -68,7 +68,7 @@ export class PokeApi {
     response: PokemonResponse,
     lambda: {
       env: {
-        queueArn: getResourceValue('queue::create-pokemon', 'id'),
+        queueArn: Refs.resourceValue('queue::create-pokemon', 'id'),
       },
     },
   })
@@ -109,7 +109,7 @@ export class PokeApi {
     path: '/{name}',
     lambda: {
       env: {
-        stateMachineArn: getResourceValue('state-machine::get-pokemon', 'arn'),
+        stateMachineArn: Refs.resourceValue('state-machine::get-pokemon', 'arn'),
       },
     },
   })
@@ -136,12 +136,12 @@ export class PokeApi {
   })
   async viewPokedex(): Promise<QueueSendMessageIntegrationResponse> {
     return {
-      queueName: getResourceValue('queue::create-pokemon', 'name'),
+      queueName: Refs.resourceValue('queue::create-pokemon', 'name'),
       body: {
         name: 'view pokedex',
         other: 1,
         foo: {
-          bar: getResourceValue('queue::create-pokemon', 'name'),
+          bar: Refs.resourceValue('queue::create-pokemon', 'name'),
         },
       },
     };
@@ -154,7 +154,7 @@ export class PokeApi {
   })
   async publishEvent(): Promise<EventBridgePutEventsIntegrationResponse> {
     return {
-      eventBusName: getResourceValue('event-bus::pokemon-bus', 'id'),
+      eventBusName: Refs.resourceValue('event-bus::pokemon-bus', 'id'),
       source: 'pokemons',
       detailType: 'PokemonPublished',
       detail: {

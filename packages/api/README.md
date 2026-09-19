@@ -298,7 +298,7 @@ class AuditedPayload {
 
 ### AWS Service Integrations
 
-HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and reference other infrastructure resources with `getResourceValue`/`getSSMValue`, imported directly from `@lafken/common`.
+HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and reference other infrastructure resources with `Refs.resourceValue`/`Refs.ssmValue`, imported directly from `@lafken/common`.
 
 Supported integrations:
 
@@ -314,7 +314,7 @@ Supported integrations:
 
 ```typescript
 import { Api, Get, Put, type BucketIntegrationResponse } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/documents' })
 class DocumentApi {
@@ -324,7 +324,7 @@ class DocumentApi {
   })
   download(): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('bucket::project-documents', 'id'),
+      bucket: Refs.resourceValue('bucket::project-documents', 'id'),
       object: 'report.pdf',
     };
   }
@@ -335,7 +335,7 @@ class DocumentApi {
   })
   upload(): BucketIntegrationResponse {
     return {
-      bucket: getResourceValue('bucket::project-documents', 'id'),
+      bucket: Refs.resourceValue('bucket::project-documents', 'id'),
       object: 'new-report.pdf',
     };
   }
@@ -352,7 +352,7 @@ import {
   type DynamoQueryIntegrationResponse,
   type DynamoPutIntegrationResponse,
 } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/products' })
 class ProductApi {
@@ -362,7 +362,7 @@ class ProductApi {
   })
   search(): DynamoQueryIntegrationResponse {
     return {
-      tableName: getResourceValue('dynamo::products-table', 'id'),
+      tableName: Refs.resourceValue('dynamo::products-table', 'id'),
       partitionKey: { category: 'electronics' },
     };
   }
@@ -373,7 +373,7 @@ class ProductApi {
   })
   add(): DynamoPutIntegrationResponse {
     return {
-      tableName: getResourceValue('dynamo::products-table', 'id'),
+      tableName: Refs.resourceValue('dynamo::products-table', 'id'),
       data: { name: 'Keyboard', price: 75 },
     };
   }
@@ -389,7 +389,7 @@ import {
   Event,
   type QueueSendMessageIntegrationResponse,
 } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/notifications' })
 class NotificationApi {
@@ -399,7 +399,7 @@ class NotificationApi {
   })
   enqueue(): QueueSendMessageIntegrationResponse {
     return {
-      queueName: getResourceValue('queue::notification-queue', 'id'),
+      queueName: Refs.resourceValue('queue::notification-queue', 'id'),
       body: { type: 'welcome', recipient: 'new-user' },
     };
   }
@@ -438,7 +438,7 @@ import {
   type StateMachineStartIntegrationResponse,
   type StateMachineStatusIntegrationResponse,
 } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/workflows' })
 class WorkflowApi {
@@ -448,7 +448,7 @@ class WorkflowApi {
   })
   start(): StateMachineStartIntegrationResponse {
     return {
-      stateMachineArn: getResourceValue('state-machine::processing-workflow', 'arn'),
+      stateMachineArn: Refs.resourceValue('state-machine::processing-workflow', 'arn'),
       input: { step: 'begin' },
     };
   }
@@ -459,7 +459,7 @@ class WorkflowApi {
   })
   status(): StateMachineStatusIntegrationResponse {
     return {
-      executionArn: getResourceValue('state-machine::processing-workflow', 'arn'),
+      executionArn: Refs.resourceValue('state-machine::processing-workflow', 'arn'),
     };
   }
 }
@@ -473,7 +473,7 @@ import {
   Post,
   type EventBridgePutEventsIntegrationResponse,
 } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @Api({ path: '/events' })
 class EventApi {
@@ -483,7 +483,7 @@ class EventApi {
   })
   publish(): EventBridgePutEventsIntegrationResponse {
     return {
-      eventBusName: getResourceValue('event-bus::orders-bus', 'id'),
+      eventBusName: Refs.resourceValue('event-bus::orders-bus', 'id'),
       source: 'orders',
       detailType: 'OrderCreated',
       detail: { orderId: '123' },
@@ -525,7 +525,7 @@ import { getCurrentDate } from '@lafken/api/main';
 
 add(): DynamoPutIntegrationResponse {
   return {
-    tableName: getResourceValue('dynamo::products-table', 'id'),
+    tableName: Refs.resourceValue('dynamo::products-table', 'id'),
     data: { name: 'Keyboard', createdAt: getCurrentDate() },
   };
 }
@@ -703,14 +703,14 @@ The handler receives an `AuthorizationHandlerEvent` — the standard `APIGateway
 
 #### Cognito Authorizer
 
-Integrates with an Amazon Cognito User Pool for token-based authorization. Requires `@lafken/auth` to be configured first. `userPoolArn` typically references the pool created elsewhere in the app via `getResourceValue()`:
+Integrates with an Amazon Cognito User Pool for token-based authorization. Requires `@lafken/auth` to be configured first. `userPoolArn` typically references the pool created elsewhere in the app via `Refs.resourceValue()`:
 
 ```typescript
 import { CognitoAuthorizer } from '@lafken/api/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @CognitoAuthorizer({
-  userPoolArn: getResourceValue('user-pool::main-user-pool', 'arn'),
+  userPoolArn: Refs.resourceValue('user-pool::main-user-pool', 'arn'),
   name: 'cognito-auth',
   header: 'Authorization',
   authorizerResultTtlInSeconds: 300,

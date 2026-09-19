@@ -40,7 +40,7 @@ export interface HandlerProps {
    * invoke: {
    *   permission: {
    *     principal: 'apigateway.amazonaws.com',
-   *     sourceArn: getResourceValue('api::orders', 'arn'),
+   *     sourceArn: Refs.resourceValue('api::orders', 'arn'),
    *   },
    *   role: {
    *     principal: 'apigateway.amazonaws.com',
@@ -89,10 +89,10 @@ export interface InvokePermission {
 
   /**
    * Restricts invocation to a specific source ARN. Accepts either a literal
-   * string or a `getResourceValue()` reference to another Lafken resource's ARN.
+   * string or a `Refs.resourceValue()` reference to another Lafken resource's ARN.
    *
    * @example
-   * sourceArn: getResourceValue('api::orders', 'arn')
+   * sourceArn: Refs.resourceValue('api::orders', 'arn')
    */
   sourceArn?: string;
 

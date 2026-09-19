@@ -1,16 +1,5 @@
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
-import {
-  enableBuildEnvVariable,
-  fn,
-  getAccountId,
-  getCallerArn,
-  getDnsSuffix,
-  getPartition,
-  getRegion,
-  getResourceValue,
-  getSSMValue,
-  token,
-} from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vitest } from 'vitest';
 import { setupTestingStack } from '../../utils';
@@ -54,14 +43,14 @@ describe('Lafken resource', () => {
     expect(dependentFn).toHaveBeenCalledTimes(1);
   });
 
-  it('should resolve a getResourceValue() reference embedded directly in the config, without a callback', () => {
+  it('should resolve a Refs.resourceValue() reference embedded directly in the config, without a callback', () => {
     const { stack } = setupTestingStack();
 
     const source = new Bucket(stack, 'source', {});
     source.register('bucket', 'source');
 
     new Bucket(stack, 'target', {
-      bucket: getResourceValue('bucket::source', 'id'),
+      bucket: Refs.resourceValue('bucket::source', 'id'),
     });
 
     const synthesized = Testing.synth(stack);
@@ -69,11 +58,11 @@ describe('Lafken resource', () => {
     expect(synthesized).toContain('aws_s3_bucket.source.id');
   });
 
-  it('should resolve a getResourceValue() reference even when the target resource is created later', () => {
+  it('should resolve a Refs.resourceValue() reference even when the target resource is created later', () => {
     const { stack } = setupTestingStack();
 
     new Bucket(stack, 'target', {
-      bucket: getResourceValue('bucket::later', 'id'),
+      bucket: Refs.resourceValue('bucket::later', 'id'),
     });
 
     const source = new Bucket(stack, 'later', {});
@@ -82,11 +71,11 @@ describe('Lafken resource', () => {
     expect(() => Testing.synth(stack)).not.toThrow();
   });
 
-  it('should throw at synth time when a getResourceValue() reference never resolves', () => {
+  it('should throw at synth time when a Refs.resourceValue() reference never resolves', () => {
     const { stack } = setupTestingStack();
 
     new Bucket(stack, 'target', {
-      bucket: getResourceValue('bucket::missing', 'id'),
+      bucket: Refs.resourceValue('bucket::missing', 'id'),
     });
 
     expect(() => Testing.synth(stack)).toThrow();
@@ -99,17 +88,17 @@ describe('Lafken resource', () => {
     source.register('bucket', 'source');
 
     new Bucket(stack, 'target', {
-      bucket: getResourceValue('bucket::source', 'notAnAttribute' as any),
+      bucket: Refs.resourceValue('bucket::source', 'notAnAttribute' as any),
     });
 
     expect(() => Testing.synth(stack)).toThrow(/notAnAttribute/);
   });
 
-  it('should resolve a getSSMValue() reference embedded directly in the config', () => {
+  it('should resolve a Refs.ssmValue() reference embedded directly in the config', () => {
     const { stack } = setupTestingStack();
 
     new Bucket(stack, 'target', {
-      bucket: getSSMValue('/example/bucket-name'),
+      bucket: Refs.ssmValue('/example/bucket-name'),
     });
 
     const synthesized = Testing.synth(stack);
@@ -126,7 +115,7 @@ describe('Lafken resource', () => {
     new Bucket(stack, 'target', {
       bucket: 'plain-name',
       tags: {
-        sourceId: getResourceValue('bucket::source', 'id'),
+        sourceId: Refs.resourceValue('bucket::source', 'id'),
       },
     });
 
@@ -136,14 +125,14 @@ describe('Lafken resource', () => {
     expect(synthesized).toContain('aws_s3_bucket.source.id');
   });
 
-  it('should resolve fn/token/getAccountId() embedded directly in the config', () => {
+  it('should resolve Refs.fn/Refs.token/Refs.accountId() embedded directly in the config', () => {
     const { stack } = setupTestingStack();
 
     new Bucket(stack, 'target', {
-      bucket: fn.upper('hello'),
+      bucket: Refs.fn.upper('hello'),
       tags: {
-        account: getAccountId(),
-        wasResolved: String(token.isUnresolved(getAccountId())),
+        account: Refs.accountId(),
+        wasResolved: String(Refs.token.isUnresolved(Refs.accountId())),
       },
     });
 
@@ -153,16 +142,16 @@ describe('Lafken resource', () => {
     expect(synthesized).toContain('upper(');
   });
 
-  it('should resolve getCallerArn()/getRegion()/getPartition()/getDnsSuffix() embedded directly in the config', () => {
+  it('should resolve Refs.callerArn()/Refs.region()/Refs.partition()/Refs.dnsSuffix() embedded directly in the config', () => {
     const { stack } = setupTestingStack();
 
     new Bucket(stack, 'target', {
       bucket: 'plain-name',
       tags: {
-        callerArn: getCallerArn(),
-        region: getRegion(),
-        partition: getPartition(),
-        dnsSuffix: getDnsSuffix(),
+        callerArn: Refs.callerArn(),
+        region: Refs.region(),
+        partition: Refs.partition(),
+        dnsSuffix: Refs.dnsSuffix(),
       },
     });
 

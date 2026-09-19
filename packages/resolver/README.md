@@ -388,22 +388,22 @@ Builds all registered Lambda assets. Called automatically by the framework after
 
 ## Environment Variables
 
-Lambda environment variables (`EnvironmentValue = Record<string, string>`) are passed straight through to the underlying `aws_lambda_function` resource — there is no dedicated `Environment` construct or SSM-string convention to parse. Static values are plain strings; dynamic values are produced by calling `getResourceValue`/`getSSMValue` (from `@lafken/common`) directly, since both already return a real, deferred CDKTN token by the time they land in the config:
+Lambda environment variables (`EnvironmentValue = Record<string, string>`) are passed straight through to the underlying `aws_lambda_function` resource — there is no dedicated `Environment` construct or SSM-string convention to parse. Static values are plain strings; dynamic values are produced by calling `Refs.resourceValue`/`Refs.ssmValue` (from `@lafken/common`) directly, since both already return a real, deferred CDKTN token by the time they land in the config:
 
 ```typescript
-import { getResourceValue, getSSMValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 lambda: {
   env: {
     TABLE_NAME: 'orders',
-    TABLE_ARN: getResourceValue('database::orders-table', 'arn'),
-    API_KEY: getSSMValue('/config/api-key'),
-    DB_PASSWORD: getSSMValue('/config/db-password', true), // secure string
+    TABLE_ARN: Refs.resourceValue('database::orders-table', 'arn'),
+    API_KEY: Refs.ssmValue('/config/api-key'),
+    DB_PASSWORD: Refs.ssmValue('/config/db-password', true), // secure string
   },
 }
 ```
 
-These functions are resolved lazily by CDKTN at synth time, regardless of the declaration order between the resources involved — see [`@lafken/common`'s Cross-Resource References](../common/README.md#cross-resource-references) for the full list of available reference functions (`getResourceValue`, `getSSMValue`, `getAccountId`, `getCallerArn`, `getRegion`, `getPartition`, `getDnsSuffix`, `fn`, `token`) and how `registerRefResolvers` wires this resolver package's implementation into them.
+These functions are resolved lazily by CDKTN at synth time, regardless of the declaration order between the resources involved — see [`@lafken/common`'s Cross-Resource Refss](../common/README.md#cross-resource-references) for the full list of available reference functions (`Refs.resourceValue`, `Refs.ssmValue`, `Refs.accountId`, `Refs.callerArn`, `Refs.region`, `Refs.partition`, `Refs.dnsSuffix`, `fn`, `token`) and how `registerRefResolvers` wires this resolver package's implementation into them.
 
 ## Testing Utilities
 

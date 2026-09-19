@@ -28,7 +28,7 @@ export interface CognitoAuthorizerProps extends ResourceProps {
    *
    * The id of a Cognito User Pool resource created or loaded by
    * `@lafken/auth`'s `AuthResolver`, typically supplied via a
-   * `getResourceValue()` reference.
+   * `Refs.resourceValue()` Refs.
    */
   userPoolId: string;
 }

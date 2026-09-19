@@ -5,7 +5,7 @@ import { ApiGatewayModel } from '@cdktn/provider-aws/lib/api-gateway-model';
 import { IamRole } from '@cdktn/provider-aws/lib/iam-role';
 import { IamRolePolicy } from '@cdktn/provider-aws/lib/iam-role-policy';
 import { SfnStateMachine } from '@cdktn/provider-aws/lib/sfn-state-machine';
-import { enableBuildEnvVariable, getResourceValue } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { lafkenResource } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it } from 'vitest';
@@ -67,7 +67,7 @@ describe('State machine start integration', () => {
         input: {
           name: 'test',
         },
-        stateMachineArn: getResourceValue('testing::test', 'arn'),
+        stateMachineArn: Refs.resourceValue('testing::test', 'arn'),
       };
     }
 

@@ -195,7 +195,7 @@ export interface ExternalUserClientProps extends UserPoolClientCommon {
    */
   isExternal: true;
   /**
-   * The ID of the existing Cognito User Pool Client to reference.
+   * The ID of the existing Cognito User Pool Client to Refs.
    *
    * This value is used to look up and integrate with a User Pool Client
    * that was created outside of the framework.

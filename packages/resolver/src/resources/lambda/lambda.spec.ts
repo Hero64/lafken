@@ -4,7 +4,7 @@ import { LambdaAlias } from '@cdktn/provider-aws/lib/lambda-alias';
 import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { LambdaPermission } from '@cdktn/provider-aws/lib/lambda-permission';
 import { LambdaProvisionedConcurrencyConfig } from '@cdktn/provider-aws/lib/lambda-provisioned-concurrency-config';
-import { enableBuildEnvVariable, getSSMValue } from '@lafken/common';
+import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { type TerraformStack, Testing } from 'cdktn';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ContextName } from '../../types';
@@ -158,7 +158,7 @@ describe('Lambda handler', () => {
     });
   });
 
-  it('should create a lambda function with vpc config using getSSMValue() references', () => {
+  it('should create a lambda function with vpc config using Refs.ssmValue() references', () => {
     lambdaAssets.initializeMetadata({
       asset: {
         foldername: '/temp',
@@ -177,8 +177,8 @@ describe('Lambda handler', () => {
       originalName: 'test',
       lambda: {
         vpcConfig: {
-          securityGroupIds: [getSSMValue('/vpc/security-group-id')],
-          subnetIds: [getSSMValue('/vpc/subnet-id')],
+          securityGroupIds: [Refs.ssmValue('/vpc/security-group-id')],
+          subnetIds: [Refs.ssmValue('/vpc/subnet-id')],
         },
       },
     });
@@ -451,7 +451,7 @@ describe('Lambda handler', () => {
     });
   });
 
-  it('should resolve a source arn provided as a getSSMValue() reference', () => {
+  it('should resolve a source arn provided as a Refs.ssmValue() reference', () => {
     lambdaAssets.initializeMetadata({
       asset: {
         foldername: '/temp',
@@ -469,7 +469,7 @@ describe('Lambda handler', () => {
       foldername: '/temp',
       originalName: 'test',
       principal: 'apigateway.amazonaws.com',
-      sourceArn: getSSMValue('/api/source-arn'),
+      sourceArn: Refs.ssmValue('/api/source-arn'),
     });
 
     const synthesized = Testing.synth(stack);

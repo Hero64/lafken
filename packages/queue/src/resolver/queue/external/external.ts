@@ -30,7 +30,7 @@ export class ExternalQueue extends QueueBase(lafkenResource.make(DataAwsSqsQueue
   private setName() {
     const { handler } = this.props;
 
-    // A `getResourceValue()`/`getSSMValue()` reference is already a real
+    // A `Refs.resourceValue()`/`Refs.ssmValue()` reference is already a real
     // queue name (or a deferred token standing for one) — applying the
     // suffix/length-truncation logic below would corrupt it.
     if (Token.isUnresolved(handler.queueName)) {

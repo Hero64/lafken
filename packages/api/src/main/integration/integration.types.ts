@@ -17,7 +17,7 @@ import type {
  * @Get({ path: 'download', action: 'Download', integration: 'bucket' })
  * download(): BucketIntegrationResponse {
  *   return {
- *     bucket: getResourceValue('bucket::my-bucket', 'id'),
+ *     bucket: Refs.resourceValue('bucket::my-bucket', 'id'),
  *     object: 'reports/monthly.json',
  *   };
  * }
@@ -40,7 +40,7 @@ export interface BucketIntegrationResponse {
  * @Post({ path: 'start', integration: 'state-machine', action: 'Start' })
  * start(): StateMachineStartIntegrationResponse {
  *   return {
- *     stateMachineArn: getResourceValue('module::state-machine::workflow', 'arn'),
+ *     stateMachineArn: Refs.resourceValue('module::state-machine::workflow', 'arn'),
  *     input: { name: 'test' },
  *   };
  * }
@@ -95,7 +95,7 @@ interface DynamoIntegrationBase {
    * ```typescript
    * { tableName: 'users' }
    * // or using a resource reference:
-   * { tableName: getResourceValue('dynamo::users', 'id') }
+   * { tableName: Refs.resourceValue('dynamo::users', 'id') }
    * ```
    */
   tableName: DynamoTableNames;
@@ -165,7 +165,7 @@ export interface DynamoQueryIntegrationResponse<T = any>
  * @Get({ integration: 'dynamodb', action: 'Put' })
  * put(): DynamoPutIntegrationResponse {
  *   return {
- *     tableName: getResourceValue('dynamo::users', 'id'),
+ *     tableName: Refs.resourceValue('dynamo::users', 'id'),
  *     data: { name: 'foo', createdAt: getCurrentDate() },
  *   };
  * }
@@ -323,7 +323,7 @@ export interface KinesisPutRecordIntegrationResponse {
 export interface EventBridgePutEventsIntegrationResponse {
   /**
    * The EventBridge event bus name to publish the event to.
-   * Can be a literal or resolved with `getResourceValue('event-bus::name', 'id')`.
+   * Can be a literal or resolved with `Refs.resourceValue('event-bus::name', 'id')`.
    * When omitted, the default event bus is used.
    */
   eventBusName?: EventBusNames;

@@ -59,7 +59,7 @@ describe('EventApi', () => {
     expect(synthesized).toHaveResourceWithProperties(AppsyncApiKey, {});
   });
 
-  it('exposes httpDomain/realtimeDomain and registers itself for getResourceValue', () => {
+  it('exposes httpDomain/realtimeDomain and registers itself for Refs.resourceValue', () => {
     const { stack, module } = setupTestingStackWithModule();
     const eventApi = new EventApi(module, 'events', { name: 'events' });
 

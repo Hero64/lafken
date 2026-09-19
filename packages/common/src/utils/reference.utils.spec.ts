@@ -1,37 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import {
-  fn,
-  getAccountId,
-  getCallerArn,
-  getDnsSuffix,
-  getPartition,
-  getRegion,
-  getResourceValue,
-  getSSMValue,
-  registerRefResolvers,
-  token,
-} from './reference.utils';
+import { Refs, registerRefResolvers } from './reference.utils';
 
-describe('reference.utils (no resolver registered)', () => {
-  it('getResourceValue()/getSSMValue() return undefined without throwing', () => {
-    expect(() => getResourceValue('bucket::test', 'id')).not.toThrow();
-    expect(getResourceValue('bucket::test', 'id')).toBeUndefined();
+describe('Refs (no resolver registered)', () => {
+  it('resourceValue()/ssmValue() return undefined without throwing', () => {
+    expect(() => Refs.resourceValue('bucket::test', 'id')).not.toThrow();
+    expect(Refs.resourceValue('bucket::test', 'id')).toBeUndefined();
 
-    expect(() => getSSMValue('/example/path')).not.toThrow();
-    expect(getSSMValue('/example/path')).toBeUndefined();
+    expect(() => Refs.ssmValue('/example/path')).not.toThrow();
+    expect(Refs.ssmValue('/example/path')).toBeUndefined();
   });
 
-  it('getAccountId() returns undefined without throwing', () => {
-    expect(() => getAccountId()).not.toThrow();
-    expect(getAccountId()).toBeUndefined();
+  it('accountId() returns undefined without throwing', () => {
+    expect(() => Refs.accountId()).not.toThrow();
+    expect(Refs.accountId()).toBeUndefined();
   });
 
   it('fn/token method calls are safe no-ops without throwing', () => {
-    expect(() => fn.upper('hello')).not.toThrow();
-    expect(fn.upper('hello')).toBeUndefined();
+    expect(() => Refs.fn.upper('hello')).not.toThrow();
+    expect(Refs.fn.upper('hello')).toBeUndefined();
 
-    expect(() => token.isUnresolved('hello')).not.toThrow();
-    expect(token.isUnresolved('hello')).toBeUndefined();
+    expect(() => Refs.token.isUnresolved('hello')).not.toThrow();
+    expect(Refs.token.isUnresolved('hello')).toBeUndefined();
   });
 });
 
@@ -54,15 +43,15 @@ describe('registerRefResolvers', () => {
   it('accepts the first registration and resolves through the injected resolvers', () => {
     expect(() => registerRefResolvers(mockResolvers)).not.toThrow();
 
-    expect(getResourceValue('bucket::test', 'id')).toBe('resolved-value');
-    expect(getSSMValue('/example/path')).toBe('ssm-value');
-    expect(getAccountId()).toBe('account-id');
-    expect(getCallerArn()).toBe('caller-arn');
-    expect(getRegion()).toBe('region');
-    expect(getPartition()).toBe('partition');
-    expect(getDnsSuffix()).toBe('dns-suffix');
-    expect(fn.upper('hello')).toBe('HELLO');
-    expect(token.isUnresolved('hello')).toBe(false);
+    expect(Refs.resourceValue('bucket::test', 'id')).toBe('resolved-value');
+    expect(Refs.ssmValue('/example/path')).toBe('ssm-value');
+    expect(Refs.accountId()).toBe('account-id');
+    expect(Refs.callerArn()).toBe('caller-arn');
+    expect(Refs.region()).toBe('region');
+    expect(Refs.partition()).toBe('partition');
+    expect(Refs.dnsSuffix()).toBe('dns-suffix');
+    expect(Refs.fn.upper('hello')).toBe('HELLO');
+    expect(Refs.token.isUnresolved('hello')).toBe(false);
   });
 
   it('throws on a second registration', () => {

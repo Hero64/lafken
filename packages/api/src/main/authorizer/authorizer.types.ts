@@ -20,7 +20,7 @@ export interface CognitoAuthorizerProps extends Omit<ResourceProps, 'name'> {
   name?: ApiAuthorizerNames;
   /**
    * ARN of the Cognito User Pool resource created or loaded by the
-   * `AuthResolver`, typically supplied via a `getResourceValue()` reference.
+   * `AuthResolver`, typically supplied via a `Refs.resourceValue()` Refs.
    */
   userPoolArn: string;
   /**

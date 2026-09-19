@@ -154,8 +154,8 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    * These permissions are merged with the base permissions automatically
    * granted to the state machine (e.g., `cloudwatch`, `lambda`).
    *
-   * An array of service names or permission objects. Use `getResourceValue()`/
-   * `getSSMValue()` directly inside a permission's `resources` to reference
+   * An array of service names or permission objects. Use `Refs.resourceValue()`/
+   * `Refs.ssmValue()` directly inside a permission's `resources` to reference
    * another resource.
    *
    * @example
@@ -169,7 +169,7 @@ interface StateMachineProps<T> extends StateMachineBaseProps<T> {
    *     {
    *       type: 'sqs',
    *       permissions: ['GetQueueUrl', 'ReceiveMessage'],
-   *       resources: [getResourceValue('queue::test', 'id')],
+   *       resources: [Refs.resourceValue('queue::test', 'id')],
    *     },
    *   ]
    * }

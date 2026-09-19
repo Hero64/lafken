@@ -73,16 +73,18 @@ await PubSubService.publish({
 });
 ```
 
-Wire `EVENTS_HTTP_DOMAIN` from the generated Event API via `getResourceValue`:
+Wire `EVENTS_HTTP_DOMAIN` from the generated Event API via `Refs.resourceValue`:
 
 ```ts
+import { Refs } from '@lafken/common';
+
 @Api({ path: '/messages' })
 export class MessagesApi {
   @Post({
     lambda: {
-      env: ({ getResourceValue }) => ({
-        EVENTS_HTTP_DOMAIN: getResourceValue('event-api::chat-app-events', 'httpDomain'),
-      }),
+      env: {
+        EVENTS_HTTP_DOMAIN: Refs.resourceValue('event-api::chat-app-events', 'httpDomain'),
+      },
     },
   })
   send() { /* ... */ }
@@ -95,14 +97,14 @@ Authorizers are separate decorated classes, registered on the resolver and refer
 
 ```ts
 import { ApiKeyAuthorizer, CognitoAuthorizer, LambdaAuthorizer, IamAuthorizer, AuthorizerHandler } from '@lafken/pubsub/main';
-import { getResourceValue } from '@lafken/common';
+import { Refs } from '@lafken/common';
 
 @ApiKeyAuthorizer({ name: 'public-key' })
 export class PublicKeyAuth {}
 
 @CognitoAuthorizer({
   name: 'app-users',
-  userPoolId: getResourceValue('user-pool::app', 'id'),
+  userPoolId: Refs.resourceValue('user-pool::app', 'id'),
 })
 export class AppUsersAuth {}
 

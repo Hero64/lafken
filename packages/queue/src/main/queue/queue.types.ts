@@ -152,7 +152,7 @@ export interface ExternalQueueProps extends SourceMappingProps {
   /**
    * Name of the external SQS queue.
    *
-   * Can be a literal queue name or a `getResourceValue()` reference that
+   * Can be a literal queue name or a `Refs.resourceValue()` reference that
    * resolves the queue identifier from another resource.
    *
    * @example
@@ -161,7 +161,7 @@ export interface ExternalQueueProps extends SourceMappingProps {
    *
    * @example
    * // Dynamic reference
-   * queueName: getResourceValue('module::queue::name', 'id')
+   * queueName: Refs.resourceValue('module::queue::name', 'id')
    */
   queueName: string;
   /**
