@@ -344,6 +344,16 @@ console.log(topic.arn);
 
 Prefer `Refs.resourceValue()` (below) over calling `getResource()` directly for cross-resource values — it returns a deferred token that's safe to embed in config regardless of resource declaration order, whereas `getResource()` requires the target to already be registered at call time.
 
+### reset()
+
+Clears the registry:
+
+```typescript
+lafkenResource.reset();
+```
+
+`lafkenResource` is a module-level singleton, so this is mainly useful in tests — call it in `beforeEach()` to stop resources registered in one test case from leaking into the next.
+
 ### Wrapping an arbitrary Terraform resource
 
 Because `make()` accepts any CDKTN construct, it's the escape hatch for using a Terraform resource Lafken has no dedicated decorator/resolver for. Wrap it, `register()` it under a namespace of your choice, then read it from anywhere — including a Lambda's `env` — with `Refs.resourceValue('namespace::id', attribute)` (see [Environment Variables](#environment-variables)):
