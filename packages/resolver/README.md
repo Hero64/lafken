@@ -194,7 +194,7 @@ interface ResolverType {
 
 ## LambdaHandler
 
-`LambdaHandler` creates AWS Lambda functions with automatic IAM roles, environment variable management, and context-aware configuration. It extends `LambdaFunction` from CDKTN via `lafkenResource.make()`, so it supports global tracking and dependency resolution.
+`LambdaHandler` creates AWS Lambda functions with automatic IAM roles, environment variable management, and context-aware configuration. It extends `LambdaFunction` from CDKTN via `lafkenResource.make()`, so it supports global resource tracking.
 
 ```typescript
 import { LambdaHandler } from '@lafken/resolver';
@@ -302,7 +302,7 @@ new Role(scope, 'custom-role', {
 
 `lafkenResource` is the global resource registry. It provides two core capabilities:
 
-1. **Mixin creation** — `lafkenResource.make(BaseClass)` enhances any CDKTN `Construct` with `register()` and `onResolve()` methods.
+1. **Mixin creation** — `lafkenResource.make(BaseClass)` enhances any CDKTN `Construct` with a `register()` method.
 2. **Global tracking** — Resources registered with `register()` can be retrieved from anywhere using `getResource()`.
 
 ### make(BaseClass)
@@ -333,17 +333,6 @@ topic.register('notifications', 'events-topic');
 
 `namespace` accepts any of the built-in `RegisterNamespaces` values (`'api'`, `'bucket'`, `'dynamo'`, `'queue'`, `'lambda'`, ...) or an arbitrary string, so custom/unsupported resources can pick their own namespace.
 
-### onResolve(callback)
-
-Defers configuration that depends on resources not yet created. The callback is invoked during `lafkenResource.resolve()`, which the framework calls automatically after every resolver's `afterCreate` phase has run:
-
-```typescript
-lambda.onResolve(() => {
-  const topic = lafkenResource.getResource('notifications', 'events-topic');
-  lambda.addOverride('environment.variables.TOPIC_ARN', topic.arn);
-});
-```
-
 ### getResource(module, id)
 
 Retrieves a globally registered resource:
@@ -353,9 +342,7 @@ const topic = lafkenResource.getResource<SnsTopic>('notifications', 'events-topi
 console.log(topic.arn);
 ```
 
-### resolve()
-
-Runs every callback queued via `onResolve()`. Called automatically by `createApp()` after all resolvers have completed their `afterCreate` phase — you don't need to call it yourself.
+Prefer `Refs.resourceValue()` (below) over calling `getResource()` directly for cross-resource values — it returns a deferred token that's safe to embed in config regardless of resource declaration order, whereas `getResource()` requires the target to already be registered at call time.
 
 ### Wrapping an arbitrary Terraform resource
 
@@ -486,5 +473,5 @@ describe('SnsResolver', () => {
 2. **Implement `ResolverType`** — set `type` to match your decorator, implement `create()` to process resources, optionally use `beforeCreate()` / `afterCreate()` for shared or deferred setup.
 3. **Use `LambdaHandler`** to create Lambda functions with automatic IAM, context, and environment management.
 4. **Use `lambdaAssets`** to register and build Lambda source code.
-5. **Use `lafkenResource.make()`** to extend any CDKTN construct with global tracking and dependency resolution.
+5. **Use `lafkenResource.make()`** to extend any CDKTN construct with global resource tracking.
 6. **Register your resolver** in `createApp({ resolvers: [new YourResolver()] })`.

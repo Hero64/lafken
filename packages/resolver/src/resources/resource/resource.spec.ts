@@ -1,7 +1,7 @@
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import { enableBuildEnvVariable, Refs } from '@lafken/common';
 import { Testing } from 'cdktn';
-import { describe, expect, it, vitest } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { setupTestingStack } from '../../utils';
 import { lafkenResource } from './resource';
 
@@ -15,7 +15,6 @@ describe('Lafken resource', () => {
     const bucket = new Bucket(stack, 'test');
 
     expect(bucket.register).toBeDefined();
-    expect(bucket.onResolve).toBeDefined();
   });
 
   it('should create a global resource', () => {
@@ -28,19 +27,6 @@ describe('Lafken resource', () => {
     const resourceBucket = lafkenResource.getResource('bucket', 'testing');
 
     expect(bucket).toBe(resourceBucket);
-  });
-
-  it('should create a resource with dependencies', async () => {
-    const { stack } = setupTestingStack();
-
-    const bucket = new Bucket(stack, 'testing');
-
-    const dependentFn = vitest.fn();
-
-    bucket.onResolve(dependentFn);
-    await lafkenResource.resolve();
-
-    expect(dependentFn).toHaveBeenCalledTimes(1);
   });
 
   it('should resolve a Refs.resourceValue() reference embedded directly in the config, without a callback', () => {

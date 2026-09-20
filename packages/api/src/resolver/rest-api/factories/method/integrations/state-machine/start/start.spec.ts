@@ -160,7 +160,6 @@ describe('State machine start integration', () => {
       'startWithResource'
     );
 
-    await lafkenResource.resolve();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {

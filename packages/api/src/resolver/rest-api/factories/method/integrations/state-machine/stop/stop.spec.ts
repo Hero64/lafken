@@ -134,7 +134,6 @@ describe('State machine status integration', () => {
     );
 
     const synthesized = Testing.synth(stack);
-    lafkenResource.resolve();
 
     expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegration, {
       integration_http_method: 'POST',

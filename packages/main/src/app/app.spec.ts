@@ -161,30 +161,6 @@ describe('App', () => {
     expect(callOrder).toStrictEqual(['before', 'after']);
   });
 
-  it('should resolver dependencies after complete create resources', async () => {
-    const dependentCallback = vi.fn();
-    class TestResolver implements ResolverType {
-      type: string = 'test-resolver';
-      async create(scope: AppModule) {
-        const Bucket = lafkenResource.make(S3Bucket);
-        const bucket = new Bucket(scope, 'bucket');
-        bucket.onResolve(dependentCallback);
-      }
-    }
-    await createApp({
-      name: 'testing',
-      modules: [
-        createModule({
-          name: 'testing',
-          resources: [TestResource],
-        }),
-      ],
-      resolvers: [new TestResolver()],
-    });
-
-    expect(dependentCallback).toHaveBeenCalledTimes(1);
-  });
-
   it('should add tags in children resources', async () => {
     class TestResolver implements ResolverType {
       type: string = 'test-resolver';

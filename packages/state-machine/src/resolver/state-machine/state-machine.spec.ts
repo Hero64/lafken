@@ -307,8 +307,6 @@ describe('State Machine', () => {
     const queue = new Queue(stack, 'test');
     queue.register('queue', 'test');
 
-    await lafkenResource.resolve();
-
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(SfnStateMachine, {
@@ -423,7 +421,6 @@ describe('State Machine', () => {
     const queue = new Queue(stack, 'test');
     queue.register('queue', 'test');
 
-    await lafkenResource.resolve();
     const synthesized = Testing.synth(stack);
 
     expect(synthesized).toHaveResourceWithProperties(IamRolePolicy, {
