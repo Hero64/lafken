@@ -302,12 +302,12 @@ new Role(scope, 'custom-role', {
 
 `lafkenResource` is the global resource registry. It provides two core capabilities:
 
-1. **Mixin creation** — `lafkenResource.make(BaseClass)` enhances any CDKTN `Construct` with `isGlobal()` and `isDependent()` methods.
-2. **Global tracking** — Resources registered with `isGlobal()` can be retrieved from anywhere using `getResource()`.
+1. **Mixin creation** — `lafkenResource.make(BaseClass)` enhances any CDKTN `Construct` with `register()` and `onResolve()` methods.
+2. **Global tracking** — Resources registered with `register()` can be retrieved from anywhere using `getResource()`.
 
 ### make(BaseClass)
 
-Creates a subclass that adds resource tracking methods:
+Creates a subclass that adds resource tracking methods. `BaseClass` must extend CDKTN's `Construct` — this works for any Terraform resource construct, not just the ones Lafken already ships a resolver for:
 
 ```typescript
 import { lafkenResource } from '@lafken/resolver';
@@ -319,24 +319,26 @@ class TrackableTopic extends lafkenResource.make(SnsTopic) {}
 const topic = new TrackableTopic(scope, 'my-topic', { name: 'events' });
 
 // Register globally so other resolvers can reference it
-topic.isGlobal('notifications', 'events-topic');
+topic.register('notifications', 'events-topic');
 ```
 
-### isGlobal(module, id)
+### register(namespace, id)
 
-Registers a resource instance under a `module::id` key so other resources can look it up:
+Registers a resource instance under a `namespace::id` key so other resources can look it up:
 
 ```typescript
-topic.isGlobal('notifications', 'events-topic');
+topic.register('notifications', 'events-topic');
 // Retrievable as 'notifications::events-topic'
 ```
 
-### isDependent(callback)
+`namespace` accepts any of the built-in `RegisterNamespaces` values (`'api'`, `'bucket'`, `'dynamo'`, `'queue'`, `'lambda'`, ...) or an arbitrary string, so custom/unsupported resources can pick their own namespace.
 
-Defers configuration that depends on resources not yet created. The callback is invoked during the `afterCreate` phase via `callDependentCallbacks()`:
+### onResolve(callback)
+
+Defers configuration that depends on resources not yet created. The callback is invoked during `lafkenResource.resolve()`, which the framework calls automatically after every resolver's `afterCreate` phase has run:
 
 ```typescript
-lambda.isDependent(() => {
+lambda.onResolve(() => {
   const topic = lafkenResource.getResource('notifications', 'events-topic');
   lambda.addOverride('environment.variables.TOPIC_ARN', topic.arn);
 });
@@ -351,9 +353,41 @@ const topic = lafkenResource.getResource<SnsTopic>('notifications', 'events-topi
 console.log(topic.arn);
 ```
 
-### callDependentCallbacks()
+### resolve()
 
-Resolves all deferred dependencies. Called automatically by the framework after all resolvers have completed their `afterCreate` phase.
+Runs every callback queued via `onResolve()`. Called automatically by `createApp()` after all resolvers have completed their `afterCreate` phase — you don't need to call it yourself.
+
+### Wrapping an arbitrary Terraform resource
+
+Because `make()` accepts any CDKTN construct, it's the escape hatch for using a Terraform resource Lafken has no dedicated decorator/resolver for. Wrap it, `register()` it under a namespace of your choice, then read it from anywhere — including a Lambda's `env` — with `Refs.resourceValue('namespace::id', attribute)` (see [Environment Variables](#environment-variables)):
+
+```typescript
+// resolver.ts — any resolver's create()/beforeCreate()
+import { lafkenResource } from '@lafken/resolver';
+import { CloudfrontDistribution } from '@cdktn/provider-aws/lib/cloudfront-distribution';
+
+class TrackableDistribution extends lafkenResource.make(CloudfrontDistribution) {}
+
+const distribution = new TrackableDistribution(module, 'cdn', {
+  /* ...distribution config... */
+});
+
+distribution.register('cdn', 'assets-distribution');
+```
+
+```typescript
+// elsewhere — a LambdaHandler's env, in the same or a different resolver
+import { Refs } from '@lafken/common';
+
+lambda: {
+  env: {
+    DISTRIBUTION_ID: Refs.resourceValue('cdn::assets-distribution', 'id'),
+    DISTRIBUTION_DOMAIN: Refs.resourceValue('cdn::assets-distribution', 'domainName'),
+  },
+}
+```
+
+`Refs.resourceValue` returns a `Lazy` CDKTN token that looks the resource up in the registry at synth time, so declaration order between the wrapped resource and the Lambda that references it doesn't matter — as long as both exist by the time `createApp()` synthesizes the stack.
 
 ## lambdaAssets
 
