@@ -1,3 +1,10 @@
+## 0.16.0
+
+### Minor Changes
+
+- Add `@lafken/pubsub`, a package for defining AppSync Events channels and publish/subscribe handlers with decorators, including channel authorization
+- Add the `Refs` namespace to `@lafken/common` (`resourceValue`, `ssmValue`, `accountId`, `callerArn`, `region`, `partition`, `dnsSuffix`, `fn`, `token`) for cross-resource references, callable directly anywhere a resource or lambda config value is expected (breaking: replaces the `@IntegrationOptions()`/`getResourceValue` callback parameter, which is removed along with its per-integration option types such as `BucketIntegrationOption`)
+
 ## 0.15.1
 
 ### Minor Changes
