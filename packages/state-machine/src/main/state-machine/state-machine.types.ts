@@ -1119,9 +1119,7 @@ export interface LambdaStateProps<T = {}> extends StateProps<keyof T> {
  * @example
  * ```ts
  * @State({
- *   integrationService: 'dynamodb',
- *   action: 'putItem',
- *   mode: 'sync',
+ *   integrationResource: 'arn:aws:states:::aws-sdk:dynamodb:putItem',
  *   end: true,
  * })
  * putItem() {}

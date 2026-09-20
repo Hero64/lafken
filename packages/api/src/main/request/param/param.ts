@@ -85,7 +85,8 @@ export const BodyParam =
  *
  * Only properties whose type is assignable to `Primitive | Primitive[]` can be
  * decorated, ensuring type-safe query parameter definitions. Query parameters
- * are **optional** by default (no `required` override is applied).
+ * are **required** by default, same as body parameters, unless explicitly
+ * overridden via `props.required`.
  *
  * @typeParam T - The class type that owns the decorated property.
  * @param props - Optional {@link QueryParamProps} to configure the query parameter schema.

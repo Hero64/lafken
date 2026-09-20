@@ -281,7 +281,7 @@ export interface TableBase<T extends Function> {
    * @example {
    *   stream: {
    *     enabled: true,
-   *     type: ['NEW_AND_OLD_IMAGES'],
+   *     type: 'NEW_AND_OLD_IMAGES',
    *     batchSize: 10,
    *     maximumBatchingWindowInSeconds: 10,
    *     filters: {
