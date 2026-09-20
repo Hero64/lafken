@@ -108,12 +108,12 @@ export const StateMachine =
  * integration) that Step Functions invokes as part of the workflow.
  * Use `next` to chain to the following state or `end: true` to mark
  * it as a terminal state. Service integrations are configured via
- * `integrationService`, `action`, and `mode`.
+ * `integrationResource`.
  *
  * @typeParam T - The class that owns the method.
  * @typeParam K - The method key being decorated.
  * @param props - Optional state configuration (next, end, assign,
- *                integrationService, action, mode, lambda, etc.).
+ *                integrationResource, lambda, etc.).
  *
  * @example
  * ```ts
@@ -129,8 +129,8 @@ export const StateMachine =
  *
  * @example
  * ```ts
- * // AWS service integration (SQS)
- * @State({ integrationService: 'sqs', action: 'sendMessage', mode: 'token' })
+ * // AWS service integration (SQS), waiting for a task token
+ * @State({ integrationResource: 'arn:aws:states:::sqs:sendMessage.waitForTaskToken' })
  * send() {
  *   return { QueueUrl: Refs.resourceValue('queue::orders', 'id') };
  * }

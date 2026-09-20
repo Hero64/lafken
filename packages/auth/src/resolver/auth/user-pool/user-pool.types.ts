@@ -10,27 +10,6 @@ export type CognitoPlan = 'lite' | 'essentials' | 'plus';
 export type UserVerificationType = 'code' | 'link';
 export type AccountRecovery = 'verified_email' | 'verified_phone_number' | 'admin_only';
 
-export type AuthFlow =
-  | 'admin_user_password'
-  | 'custom'
-  | 'user'
-  | 'user_password'
-  | 'user_srp';
-export type OAuthFlow =
-  | 'authorization_code_grant'
-  | 'client_credentials'
-  | 'implicit_code_grant';
-export type OAuthScopes =
-  | 'cognito_admin'
-  | 'email'
-  | 'open_id'
-  | 'phone'
-  | 'profile'
-  | {
-      name: string;
-      description: string;
-    };
-
 export type AmazonProviderAttributes = 'email' | 'name' | 'postal_code' | 'user_id';
 export type AppleProviderAttributes =
   | 'email'
