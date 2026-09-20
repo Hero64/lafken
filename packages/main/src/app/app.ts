@@ -2,7 +2,6 @@ import { AwsProvider } from '@cdktn/provider-aws/lib/provider';
 import { enableBuildEnvVariable } from '@lafken/common';
 import {
   ContextName,
-  lafkenResource,
   lambdaAssets,
   type ResolverType,
   Role,
@@ -47,7 +46,6 @@ export class AppStack extends TerraformStack {
     }
 
     this.addAspectProperties();
-    await lafkenResource.resolve();
     await lambdaAssets.createAssets();
   }
 
