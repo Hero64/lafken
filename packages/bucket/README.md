@@ -64,6 +64,19 @@ export class UploadBucket {}
 | `tracing`             | `boolean`                                     | `false`      | Enable AWS X-Ray tracing on repository operations         |
 | `tags`                | `Record<string, string>`                      | —            | Tags applied to the bucket resource                       |
 | `lifeCycleRules`      | `Record<string, KeyLifeCycleRule>`            | —            | Object lifecycle management rules                         |
+| `ref`                 | `string`                                      | —            | Registers the bucket as a named global reference — see [Global References](#global-references) |
+| `outputs`             | `ResourceOutputType<BucketOutputAttributes>`  | —            | Exports bucket attributes to SSM/Terraform — see [Outputs](#outputs) |
+
+### External Buckets
+
+Set `isExternal: true` to reference an existing S3 bucket instead of creating one. The framework only reads the bucket by `name` — it does not manage versioning, ACL, lifecycle rules, or any other configuration:
+
+```typescript
+@Bucket({ name: 'legacy-assets', isExternal: true })
+export class LegacyAssetsBucket {}
+```
+
+Register it the same way as any other bucket — `new BucketResolver([LegacyAssetsBucket])`. Options like `versioned`, `lifeCycleRules`, `eventBridgeEnabled`, and `outputs` don't apply, since the framework doesn't own the resource.
 
 ### Lifecycle Rules
 
@@ -134,6 +147,47 @@ Enable `eventBridgeEnabled` to send bucket events (object created, deleted, etc.
   eventBridgeEnabled: true,
 })
 export class DocumentBucket {}
+```
+
+### Outputs
+
+Export bucket attributes to SSM Parameter Store or as Terraform outputs via `outputs`:
+
+```typescript
+@Bucket({
+  name: 'document-uploads',
+  outputs: [
+    { type: 'ssm', name: '/document-uploads/arn', value: 'arn' },
+    { type: 'output', name: 'document_uploads_domain', value: 'bucketDomainName' },
+  ],
+})
+export class DocumentBucket {}
+```
+
+| Attribute                  | Description                                        |
+| --------------------------- | --------------------------------------------------- |
+| `id`                        | Name of the bucket                                 |
+| `arn`                        | ARN of the bucket (`arn:aws:s3:::bucketname`)      |
+| `bucketDomainName`           | Bucket domain name (`bucketname.s3.amazonaws.com`) |
+| `bucketRegionalDomainName`   | Region-specific bucket domain name                 |
+
+### Global References
+
+Set `ref` to register the bucket under a name, so other resources can read its attributes (e.g. an ARN dropped into a Lambda's `env`) without importing the bucket class directly:
+
+```typescript
+@Bucket({ name: 'document-uploads', ref: 'documents' })
+export class DocumentBucket {}
+```
+
+```typescript
+import { Refs } from '@lafken/common';
+
+lambda: {
+  env: {
+    DOCUMENTS_BUCKET_ARN: Refs.resourceValue('bucket::documents', 'arn'),
+  },
+}
 ```
 
 ### Repository

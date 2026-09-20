@@ -104,6 +104,41 @@ Step Functions definition while keeping names unique within the state machine:
 export class DelayedWorkflow {}
 ```
 
+### State Machine Configuration
+
+Beyond `startAt`, `@StateMachine` accepts these state-machine-level options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `executionType` | `'STANDARD' \| 'EXPRESS'` | `STANDARD` for long-running, exactly-once workflows; `EXPRESS` for high-throughput, short-duration ones. |
+| `services` | `Services[]` | Additional IAM permissions for the state machine's role — see [AWS Service Integrations](#aws-service-integrations). |
+| `loggingConfiguration` | `object` | Enables CloudWatch Logs for execution history: `logGroupName`, `level` (`'all'\|'error'\|'fatal'\|'off'`), `includeExecutionData`, `retentionInDays`. |
+| `enableTrace` | `boolean` | Enables AWS X-Ray tracing for the state machine. |
+| `outputs` | `ResourceOutputType<'id' \| 'arn' \| 'stateMachineVersionArn'>` | Exports an attribute to SSM Parameter Store or as a Terraform output. |
+| `ref` | `string` | Registers the state machine as a named global reference, retrievable via `Refs.resourceValue('state-machine::<ref>', attr)`. |
+
+```typescript
+@StateMachine({
+  startAt: 'process',
+  executionType: 'EXPRESS',
+  enableTrace: true,
+  loggingConfiguration: {
+    logGroupName: '/aws/states/order-workflow',
+    level: 'error',
+    includeExecutionData: true,
+    retentionInDays: 30,
+  },
+  outputs: [{ type: 'output', name: 'order_workflow_arn', value: 'arn' }],
+  ref: 'order-workflow',
+})
+export class OrderWorkflow {
+  @State({ end: true })
+  process(@Event('{% $states.input %}') input: any) {}
+}
+```
+
+Every state machine's IAM role is automatically granted `cloudwatch` and `lambda` permissions (for execution logging and invoking its own task Lambdas), plus S3 read/write permissions auto-derived from any Distributed Map state's `itemReader`/`resultWriter` buckets (see below) — `services` only needs to cover what your own tasks/integrations require beyond that.
+
 ### Lambda Tasks
 
 The `@State` decorator turns a method into a Lambda-backed task within the state machine. Step Functions will invoke the Lambda automatically during execution.
@@ -240,6 +275,45 @@ class ItemProcessor {
 export class BatchWorkflow {}
 ```
 
+#### Distributed Map
+
+For large collections, run each iteration as its own state machine execution with `mode: 'distributed'` — this scales past inline mode's concurrency limits and can read its input directly from S3:
+
+```typescript
+@StateMachine({
+  startAt: {
+    type: 'map',
+    mode: 'distributed',
+    executionType: 'standard',
+    states: ItemProcessor,
+    itemReader: {
+      source: 'json',
+      bucket: 'orders-bucket',
+      key: 'batch/orders.json',
+    },
+    resultWriter: {
+      bucket: 'orders-bucket',
+      prefix: 'results/',
+      config: { outputType: 'JSON' },
+    },
+    toleratedFailurePercentage: 5,
+    maxItemsPerBatch: 100,
+    end: true,
+  },
+})
+export class BatchOrderWorkflow {}
+```
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `executionType` | `'standard' \| 'express'` | Execution mode for each iteration's underlying execution. |
+| `itemReader` | `object` | Source of the items to iterate: JSON/JSONL/manifest from S3 (`source`, `bucket`, `key`, optional `itemsPointer`/`maxItems`) or CSV (`source: 'csv'`, plus `headers: { location, titles? }`/`delimiter`). |
+| `resultWriter` | `object` | Where iteration results are written — `bucket`, `prefix`, and optional `config: { outputType, transformation }` (`'JSON'\|'JSONL'`, `'NONE'\|'COMPACT'\|'FLATTEN'`). |
+| `toleratedFailurePercentage` / `toleratedFailureCount` | `number \| JSONata` | Maximum share/count of failed items before the whole Map state is considered failed. |
+| `maxItemsPerBatch` | `number \| JSONata` | Maximum number of items processed per batch. |
+
+`itemReader`/`resultWriter` buckets are automatically granted S3 read/write permissions on the state machine's role — no need to add them to `services`.
+
 #### Parallel State
 
 A Parallel state runs multiple branches concurrently. Each branch is a class decorated with `@NestedStateMachine`:
@@ -318,6 +392,8 @@ States support `retry` and `catch` configurations for resilient workflows:
       intervalSeconds: 2,
       maxAttempt: 3,
       backoffRate: 2,
+      maxDelaySeconds: 60,
+      jitterStrategy: 'FULL',
     },
   ],
   catch: [
@@ -332,6 +408,15 @@ riskyOperation(@Event('{% $states.input %}') input: any) {
   return { result: 'done' };
 }
 ```
+
+| Retry option | Type | Description |
+| --- | --- | --- |
+| `errorEquals` | `ErrorType[]` | Error names that trigger this retry. |
+| `intervalSeconds` | `number` | Seconds to wait before the first retry attempt. |
+| `maxAttempt` | `number` | Maximum number of retry attempts. |
+| `backoffRate` | `number` | Multiplier applied to `intervalSeconds` after each retry. |
+| `maxDelaySeconds` | `number` | Caps the exponential backoff delay between retries. |
+| `jitterStrategy` | `'FULL' \| 'NONE'` | `'FULL'` adds up to 100% random jitter to the delay; `'NONE'` disables it. |
 
 ### State Events & Payloads
 

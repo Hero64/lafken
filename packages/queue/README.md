@@ -107,6 +107,54 @@ If `queueName` is omitted, the method name is used as the queue name.
 | `maxConcurrency`      | `number` | Maximum concurrent Lambda invocations for this queue               |
 | `maxBatchingWindow`   | `number` | Seconds to wait gathering messages into a batch before invoking    |
 | `lambda`              | `object` | Lambda-specific configuration (memory, timeout, etc.)              |
+| `dlq`                 | `{ maxReceiveCount, retentionPeriod? }` | Dead Letter Queue config — see [Dead Letter Queue](#dead-letter-queue) below |
+| `outputs`             | `ResourceOutputType<'arn' \| 'id' \| 'url'>` | Exports the queue's `arn`/`id`/`url` to SSM Parameter Store or a Terraform output |
+| `ref`                 | `string` | Registers the queue as a named global reference, retrievable via `Refs.resourceValue('queue::<ref>', attr)` |
+
+### Dead Letter Queue
+
+Set `dlq` to automatically create a Dead Letter Queue and configure a redrive policy on the main queue — messages that fail processing `maxReceiveCount` times are moved there instead of being retried forever:
+
+```typescript
+@Standard({
+  queueName: 'orders',
+  dlq: {
+    maxReceiveCount: 3,
+    retentionPeriod: 1209600, // 14 days
+  },
+})
+processOrder(@Event(OrderMessage) messages: OrderMessage[]) { }
+```
+
+| Option            | Type     | Required | Description                                                  |
+| ------------------ | -------- | -------- | -------------------------------------------------------------- |
+| `maxReceiveCount`   | `number` | Yes      | Number of receives before a message is moved to the DLQ        |
+| `retentionPeriod`   | `number` | No       | Seconds the DLQ retains messages before automatic deletion      |
+
+### External Queues
+
+Set `isExternal: true` to attach a consumer to a pre-existing SQS queue instead of creating one. The framework still creates the Lambda handler and event source mapping — it just skips creating the `SqsQueue` resource itself:
+
+```typescript
+@Standard({
+  isExternal: true,
+  queueName: 'shared-legacy-queue',
+})
+processLegacy(@Event(LegacyMessage) messages: LegacyMessage[]) { }
+```
+
+`queueName` also accepts a dynamic reference instead of a literal name, e.g. when the queue is owned by another resource in the same app:
+
+```typescript
+@Standard({
+  isExternal: true,
+  queueName: Refs.resourceValue('bucket::uploads::notification-queue', 'id'),
+})
+processExternalNotification(@Event(NotificationMessage) messages: NotificationMessage[]) { }
+```
+
+> [!NOTE]
+> External queues don't support `dlq`, `outputs`, `visibilityTimeout`, `deliveryDelay`, `retentionPeriod`, or `maxMessageSizeBytes` — those only apply to queues the framework creates. `lambda` and the `SourceMappingProps` options (`batchSize`, `maxBatchingWindow`, `maxConcurrency`) still apply.
 
 ### FIFO Queues
 
@@ -124,11 +172,12 @@ processPayment(@Event(PaymentMessage) messages: PaymentMessage[]) {
 }
 ```
 
-FIFO queues support all standard queue options plus:
+FIFO queues support all standard queue options — including `dlq`, `outputs`, and `ref` (see [Dead Letter Queue](#dead-letter-queue) above) — plus:
 
 | Option                      | Type      | Description                                                     |
 | --------------------------- | --------- | --------------------------------------------------------------- |
 | `contentBasedDeduplication` | `boolean` | Use message content to generate deduplication IDs automatically |
+| `dlq`                       | `{ maxReceiveCount, retentionPeriod? }` | Dead Letter Queue config, same shape as standard queues |
 
 > [!NOTE]
 > FIFO queues automatically enable `ReportBatchItemFailures`, allowing partial batch failure reporting.

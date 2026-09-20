@@ -118,7 +118,23 @@ processOrder() { }
 | `services`  | `Services[]`     | Additional IAM policy statements to attach to the role     |
 | `ref`       | `string`         | Name to register the created role as a global reference    |
 
-### Global Refss
+### Handler Payload
+
+Use the `@Event()` parameter decorator to inject the raw invocation payload into a handler method argument — useful when the Lambda is invoked directly (e.g. via the AWS SDK or another Lambda) rather than through a resource that has its own typed event decorator:
+
+```typescript
+import { Standalone, Handler, Event } from '@lafken/standalone/main';
+
+@Standalone()
+export class OrderFunctions {
+  @Handler()
+  processOrder(@Event() event: { orderId: string }) {
+    console.log(`Processing order ${event.orderId}`);
+  }
+}
+```
+
+### Global Refs
 
 Use `ref` to register the Lambda function as a named global reference so other resources can access its attributes (e.g. ARN, function name):
 

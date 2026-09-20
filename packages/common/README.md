@@ -62,7 +62,14 @@ export class NotificationService { ... }
 | `foldername`   | Directory of the decorated file          |
 | `filename`     | File name (without `.js` extension)      |
 | `originalName` | Original class name (for asset naming)   |
-| `minify`       | Whether to minify the bundle (`true`)    |
+| `bundler`      | `BundlerConfig` from the decorator's own `bundler` prop — `{ minify?, externalPackages? }` |
+
+Every resource decorator's props type extends `ResourceProps`, so it also accepts an optional `bundler` option alongside your own custom props:
+
+```typescript
+@MyService({ name: 'notifications', bundler: { minify: false, externalPackages: ['sharp'] } })
+export class NotificationService { ... }
+```
 
 ### `createLambdaDecorator`
 
@@ -112,6 +119,18 @@ class NotificationService {
 | `env`         | `EnvironmentValue`  | Environment variables (static or dynamic)     |
 | `tags`        | `Record<string, string>` | Resource tags                            |
 | `enableTrace` | `boolean`           | Enable AWS X-Ray tracing                      |
+| `vpcConfig`   | `VpcConfig`         | Deploys the function inside a VPC (`securityGroupIds`, `subnetIds`) |
+| `ephemeralStorage` | `number`       | `/tmp` size in MB (512–10240)                 |
+| `reservedConcurrency` | `number`   | Caps concurrent executions (`0` throttles the function) |
+| `architecture` | `'x86_64' \| 'arm64'` | Instruction set architecture               |
+| `alias`       | `AliasConfig`       | Publishes a version and creates an alias, optionally with provisioned concurrency |
+| `loggingConfig` | `LoggingConfig`   | CloudWatch log format, retention, and application/system log levels |
+| `layers`      | `string[]`          | Layer ARNs — merged across app, module, and lambda levels |
+| `outputs`     | `ResourceOutputType<LambdaOutputAttributes>` | Exports `arn`/`invokeArn`/`qualifiedArn` to SSM or as a Terraform output |
+| `functionName` | `string`           | Overrides the auto-generated function name    |
+| `ref`         | `string`            | Registers the function as a named global reference, retrievable via `lafkenResource.getResource('lambda', ref)` |
+
+`@lafken/resolver`'s `LambdaHandler` is what turns these into real CDKTN resources — see its README for the mapping of each field to the AWS resource it provisions.
 
 ### `createEventDecorator`
 
@@ -149,6 +168,26 @@ class MyService {
   }
 }
 ```
+
+### `Streaming` / `ResponseStreaming`
+
+Built-in decorators for AWS Lambda response streaming. `@Streaming()` marks a handler method as a response-streaming handler; `@ResponseStreaming()` binds a parameter to the writable response stream.
+
+```typescript
+import { Context, ResponseStreaming, Streaming } from '@lafken/common';
+import type { Writable } from 'node:stream';
+
+class NotificationService {
+  @Streaming()
+  @Publish({ name: 'stream-report' })
+  streamReport(@ResponseStreaming() responseStream: Writable, @Context() context: any) {
+    responseStream.write('chunk');
+    responseStream.end();
+  }
+}
+```
+
+The decorated method's runtime signature becomes `(event, responseStream, context)` instead of the usual `(event, context)` — the generated wrapper (from `createLambdaDecorator`) tells the two apart structurally, by checking whether the second argument exposes a `write` function. `@Streaming()` only records which methods are streaming handlers; the actual `awslambda.streamifyResponse` wrapping is applied at build time by `@lafken/resolver`'s bundler (via `initLambdaAssetMetadata`'s `streamingByMethod`), since a decorator-added wrapper would be dropped when the handler method is bound to its instance at export time.
 
 ### `createFieldDecorator`
 
@@ -271,6 +310,39 @@ describe('My resolver', () => {
     const meta = getResourceMetadata(TestResource);
     expect(meta.name).toBe('test');
   });
+});
+```
+
+## Testing Utilities
+
+### `executeLambda` / `executeLambdaWithEvent`
+
+Invoke a decorated handler method directly in a unit test, without going through CDKTN or a resolver. Both require `enableBuildEnvVariable()` to have run first (they read the `@Event`/`@Context` argument mapping captured by `createLambdaDecorator`), and both instantiate the class fresh (`new classResource()`) before calling the method.
+
+`executeLambda` calls the method positionally, passing your own arguments straight through:
+
+```typescript
+import { enableBuildEnvVariable, executeLambda } from '@lafken/common';
+
+enableBuildEnvVariable();
+
+const result = await executeLambda(NotificationService, {
+  method: 'sendEmail',
+  params: [{ to: 'user@example.com' }], // forwarded positionally to sendEmail(...)
+});
+```
+
+`executeLambdaWithEvent` instead maps a raw Lambda `event`/`context` onto whichever parameters the method declared with `@Event()`/`@Context()`, the same way an actual Lambda invocation would:
+
+```typescript
+import { enableBuildEnvVariable, executeLambdaWithEvent } from '@lafken/common';
+
+enableBuildEnvVariable();
+
+const result = await executeLambdaWithEvent(NotificationService, {
+  method: 'sendEmail',
+  event: { to: 'user@example.com' },
+  context: {},
 });
 ```
 
@@ -403,6 +475,9 @@ declare module '@lafken/common' {
 | `createFieldDecorator`     | Factory for property-level field metadata   |
 | `createPayloadDecorator`   | Factory for class-level payload naming      |
 | `Context`                  | Parameter decorator for Lambda context      |
+| `Streaming`                 | Method decorator marking a handler as response-streaming |
+| `ResponseStreaming`         | Parameter decorator for the response stream |
+| `createStreamingDecorator`  | Factory `Streaming` is built from            |
 
 ### Metadata Readers
 
@@ -427,6 +502,8 @@ declare module '@lafken/common' {
 | `cleanTemplateString`     | Collapse multiline string to one line    |
 | `Refs`               | Namespace of cross-resource reference members — see [Cross-Resource References](#cross-resource-references) |
 | `registerRefResolvers`    | Injection point used by `@lafken/resolver` to back `Refs`  |
+| `executeLambda`           | Invoke a decorated handler positionally, in a test — see [Testing Utilities](#testing-utilities) |
+| `executeLambdaWithEvent`  | Invoke a decorated handler with an `event`/`context`, in a test |
 
 ### Constants
 
@@ -443,6 +520,11 @@ declare module '@lafken/common' {
 | `ResourceMetadata`   | Metadata shape stored by resource decorators         |
 | `LambdaProps`        | Lambda configuration (timeout, memory, runtime, ...) |
 | `LambdaMetadata`     | Metadata shape for handler methods                   |
+| `VpcConfig`          | VPC config for a Lambda (`securityGroupIds`, `subnetIds`) |
+| `AliasConfig`        | Alias + optional provisioned concurrency config for a Lambda |
+| `LoggingConfig`      | CloudWatch logging config for a Lambda               |
+| `ResourceOutputType<T>` | Array of SSM/Terraform output declarations for a resource |
+| `BundlerConfig`      | Per-resource bundler options (`minify`, `externalPackages`) |
 | `FieldMetadata`      | Discriminated union of field types                   |
 | `PayloadMetadata`    | Metadata shape for payload classes                   |
 | `Services`           | IAM permission declaration type                      |
