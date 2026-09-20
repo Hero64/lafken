@@ -203,11 +203,33 @@ detail: {
 | Exact match           | `'value'`                                 | Matches exact string or number     |
 | `prefix`              | `{ prefix: 'usr_' }`                     | Starts with                        |
 | `suffix`              | `{ suffix: '.com' }`                     | Ends with                          |
+| `wildcard`            | `{ wildcard: 'dir/*.png' }`               | Matches using a `*` wildcard       |
+| `cidr`                | `{ cidr: '10.0.0.0/24' }`                 | Matches an IPv4/IPv6 address against a CIDR block |
 | `anything-but`        | `{ 'anything-but': 'admin' }`            | Matches everything except          |
 | `numeric`             | `{ numeric: ['>', 100] }`                | Numeric comparison                 |
 | `numeric` (range)     | `{ numeric: ['>=', 0, '<', 100] }`       | Numeric range                      |
 | `exists`              | `{ exists: true }`                        | Field exists or does not exist     |
 | `equals-ignore-case`  | `{ 'equals-ignore-case': 'active' }`     | Case-insensitive string match      |
+
+`prefix`, `suffix`, and `anything-but` also accept a nested `equals-ignore-case` to match case-insensitively:
+
+```typescript
+detail: {
+  region: [{ prefix: { 'equals-ignore-case': 'eventb' } }],
+  status: [{ 'anything-but': { suffix: ['.txt', '.rtf'] } }],
+}
+```
+
+Use the `$or` operator to match if *any* of several field conditions are met, across one or more fields:
+
+```typescript
+detail: {
+  $or: [
+    { location: ['New York'] },
+    { day: ['Monday'] },
+  ],
+}
+```
 
 ### Receiving Events
 
@@ -251,6 +273,29 @@ createApp({
 });
 ```
 
+#### Event Bus Options
+
+| Option     | Type                                                | Description                                                             |
+| ---------- | ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| `busName`  | `string`                                             | Name of the EventBridge bus. `'default'` is reserved for the built-in bus. |
+| `isExternal` | `boolean`                                          | When `true`, references an existing bus by `busName` instead of creating one. |
+| `outputs`  | `ResourceOutputType<'arn' \| 'id'>`                  | Exports the bus's `arn`/`id` to SSM Parameter Store or a Terraform output. |
+| `ref`      | `string`                                             | Registers the bus as a named global reference, retrievable via `Refs.resourceValue('event-bus::<ref>', attr)`. |
+| `extend`   | `(props: { scope, eventBus }) => void`               | Apply additional CDKTN configuration to the created/referenced bus.       |
+
+```typescript
+new EventRuleResolver({
+  busName: 'legacy-bus',
+  isExternal: true, // references an existing bus instead of creating one
+});
+
+new EventRuleResolver({
+  busName: 'orders-bus',
+  ref: 'orders-bus-ref',
+  outputs: [{ type: 'output', name: 'orders_bus_arn', value: 'arn' }],
+});
+```
+
 Reference a specific bus from a rule:
 
 ```typescript
@@ -262,6 +307,21 @@ Reference a specific bus from a rule:
   },
 })
 onCheckout(@Event() event: any) { }
+```
+
+### Global Reference
+
+Register a rule as a named global reference with `ref`, so other resources can look up its attributes (e.g. the rule's ARN) via `Refs.resourceValue('event-rule::<ref>', attr)`:
+
+```typescript
+@Rule({
+  ref: 'order-created-rule',
+  pattern: {
+    source: 'orders',
+    detailType: ['order.created'],
+  },
+})
+onOrderCreated(@Event() event: any) { }
 ```
 
 ### Retry Policy

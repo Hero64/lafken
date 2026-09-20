@@ -83,12 +83,25 @@ await createApp({
 | Option              | Type                | Required | Description                                               |
 | ------------------- | ------------------- | -------- | --------------------------------------------------------- |
 | `name`              | `string`            | Yes      | Application name, used as the stack identifier             |
-| `modules`           | `StackModule[]`     | Yes      | Modules created with `createModule`                        |
+| `modules`           | `ReturnType<typeof createModule>[]` | Yes | Modules created with `createModule()` — each entry is the async factory function it returns, not a `StackModule` instance directly |
 | `resolvers`         | `ResolverType[]`    | Yes      | Resolvers that process decorated resources                 |
-| `globalConfig`      | `GlobalConfig`      | No       | Shared Lambda and tag settings for all resources           |
+| `globalConfig`      | `GlobalConfig`      | No       | Shared Lambda, tag, and bundler settings for all resources  |
 | `awsProviderConfig` | `AwsProviderConfig` | No       | AWS provider settings (region, profile, etc.)              |
 | `state`             | `StateConfig`       | No       | Terraform state backend (`s3` or `local`)                  |
 | `extend`            | `(scope) => void`   | No       | Callback invoked after all resolvers finish                |
+
+#### Return Value
+
+`createApp` resolves once the whole app has been built and synthesized to Terraform:
+
+```typescript
+const { app, appStack } = await createApp({ /* ... */ });
+```
+
+| Property   | Type       | Description                                                          |
+| ---------- | ---------- | ---------------------------------------------------------------------- |
+| `app`      | `App`      | The root CDKTN `App` instance.                                         |
+| `appStack` | `AppStack` | The `TerraformStack` created for this application — the same instance passed to the `extend` callback. |
 
 ### createModule
 
@@ -121,13 +134,21 @@ const orderModule = createModule({
 
 ### Global Configuration
 
-Global configuration applies default settings to all Lambda functions and resources. Values cascade from application to module to individual resource, with more specific settings taking precedence:
+Global configuration applies default settings to all Lambda functions and resources, at two levels — app-wide (`createApp`'s `globalConfig`) and module-wide (`createModule`'s `globalConfig`). It's not a single cascading mechanism, though: two different rules apply depending on the option.
+
+Most `lambda` options (`memory`, `timeout`, `runtime`, `architecture`, `ephemeralStorage`, `reservedConcurrency`, `alias`, `loggingConfig`, `layers`, `outputs`, `ref`) and `bundler` are resolved per key by `@lafken/resolver`'s `LambdaHandler` when it builds each function, with the handler's own value winning over the module's, which wins over the app's, which wins over the framework default:
 
 ```
-App globalConfig → Module globalConfig → Resource-level config
+handler-level  >  module-level  >  app-level  >  default
 ```
+
+`lambda.env` and `lambda.vpcConfig` are different: they're not read by `LambdaHandler` at all. Instead, `createApp`/`createModule` attach a CDKTN `Aspect` (`AppAspect`) that runs once, after every resolver has finished, and walks every `LambdaFunction` construct in the whole stack — merging the app's and module's `env` into each function's environment variables, and setting `vpcConfig` on any function that doesn't already have one from its own handler-level config. So a handler-level `env`/`vpcConfig` is never overwritten, but the merge happens as a separate post-processing pass rather than as part of `LambdaHandler`'s own config resolution.
+
+`tags` and `services` follow their own rules — see [Tags](#tags) and [Available Services](#available-services) below.
 
 #### Lambda Configuration
+
+Available under `globalConfig.lambda` at both the app and module level (everything except `tags` and `functionName`, which only make sense per-resource):
 
 | Option        | Type             | Description                                               |
 | ------------- | ---------------- | --------------------------------------------------------- |
@@ -136,7 +157,31 @@ App globalConfig → Module globalConfig → Resource-level config
 | `runtime`     | `22 \| 24` | Node.js runtime version                                   |
 | `services`    | `Services[]`     | AWS services the Lambda can access (creates IAM role)     |
 | `enableTrace` | `boolean`        | Enable AWS X-Ray tracing                                  |
-| `env`         | `EnvironmentValue` | Environment variables for Lambda functions              |
+| `env`         | `EnvironmentValue` | Environment variables for Lambda functions — merged in by `AppAspect`, see above |
+| `vpcConfig`   | `VpcConfig`      | VPC placement (`securityGroupIds`, `subnetIds`) — applied by `AppAspect`, see above |
+| `ephemeralStorage` | `number`    | `/tmp` size in MB (512–10240)                              |
+| `reservedConcurrency` | `number` | Caps concurrent executions (`0` throttles the function)   |
+| `architecture` | `'x86_64' \| 'arm64'` | Instruction set architecture                       |
+| `alias`       | `AliasConfig`    | Publishes a version and creates an alias, optionally with provisioned concurrency |
+| `loggingConfig` | `LoggingConfig` | CloudWatch log format, retention, and application/system log levels |
+| `layers`      | `string[]`       | Layer ARNs — merged across app, module, and handler levels, not overridden |
+| `outputs`     | `ResourceOutputType<LambdaOutputAttributes>` | Exports `arn`/`invokeArn`/`qualifiedArn` to SSM or as a Terraform output |
+| `ref`         | `string`         | Registers the function as a named global reference         |
+
+#### Bundler Configuration
+
+`globalConfig.bundler` controls how Lambda source files are bundled by rolldown, at the app and module level:
+
+```typescript
+globalConfig: {
+  bundler: { minify: true, externalPackages: ['my-shared-lib'] },
+}
+```
+
+| Option             | Type                    | Description                                               |
+| ------------------ | ----------------------- | ----------------------------------------------------------- |
+| `minify`           | `boolean`               | Enables minification — resource-level `bundler.minify` takes precedence when set |
+| `externalPackages` | `(string \| RegExp)[]` | Extra packages to exclude from the bundle — accumulates across app, module, and resource levels, on top of the always-external `@aws-sdk/*`, `aws-lambda`, `node:*` |
 
 #### Available Services
 
@@ -153,6 +198,7 @@ Services define which AWS resources the Lambda IAM role can access:
 | `kms`           | AWS KMS                          |
 | `ssm`           | AWS Systems Manager Parameter Store |
 | `event`         | Amazon EventBridge               |
+| `kinesis`       | Amazon Kinesis                   |
 
 For fine-grained control, specify individual permissions:
 

@@ -52,7 +52,7 @@ createApp({
       restApi: {
         name: 'my-rest-api',
         cors: { allowOrigins: true },
-        stage: { stageName: 'dev' },
+        stages: [{ stageName: 'dev' }],
       },
     }),
   ],
@@ -61,6 +61,8 @@ createApp({
 ```
 
 If no configuration is passed to `ApiResolver`, a default API Gateway is created with minimal settings. You can also create multiple APIs within the same application by passing multiple configuration objects.
+
+`stages` is an array — each entry deploys a separate stage (e.g. `dev`, `staging`, `prod`) of the same API. If omitted, a single default stage named `api` is created.
 
 ### API Definition: `resource` vs `openapi`
 
@@ -121,7 +123,59 @@ In `resource` mode the same information is stored as `aws_api_gateway_documentat
 
 #### Supported integrations
 
-All AWS service integrations work in both modes (`bucket`, `dynamodb`, `queue`, `state-machine`, `event-bridge`, and plain Lambda-backed methods). If an integration is not supported in `openapi` mode, deployment fails with a clear error.
+All AWS service integrations work in both modes (`bucket`, `dynamodb`, `queue`, `state-machine`, `event-bridge`, `kinesis`, and plain Lambda-backed methods). If an integration is not supported in `openapi` mode, deployment fails with a clear error.
+
+### REST API Options Reference
+
+Beyond `cors`, `stages`, `auth`, and `definition` shown above, `restApi` accepts:
+
+| Option | Type | Description |
+| ------ | ---- | ----------- |
+| `methodSettings` | `MethodSettings` | Default caching/logging/metrics/throttling for every method of every stage. A stage's own `methodSettings` overrides this default, and `@Api`/method-level settings override both. |
+| `defaultResponses` | `ApiDefaultResponse` | Overrides the body of API Gateway's own gateway responses (`unauthorized`, `throttled`, `default4xx`, `wafFiltered`, ...) — the responses API Gateway returns before your integration ever runs. |
+| `outputs` | `ResourceOutputType<'arn' \| 'id' \| 'executionArn'>` | Exports REST API attributes to SSM Parameter Store or as Terraform outputs. |
+| `ref` | `string` | Registers the API as a named global reference, retrievable elsewhere via `Refs.resourceValue('api::<ref>', attr)`. |
+| `apiKeySource` | `'header' \| 'authorizer'` | Where API Gateway reads the API key from for key-validated methods. |
+| `supportedMediaTypes` | `string[]` | Binary media (`Content-Type`) types the API accepts/returns. |
+| `endpointConfiguration` | `{ type: 'edge' \| 'regional' \| 'private', ... }` | API Gateway endpoint type; `private` additionally requires `vpcEndpointIds`. |
+| `disableExecuteApiEndpoint` | `boolean` | Disables the default `execute-api` endpoint — use when the API is only exposed through a custom domain. |
+| `minCompressionSize` | `number` | Minimum response size (bytes) before API Gateway compresses it. |
+
+```typescript
+new ApiResolver({
+  restApi: {
+    name: 'my-rest-api',
+    methodSettings: {
+      metricsEnabled: true,
+      loggingLevel: 'error',
+      throttlingRateLimit: 100,
+    },
+    defaultResponses: {
+      unauthorized: { message: 'Unauthorized' },
+      default4xx: { message: 'Client error' },
+    },
+    outputs: [{ type: 'output', name: 'api_execution_arn', value: 'executionArn' }],
+    ref: 'main-api',
+    endpointConfiguration: { type: 'regional' },
+    disableExecuteApiEndpoint: true,
+  },
+});
+```
+
+### Referencing an Existing REST API
+
+Set `isExternal: true` to attach `ApiResolver` to an API Gateway REST API that already exists — created outside Lafken, or shared across apps — instead of creating a new one. Lafken looks it up by `name` and still generates resources, methods, and integrations under it; only the REST API resource itself is skipped:
+
+```typescript
+new ApiResolver({
+  restApi: {
+    name: 'shared-rest-api',
+    isExternal: true,
+  },
+});
+```
+
+`cors`, `auth`, `stages`, `methodSettings`, `defaultResponses`, `description`, and `ref` are still available. The options exclusive to newly created REST APIs (`apiKeySource`, `supportedMediaTypes`, `endpointConfiguration`, `disableExecuteApiEndpoint`, `minCompressionSize`, `outputs`, `definition`) don't apply, since there's no REST API resource to configure them on.
 
 ## Features
 
@@ -174,6 +228,7 @@ Handler methods receive structured input through the `@Event` decorator combined
 | `@QueryParam`    | Query string parameter         | Yes (default)   |
 | `@HeaderParam`   | HTTP header                    | Yes (default)   |
 | `@ContextParam`  | API Gateway request context    | Yes (always)    |
+| `@VelocityParam` | Raw Velocity template expression | — (not part of the OpenAPI schema) |
 
 These decorators generate a fully resolved Velocity `requestTemplate` internally, mapping each field to the correct source.
 
@@ -296,6 +351,22 @@ class AuditedPayload {
 }
 ```
 
+#### Velocity Template Parameter
+
+`@VelocityParam` injects a raw Apache Velocity (VTL) expression directly into the generated request mapping template, for cases the other field decorators don't cover. The decorated property name becomes the JSON key; the `template` string becomes its value, unescaped:
+
+```typescript
+@ApiRequest()
+class ForwardRawBody {
+  @BodyParam()
+  name: string;
+
+  @VelocityParam({ template: "$input.json('$')" })
+  raw: any;
+}
+// Generated template: { "name": "...", "raw": $input.json('$') }
+```
+
 ### AWS Service Integrations
 
 HTTP methods can integrate directly with AWS services without an intermediate Lambda function. Set the `integration` property on the method decorator and reference other infrastructure resources with `Refs.resourceValue`/`Refs.ssmValue`, imported directly from `@lafken/common`.
@@ -309,6 +380,7 @@ Supported integrations:
 | `queue`          | `SendMessage`                  |
 | `state-machine`  | `Start`, `Stop`, `Status`      |
 | `event-bridge`   | `PutEvents`                    |
+| `kinesis`        | `PutRecord`                    |
 
 #### S3 Bucket Integration
 
@@ -518,6 +590,34 @@ publishOrder(
 
 When `eventBusName` is omitted, the event is published to the default event bus.
 
+#### Kinesis Integration
+
+```typescript
+import {
+  Api,
+  Post,
+  type KinesisPutRecordIntegrationResponse,
+} from '@lafken/api/main';
+import { Refs } from '@lafken/common';
+
+@Api({ path: '/tracking' })
+class TrackingApi {
+  @Post({
+    integration: 'kinesis',
+    action: 'PutRecord',
+  })
+  track(): KinesisPutRecordIntegrationResponse {
+    return {
+      streamName: Refs.resourceValue('kinesis::activity-stream', 'id'),
+      data: { userId: '123', action: 'login' },
+      partitionKey: 'user-123',
+    };
+  }
+}
+```
+
+`data` is base64-encoded automatically and, like `queue`'s `body` and `event-bridge`'s `detail`, can mix static values with `@Event` fields. `partitionKey` (used to route the record to a shard) and the optional `sequenceNumberForOrdering` accept either a literal or an `@Event` parameter.
+
 Direct integration methods can also use `getCurrentDate()` (from `@lafken/api/main`) to embed the API Gateway request timestamp into the generated VTL template:
 
 ```typescript
@@ -665,9 +765,12 @@ import { ApiKeyAuthorizer } from '@lafken/api/main';
   defaultKeys: ['default-key'],
   quota: { limit: 10000, period: 'month' },
   throttle: { burstLimit: 50, rateLimit: 100 },
+  createUsagePlan: true,
 })
 export class PlatformApiKey {}
 ```
+
+`createUsagePlan` (default `true`) provisions a usage plan resource holding the `quota`/`throttle` settings above.
 
 #### Custom Authorizer
 

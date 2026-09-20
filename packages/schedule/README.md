@@ -130,6 +130,38 @@ midMonthAudit() {
 
 When `day` is set to a specific value, `weekDay` is automatically set to `'?'` and vice versa, following the AWS cron constraint.
 
+### Additional Options
+
+`@Cron` also accepts these options, none of which affect the cron/schedule expression itself:
+
+```typescript
+@Cron({
+  schedule: 'cron(0 3 * * ? *)',
+  timezone: 'America/Santiago',
+  description: 'Nightly cleanup job',
+  state: 'disabled',        // paused without deleting the schedule
+  startDate: '2026-07-01T00:00:00Z',
+  endDate: '2026-12-31T23:59:59Z',
+  flexibleWindowMinutes: 15, // EventBridge may run anywhere within this window
+  outputs: [{ type: 'output', name: 'cleanup_schedule_arn', value: 'arn' }],
+  ref: 'nightly-cleanup',
+})
+cleanupExpiredSessions() { }
+```
+
+| Option                  | Type                                     | Description                                                              |
+| ------------------------ | ----------------------------------------- | ------------------------------------------------------------------------- |
+| `timezone`               | `string`                                  | IANA timezone the schedule is evaluated in (e.g. `'America/Santiago'`). Defaults to UTC. |
+| `description`            | `string`                                  | Human-readable description shown in the AWS console. **See note below.**  |
+| `state`                  | `'enabled' \| 'disabled'`                 | Pauses the schedule without deleting it. Defaults to `'enabled'`.         |
+| `startDate` / `endDate`  | `string` (ISO 8601)                       | Window during which the schedule is allowed to trigger its target.        |
+| `flexibleWindowMinutes`  | `number`                                  | Runs in `FLEXIBLE` mode within this window (minutes) instead of firing at the exact time — useful to avoid thundering-herd invocations. Omit to run in `OFF` mode (exact time). |
+| `outputs`                | `ResourceOutputType<'arn' \| 'id'>`       | Exports the schedule's `arn`/`id` to SSM Parameter Store or a Terraform output. |
+| `ref`                    | `string`                                  | Registers the schedule as a named global reference, retrievable via `Refs.resourceValue('schedule::<ref>', attr)`. |
+
+> [!NOTE]
+> `description` is shared with the underlying Lambda: `@Cron`'s props are merged into the same handler metadata used to build the `LambdaHandler`, so the string you pass to `description` is applied to **both** the EventBridge Schedule's description **and** the Lambda function's description. There is currently no way to set a different description for each.
+
 ### Retry Policy
 
 Configure how EventBridge handles failed deliveries using `retryAttempts` and `maxEventAge`:

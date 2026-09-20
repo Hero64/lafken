@@ -91,6 +91,12 @@ export class MessagesApi {
 }
 ```
 
+The Event API also exposes `realtimeDomain` — the WebSocket domain clients actually connect/subscribe to (`wss://{realtimeDomain}/event/realtime`), as opposed to `httpDomain` which is only for publishing over HTTP:
+
+```ts
+EVENTS_REALTIME_DOMAIN: Refs.resourceValue('event-api::chat-app-events', 'realtimeDomain'),
+```
+
 ## Authorization
 
 Authorizers are separate decorated classes, registered on the resolver and referenced by name — the same pattern as `@lafken/api`.
