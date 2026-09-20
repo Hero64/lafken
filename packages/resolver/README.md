@@ -1,6 +1,6 @@
 # @lafken/resolver
 
-`@lafken/resolver` is the foundation package for building custom resolvers within the Lafken framework. It provides the `ResolverType` interface, infrastructure primitives (`LambdaHandler`, `Role`, `Environment`), and a global resource tracking system (`lafkenResource`) that enable developers to integrate any AWS service into Lafken.
+`@lafken/resolver` is the foundation package for building custom resolvers within the Lafken framework. It provides the `ResolverType` interface, infrastructure primitives (`LambdaHandler`, `Role`), Lambda asset bundling (`initLambdaAssetMetadata`/`lambdaAssets`), and a global resource tracking system (`lafkenResource`) that enable developers to integrate any AWS service into Lafken.
 
 If you want to create your own resolver — for example, to support a new AWS service or a custom integration — this package gives you everything you need.
 
@@ -75,10 +75,10 @@ import {
 } from '@lafken/common';
 import {
   type AppModule,
-  type AppStack,
-  type ResolverType,
+  getContextValueByScope,
+  initLambdaAssetMetadata,
   LambdaHandler,
-  lambdaAssets,
+  type ResolverType,
 } from '@lafken/resolver';
 import { SnsTopic } from '@cdktn/provider-aws/lib/sns-topic';
 import { SnsTopicSubscription } from '@cdktn/provider-aws/lib/sns-topic-subscription';
@@ -90,15 +90,10 @@ export class SnsResolver implements ResolverType {
   public create(module: AppModule, resource: ClassResource) {
     const metadata: ResourceMetadata = getResourceMetadata(resource);
     const handlers = getResourceHandlerMetadata<PublishMetadata>(resource);
+    const contextBundler = getContextValueByScope(module, 'bundler');
 
-    // Initialize Lambda build assets
-    lambdaAssets.initializeMetadata({
-      foldername: metadata.foldername,
-      filename: metadata.filename,
-      minify: metadata.minify,
-      className: metadata.originalName,
-      methods: handlers.map((h) => h.name),
-    });
+    // Register the Lambda source file so `lambdaAssets.createAssets()` bundles it later
+    initLambdaAssetMetadata({ metadata, handlers, contextBundler });
 
     // Create SNS Topic
     const topic = new SnsTopic(module, `${metadata.name}-topic`, {
@@ -235,8 +230,31 @@ This applies to `runtime`, `timeout`, `memory`, and `env`. Values set directly o
 | `foldername` | `string` | Yes | Source directory path for bundling. |
 | `originalName` | `string` | Yes | Original class name, used for asset generation. |
 | `suffix` | `string` | No | Appended to the function name for uniqueness. |
+| `description` | `string` | No | Lambda function description. |
 | `principal` | `string` | No | AWS service principal for invoke permission (e.g., `apigateway.amazonaws.com`). |
-| `lambda` | `LambdaProps` | No | Lambda-specific configuration (memory, timeout, runtime, services, env, etc.). |
+| `sourceArn` | `string` | No | Restricts the invoke permission to a specific source ARN (e.g., a specific S3 bucket or API Gateway resource). Only applies when `principal` is set. |
+| `sourceAccount` | `string` | No | Restricts the invoke permission to a specific source AWS account. Only applies when `principal` is set. |
+| `lambda` | `LambdaProps` | No | Lambda-specific configuration — see [Lambda Configuration (`lambda` prop)](#lambda-configuration-lambda-prop) below. |
+
+### Lambda Configuration (`lambda` prop)
+
+`LambdaProps` (from `@lafken/common`) covers more than `memory`/`timeout`/`runtime`/`services`/`env`/`enableTrace` shown above. `LambdaHandler` wires each of these into real CDKTN resources:
+
+| Property | Type | What `LambdaHandler` does with it |
+|---|---|---|
+| `tags` | `Record<string, string>` | Applied as resource tags on the function. |
+| `vpcConfig` | `VpcConfig` | Deploys the function inside a VPC (`putVpcConfig`) so it can reach private resources (RDS, ElastiCache, internal services). |
+| `ephemeralStorage` | `number` | Sets the `/tmp` size in MB (512–10240). |
+| `reservedConcurrency` | `number` | Caps concurrent executions (`0` throttles the function entirely). |
+| `architecture` | `'x86_64' \| 'arm64'` | Sets the instruction set architecture. |
+| `alias` | `AliasConfig` | Publishes a version and creates a `LambdaAlias` pointing to it; if `provisionedExecutions > 0`, also creates a `LambdaProvisionedConcurrencyConfig` on that alias. |
+| `loggingConfig` | `LoggingConfig` | Configures CloudWatch logging (`putLoggingConfig`); if `retentionInDays` is set, creates and links a `CloudwatchLogGroup`. |
+| `layers` | `string[]` | Layer ARNs to attach. Layers declared at app, module, and handler level are all **merged together**, not overridden. |
+| `outputs` | `ResourceOutputType<LambdaOutputAttributes>` | Exports function attributes (`arn`, `invokeArn`, `qualifiedArn`) as SSM parameters or Terraform outputs via `ResourceOutput`. |
+| `functionName` | `string` | Overrides the auto-generated function name. |
+| `ref` | `string` | Registers the function globally (`register('lambda', ref)`), retrievable elsewhere via `lafkenResource.getResource('lambda', ref)` or `Refs.resourceValue('lambda::<ref>', attr)`. |
+
+See `LambdaProps` in `@lafken/common`'s source for the full JSDoc on each field.
 
 ## Role
 
@@ -272,10 +290,11 @@ Each service name maps to a default set of IAM actions:
 | `lambda` | `lambda:` | InvokeFunction |
 | `cloudwatch` | `logs:` | CreateLogGroup, CreateLogStream, PutLogEvents, and more |
 | `sqs` | `sqs:` | SendMessage, ReceiveMessage, DeleteMessage, GetQueueUrl, GetQueueAttributes |
-| `state_machine` | `states:` | StartExecution, StopExecution, DescribeExecution, GetExecutionHistory |
+| `state_machine` | `states:` | InvokeHTTPEndpoint, DescribeExecution, StartExecution, StopExecution, GetExecutionHistory |
 | `kms` | `kms:` | Encrypt, Decrypt, GenerateDataKey, DescribeKey, and more |
 | `ssm` | `ssm:` | GetParameter, GetParameters, PutParameter, DescribeParameters, and more |
-| `event` | `events:` | PutEvents, PutRule, DescribeRule, DescribeEventBus |
+| `event` | `events:` | DescribeEventRule, DescribeEventBus, DescribeRule, PutEvents, PutRule |
+| `kinesis` | `kinesis:` | PutRecord, PutRecords |
 
 ### RoleProps
 
@@ -388,34 +407,39 @@ lambda: {
 
 ## lambdaAssets
 
-`lambdaAssets` manages the build and bundling pipeline for Lambda functions using Rolldown. It handles code splitting, minification, and asset packaging.
+`lambdaAssets` manages the build and bundling pipeline for Lambda functions using Rolldown. It handles code splitting, minification, and asset packaging. Every built-in resolver (`api`, `queue`, `event`, `schedule`, `state-machine`, `standalone`, `pubsub`, ...) registers its Lambda source files through the `initLambdaAssetMetadata()` helper described below rather than calling `lambdaAssets` directly.
 
-### initializeMetadata(props)
+### initLambdaAssetMetadata(props)
 
-Registers metadata for a Lambda source file. Must be called in the resolver's `create` method before any `LambdaHandler` instances reference it:
+Exported from `@lafken/resolver`'s utils. Registers metadata for a Lambda source file, merging the resource's own bundler config with the app/module-level one. Call it in the resolver's `create` method, before any `LambdaHandler` instances reference the same `filename`/`foldername`:
 
 ```typescript
-lambdaAssets.initializeMetadata({
-  foldername: metadata.foldername,
-  filename: metadata.filename,
-  minify: metadata.minify,
-  className: metadata.originalName,
-  methods: handlers.map((h) => h.name),
+import { getContextValueByScope, initLambdaAssetMetadata } from '@lafken/resolver';
+
+const contextBundler = getContextValueByScope(module, 'bundler');
+
+initLambdaAssetMetadata({
+  metadata,   // ResourceMetadata — provides filename, foldername, originalName, bundler
+  handlers,   // LambdaMetadata[] — provides each handler's name
+  contextBundler,
+  streamingByMethod: { onOrderCreated: true }, // optional, per-method response streaming
+  afterBuild: (outputPath) => { /* optional post-build hook */ },
 });
 ```
 
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `metadata` | `ResourceMetadata` | Yes | The decorated resource's metadata (`getResourceMetadata()`); provides `filename`, `foldername`, `originalName`, and its own `bundler` config. |
+| `handlers` | `LambdaMetadata[]` | Yes | The decorated handlers (`getResourceHandlerMetadata()`); each contributes its `name` as an exported method. |
+| `contextBundler` | `BundlerConfig` | No | App/module-level bundler config (typically `getContextValueByScope(module, 'bundler')`), used as a fallback when the resource sets no `bundler.minify`. |
+| `streamingByMethod` | `Record<string, boolean>` | No | Marks specific handler methods for response streaming (wrapped with `awslambda.streamifyResponse` at build time). |
+| `afterBuild` | `(outputPath: string) => void` | No | Called after the asset is bundled, with the output directory path. |
+
+`lambdaAssets.initializeMetadata()`/`addLambda()` are the lower-level methods `initLambdaAssetMetadata()` and `LambdaHandler` call internally — resolvers should use `initLambdaAssetMetadata()` instead of calling them directly.
+
 ### createAssets()
 
-Builds all registered Lambda assets. Called automatically by the framework after all resolvers complete. Each asset is bundled with Rolldown as a CJS module targeting Node.js, with `@aws-sdk` and `aws-lambda` as externals.
-
-| Property | Type | Description |
-|---|---|---|
-| `foldername` | `string` | Source directory containing the handler file. |
-| `filename` | `string` | Source file name (without extension). |
-| `minify` | `boolean` | Whether to minify the output. Defaults to `true`. |
-| `className` | `string` | Original class name for the build plugin. |
-| `methods` | `string[]` | Method names to export from the bundle. |
-| `afterBuild` | `(outputPath: string) => void` | Optional post-build hook. |
+Builds all registered Lambda assets. Called automatically by the framework after all resolvers complete. Each asset is bundled with Rolldown as a CJS module targeting Node.js, with `@aws-sdk`, `aws-lambda`, and `node:*` as externals (plus any `externalPackages` set on the app/module/resource bundler config).
 
 ## Environment Variables
 
@@ -435,6 +459,28 @@ lambda: {
 ```
 
 These functions are resolved lazily by CDKTN at synth time, regardless of the declaration order between the resources involved — see [`@lafken/common`'s Cross-Resource Refss](../common/README.md#cross-resource-references) for the full list of available reference functions (`Refs.resourceValue`, `Refs.ssmValue`, `Refs.accountId`, `Refs.callerArn`, `Refs.region`, `Refs.partition`, `Refs.dnsSuffix`, `fn`, `token`) and how `registerRefResolvers` wires this resolver package's implementation into them.
+
+## Context Utilities
+
+`createApp()`/`createModule()` store their `globalConfig.lambda` under CDKTN construct context (`app`/`module` context names). These helpers read it back, which is how `LambdaHandler`'s [Configuration Resolution](#configuration-resolution) hierarchy (handler > module > app > default) is implemented — use them in a custom resolver to honor the same hierarchy for its own config.
+
+```typescript
+import { getAppContext, getModuleContext, getContextValueByScope } from '@lafken/resolver';
+
+// inside a resolver's create(module, resource)
+const appContext = getAppContext(module); // GlobalContext set on createApp()
+const moduleContext = getModuleContext(module); // GlobalContext set on createModule(), if any
+
+// Or read a single key, falling back from module- to app-level automatically:
+const contextBundler = getContextValueByScope(module, 'bundler');
+```
+
+| Function | Description |
+|---|---|
+| `getAppContext(scope)` | Returns the app-level `GlobalContext`. |
+| `getModuleContext(scope)` | Returns the module-level `GlobalContext`, if the module set one. |
+| `getContextValue(key, appContext, moduleContext)` | Returns `moduleContext[key] ?? appContext[key]`. |
+| `getContextValueByScope(scope, key)` | Combines the three calls above — resolves `appContext`/`moduleContext` from `scope` and returns the module-over-app value for `key`. |
 
 ## Testing Utilities
 
@@ -482,6 +528,6 @@ describe('SnsResolver', () => {
 1. **Create decorators** with `createResourceDecorator()` / `createLambdaDecorator()` from `@lafken/common`. Set a unique `type` string.
 2. **Implement `ResolverType`** — set `type` to match your decorator, implement `create()` to process resources, optionally use `beforeCreate()` / `afterCreate()` for shared or deferred setup.
 3. **Use `LambdaHandler`** to create Lambda functions with automatic IAM, context, and environment management.
-4. **Use `lambdaAssets`** to register and build Lambda source code.
+4. **Use `initLambdaAssetMetadata()`** to register Lambda source files; `lambdaAssets.createAssets()` bundles them automatically after all resolvers complete.
 5. **Use `lafkenResource.make()`** to extend any CDKTN construct with global resource tracking.
 6. **Register your resolver** in `createApp({ resolvers: [new YourResolver()] })`.
