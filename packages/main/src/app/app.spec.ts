@@ -1,10 +1,13 @@
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { DataAwsSsmParameter } from '@cdktn/provider-aws/lib/data-aws-ssm-parameter';
+import { LambdaFunction } from '@cdktn/provider-aws/lib/lambda-function';
 import { S3Bucket } from '@cdktn/provider-aws/lib/s3-bucket';
 import {
   createLambdaDecorator,
   createResourceDecorator,
   enableBuildEnvVariable,
+  Refs,
 } from '@lafken/common';
 import {
   type AppModule,
@@ -258,5 +261,49 @@ describe('App', () => {
 
     expect(terraform.terraform.backend.s3).toBeUndefined();
     expect(terraform.terraform.backend.local.path).toContain('terraform.testing.tfstate');
+  });
+
+  it('should synthesize the SSM data source for a value set via globalConfig.lambda.env (Aspect-applied)', async () => {
+    class TestResolver implements ResolverType {
+      type: string = 'test-resolver';
+      public async create(module: AppModule) {
+        new LambdaFunction(module, 'testing-fn', {
+          functionName: 'testing-fn',
+          handler: 'index.handler',
+          runtime: 'nodejs22.x',
+          role: 'arn:aws:iam::123456789012:role/fake-role',
+          filename: 'fake.zip',
+        });
+      }
+    }
+
+    const { appStack } = await createApp({
+      name: 'testing-globalconfig-ssm',
+      modules: [
+        createModule({
+          name: 'testing',
+          resources: [TestResource],
+          globalConfig: {
+            lambda: {
+              env: { SECRET: Refs.ssmValue('/app/global-config-secret') },
+            },
+          },
+        }),
+      ],
+      resolvers: [new TestResolver()],
+    });
+
+    const synthesized = Testing.synth(appStack);
+
+    expect(synthesized).toHaveDataSourceWithProperties(DataAwsSsmParameter, {
+      name: '/app/global-config-secret',
+    });
+    expect(synthesized).toHaveResourceWithProperties(LambdaFunction, {
+      environment: {
+        variables: {
+          SECRET: '${data.aws_ssm_parameter.ssm--app-global-config-secret.value}',
+        },
+      },
+    });
   });
 });
