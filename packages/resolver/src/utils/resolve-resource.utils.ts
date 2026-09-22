@@ -37,6 +37,24 @@ export class ResolveResources {
 
 const resolveResources = new ResolveResources();
 
+const pendingRefs: Array<() => void> = [];
+
+const deferred = (materialize: () => void) => {
+  pendingRefs.push(materialize);
+};
+
+/**
+ * Eagerly runs every queued `Refs.*` data-source materialization, in
+ * request order. Safe to call once `rootScope` has been set; a no-op if
+ * nothing was queued. See `pendingRefs` above for why this exists.
+ */
+export const flushPendingRefs = () => {
+  const queued = pendingRefs.splice(0, pendingRefs.length);
+  for (const materialize of queued) {
+    materialize();
+  }
+};
+
 /**
  * Wires the real, cdktn-backed implementation into `@lafken/common`'s
  * `Refs` namespace (`Refs.resourceValue`, `Refs.ssmValue`,
@@ -54,20 +72,42 @@ registerRefResolvers({
     const [module, id] = ref.replace('::', '##').split('##');
     return resolveResources.getResourceValue(module, id, attr as OutputType);
   },
-  resolveSsmValue: (path, secure) =>
-    Lazy.stringValue({
+  resolveSsmValue: (path, secure) => {
+    deferred(() => ssmFactory.getValue(rootScope.get(), path, secure));
+    return Lazy.stringValue({
       produce: () => ssmFactory.getValue(rootScope.get(), path, secure),
-    }),
-  getAccountId: () =>
-    Lazy.stringValue({ produce: () => contextFactory.getAccountId(rootScope.get()) }),
-  getCallerArn: () =>
-    Lazy.stringValue({ produce: () => contextFactory.getCallerArn(rootScope.get()) }),
-  getRegion: () =>
-    Lazy.stringValue({ produce: () => contextFactory.getRegionName(rootScope.get()) }),
-  getPartition: () =>
-    Lazy.stringValue({ produce: () => contextFactory.getPartitionName(rootScope.get()) }),
-  getDnsSuffix: () =>
-    Lazy.stringValue({ produce: () => contextFactory.getDnsSuffix(rootScope.get()) }),
+    });
+  },
+  getAccountId: () => {
+    deferred(() => contextFactory.getAccountId(rootScope.get()));
+    return Lazy.stringValue({
+      produce: () => contextFactory.getAccountId(rootScope.get()),
+    });
+  },
+  getCallerArn: () => {
+    deferred(() => contextFactory.getCallerArn(rootScope.get()));
+    return Lazy.stringValue({
+      produce: () => contextFactory.getCallerArn(rootScope.get()),
+    });
+  },
+  getRegion: () => {
+    deferred(() => contextFactory.getRegionName(rootScope.get()));
+    return Lazy.stringValue({
+      produce: () => contextFactory.getRegionName(rootScope.get()),
+    });
+  },
+  getPartition: () => {
+    deferred(() => contextFactory.getPartitionName(rootScope.get()));
+    return Lazy.stringValue({
+      produce: () => contextFactory.getPartitionName(rootScope.get()),
+    });
+  },
+  getDnsSuffix: () => {
+    deferred(() => contextFactory.getDnsSuffix(rootScope.get()));
+    return Lazy.stringValue({
+      produce: () => contextFactory.getDnsSuffix(rootScope.get()),
+    });
+  },
   fn: Fn,
   token: Token,
 });

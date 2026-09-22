@@ -1,3 +1,9 @@
+## 0.16.1
+
+### Patch Changes
+
+- Add deferred resource reference verification
+
 ## 0.16.0
 
 ### Minor Changes

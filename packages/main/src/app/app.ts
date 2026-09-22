@@ -2,6 +2,7 @@ import { AwsProvider } from '@cdktn/provider-aws/lib/provider';
 import { enableBuildEnvVariable } from '@lafken/common';
 import {
   ContextName,
+  flushPendingRefs,
   lambdaAssets,
   type ResolverType,
   Role,
@@ -165,6 +166,7 @@ export const createApp = async (props: CreateAppProps) => {
   });
   const appStack = new AppStack(app, props.name, props);
   rootScope.set(appStack);
+  flushPendingRefs();
   await appStack.init();
 
   app.synth();
