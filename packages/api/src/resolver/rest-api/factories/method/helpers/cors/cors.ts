@@ -90,16 +90,18 @@ export class CorsHelper {
     headers['method.response.header.Access-Control-Allow-Methods'] =
       `'${allowedMethods.join(',')}'`;
 
-    if (cors.allowHeaders !== undefined) {
-      if (typeof cors.allowHeaders === 'boolean') {
-        headers['method.response.header.Access-Control-Allow-Headers'] = cors.allowHeaders
-          ? "'*'"
-          : "''";
-      } else {
-        headers['method.response.header.Access-Control-Allow-Headers'] =
-          `'${cors.allowHeaders.join(',')}'`;
+    if (cors.allowHeaders === true) {
+      if (cors.allowCredentials) {
+        throw new Error(
+          'cors.allowHeaders cannot be true when allowCredentials is true: browsers read "*" literally on credentialed requests. List the allowed headers instead.'
+        );
       }
-    } else {
+      headers['method.response.header.Access-Control-Allow-Headers'] =
+        "'*,Authorization'";
+    } else if (Array.isArray(cors.allowHeaders)) {
+      headers['method.response.header.Access-Control-Allow-Headers'] =
+        `'${cors.allowHeaders.join(',')}'`;
+    } else if (cors.allowHeaders === undefined) {
       headers['method.response.header.Access-Control-Allow-Headers'] =
         "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'";
     }
@@ -213,6 +215,15 @@ export class CorsHelper {
     if (origin === '*' && cors.allowCredentials) {
       throw new Error(
         "cors.allowOrigins cannot be '*' when allowCredentials is true: browsers reject that pair. Name the allowed origin instead."
+      );
+    }
+
+    if (
+      origin !== '*' &&
+      (origin.includes("'") || URL.parse(origin)?.origin !== origin)
+    ) {
+      throw new Error(
+        `cors.allowOrigins "${origin}" is not a valid origin: use scheme, host and optional port only, with no path or trailing slash (e.g. 'https://app.example.com').`
       );
     }
 

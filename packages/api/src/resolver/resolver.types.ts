@@ -83,11 +83,12 @@ export type CorsHttpMethod =
  * responses declared by each handler. Two cases are out of reach and must be
  * handled elsewhere:
  *
- * - Handlers using `integrationType: 'aws-proxy'`. A proxy integration returns
- *   the Lambda response verbatim, so API Gateway never applies response
- *   mappings: the Lambda itself has to return the CORS headers.
- * - API Gateway's own gateway responses, see
- *   {@link CorsOptions.addToErrorResponses}.
+ * - Handlers using `integrationType: 'aws-proxy'` (including `@Streaming()`).
+ *   A proxy integration returns the Lambda response verbatim, so API Gateway
+ *   never applies response mappings: the Lambda itself has to return the CORS
+ *   headers.
+ * - Gateway responses of an external REST API: `DEFAULT_4XX`/`DEFAULT_5XX` are
+ *   still overridden, replacing whatever the API owner configured.
  */
 export interface CorsOptions {
   /**
@@ -95,7 +96,8 @@ export interface CorsOptions {
    * Can be:
    * - `true`: Allow all origins (`*`)
    * - `false`: Disable CORS, no header is emitted
-   * - `string`: Single origin (e.g., 'https://example.com')
+   * - `string`: Single origin (e.g., 'https://example.com'): scheme, host and
+   *   optional port, with no path or trailing slash
    *
    * Only one origin is supported. `Access-Control-Allow-Origin` holds a single
    * value, and the gateway responses API Gateway emits before reaching the
@@ -106,7 +108,7 @@ export interface CorsOptions {
    * `*` cannot be combined with {@link CorsOptions.allowCredentials} — browsers
    * reject that pair.
    *
-   * @default false
+   * @default true when `cors` is set
    */
   allowOrigins?: boolean | string;
 
@@ -120,10 +122,13 @@ export interface CorsOptions {
   /**
    * Specifies the headers that are allowed in the actual request.
    * Can be:
-   * - `true`: Allow all headers (*)
+   * - `true`: Allow all headers (`*,Authorization`, as `*` never covers
+   *   `Authorization`). Not allowed with {@link CorsOptions.allowCredentials},
+   *   where browsers read `*` literally.
+   * - `false`: No `Access-Control-Allow-Headers` header
    * - `string[]`: Specific headers to allow
    *
-   * @default true
+   * @default ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token']
    */
   allowHeaders?: boolean | string[];
 
@@ -155,10 +160,11 @@ export interface CorsOptions {
    * Indicates whether to add CORS headers to error responses.
    * This is useful for handling CORS in error scenarios.
    *
-   * Only covers the responses declared by the handler. API Gateway's own
-   * gateway responses (request validation, authorizer rejections, throttling)
-   * are emitted before the integration runs and carry no CORS header, so a
-   * browser reports those as a CORS failure rather than as the status code.
+   * Covers the `4xx`/`5xx` responses declared by the handler and API Gateway's
+   * own gateway responses (request validation, authorizer rejections,
+   * throttling), through `DEFAULT_4XX`/`DEFAULT_5XX` and any overridden
+   * `defaultResponses`. When `false`, a browser reports those errors as a
+   * CORS failure rather than as the status code.
    *
    * @default true
    */

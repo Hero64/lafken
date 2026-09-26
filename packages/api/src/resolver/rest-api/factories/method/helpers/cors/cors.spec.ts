@@ -93,14 +93,42 @@ describe('CorsHelper', () => {
       );
     });
 
-    it('should set * for allowed headers when true', () => {
+    it('should set * plus Authorization for allowed headers when true', () => {
       const headers = corsHelper.buildHeaders({ allowHeaders: true });
-      expect(headers['method.response.header.Access-Control-Allow-Headers']).toBe("'*'");
+      expect(headers['method.response.header.Access-Control-Allow-Headers']).toBe(
+        "'*,Authorization'"
+      );
     });
 
-    it('should set empty for allowed headers when false', () => {
+    it('should reject allowHeaders true combined with credentials', () => {
+      expect(() =>
+        corsHelper.buildHeaders({
+          allowOrigins: 'https://a.com',
+          allowHeaders: true,
+          allowCredentials: true,
+        })
+      ).toThrow(/allowHeaders/);
+    });
+
+    it('should omit allowed headers when false', () => {
       const headers = corsHelper.buildHeaders({ allowHeaders: false });
-      expect(headers['method.response.header.Access-Control-Allow-Headers']).toBe("''");
+      expect(
+        headers['method.response.header.Access-Control-Allow-Headers']
+      ).toBeUndefined();
+    });
+
+    it.each(['https://a.com/', 'https://a.com/path', "https://a'b.com", 'a.com'])(
+      'should reject the invalid origin %s',
+      (allowOrigins) => {
+        expect(() => corsHelper.buildHeaders({ allowOrigins })).toThrow(/valid origin/);
+      }
+    );
+
+    it('should accept an origin with a port', () => {
+      const headers = corsHelper.buildHeaders({ allowOrigins: 'http://localhost:3000' });
+      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe(
+        "'http://localhost:3000'"
+      );
     });
 
     it('should set custom allowed headers', () => {
