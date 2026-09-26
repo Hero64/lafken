@@ -60,7 +60,7 @@ describe('Handler', () => {
       invoke: {
         permission: {
           principal: 'apigateway.amazonaws.com',
-          sourceArn: (props) => props.getResourceValue('api::orders', 'arn'),
+          sourceArn: 'arn:aws:execute-api:us-east-1:123456789012:api/*',
           sourceAccount: '123456789012',
         },
       },
@@ -147,7 +147,7 @@ describe('Handler', () => {
       'permissionHandler-TestStandalone',
       expect.objectContaining({
         principal: 'apigateway.amazonaws.com',
-        sourceArn: expect.any(Function),
+        sourceArn: 'arn:aws:execute-api:us-east-1:123456789012:api/*',
         sourceAccount: '123456789012',
       })
     );
