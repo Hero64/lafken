@@ -11,11 +11,11 @@ export class StateMachineBaseIntegration<T> implements Integration {
   constructor(protected props: StateMachineIntegrationBaseProps<T>) {}
 
   public async create() {
-    const { restApi, apiGatewayMethod } = this.props;
+    const { restApi, apiGatewayMethod, routeId } = this.props;
 
     const compute = await this.compute();
 
-    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+    const integration = new LafkenIntegration(restApi, `${routeId}-integration`, {
       httpMethod: apiGatewayMethod.httpMethod,
       resourceId: apiGatewayMethod.resourceId,
       restApiId: restApi.id,

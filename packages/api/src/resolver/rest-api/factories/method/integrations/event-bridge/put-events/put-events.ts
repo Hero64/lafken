@@ -14,11 +14,11 @@ export class PutEventsIntegration implements Integration {
   constructor(protected props: IntegrationProps) {}
 
   async create() {
-    const { restApi, apiGatewayMethod } = this.props;
+    const { restApi, apiGatewayMethod, routeId } = this.props;
 
     const compute = await this.compute();
 
-    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+    const integration = new LafkenIntegration(restApi, `${routeId}-integration`, {
       httpMethod: apiGatewayMethod.httpMethod,
       resourceId: apiGatewayMethod.resourceId,
       restApiId: restApi.id,

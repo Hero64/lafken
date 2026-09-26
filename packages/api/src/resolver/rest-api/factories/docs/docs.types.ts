@@ -107,6 +107,7 @@ export type DocProperties =
 
 export interface CreateDocProps {
   id: string;
+  legacyId?: string;
   location: DocLocation;
   properties: DocProperties;
 }

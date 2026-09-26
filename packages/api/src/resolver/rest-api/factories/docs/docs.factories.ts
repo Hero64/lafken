@@ -3,6 +3,7 @@ import { ApiGatewayDocumentationVersion } from '@cdktn/provider-aws/lib/api-gate
 import { createSha256 } from '@lafken/resolver';
 import type { TerraformResource } from 'cdktn';
 import type { RestApi } from '../../../resolver.types';
+import { moveFromLegacyId } from '../../../utils/legacy-id.utils';
 import type { CreateDocProps, DocVersion } from './docs.types';
 
 export class DocsFactory {
@@ -15,7 +16,7 @@ export class DocsFactory {
     return this.docResources;
   }
 
-  public createDoc({ id, location, properties }: CreateDocProps) {
+  public createDoc({ id, legacyId, location, properties }: CreateDocProps) {
     if (this.scope.openapiFactory.isEnabled) {
       return undefined;
     }
@@ -28,6 +29,10 @@ export class DocsFactory {
       location,
       properties: propertiesString,
     });
+
+    if (legacyId) {
+      moveFromLegacyId(docPart, `${legacyId}-doc-part`);
+    }
 
     this.docResources.push(docPart);
     return docPart;

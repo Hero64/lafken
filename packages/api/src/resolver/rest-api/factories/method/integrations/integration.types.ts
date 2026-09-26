@@ -37,7 +37,10 @@ export interface OpenApiIntegrationResult {
  * exists in openapi mode, so it is omitted; the route method comes from
  * `handler.method`.
  */
-export type OpenApiIntegrationProps = Omit<IntegrationProps, 'apiGatewayMethod'>;
+export type OpenApiIntegrationProps = Omit<
+  IntegrationProps,
+  'apiGatewayMethod' | 'routeId'
+>;
 
 export interface IntegrationProps {
   scope: Construct;
@@ -49,6 +52,7 @@ export interface IntegrationProps {
   integrationHelper: IntegrationHelper;
   responseTemplateHelper: ResponseTemplateHelper;
   apiGatewayMethod: ApiGatewayMethod;
+  routeId: string;
   resourceMetadata: ApiResourceMetadata;
   proxyHelper: ProxyHelper;
   classResource: ClassResource;
