@@ -1,6 +1,6 @@
 {
   "name": "@lafken/pubsub",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "private": false,
   "description": "Define AppSync Events channels and publish/subscribe handlers using TypeScript decorators - automatic infrastructure generation with Lafken",
   "keywords": [
