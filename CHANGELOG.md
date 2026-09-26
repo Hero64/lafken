@@ -1,3 +1,16 @@
+## 0.16.2
+
+### Patch Changes
+
+- Derive API Gateway construct ids from the route instead of the handler name and path parameter names, so renaming a path parameter, a handler or an `@Api` class no longer fails the next deploy with `409 ConflictException`; existing resources are migrated through `moved` blocks
+- Throw a clear error when two handlers define the same route or when sibling path parameters use different names at the same level
+- Fix the CORS `OPTIONS` integration response sometimes failing with `No method response exists for method` or `Invalid Integration identifier`
+- Emit `*,Authorization` for `cors.allowHeaders: true`, since `*` never covers `Authorization` and preflights of authorized requests failed, and reject it when combined with `allowCredentials`
+- Omit `Access-Control-Allow-Headers` when `cors.allowHeaders` is `false` instead of emitting an empty value
+- Validate `cors.allowOrigins` at synth time, rejecting values with a path, a trailing slash, a missing scheme or a single quote
+- Throw when a DynamoDB `update` has no values instead of sending an empty `UpdateExpression`, and allow combining `set`, `replace` and `remove` in a single update
+- Improve the error and annotation messages across packages so they state what failed, where and how to fix it
+
 ## 0.16.1
 
 ### Patch Changes
