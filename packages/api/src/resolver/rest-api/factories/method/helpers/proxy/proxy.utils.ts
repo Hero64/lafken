@@ -17,7 +17,9 @@ export const getVariableFieldType = (value: any): FieldTypes => {
   const fieldType = mapValueTypeField[valueType];
 
   if (fieldType === undefined) {
-    throw new Error(`Value ${value} is not supported`);
+    throw new Error(
+      `Unsupported value "${String(value)}" (${valueType}). Use a string, number, boolean, object or array.`
+    );
   }
 
   return fieldType;

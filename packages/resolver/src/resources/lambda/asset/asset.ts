@@ -36,7 +36,9 @@ class LambdaAssets {
     const prebuildPath = this.getPrebuildPath(foldername, filename);
 
     if (!this.lambdaAssets[prebuildPath]) {
-      throw new Error(`asset from ${foldername}/${filename} not initialized`);
+      throw new Error(
+        `Lambda asset for "${foldername}/${filename}" was not initialized. Make sure its resource is registered before adding lambdas.`
+      );
     }
 
     this.lambdaAssets[prebuildPath].lambdas.push(lambda);

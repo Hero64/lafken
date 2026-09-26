@@ -308,7 +308,7 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
       for (const { methodName, methodPath, stageName } of this.methodFactory.settings) {
         if (stageName && !stageNames.has(stageName)) {
           throw new Error(
-            `method settings for "${methodName}" reference stage "${stageName}" but that stage is not configured in the "${apiProps.name}" API`
+            `Method settings for "${methodName}" reference stage "${stageName}", which is not configured in the "${apiProps.name}" API.`
           );
         }
 

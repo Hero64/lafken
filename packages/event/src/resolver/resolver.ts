@@ -48,7 +48,9 @@ export class EventRuleResolver implements ResolverType {
 
     for (const eventBusProps of this.props) {
       if (eventBusProps.busName === 'default') {
-        throw new Error('Event bus default already exist');
+        throw new Error(
+          'The "default" event bus already exists and cannot be redeclared. Use a different busName.'
+        );
       }
       let eventBus:
         | InstanceType<typeof LafkenEventBus>

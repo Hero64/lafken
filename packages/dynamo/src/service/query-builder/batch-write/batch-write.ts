@@ -36,7 +36,9 @@ export class BatchWriteBuilder<E extends ClassResource> extends QueryBuilderBase
 
     if (Object.keys(unprocessedItems).length > 0) {
       if (attempt === (this.queryOptions.maxAttempt ?? 5)) {
-        throw new Error('Failed to process all items after maximum retries');
+        throw new Error(
+          `BatchWrite left ${Object.keys(unprocessedItems).length} table(s) with unprocessed items after ${attempt} retries. This usually means throttling: lower the batch size or raise the table capacity.`
+        );
       }
       await this.execAndRetry(
         {

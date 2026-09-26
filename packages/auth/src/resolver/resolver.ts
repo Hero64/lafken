@@ -19,7 +19,9 @@ export class AuthResolver<T extends ClassResource = ClassResource>
   }
 
   public async create(module: AppModule) {
-    Annotations.of(module).addError('Auth has no resources to create');
+    Annotations.of(module).addError(
+      `Module "${module.id}" registers an auth resource, but auth resources are not created from module resources. Pass @AuthExtension classes through the "extensions" option of the user pool.`
+    );
   }
 
   public async afterCreate() {

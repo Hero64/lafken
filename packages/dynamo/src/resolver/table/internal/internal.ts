@@ -200,7 +200,7 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
       if (index.type === 'local') {
         if (!sortKeyName) {
           throw new Error(
-            'It is not possible to add a local secondary index without an associated sort key.'
+            `Local secondary index "${index.name}" requires the table to define a sortKey.`
           );
         }
         indexAttributes.add(index.sortKey.toString());
@@ -222,7 +222,7 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
 
       if (partitionKeys.length > 4 || sortKeys.length > 4) {
         throw new Error(
-          `A multi-attribute index supports up to 4 partition and 4 sort attributes. Check the index "${index.name}".`
+          `Index "${index.name}" has ${partitionKeys.length} partition and ${sortKeys.length} sort attributes; a multi-attribute index supports up to 4 of each.`
         );
       }
 
@@ -302,13 +302,17 @@ export class InternalTable extends lafkenResource.make(DynamodbTable) {
       const field = fields[key];
 
       if (!field) {
-        throw new Error(`field ${key} not found in dynamo table`);
+        throw new Error(
+          `Filter criteria field "${key}" does not exist in the table model. Available: ${Object.keys(fields).join(', ')}.`
+        );
       }
 
       const fieldType = mapFieldType[field.type];
 
       if (!fieldType) {
-        throw new Error(`field ${key} has not valid type in filter criteria`);
+        throw new Error(
+          `Filter criteria field "${key}" has type "${field.type}", which is not supported in filter criteria.`
+        );
       }
 
       acc[key] = {

@@ -45,7 +45,9 @@ export class DynamoResolver implements ResolverType {
   }
 
   public create() {
-    throw new Error('It is not possible to parse this service');
+    throw new Error(
+      'The DynamoDB resolver cannot create resources on its own: tables are declared in the resolver constructor, not as module resources.'
+    );
   }
 
   public afterCreate(scope: AppStack) {

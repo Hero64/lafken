@@ -11,7 +11,7 @@ export class Publish {
 
     if (events.length === 0 || events.length > MAX_EVENTS_PER_BATCH) {
       throw new Error(
-        `channel publish accepts between 1 and ${MAX_EVENTS_PER_BATCH} events per batch, received ${events.length}`
+        `Publishing to a channel requires between 1 and ${MAX_EVENTS_PER_BATCH} events per batch; received ${events.length}.`
       );
     }
 
@@ -30,7 +30,7 @@ export class Publish {
 
     if (!response.ok) {
       throw new Error(
-        `failed to publish event to channel "${channel}": ${response.status} ${await response.text()}`
+        `Failed to publish to channel "${channel}": ${response.status} ${(await response.text()).slice(0, 500)}`
       );
     }
 

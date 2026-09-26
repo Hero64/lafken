@@ -146,7 +146,9 @@ export class PutRecordIntegration implements Integration {
       return `$util.base64Encode($input.json('$.${dataResolver.path}'))`;
     }
 
-    throw new Error('Kinesis data only supports body source parameters');
+    throw new Error(
+      `Kinesis PutRecord data field "${dataResolver.path}" must have source 'body'; received "${dataResolver.field.source}".`
+    );
   }
 
   private resolvePartitionKey(partitionKey: any): string {

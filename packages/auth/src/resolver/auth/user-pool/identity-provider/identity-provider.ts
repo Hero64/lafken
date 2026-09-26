@@ -132,7 +132,9 @@ export class IdentityProvider extends Construct {
       const attribute = this.props.attributeByName[providerAttribute];
 
       if (!attribute) {
-        throw new Error(`Attribute ${providerAttribute} not exist in attribute class`);
+        throw new Error(
+          `Attribute "${providerAttribute}" is not defined in the attribute class. Available: ${Object.keys(this.props.attributeByName).join(', ') || 'none'}.`
+        );
       }
 
       const attributeName =

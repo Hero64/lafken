@@ -48,7 +48,9 @@ export class AuthorizerFactory {
           this.createIamAuthorizer(metadata);
           break;
         default:
-          throw new Error(`unsupported channel authorizer type: ${metadata.type}`);
+          throw new Error(
+            `Unsupported channel authorizer type: ${metadata.type}. Supported types: ${Object.values(ChannelAuthorizerType).join(', ')}.`
+          );
       }
     }
 
@@ -65,7 +67,9 @@ export class AuthorizerFactory {
     const authType = this.authTypeByName[authorizerName];
 
     if (!authType) {
-      throw new Error(`channel authorizer "${authorizerName}" not found`);
+      throw new Error(
+        `Channel authorizer "${authorizerName}" not found. Registered authorizers: ${Object.keys(this.authTypeByName).join(', ') || 'none'}.`
+      );
     }
 
     return authType;
@@ -101,7 +105,9 @@ export class AuthorizerFactory {
     metadata: LambdaAuthorizerMetadata
   ) {
     if (this.hasLambdaAuthorizer) {
-      throw new Error('an AppSync Event API supports only one AWS_LAMBDA authorizer');
+      throw new Error(
+        'An AppSync Event API supports only one lambda authorizer. Keep a single @LambdaAuthorizer.'
+      );
     }
     this.hasLambdaAuthorizer = true;
 
@@ -112,7 +118,7 @@ export class AuthorizerFactory {
 
     if (!handler) {
       throw new Error(
-        'a channel lambda authorizer requires an @AuthorizerHandler method'
+        'A @LambdaAuthorizer class requires a method decorated with @AuthorizerHandler().'
       );
     }
 

@@ -21,12 +21,12 @@ export class ResolveResources {
 
         if (!resource) {
           throw new Error(
-            `resource ${module}::${id} not found, please check the resource ref`
+            `Resource "${module}::${id}" not found. Check the id passed to Refs.resourceValue() and that the resource is declared.`
           );
         }
 
         if (!(type in resource)) {
-          throw new Error(`property ${type} in ${module}::${id} not found`);
+          throw new Error(`Resource "${module}::${id}" has no property "${type}".`);
         }
 
         return resource[type];

@@ -30,7 +30,9 @@ export class DynamoDbIntegration implements Integration {
       case 'Delete':
         return new DeleteIntegration(this.props);
       default:
-        throw new Error('Integration method not found');
+        throw new Error(
+          `Unsupported DynamoDB integration action "${action}" in handler "${this.props.handler.name}".`
+        );
     }
   }
 }

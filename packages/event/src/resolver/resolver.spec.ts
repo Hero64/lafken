@@ -73,7 +73,7 @@ describe('event resolver', () => {
       });
 
       await expect(resolver.beforeCreate(stack as unknown as AppStack)).rejects.toThrow(
-        'Event bus default already exist'
+        'The "default" event bus already exists'
       );
     });
   });

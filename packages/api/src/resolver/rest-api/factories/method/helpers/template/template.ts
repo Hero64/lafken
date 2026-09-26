@@ -76,7 +76,7 @@ export class TemplateHelper {
           field.source !== property.source
         ) {
           Annotations.of(this.scope).addWarning(
-            `The field ${field.name} should not have a subfield(${property.name}) with a different source`
+            `Field "${field.name}" has source "${field.source}" but its subfield "${property.name}" uses "${property.source}". Subfields should share the parent source.`
           );
         }
 

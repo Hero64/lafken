@@ -75,7 +75,9 @@ const getObjectMetadata = (
   );
 
   if (!disablePropertiesValidation && !properties?.length) {
-    throw new Error(`should include Field properties in ${payloadClass.name} class`);
+    throw new Error(
+      `Class "${payloadClass.name}" is used as a payload but has no @Field properties. Decorate its fields with @Field().`
+    );
   }
 
   return {

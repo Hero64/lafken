@@ -22,7 +22,9 @@ class LafkenResource {
     const self = this;
 
     if (!(ExtendResource.prototype instanceof Construct)) {
-      throw new Error('Only classes that extend from Construct are permitted.');
+      throw new Error(
+        `lafkenResource.make() received "${ExtendResource.name}", which does not extend Construct.`
+      );
     }
 
     class Resource extends ExtendResource {

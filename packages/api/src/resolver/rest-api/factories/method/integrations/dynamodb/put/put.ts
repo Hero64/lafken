@@ -37,7 +37,9 @@ export class PutIntegration
 
   private resolveConditionTemplate(values: any[] = []) {
     if (!Array.isArray(values)) {
-      throw new Error('Condition only support an string array value');
+      throw new Error(
+        'DynamoDB put "condition" must be a string array, e.g. [\'attributeName\'].'
+      );
     }
 
     if (values.length === 0) {
@@ -47,7 +49,7 @@ export class PutIntegration
     const hasInvalidValues = values.some((value) => typeof value !== 'string');
 
     if (hasInvalidValues) {
-      throw new Error('Condition only support string values');
+      throw new Error('DynamoDB put "condition" must contain only strings.');
     }
 
     let condition = `attribute_exists(${values[0]})`;

@@ -23,7 +23,9 @@ export class ProxyHelper {
         if (typeof prop === 'symbol') {
           if (prop === Symbol.toPrimitive) {
             if (/\.\d+/.test(path)) {
-              throw new Error(`Invalid path: "${path}" do not accept arrays.`);
+              throw new Error(
+                `Event reference "${path}" cannot index into an array. Reference the array field itself instead.`
+              );
             }
 
             return () => `${PROXY_MARKER}${path}${PROXY_MARKER}`;
@@ -65,7 +67,9 @@ export class ProxyHelper {
       const path = stripMarkers(`${value}`);
       const eventValue = fieldParamsPaths[path];
       if (!eventValue) {
-        throw new Error(`The value for the path ${path} does not exist.`);
+        throw new Error(
+          `Event reference "${path}" does not match any field in the payload class. Check the field name.`
+        );
       }
 
       return {
@@ -89,16 +93,18 @@ export class ProxyHelper {
     fieldParamsPaths: Record<string, ApiParamMetadata>
   ): ProxyResolveObjectKeyValue {
     if (value.isProxy) {
-      throw new Error(`Value ${value} is not supported`);
+      throw new Error(
+        `An event reference (${stripMarkers(`${value}`)}) cannot be used as an object key. Use a literal string.`
+      );
     }
 
     if (typeof value !== 'object') {
-      throw new Error('Key should be and object');
+      throw new Error(`Expected an object with a single key, received ${typeof value}.`);
     }
     const key = Object.keys(value)[0];
 
     if (!key) {
-      throw new Error('Should define a value');
+      throw new Error('Expected an object with a single key, received an empty object.');
     }
 
     return {

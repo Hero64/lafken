@@ -30,7 +30,9 @@ export class StateMachineIntegration implements Integration {
       case 'Stop':
         return new StopIntegration(this.props);
       default:
-        throw new Error('Integration method not found');
+        throw new Error(
+          `Unsupported state machine integration action "${action}" in handler "${this.props.handler.name}".`
+        );
     }
   }
 }

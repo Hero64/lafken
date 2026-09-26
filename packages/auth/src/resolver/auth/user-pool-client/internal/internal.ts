@@ -142,7 +142,9 @@ export class InternalUserPoolClient extends Construct {
       const attribute = this.props.attributeByName[providerAttribute];
 
       if (!attribute) {
-        throw new Error(`Attribute ${providerAttribute} not exist in attribute class`);
+        throw new Error(
+          `Attribute "${providerAttribute}" is not defined in the attribute class. Available: ${Object.keys(this.props.attributeByName).join(', ') || 'none'}.`
+        );
       }
 
       const attributeName =
@@ -151,7 +153,9 @@ export class InternalUserPoolClient extends Construct {
           : `custom:${attribute.name}`;
 
       if (!attributeName) {
-        throw new Error(`Attribute ${attribute.name} is not a standard attribute`);
+        throw new Error(
+          `"${attribute.name}" is not a standard Cognito attribute. Use @Custom() for custom attributes.`
+        );
       }
 
       attributes.push(attributeName);

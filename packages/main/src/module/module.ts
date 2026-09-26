@@ -36,7 +36,9 @@ export class StackModule extends Construct {
       const resolver = this.props.resolvers[metadata.type];
 
       if (!resolver) {
-        throw new Error(`There is no resolver for the resource ${metadata.type}`);
+        throw new Error(
+          `No resolver registered for resource type "${metadata.type}" (class "${resource.name}" in module "${this.props.name}"). Add the matching resolver to createApp({ resolvers }).`
+        );
       }
 
       await resolver.create(this, resource);

@@ -48,7 +48,9 @@ export class DynamoIndexes {
     if (indexName) {
       const index = this.indexByName[indexName];
       if (!index) {
-        throw new Error(`the index "${indexName}" does not exist`);
+        throw new Error(
+          `Index "${indexName}" does not exist. Available: ${Object.keys(this.indexByName).join(', ') || 'none'}.`
+        );
       }
 
       return index;
@@ -108,7 +110,9 @@ export class DynamoIndexes {
     });
 
     if (!index) {
-      throw new Error('no index found for the selected attributes');
+      throw new Error(
+        'No index found for the selected key attributes. Query by the primary key or use an index whose partition and sort keys match them.'
+      );
     }
 
     return index;
