@@ -4,6 +4,7 @@ import type { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-metho
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
 import type { TerraformResource } from 'cdktn';
 import type { CorsOptions, RestApi } from '../../../resolver.types';
+import { moveFromLegacyId } from '../../../utils/legacy-id.utils';
 import { CorsHelper } from '../method/helpers/cors/cors';
 import type { ResponseHandler } from '../method/helpers/response/response.types';
 import type {
@@ -129,7 +130,7 @@ export class ResponseFactory {
 
       const methodResponse = new ApiGatewayMethodResponse(
         this.scope,
-        `${responseName}-method-response`,
+        `${method.node.id}-${response.statusCode}-response`,
         {
           httpMethod: method.httpMethod,
           resourceId: method.resourceId,
@@ -154,7 +155,7 @@ export class ResponseFactory {
 
       const integrationResponse = new ApiGatewayIntegrationResponse(
         this.scope,
-        `${responseName}-integration-response`,
+        `${integration.node.id}-${response.statusCode}-response`,
         {
           httpMethod: integration.httpMethod,
           resourceId: integration.resourceId,
@@ -171,6 +172,9 @@ export class ResponseFactory {
           dependsOn: [integration, methodResponse],
         }
       );
+      moveFromLegacyId(methodResponse, `${responseName}-method-response`);
+      moveFromLegacyId(integrationResponse, `${responseName}-integration-response`);
+
       this.responses.push(methodResponse, integrationResponse);
     }
   }

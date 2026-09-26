@@ -17,6 +17,7 @@ export interface CreateMethodProps {
 
 export interface MethodSettingsEntry {
   methodName: string;
+  routeId: string;
   methodPath: string;
   /**
    * Stage this settings block is scoped to. When `undefined`, the settings
@@ -30,6 +31,7 @@ export interface RegisterMethodSettingsProps
   extends Pick<CreateMethodProps, 'handler' | 'resourceMetadata'> {
   fullPath: string;
   methodName: string;
+  routeId: string;
 }
 
 export interface AddDocumentationProps extends RegisterMethodSettingsProps {

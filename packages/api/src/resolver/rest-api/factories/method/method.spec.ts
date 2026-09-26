@@ -1,7 +1,7 @@
 import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integration';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayResource } from '@cdktn/provider-aws/lib/api-gateway-resource';
-import { enableBuildEnvVariable, Streaming } from '@lafken/common';
+import { type ClassResource, enableBuildEnvVariable, Streaming } from '@lafken/common';
 import { LambdaHandler } from '@lafken/resolver';
 import { Testing } from 'cdktn';
 import { describe, expect, it, vi } from 'vitest';
@@ -157,15 +157,55 @@ describe('Api Method', () => {
     expect(restApi.methodFactory.settings).toEqual([
       {
         methodName: 'InheritedMethodSettingsApi-create-post',
+        routeId: 'users-post',
         methodPath: 'users/POST',
         settings: { metricsEnabled: true },
       },
       {
         methodName: 'InheritedMethodSettingsApi-getById-get',
+        routeId: 'users_param-get',
         methodPath: 'users/{id}/GET',
         settings: { metricsEnabled: true },
       },
     ]);
+  });
+
+  @Api({ path: '/users' })
+  class RouteApi {
+    @Get({ path: '/{id}', description: 'get user' })
+    getUser(@Event(UserIdPayload) _event: UserIdPayload) {}
+  }
+
+  @Api({ path: '/users' })
+  class RenamedRouteApi {
+    @Get({ path: '/{id}', description: 'get user' })
+    findUser(@Event(UserIdPayload) _event: UserIdPayload) {}
+  }
+
+  it('keeps the api gateway addresses when the handler is renamed', async () => {
+    const synthAddresses = async (resource: ClassResource, handlerName: string) => {
+      const { restApi, stack } = setupInternalTestingRestApi();
+      await initializeMethod(restApi, stack, resource, handlerName);
+      const { resource: resources } = JSON.parse(Testing.synth(stack));
+
+      return Object.entries(resources as Record<string, Record<string, unknown>>)
+        .filter(([type]) => type.startsWith('aws_api_gateway_'))
+        .flatMap(([type, byId]) => Object.keys(byId).map((id) => `${type}.${id}`))
+        .sort();
+    };
+
+    const before = await synthAddresses(RouteApi, 'getUser');
+    const after = await synthAddresses(RenamedRouteApi, 'findUser');
+
+    expect(before).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^aws_api_gateway_method\..*users_param-get-method/),
+        expect.stringMatching(
+          /^aws_api_gateway_documentation_part\..*users_param-get-doc-part/
+        ),
+      ])
+    );
+    expect(after).toEqual(before);
   });
 
   it('should create a lambda integration method', async () => {

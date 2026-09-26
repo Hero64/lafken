@@ -59,7 +59,7 @@ export class LambdaIntegration implements Integration {
 
     const integration = new ApiGatewayIntegration(
       restApi,
-      `${resourceMetadata.name}-${handler.name}-integration`,
+      `${this.props.routeId}-integration`,
       {
         httpMethod: apiGatewayMethod.httpMethod,
         resourceId: apiGatewayMethod.resourceId,

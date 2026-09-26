@@ -10,11 +10,11 @@ export class MockIntegration implements Integration {
   constructor(private props: IntegrationProps) {}
 
   async create() {
-    const { restApi, apiGatewayMethod } = this.props;
+    const { restApi, apiGatewayMethod, routeId } = this.props;
 
     const { name, statusCode, responseHandlers } = await this.resolveResponse();
 
-    const integration = new LafkenIntegration(restApi, `${name}-integration`, {
+    const integration = new LafkenIntegration(restApi, `${routeId}-integration`, {
       httpMethod: apiGatewayMethod.httpMethod,
       resourceId: apiGatewayMethod.resourceId,
       restApiId: restApi.id,

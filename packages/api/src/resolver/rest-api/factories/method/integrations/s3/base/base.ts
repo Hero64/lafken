@@ -20,11 +20,11 @@ export class BucketBaseIntegration implements Integration {
   constructor(protected props: BucketIntegrationBaseProps) {}
 
   async create() {
-    const { apiGatewayMethod, restApi, httpMethod } = this.props;
+    const { apiGatewayMethod, restApi, httpMethod, routeId } = this.props;
 
     const compute = await this.compute();
 
-    const integration = new LafkenIntegration(restApi, `${compute.name}-integration`, {
+    const integration = new LafkenIntegration(restApi, `${routeId}-integration`, {
       httpMethod: apiGatewayMethod.httpMethod,
       resourceId: apiGatewayMethod.resourceId,
       restApiId: restApi.id,

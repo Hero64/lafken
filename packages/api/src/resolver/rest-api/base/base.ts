@@ -18,6 +18,7 @@ import {
   type RestApiProps,
   type Stage,
 } from '../../resolver.types';
+import { moveFromLegacyId } from '../../utils/legacy-id.utils';
 import { AuthorizerFactory } from '../factories/authorizer/authorizer';
 import { DocsFactory } from '../factories/docs/docs.factories';
 import { CorsHelper } from '../factories/method/helpers/cors/cors';
@@ -42,6 +43,7 @@ export interface CreateMethodSettingsProps {
   stage: ApiGatewayStage;
   stageName: string;
   methodName: string;
+  routeId: string;
   methodPath: string;
   settings: MethodSettings;
 }
@@ -331,27 +333,27 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           stage,
           stageName,
           methodName: 'all-methods',
+          routeId: 'all-methods',
           methodPath: allMethodsPath,
           settings: stageSettings,
         });
       }
 
-      for (const { methodName, methodPath, settings, stageName: scopedStage } of this
-        .methodFactory.settings) {
+      for (const { stageName: scopedStage, ...entry } of this.methodFactory.settings) {
         if (scopedStage && scopedStage !== stageName) {
           continue;
         }
 
-        this.createMethodSettings({ stage, stageName, methodName, methodPath, settings });
+        this.createMethodSettings({ stage, stageName, ...entry });
       }
     }
 
     public createMethodSettings(props: CreateMethodSettingsProps) {
-      const { stage, stageName, methodName, methodPath, settings } = props;
+      const { stage, stageName, methodName, routeId, methodPath, settings } = props;
 
-      return new ApiGatewayMethodSettings(
+      const methodSettings = new ApiGatewayMethodSettings(
         restApi,
-        `${apiProps.name}-${stageName}-${methodName}-method-settings`,
+        `${apiProps.name}-${stageName}-${routeId}-method-settings`,
         {
           restApiId: restApi.id,
           stageName,
@@ -360,6 +362,12 @@ export function RestApiBase<TBase extends Constructor>(Base: TBase) {
           dependsOn: [stage],
         }
       );
+      moveFromLegacyId(
+        methodSettings,
+        `${apiProps.name}-${stageName}-${methodName}-method-settings`
+      );
+
+      return methodSettings;
     }
 
     public createStage(

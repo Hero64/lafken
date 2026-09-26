@@ -8,6 +8,7 @@ import {
   type StageMethodSettings,
 } from '../../../../main';
 import type { RestApi } from '../../../resolver.types';
+import { moveFromLegacyId } from '../../../utils/legacy-id.utils';
 import type { DocLocation, DocMethodProperties } from '../docs/docs.types';
 import type { ModelRef } from '../model/model.types';
 import type { OperationObject } from '../openapi/openapi.types';
@@ -89,8 +90,16 @@ export class MethodFactory {
 
     const model = this.resolveModel(paramHelper);
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
+    const resourceKey = this.scope.resourceFactory.getConstructId(fullPath);
+    const routeId = `${resourceKey}-${handler.method.toLowerCase()}`;
 
-    this.registerMethodSettings({ handler, resourceMetadata, fullPath, methodName });
+    this.registerMethodSettings({
+      handler,
+      resourceMetadata,
+      fullPath,
+      methodName,
+      routeId,
+    });
 
     const integrationProps: OpenApiIntegrationProps = {
       ...props,
@@ -119,6 +128,7 @@ export class MethodFactory {
         cors: props.cors,
         security,
         methodName,
+        routeId,
       });
       return;
     }
@@ -128,7 +138,7 @@ export class MethodFactory {
 
     const resourceId = this.scope.resourceFactory.getResource(fullPath);
 
-    const method = new ApiGatewayMethod(this.scope, `${methodName}-method`, {
+    const method = new ApiGatewayMethod(this.scope, `${routeId}-method`, {
       ...authorizationProps,
       resourceId,
       restApiId: this.scope.id,
@@ -141,32 +151,41 @@ export class MethodFactory {
           }
         : undefined,
     });
+    moveFromLegacyId(method, `${methodName}-method`);
 
     // One preflight per path: every method sharing it answers the same OPTIONS,
     // and a second one would collide on the same resource. Keyed by path
     // because resourceId is a fresh token on each read.
     if (this.corsHelper.isEnabled(props.cors) && !this.corsPaths.has(fullPath)) {
       this.corsPaths.add(fullPath);
-      this.methodResources.push(
-        ...this.corsHelper.createOptionsMethod(
-          this.scope,
-          methodName,
-          resourceId,
-          props.cors
-        )
+      const corsResources = this.corsHelper.createOptionsMethod(
+        this.scope,
+        resourceKey,
+        resourceId,
+        props.cors
       );
+      for (const corsResource of corsResources) {
+        moveFromLegacyId(
+          corsResource,
+          corsResource.node.id.replace(resourceKey, methodName)
+        );
+      }
+      this.methodResources.push(...corsResources);
     }
 
     const integration = await this.integrateMethod({
       ...integrationProps,
       apiGatewayMethod: method,
+      routeId,
     });
+    moveFromLegacyId(integration, `${resourceMetadata.name}-${handler.name}-integration`);
 
     this.methodResources.push(method, integration);
 
     const docParams = {
       ...props,
       methodName,
+      routeId,
       paramHelper,
       fullPath: `/${fullPath}`,
     };
@@ -185,6 +204,7 @@ export class MethodFactory {
     cors?: CreateMethodProps['cors'];
     security?: Array<Record<string, string[]>>;
     methodName: string;
+    routeId: string;
   }) {
     const {
       fullPath,
@@ -197,6 +217,7 @@ export class MethodFactory {
       cors,
       security,
       methodName,
+      routeId,
     } = ctx;
 
     const { integration, responses } = await this.integrateOpenApi(integrationProps);
@@ -234,6 +255,7 @@ export class MethodFactory {
       resourceMetadata,
       paramHelper,
       methodName,
+      routeId,
       fullPath: `/${fullPath}`,
     };
     this.addMethodDocumentation(docParams);
@@ -362,6 +384,7 @@ export class MethodFactory {
 
   private normalizeMethodSettings(
     methodName: string,
+    routeId: string,
     fullPath: string,
     method: string,
     methodSettings: MethodSettingsConfig
@@ -371,13 +394,14 @@ export class MethodFactory {
     if (Array.isArray(methodSettings)) {
       return methodSettings.map(({ stageName, ...settings }: StageMethodSettings) => ({
         methodName,
+        routeId,
         methodPath,
         stageName,
         settings,
       }));
     }
 
-    return [{ methodName, methodPath, settings: methodSettings }];
+    return [{ methodName, routeId, methodPath, settings: methodSettings }];
   }
 
   /**
@@ -390,7 +414,7 @@ export class MethodFactory {
    * take precedence over the class ones.
    */
   private registerMethodSettings(props: RegisterMethodSettingsProps) {
-    const { handler, resourceMetadata, fullPath, methodName } = props;
+    const { handler, resourceMetadata, fullPath, methodName, routeId } = props;
     const classSettings = resourceMetadata.methodSettings;
     const settings = handler.methodSettings ?? classSettings;
 
@@ -399,12 +423,18 @@ export class MethodFactory {
     }
 
     this.methodSettings.push(
-      ...this.normalizeMethodSettings(methodName, fullPath, handler.method, settings)
+      ...this.normalizeMethodSettings(
+        methodName,
+        routeId,
+        fullPath,
+        handler.method,
+        settings
+      )
     );
   }
 
   private addMethodDocumentation(props: AddDocumentationProps) {
-    const { handler, resourceMetadata, fullPath, methodName } = props;
+    const { handler, resourceMetadata, fullPath, methodName, routeId } = props;
 
     if (
       !handler.description &&
@@ -431,11 +461,16 @@ export class MethodFactory {
       return;
     }
 
-    this.scope.docsFactory.createDoc({ id: methodName, location, properties });
+    this.scope.docsFactory.createDoc({
+      id: routeId,
+      legacyId: methodName,
+      location,
+      properties,
+    });
   }
 
   private addParamsDocumentation(props: AddDocumentationProps) {
-    const { paramHelper, methodName, handler, fullPath } = props;
+    const { paramHelper, methodName, routeId, handler, fullPath } = props;
 
     const { paramsBySource } = paramHelper;
 
@@ -456,7 +491,8 @@ export class MethodFactory {
       }
 
       this.scope.docsFactory.createDoc({
-        id: `${param.name}-${methodName}-${handler.method}`,
+        id: `${param.name}-${routeId}`,
+        legacyId: `${param.name}-${methodName}-${handler.method}`,
         location,
         properties,
       });
