@@ -255,24 +255,41 @@ describe('UpdateBuilder', () => {
       expect(Object.keys(rawValues).some((k) => k.includes('zip'))).toBe(false);
     });
 
-    it('should still work when all setValues are undefined (empty after filtering)', () => {
-      const builder = new UpdateBuilder({
+    it('should throw when all values are undefined (empty after filtering)', () => {
+      expect(
+        () =>
+          new UpdateBuilder({
+            ...getBaseProps(),
+            inputProps: {
+              keyCondition: { id: '123' },
+              setValues: { name: undefined, age: undefined },
+            },
+          })
+      ).toThrow('You must assign a value to update');
+    });
+
+    it('should throw when no values are provided', () => {
+      expect(
+        () =>
+          new UpdateBuilder({
+            ...getBaseProps(),
+            inputProps: { keyCondition: { id: '123' } },
+          })
+      ).toThrow('You must assign a value to update');
+    });
+
+    it('should combine set, replace and remove values', () => {
+      const command = new UpdateBuilder({
         ...getBaseProps(),
         inputProps: {
           keyCondition: { id: '123' },
-          setValues: {
-            name: undefined,
-            age: undefined,
-          },
+          setValues: { name: 'a' },
+          replaceValues: { data: { x: 1 } },
+          removeValues: { old: true },
         },
-      });
+      }).getCommand();
 
-      const command = builder.getCommand();
-      const values = command.ExpressionAttributeValues!;
-
-      // Should have no SET expression
-      expect(command.UpdateExpression).not.toMatch(/^SET/);
-      expect(values).toBeUndefined();
+      expect(command.UpdateExpression).toMatch(/^SET .+ REMOVE #old$/);
     });
   });
 });

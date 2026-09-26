@@ -86,9 +86,9 @@ export class UpdateBuilder<
     const filteredReplaceValues = removeUndefinedValues(replaceValues);
 
     if (
-      Object.keys(removeValues).length > 0 &&
-      Object.keys(filteredReplaceValues).length > 0 &&
-      Object.keys(filteredSetValues).length > 0
+      Object.keys(removeValues).length === 0 &&
+      Object.keys(filteredReplaceValues).length === 0 &&
+      Object.keys(filteredSetValues).length === 0
     ) {
       throw new Error('You must assign a value to update');
     }
