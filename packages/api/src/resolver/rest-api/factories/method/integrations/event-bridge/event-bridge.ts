@@ -24,7 +24,9 @@ export class EventBridgeIntegration implements Integration {
       case 'PutEvents':
         return new PutEventsIntegration(this.props);
       default:
-        throw new Error('Integration method not found');
+        throw new Error(
+          `Unsupported EventBridge integration action "${action}" in handler "${this.props.handler.name}".`
+        );
     }
   }
 }

@@ -54,7 +54,7 @@ export class PubSubResolver implements ResolverType {
 
       if (!metadata.eventApiName || !api) {
         throw new Error(
-          `must specify the eventApiName of the resource in module ${module.id}`
+          `Cannot pick an Event API for module "${module.id}": ${apiNames.length} are registered (${apiNames.join(', ')}). Set "eventApiName" on the channel resource to one of them.`
         );
       }
     }

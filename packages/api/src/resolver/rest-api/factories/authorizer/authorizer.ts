@@ -104,7 +104,9 @@ export class AuthorizerFactory {
 
     const authorizerMetadata = this.authorizerMetadata[id];
     if (!authorizerMetadata) {
-      throw new Error(`authorized ${id} not found`);
+      throw new Error(
+        `Authorizer "${id}" not found. Registered authorizers: ${Object.keys(this.authorizerMetadata).join(', ') || 'none'}. Check "authorizerName" or the API's default authorizer.`
+      );
     }
 
     switch (authorizerMetadata.type) {
@@ -134,7 +136,9 @@ export class AuthorizerFactory {
         return [{ [API_KEY_SCHEME]: [] }];
       }
       default: {
-        throw new Error('authorizer type  not defined');
+        throw new Error(
+          `Authorizer "${id}" has unsupported type "${(authorizerMetadata as { type: string }).type}". Supported types: ${Object.values(ApiAuthorizerType).join(', ')}. Use @CognitoAuthorizer, @CustomAuthorizer or @ApiKeyAuthorizer.`
+        );
       }
     }
   }
@@ -159,7 +163,9 @@ export class AuthorizerFactory {
 
     const authorizerMetadata = this.authorizerMetadata[id];
     if (!authorizerMetadata) {
-      throw new Error(`authorized ${id} not found`);
+      throw new Error(
+        `Authorizer "${id}" not found. Registered authorizers: ${Object.keys(this.authorizerMetadata).join(', ') || 'none'}. Check "authorizerName" or the API's default authorizer.`
+      );
     }
 
     switch (authorizerMetadata.type) {
@@ -197,7 +203,9 @@ export class AuthorizerFactory {
         };
       }
       default: {
-        throw new Error('authorizer type  not defined');
+        throw new Error(
+          `Authorizer "${id}" has unsupported type "${(authorizerMetadata as { type: string }).type}". Supported types: ${Object.values(ApiAuthorizerType).join(', ')}. Use @CognitoAuthorizer, @CustomAuthorizer or @ApiKeyAuthorizer.`
+        );
       }
     }
   }
@@ -250,7 +258,9 @@ export class AuthorizerFactory {
     );
 
     if (!handler) {
-      throw new Error('custom authorizer require a lambda handler');
+      throw new Error(
+        `Custom authorizer "${metadata.name}" requires a handler. Add a method decorated with @AuthorizerHandler() to the @CustomAuthorizer class.`
+      );
     }
 
     initLambdaAssetMetadata({

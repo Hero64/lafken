@@ -217,7 +217,7 @@ describe('EventApi', () => {
           name: 'events',
           authorizers: [AuthOne, AuthTwo],
         })
-    ).toThrow('an AppSync Event API supports only one AWS_LAMBDA authorizer');
+    ).toThrow('An AppSync Event API supports only one lambda authorizer');
   });
 
   it('throws for a registered authorizer with an unsupported type', () => {
@@ -234,7 +234,7 @@ describe('EventApi', () => {
           name: 'events',
           authorizers: [WeirdAuth],
         })
-    ).toThrow('unsupported channel authorizer type: unsupported');
+    ).toThrow('Unsupported channel authorizer type: unsupported');
   });
 
   it('throws when resolving an unknown authorizer name', () => {
@@ -242,7 +242,7 @@ describe('EventApi', () => {
     const eventApi = new EventApi(module, 'events', { name: 'events' });
 
     expect(() => eventApi.authorizerFactory.getAuthType('missing')).toThrow(
-      'channel authorizer "missing" not found'
+      'Channel authorizer "missing" not found'
     );
   });
 
@@ -276,6 +276,6 @@ describe('EventApi', () => {
           authorizers: [PublicKeyAuth],
           defaultAuthorizerName: 'missing',
         })
-    ).toThrow('channel authorizer "missing" not found');
+    ).toThrow('Channel authorizer "missing" not found');
   });
 });

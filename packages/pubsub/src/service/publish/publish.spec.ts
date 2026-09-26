@@ -66,7 +66,7 @@ describe('Publish', () => {
     });
 
     await expect(publish.exec()).rejects.toThrow(
-      'channel publish accepts between 1 and 5'
+      'Publishing to a channel requires between 1 and 5 events'
     );
   });
 
@@ -79,7 +79,7 @@ describe('Publish', () => {
     });
 
     await expect(publish.exec()).rejects.toThrow(
-      'channel publish accepts between 1 and 5'
+      'Publishing to a channel requires between 1 and 5 events'
     );
   });
 
@@ -101,7 +101,7 @@ describe('Publish', () => {
     });
 
     await expect(publish.exec()).rejects.toThrow(
-      'failed to publish event to channel "/default/room-1": 403 Forbidden'
+      'Failed to publish to channel "/default/room-1": 403 Forbidden'
     );
   });
 });

@@ -326,7 +326,7 @@ describe('bucket resolver', () => {
 
       expect(() => {
         resolver.create();
-      }).toThrow('It is not possible to parse this service');
+      }).toThrow('The bucket resolver cannot create resources on its own');
     });
   });
 

@@ -25,12 +25,12 @@ function getParams(props: QueueProps) {
 function validateParamType(param: QueueParamMetadata) {
   if (param.source === 'attribute' && !attributeAllowedTypes.has(param.type)) {
     throw new Error(
-      `Attribute params only support ${[...attributeAllowedTypes].join(', ')} values`
+      `Queue param "${param.name}" has type "${param.type}". Attribute params only support ${[...attributeAllowedTypes].join(', ')}.`
     );
   }
   if (param?.source === 'body' && !param.parse && !bodyUnparsedTypes.has(param.type)) {
     throw new Error(
-      `Body params only support ${[...bodyUnparsedTypes].join(', ')} values`
+      `Queue param "${param.name}" has type "${param.type}". Body params only support ${[...bodyUnparsedTypes].join(', ')} unless "parse" is enabled.`
     );
   }
 }
@@ -71,7 +71,10 @@ export function QueueBase<TBase extends Constructor>(Base: TBase) {
       for (const property of param.properties) {
         validateParamType(property);
         if (property.source === 'body') bodyCount++;
-        if (bodyCount >= 2) throw new Error('Queue event only support one body param');
+        if (bodyCount >= 2)
+          throw new Error(
+            'A queue event supports a single body param: an SQS message has only one body.'
+          );
       }
     }
   }

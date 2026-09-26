@@ -129,7 +129,9 @@ export class DynamoBaseIntegration<T> implements Integration {
 
   protected marshallField(template: string, type: FieldTypes) {
     if (type === 'Any') {
-      throw new Error('It is not possible to identify the type');
+      throw new Error(
+        `Cannot infer the DynamoDB attribute type for "${template}". Declare the field with a concrete type instead of 'Any'.`
+      );
     }
     return `{ "${mapDynamoType[type]}": ${template} }`;
   }

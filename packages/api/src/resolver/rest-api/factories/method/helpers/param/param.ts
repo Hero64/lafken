@@ -88,13 +88,13 @@ export class ParamHelper {
 
     if (missing.length) {
       throw new Error(
-        `there are parameters "${missing.join(', ')}" that do not exist in the path ${fullPath} , modify your URL or remove the payload parameters in the ${this.classResource.name} class`
+        `@PathParam field(s) "${missing.join(', ')}" in class "${this.classResource.name}" have no matching {segment} in "${fullPath}". Add them to the URL or remove the fields.`
       );
     }
 
     if (extra.length) {
       throw new Error(
-        `There are extra parameters "${extra.join(', ')}" in the "${fullPath}" url. Add path parameters to payload lass or remove them from the URL`
+        `URL "${fullPath}" has segment(s) "${extra.join(', ')}" with no matching @PathParam field in class "${this.classResource.name}". Declare them or remove them from the URL.`
       );
     }
   }

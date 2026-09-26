@@ -161,7 +161,9 @@ export class SendMessageIntegration implements Integration {
         return `&MessageBody=${this.createBodyObjectTemplate(value)}`;
       }
 
-      throw new Error('Body message only support event parameters');
+      throw new Error(
+        'SQS SendMessage body must be a string, an object, an array or an event field reference.'
+      );
     }
 
     if (bodyResolver.path === '' && bodyResolver.field.type === 'Object') {
@@ -170,14 +172,18 @@ export class SendMessageIntegration implements Integration {
       );
 
       if (!isAllBodyValues) {
-        throw new Error('Body message only support body source parameters');
+        throw new Error(
+          "SQS SendMessage body: when the whole payload is the message, every field must have source 'body'."
+        );
       }
 
       return "&MessageBody=$util.urlEncode($input.json('$'))";
     }
 
     if (bodyResolver.field.source !== 'body') {
-      throw new Error('Body message only support single body event parameter');
+      throw new Error(
+        `SQS SendMessage body field "${bodyResolver.path}" must have source 'body'; received "${bodyResolver.field.source}".`
+      );
     }
 
     return `&MessageBody={"${bodyResolver.path}":$util.urlEncode($input.json('$.${bodyResolver.path}'))}`;

@@ -278,7 +278,7 @@ export class MethodFactory {
 
     if (!integration.createOpenApi) {
       throw new Error(
-        `integration "${props.handler.integration}" is not supported in openapi definition mode`
+        `Integration "${props.handler.integration}" in handler "${props.handler.name}" cannot be used in OpenAPI definition mode. Use a supported integration or disable OpenAPI.`
       );
     }
 

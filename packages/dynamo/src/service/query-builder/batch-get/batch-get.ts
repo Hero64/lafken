@@ -49,7 +49,9 @@ export class BatchGetBuilder<E extends ClassResource> extends QueryBuilderBase<E
 
     if (Object.keys(UnprocessedKeys).length > 0) {
       if (attempt === (this.queryOptions.options?.maxAttempt ?? 5)) {
-        throw new Error('Failed to process all keys after maximum retries');
+        throw new Error(
+          `BatchGet left unprocessed keys after ${attempt} retries. This usually means throttling: lower the batch size or raise the table capacity.`
+        );
       }
       return this.execAndRetry({ RequestItems: UnprocessedKeys }, allItems, attempt + 1);
     }

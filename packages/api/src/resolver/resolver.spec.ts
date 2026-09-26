@@ -481,7 +481,7 @@ describe('Api Resolver', () => {
     await resolver.beforeCreate(module as AppStack);
     await resolver.create(module, TestApi);
     await expect(resolver.afterCreate(stack as AppStack)).rejects.toThrow(
-      /reference stage "nope" but that stage is not configured/
+      /reference stage "nope", which is not configured/
     );
   });
 

@@ -48,7 +48,7 @@ export const signPublishRequest = async ({
 
   if (!signingRegion) {
     throw new Error(
-      'iam publish auth requires a region — pass it explicitly or set AWS_REGION'
+      'IAM publish auth requires a region. Pass it explicitly or set AWS_REGION.'
     );
   }
 

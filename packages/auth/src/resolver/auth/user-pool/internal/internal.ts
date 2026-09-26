@@ -120,7 +120,9 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
       const metadata = getResourceMetadata(extension);
 
       if (metadata.type !== RESOURCE_TYPE) {
-        throw new Error(`extension should have @AuthExtension decorator`);
+        throw new Error(
+          `Class "${extension.name}" is listed in the user pool "extensions" but is not decorated with @AuthExtension.`
+        );
       }
 
       const handlers = getResourceHandlerMetadata<TriggerMetadata>(extension);
@@ -134,7 +136,9 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
       for (const key in triggers) {
         const configKey = key as keyof CognitoUserPoolLambdaConfig;
         if (lambdaConfig[configKey] !== undefined) {
-          throw new Error(`trigger ${key} already exist`);
+          throw new Error(
+            `Cognito trigger "${key}" is defined more than once (last seen in "${extension.name}"). Each trigger can have only one handler.`
+          );
         }
       }
 
@@ -255,7 +259,9 @@ export class InternalUserPool extends lafkenResource.make(CognitoUserPool) {
         const attributeName = mapUserAttributes[attribute.name as keyof AuthAttributes];
 
         if (!attributeName) {
-          throw new Error(`${attribute.name} is not a standard cognito attribute`);
+          throw new Error(
+            `"${attribute.name}" is not a standard Cognito attribute. Use @Custom() for custom attributes.`
+          );
         }
         schema.push({
           attributeDataType: attribute.type,

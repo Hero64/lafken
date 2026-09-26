@@ -187,7 +187,7 @@ export class CorsHelper {
 
     if (Array.isArray(allowOrigins)) {
       throw new Error(
-        'cors.allowOrigins accepts a single origin. Access-Control-Allow-Origin holds one value and API Gateway cannot match a list, so name one origin per deployment.'
+        'cors.allowOrigins accepts a single origin, not a list: Access-Control-Allow-Origin holds one value and API Gateway cannot match several. Name one origin per deployment.'
       );
     }
 
@@ -196,11 +196,15 @@ export class CorsHelper {
       typeof allowOrigins !== 'boolean' &&
       typeof allowOrigins !== 'string'
     ) {
-      throw new Error('cors.allowOrigins accepts a boolean or a string.');
+      throw new Error(
+        `cors.allowOrigins must be a boolean or a string; received ${typeof allowOrigins}.`
+      );
     }
 
     if (allowOrigins === false) {
-      throw new Error('cors is disabled, resolveAllowOrigin must not be reached');
+      throw new Error(
+        'Internal error: the CORS origin was resolved while CORS is disabled. Please report this issue.'
+      );
     }
 
     const origin =

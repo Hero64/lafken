@@ -230,7 +230,7 @@ describe('channel resolver', () => {
     expect(() =>
       resolver.create(module as unknown as AppModule, ChatChannel)
     ).toThrowErrorMatchingInlineSnapshot(
-      `[Error: must specify the eventApiName of the resource in module test]`
+      `[Error: Cannot pick an Event API for module "test": 2 are registered (api-one, api-two). Set "eventApiName" on the channel resource to one of them.]`
     );
   });
 });

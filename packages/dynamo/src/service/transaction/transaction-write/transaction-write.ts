@@ -33,7 +33,9 @@ export const getTransactionType = (builder: QueryTransactions) => {
   }
 
   if (type === undefined) {
-    throw new Error('The transaction includes a query that is not allowed');
+    throw new Error(
+      'transactionWrite only accepts put, update, delete and conditionCheck queries.'
+    );
   }
 
   return type;

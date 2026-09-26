@@ -96,7 +96,7 @@ export class ModelFactory {
   ) {
     if (min !== undefined && max !== undefined && min > max) {
       Annotations.of(this.scope).addWarning(
-        `${minKey} (${min}) in "${name}" field should be less than ${maxKey} (${max})`
+        `Field "${name}": ${minKey} (${min}) must be less than ${maxKey} (${max}).`
       );
     }
   }

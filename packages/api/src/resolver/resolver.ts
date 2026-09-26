@@ -83,7 +83,7 @@ export class ApiResolver implements ResolverType {
 
       if (!metadata.apiGatewayName || !api) {
         throw new Error(
-          `must specify the name of the API gateway in module ${module.id}`
+          `Cannot pick an API Gateway for module "${module.id}": ${apiNames.length} are registered (${apiNames.join(', ')}). Set "apiGatewayName" in @Api to one of them.`
         );
       }
     }

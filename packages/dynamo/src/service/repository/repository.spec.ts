@@ -182,7 +182,9 @@ describe('Dynamo Service', () => {
         });
       };
 
-      await expect(call()).rejects.toThrow('no index found for the selected attributes');
+      await expect(call()).rejects.toThrow(
+        'No index found for the selected key attributes'
+      );
     });
 
     it('Should scan all users', async () => {
@@ -1144,7 +1146,7 @@ describe('Dynamo Service', () => {
         transactionGet([
           userRepository.findOne({ keyCondition: { partition: { email: EMAIL } } }),
         ] as any)
-      ).rejects.toThrow('The transaction includes a query that is not a getItem');
+      ).rejects.toThrow('transactionGet only accepts getItem queries');
 
       expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
     });
@@ -1233,7 +1235,9 @@ describe('Dynamo Service', () => {
             name: 'example1',
           }),
         ])
-      ).rejects.toThrow('All queries in a transaction must share the same client');
+      ).rejects.toThrow(
+        'All queries in a transaction must share the same DynamoDB client'
+      );
 
       expect(dynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
       expect(customDynamoClient.commandCalls(TransactWriteItemsCommand)).toHaveLength(0);
@@ -1261,7 +1265,9 @@ describe('Dynamo Service', () => {
           userRepository.getItem({ email: EMAIL, name: 'example1' }),
           customUserRepository.getItem({ email: EMAIL, name: 'example2' }),
         ])
-      ).rejects.toThrow('All queries in a transaction must share the same client');
+      ).rejects.toThrow(
+        'All queries in a transaction must share the same DynamoDB client'
+      );
 
       expect(dynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);
       expect(customDynamoClient.commandCalls(TransactGetItemsCommand)).toHaveLength(0);

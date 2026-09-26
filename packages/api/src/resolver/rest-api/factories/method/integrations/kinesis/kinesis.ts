@@ -24,7 +24,9 @@ export class KinesisIntegration implements Integration {
       case 'PutRecord':
         return new PutRecordIntegration(this.props);
       default:
-        throw new Error('Integration method not found');
+        throw new Error(
+          `Unsupported Kinesis integration action "${action}" in handler "${this.props.handler.name}".`
+        );
     }
   }
 }

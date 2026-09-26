@@ -88,7 +88,9 @@ export class BucketBaseIntegration implements Integration {
     } = this.props;
 
     if ((paramHelper.paramsBySource.body || []).length > 0) {
-      throw new Error('bucket integration does not support body params');
+      throw new Error(
+        `S3 integration "${handler.name}" does not accept body fields. Use path or query fields instead.`
+      );
     }
 
     const resource: InitializedClass<BucketIntegrationResponse> = new classResource();
@@ -171,7 +173,9 @@ export class BucketBaseIntegration implements Integration {
 
         const eventField = paramHelper.pathParams[segment.value];
         if (!eventField) {
-          throw new Error(`The value for the path ${segment.value} does not exist.`);
+          throw new Error(
+            `Path segment "${segment.value}" has no matching @PathParam field in the payload class. Declare a field with that name or remove the segment.`
+          );
         }
 
         requestParameters[`integration.request.path.${paramName}`] =

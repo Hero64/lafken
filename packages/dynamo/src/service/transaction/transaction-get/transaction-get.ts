@@ -32,7 +32,7 @@ export const transactionGet = async <T extends readonly QueryGetTransactions[]>(
   }
 
   if (queryBuilders.some((builder) => !(builder instanceof GetItemBuilder))) {
-    throw new Error('The transaction includes a query that is not a getItem');
+    throw new Error('transactionGet only accepts getItem queries.');
   }
 
   const client = getTransactionClient(queryBuilders);

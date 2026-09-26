@@ -24,7 +24,9 @@ export class QueueIntegration implements Integration {
       case 'SendMessage':
         return new SendMessageIntegration(this.props);
       default:
-        throw new Error('Integration method not found');
+        throw new Error(
+          `Unsupported SQS integration action "${action}" in handler "${this.props.handler.name}".`
+        );
     }
   }
 }

@@ -17,7 +17,7 @@ export const getTransactionClient = (
   const client = queryBuilders[0].getClient();
 
   if (queryBuilders.some((builder) => builder.getClient() !== client)) {
-    throw new Error('All queries in a transaction must share the same client');
+    throw new Error('All queries in a transaction must share the same DynamoDB client.');
   }
 
   return client;

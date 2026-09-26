@@ -45,6 +45,6 @@ describe('signPublishRequest', () => {
 
     await expect(
       signPublishRequest({ httpDomain: 'abc123.appsync-api.amazonaws.com', body: '{}' })
-    ).rejects.toThrow('iam publish auth requires a region');
+    ).rejects.toThrow('IAM publish auth requires a region');
   });
 });

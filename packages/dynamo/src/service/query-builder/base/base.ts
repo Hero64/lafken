@@ -70,13 +70,13 @@ export class QueryBuilderBase<E extends ClassResource> {
         if (sort[attributeName]) {
           if (lastOmittedAttribute) {
             throw new Error(
-              `The sortKey is read from left to right. It is not possible to skip values; you must include the attribute"${lastOmittedAttribute}". Check the index "${index.name}"`
+              `Index "${index.name}": sortKey attributes must be provided from left to right without skipping. Add "${lastOmittedAttribute}" before the later attributes.`
             );
           }
 
           if (sortCount > 1 && typeof sort[attributeName] === 'object') {
             throw new Error(
-              'Only the last attribute in the index sortKey can add a value different from the equal.'
+              `Index "${index.name}": only the last sortKey attribute can use a condition other than equality.`
             );
           }
           sortValues[attributeName] = sort[attributeName];
@@ -269,7 +269,7 @@ export class QueryBuilderBase<E extends ClassResource> {
   private validateGlobalKey(keys: string[], isGlobalIndex: boolean) {
     if (keys.length > 1 && !isGlobalIndex) {
       throw new Error(
-        'partition keys only support multi-attributes when they are a global multi-attribute index.'
+        'Composite partition keys are only supported on global secondary indexes with multi-attribute keys.'
       );
     }
   }

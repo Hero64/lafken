@@ -65,7 +65,7 @@ describe('QueueBase', () => {
         resourceMetadata: baseMetadata,
         classResource: TestQueue,
       });
-    }).toThrow('Attribute params only support String, Number values');
+    }).toThrow('Attribute params only support String, Number');
   });
 
   it('should throw when more than one body param is declared', () => {
@@ -82,6 +82,6 @@ describe('QueueBase', () => {
         resourceMetadata: baseMetadata,
         classResource: TestQueue,
       });
-    }).toThrow('Queue event only support one body param');
+    }).toThrow('A queue event supports a single body param');
   });
 });

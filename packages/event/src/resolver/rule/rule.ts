@@ -114,7 +114,9 @@ export class Rule extends lafkenResource.make(CloudwatchEventRule) {
       }
 
       default:
-        throw new Error('Unsupported integration type');
+        throw new Error(
+          `Unsupported event rule integration type "${(handler as { integration?: string }).integration}".`
+        );
     }
   }
 
