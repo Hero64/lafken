@@ -208,6 +208,27 @@ describe('Api Method', () => {
     expect(after).toEqual(before);
   });
 
+  @Api({ path: '/users' })
+  class DuplicatedRouteApi {
+    @Get()
+    list() {}
+
+    @Get()
+    listAgain() {}
+  }
+
+  it('should throw when two handlers define the same route', async () => {
+    const { restApi, stack } = setupInternalTestingRestApi();
+
+    await initializeMethod(restApi, stack, DuplicatedRouteApi, 'list');
+
+    await expect(
+      initializeMethod(restApi, stack, DuplicatedRouteApi, 'listAgain')
+    ).rejects.toThrow(
+      'Route "GET /users" of "DuplicatedRouteApi.listAgain" is already defined by "DuplicatedRouteApi.list"'
+    );
+  });
+
   it('should create a lambda integration method', async () => {
     const { restApi, stack } = setupInternalTestingRestApi();
     await initializeMethod(restApi, stack, TestingApi, 'lambdaIntegration');

@@ -62,7 +62,7 @@ export class CorsHelper {
         responseTemplates: {
           'application/json': '',
         },
-        dependsOn: [corsMethod],
+        dependsOn: [corsIntegration, corsResponse],
       }
     );
 

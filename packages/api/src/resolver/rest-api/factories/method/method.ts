@@ -51,6 +51,7 @@ export class MethodFactory {
   private methodSettings: MethodSettingsEntry[] = [];
   private corsHelper = new CorsHelper();
   private corsPaths = new Set<string>();
+  private routes = new Map<string, string>();
 
   constructor(private scope: RestApi) {}
 
@@ -92,6 +93,14 @@ export class MethodFactory {
     const methodName = `${resourceMetadata.name}-${handler.name}-${handler.method.toLowerCase()}`;
     const resourceKey = this.scope.resourceFactory.getConstructId(fullPath);
     const routeId = `${resourceKey}-${handler.method.toLowerCase()}`;
+    const handlerName = `${resourceMetadata.name}.${handler.name}`;
+    const existingHandler = this.routes.get(routeId);
+    if (existingHandler) {
+      throw new Error(
+        `Route "${handler.method} /${fullPath === '/' ? '' : fullPath}" of "${handlerName}" is already defined by "${existingHandler}"`
+      );
+    }
+    this.routes.set(routeId, handlerName);
 
     this.registerMethodSettings({
       handler,
