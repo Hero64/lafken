@@ -263,6 +263,10 @@ export class TemplateHelper {
     return resolver.value;
   }
 
+  escapeJsonString(value: string) {
+    return `$util.escapeJavaScript(${value}).replaceAll("\\\\'", "'")`;
+  }
+
   scapeJavascriptValue(value: string, type: FieldTypes) {
     return type === 'String' ? `$util.escapeJavaScript(${value})` : value;
   }

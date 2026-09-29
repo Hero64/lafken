@@ -8,6 +8,14 @@ describe('TemplateHelper', () => {
     templateHelper = new TemplateHelper();
   });
 
+  describe('escapeJsonString', () => {
+    it('should wrap the value with escapeJavaScript and undo escaped apostrophes', () => {
+      expect(templateHelper.escapeJsonString("$input.path('$.a')")).toBe(
+        '$util.escapeJavaScript($input.path(\'$.a\')).replaceAll("\\\\\'", "\'")'
+      );
+    });
+  });
+
   describe('generateTemplate', () => {
     describe('String type handling', () => {
       it('should generate template for string field from body source', () => {
