@@ -25,7 +25,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",") }`
+        `{ #set($comma = "") $comma"name": "$util.escapeJavaScript($input.path('$.name')).replaceAll("\\\\'", "'")" #set($comma = ",") }`
       );
     });
 
@@ -75,7 +75,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",")$comma"age": $input.path('$.age') #set($comma = ",")$comma"active": $input.path('$.active') #set($comma = ",") }`
+        `{ #set($comma = "") $comma"name": "$util.escapeJavaScript($input.path('$.name')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"age": $input.path('$.age') #set($comma = ",")$comma"active": $input.path('$.active') #set($comma = ",") }`
       );
     });
   });
@@ -95,7 +95,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"id": "$input.path('$.nested.id')" #set($comma = ",") }`
+        `{ #set($comma = "") $comma"id": "$util.escapeJavaScript($input.path('$.nested.id')).replaceAll("\\\\'", "'")" #set($comma = ",") }`
       );
     });
 
@@ -139,7 +139,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"name": "$input.path('$.name')" #set($comma = ",")$comma"address": { #set($comma = "") $comma"street": "$input.path('$.address.street')" #set($comma = ",")$comma"city": "$input.path('$.address.city')" #set($comma = ",") } #set($comma = ",") }`
+        `{ #set($comma = "") $comma"name": "$util.escapeJavaScript($input.path('$.name')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"address": { #set($comma = "") $comma"street": "$util.escapeJavaScript($input.path('$.address.street')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"city": "$util.escapeJavaScript($input.path('$.address.city')).replaceAll("\\\\'", "'")" #set($comma = ",") } #set($comma = ",") }`
       );
     });
 
@@ -169,7 +169,7 @@ describe('ResponseTemplateHelper', () => {
       const response = makeObject({ properties: [address] });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"address": { #set($comma = "") $comma"city": "$input.path('$.address.city')" #set($comma = ",")$comma"geo": { #set($comma = "") $comma"lat": $input.path('$.address.geo.lat') #set($comma = ",")$comma"lng": $input.path('$.address.geo.lng') #set($comma = ",") } #set($comma = ",") } #set($comma = ",") }`
+        `{ #set($comma = "") $comma"address": { #set($comma = "") $comma"city": "$util.escapeJavaScript($input.path('$.address.city')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"geo": { #set($comma = "") $comma"lat": $input.path('$.address.geo.lat') #set($comma = ",")$comma"lng": $input.path('$.address.geo.lng') #set($comma = ",") } #set($comma = ",") } #set($comma = ",") }`
       );
     });
   });
@@ -312,7 +312,7 @@ describe('ResponseTemplateHelper', () => {
       });
 
       expect(helper.buildTemplate(response)).toBe(
-        `{ #set($comma = "") $comma"title": "$input.path('$.title')" #set($comma = ",")$comma"count": $input.path('$.count') #set($comma = ",")$comma"ref": "$input.path('$.meta.ref')" #set($comma = ",")$comma"ids": $input.json('$.ids') #set($comma = ",") }`
+        `{ #set($comma = "") $comma"title": "$util.escapeJavaScript($input.path('$.title')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"count": $input.path('$.count') #set($comma = ",")$comma"ref": "$util.escapeJavaScript($input.path('$.meta.ref')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"ids": $input.json('$.ids') #set($comma = ",") }`
       );
     });
   });

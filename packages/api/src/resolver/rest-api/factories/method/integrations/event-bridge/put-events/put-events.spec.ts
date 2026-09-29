@@ -95,7 +95,7 @@ describe('EventBridge put events integration', () => {
       },
       request_templates: {
         'application/json':
-          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript(\'123\')\\" #set($comma = ",")$comma\\"items\\": 2 #set($comma = ",") }", "EventBusName": "orders-bus" }] }',
+          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript($util.escapeJavaScript(\'123\').replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",")$comma\\"items\\": 2 #set($comma = ",") }", "EventBusName": "orders-bus" }] }',
       },
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:events:action/PutEvents',
@@ -153,7 +153,7 @@ describe('EventBridge put events integration', () => {
       passthrough_behavior: 'WHEN_NO_TEMPLATES',
       request_templates: {
         'application/json':
-          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript(\'123\')\\" #set($comma = ",") }", "EventBusName": "${aws_cloudwatch_event_bus.test.id}" }] }',
+          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript($util.escapeJavaScript(\'123\').replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",") }", "EventBusName": "${aws_cloudwatch_event_bus.test.id}" }] }',
       },
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:events:action/PutEvents',
@@ -172,7 +172,7 @@ describe('EventBridge put events integration', () => {
       passthrough_behavior: 'WHEN_NO_TEMPLATES',
       request_templates: {
         'application/json':
-          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript($input.path(\'$.orderId\'))\\" #set($comma = ",")$comma\\"items\\": $input.json(\'$.items\') #set($comma = ",") }", "EventBusName": "orders-bus" }] }',
+          '{ "Entries": [{ "Source": "orders", "DetailType": "OrderCreated", "Detail": "{ #set($comma = "") $comma\\"orderId\\": \\"$util.escapeJavaScript($util.escapeJavaScript($input.path(\'$.orderId\')).replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",")$comma\\"items\\": $input.json(\'$.items\') #set($comma = ",") }", "EventBusName": "orders-bus" }] }',
       },
       type: 'AWS',
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:events:action/PutEvents',

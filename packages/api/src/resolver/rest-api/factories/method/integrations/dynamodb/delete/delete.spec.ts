@@ -166,7 +166,7 @@ describe('Dynamo delete integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"TableName": "test","Key": { #set($comma = "") $comma"name": { "S": "$input.params().path.get(\'id\')" } #set($comma = ",") }}',
+          '{"TableName": "test","Key": { #set($comma = "") $comma"name": { "S": "$util.escapeJavaScript($input.params().path.get(\'id\')).replaceAll("\\\\\'", "\'")" } #set($comma = ",") }}',
       },
     });
   });

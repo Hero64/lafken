@@ -83,6 +83,7 @@ export class MockIntegration implements Integration {
       value: integrationResponse,
       resolveValue: (value) =>
         proxyHelper.resolveProxyValue(value, paramHelper.pathParams),
+      templateOptions: { valueParser: templateHelper.escapeStringParser },
     });
 
     const [successResponse] = responseHelper.handlerResponse;
