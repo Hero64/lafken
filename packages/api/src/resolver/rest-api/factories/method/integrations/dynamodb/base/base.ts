@@ -165,7 +165,9 @@ export class DynamoBaseIntegration<T> implements Integration {
       templateOptions: {
         propertyWrapper: (template, param) => this.marshallField(template, param.type),
         valueParser: (value, type) => {
-          return type !== 'Number' ? value : `"${value}"`;
+          return type === 'Number'
+            ? `"${value}"`
+            : templateHelper.escapeStringParser(value, type);
         },
       },
     });

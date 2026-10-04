@@ -84,7 +84,9 @@ export class QueryIntegration
       field: this.attributeValues as ApiObjectMetadata,
       propertyWrapper: (template, field) => this.marshallField(template, field.type),
       valueParser: (value, fieldType) => {
-        return fieldType === 'String' ? value : `"${value}"`;
+        return fieldType === 'String'
+          ? templateHelper.escapeStringParser(value, fieldType)
+          : `"${value}"`;
       },
     });
 

@@ -11,7 +11,11 @@ export class ResponseTemplateHelper {
 
   buildTemplate(response: ResponseObjectMetadata | ResponseArrayField): string {
     const param = this.toTemplateParam(response);
-    return this.templateHelper.generateTemplate({ field: param, currentValue: '' });
+    return this.templateHelper.generateTemplate({
+      field: param,
+      currentValue: '',
+      valueParser: this.templateHelper.escapeStringParser,
+    });
   }
 
   private toTemplateParam(field: ResponseFieldMetadata): TemplateParam {

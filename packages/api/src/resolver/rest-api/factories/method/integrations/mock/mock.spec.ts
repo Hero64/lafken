@@ -168,7 +168,7 @@ describe('Mock integration', () => {
       status_code: '201',
       response_templates: {
         'application/json':
-          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"other": "$input.params(\'other\')" #set($comma = ",")$comma"name": "$input.path(\'$.name\')" #set($comma = ",") }',
+          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"other": "$util.escapeJavaScript($input.params(\'other\')).replaceAll("\\\\\'", "\'")" #set($comma = ",")$comma"name": "$util.escapeJavaScript($input.path(\'$.name\')).replaceAll("\\\\\'", "\'")" #set($comma = ",") }',
       },
     });
   });
@@ -184,7 +184,7 @@ describe('Mock integration', () => {
       status_code: '201',
       response_templates: {
         'application/json':
-          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"email": "$context.authorizer.email" #set($comma = ",")$comma"page": "$input.params(\'page-number\')" #set($comma = ",") }',
+          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"email": "$util.escapeJavaScript($context.authorizer.email).replaceAll("\\\\\'", "\'")" #set($comma = ",")$comma"page": "$util.escapeJavaScript($input.params(\'page-number\')).replaceAll("\\\\\'", "\'")" #set($comma = ",") }',
       },
     });
   });
@@ -242,7 +242,7 @@ describe('Mock integration', () => {
       status_code: '201',
       response_templates: {
         'application/json':
-          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"keep": "$input.params(\'keep\')" #set($comma = ",")#if($input.params(\'maybe\') && $input.params(\'maybe\') != "") $comma"maybe": "$input.params(\'maybe\')" #set($comma = ",") #end  }',
+          '{ #set($comma = "") $comma"foo": "foo" #set($comma = ",")$comma"keep": "$util.escapeJavaScript($input.params(\'keep\')).replaceAll("\\\\\'", "\'")" #set($comma = ",")#if($input.params(\'maybe\') && $input.params(\'maybe\') != "") $comma"maybe": "$util.escapeJavaScript($input.params(\'maybe\')).replaceAll("\\\\\'", "\'")" #set($comma = ",") #end  }',
       },
     });
   });

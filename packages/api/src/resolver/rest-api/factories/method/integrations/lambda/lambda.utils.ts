@@ -41,6 +41,7 @@ export const buildRequestTemplates = (props: OpenApiIntegrationProps) => {
     ? {
         'application/json': templateHelper.generateTemplate({
           field: paramHelper.params,
+          valueParser: templateHelper.escapeStringParser,
         }),
       }
     : undefined;

@@ -99,7 +99,7 @@ describe('State machine start integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"input": "{ #set($comma = "") $comma\\"name\\": \\"$util.escapeJavaScript(\'test\')\\" #set($comma = ",") }","stateMachineArn": "arn"}',
+          '{"input": "{ #set($comma = "") $comma\\"name\\": \\"$util.escapeJavaScript($util.escapeJavaScript(\'test\').replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",") }","stateMachineArn": "arn"}',
       },
       uri: 'arn:aws:apigateway:${aws_api_gateway_rest_api.testing-api-api.region}:states:action/StartExecution',
     });
@@ -167,7 +167,7 @@ describe('State machine start integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"input": "{ #set($comma = "") $comma\\"name\\": \\"$util.escapeJavaScript(\'test\')\\" #set($comma = ",") }","stateMachineArn": "${aws_sfn_state_machine.test.arn}"}',
+          '{"input": "{ #set($comma = "") $comma\\"name\\": \\"$util.escapeJavaScript($util.escapeJavaScript(\'test\').replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",") }","stateMachineArn": "${aws_sfn_state_machine.test.arn}"}',
       },
     });
   });
@@ -184,7 +184,7 @@ describe('State machine start integration', () => {
       type: 'AWS',
       request_templates: {
         'application/json':
-          '{"input": "{ #set($comma = "") $comma\\"foo\\": \\"$util.escapeJavaScript($input.path(\'$.foo\'))\\" #set($comma = ",")$comma\\"ids\\": $input.json(\'$.ids\') #set($comma = ",") }","stateMachineArn": "$input.params().path.get(\'name\')"}',
+          '{"input": "{ #set($comma = "") $comma\\"foo\\": \\"$util.escapeJavaScript($util.escapeJavaScript($input.path(\'$.foo\')).replaceAll("\\\\\'", "\'")).replaceAll("\\\\\'", "\'")\\" #set($comma = ",")$comma\\"ids\\": $input.json(\'$.ids\') #set($comma = ",") }","stateMachineArn": "$input.params().path.get(\'name\')"}',
       },
     });
   });

@@ -8,6 +8,40 @@ describe('TemplateHelper', () => {
     templateHelper = new TemplateHelper();
   });
 
+  describe('escapeJsonString', () => {
+    it('should wrap the value with escapeJavaScript and undo escaped apostrophes', () => {
+      expect(templateHelper.escapeJsonString("$input.path('$.a')")).toBe(
+        '$util.escapeJavaScript($input.path(\'$.a\')).replaceAll("\\\\\'", "\'")'
+      );
+    });
+  });
+
+  describe('escapeStringParser', () => {
+    it('should escape quoted string references', () => {
+      expect(templateHelper.escapeStringParser(`"$input.params('a')"`, 'String')).toBe(
+        `"${templateHelper.escapeJsonString(`$input.params('a')`)}"`
+      );
+    });
+
+    it('should keep static strings and non-string values untouched', () => {
+      expect(templateHelper.escapeStringParser('"foo"', 'String')).toBe('"foo"');
+      expect(templateHelper.escapeStringParser("$input.path('$.a')", 'Number')).toBe(
+        "$input.path('$.a')"
+      );
+    });
+  });
+
+  describe('scapeJavascriptValue', () => {
+    it('should escape strings twice and leave other types untouched', () => {
+      const escaped = templateHelper.escapeJsonString('$a');
+
+      expect(templateHelper.scapeJavascriptValue('$a', 'String')).toBe(
+        templateHelper.escapeJsonString(escaped)
+      );
+      expect(templateHelper.scapeJavascriptValue('$a', 'Number')).toBe('$a');
+    });
+  });
+
   describe('generateTemplate', () => {
     describe('String type handling', () => {
       it('should generate template for string field from body source', () => {

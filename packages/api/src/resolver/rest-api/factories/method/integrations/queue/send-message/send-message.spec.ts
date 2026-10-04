@@ -368,7 +368,7 @@ describe('Queue send message integration', () => {
       expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
         status_code: '200',
         response_templates: {
-          'application/json': `{ #set($comma = "") $comma"messageId": "$input.path('$.messageId')" #set($comma = ",")$comma"sequenceNumber": "$input.path('$.sequenceNumber')" #set($comma = ",") }`,
+          'application/json': `{ #set($comma = "") $comma"messageId": "$util.escapeJavaScript($input.path('$.messageId')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"sequenceNumber": "$util.escapeJavaScript($input.path('$.sequenceNumber')).replaceAll("\\\\'", "'")" #set($comma = ",") }`,
         },
       });
     });
@@ -383,7 +383,7 @@ describe('Queue send message integration', () => {
       expect(synthesized).toHaveResourceWithProperties(ApiGatewayIntegrationResponse, {
         status_code: '200',
         response_templates: {
-          'application/json': `{ #set($comma = "") $comma"messageId": "$input.path('$.SendMessageResponse.SendMessageResult.MessageId')" #set($comma = ",")$comma"requestId": "$input.path('$.requestId')" #set($comma = ",") }`,
+          'application/json': `{ #set($comma = "") $comma"messageId": "$util.escapeJavaScript($input.path('$.SendMessageResponse.SendMessageResult.MessageId')).replaceAll("\\\\'", "'")" #set($comma = ",")$comma"requestId": "$util.escapeJavaScript($input.path('$.requestId')).replaceAll("\\\\'", "'")" #set($comma = ",") }`,
         },
       });
     });
