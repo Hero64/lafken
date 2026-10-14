@@ -2,7 +2,7 @@ import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integ
 import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
-import type { TerraformResource } from 'cdktn';
+import { type TerraformResource, Token } from 'cdktn';
 import type { CorsOptions, RestApi } from '../../../../../resolver.types';
 
 export class CorsHelper {
@@ -218,8 +218,10 @@ export class CorsHelper {
       );
     }
 
+    // A token (e.g. an SSM value) resolves at apply time, so it can't be checked here.
     if (
       origin !== '*' &&
+      !Token.isUnresolved(origin) &&
       (origin.includes("'") || URL.parse(origin)?.origin !== origin)
     ) {
       throw new Error(

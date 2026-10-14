@@ -2,7 +2,7 @@ import { ApiGatewayIntegration } from '@cdktn/provider-aws/lib/api-gateway-integ
 import { ApiGatewayIntegrationResponse } from '@cdktn/provider-aws/lib/api-gateway-integration-response';
 import { ApiGatewayMethod } from '@cdktn/provider-aws/lib/api-gateway-method';
 import { ApiGatewayMethodResponse } from '@cdktn/provider-aws/lib/api-gateway-method-response';
-import { Testing } from 'cdktn';
+import { Testing, Token } from 'cdktn';
 import { describe, expect, it } from 'vitest';
 import type { CorsOptions } from '../../../../../resolver.types';
 import { setupInternalTestingRestApi } from '../../../../../utils/testing.utils';
@@ -123,6 +123,14 @@ describe('CorsHelper', () => {
         expect(() => corsHelper.buildHeaders({ allowOrigins })).toThrow(/valid origin/);
       }
     );
+
+    it('should accept an unresolved token origin', () => {
+      const allowOrigins = Token.asString({ resolve: () => 'https://a.com' });
+      const headers = corsHelper.buildHeaders({ allowOrigins });
+      expect(headers['method.response.header.Access-Control-Allow-Origin']).toBe(
+        `'${allowOrigins}'`
+      );
+    });
 
     it('should accept an origin with a port', () => {
       const headers = corsHelper.buildHeaders({ allowOrigins: 'http://localhost:3000' });
