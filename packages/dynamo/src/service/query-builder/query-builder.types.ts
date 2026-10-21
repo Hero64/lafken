@@ -70,7 +70,8 @@ export type Filter<E> = {
       ?
           | NonNullable<E[key]>
           | OnlyOne<
-              StringExpression &
+              OperationExpression<string> &
+                StringExpression &
                 StringFilterExpression &
                 CommonExpression<string> &
                 InExpression<string>
@@ -96,7 +97,8 @@ export type Filter<E> = {
                   : NonNullable<E[key]> extends null
                     ? NullExpression
                     : OnlyOne<
-                        StringExpression &
+                        OperationExpression<string> &
+                          StringExpression &
                           StringFilterExpression &
                           CommonExpression<string> &
                           InExpression<string>
