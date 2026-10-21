@@ -417,6 +417,8 @@ Beyond a plain equality value, `filter` accepts one operator per field:
 | `exist`              | Attribute exists                              |
 | `notExist`           | Attribute does not exist                      |
 
+Range operators (`lessThan` … `between`) work on number and string fields. Strings compare lexicographically, so ISO 8601 dates filter correctly as long as both sides use the same format (e.g. `toISOString()`).
+
 ```typescript
 filter: {
   age: { between: [18, 65] },

@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { describe, expect, it } from 'vitest';
+import type { Filter } from '../query-builder.types';
 import { QueryBuilderBase } from './base';
 import type { QueryBuilderProps } from './base.types';
 
@@ -257,6 +258,24 @@ describe('Query builder base', () => {
 
       const qb = new QueryBuilder(getQueryBuilderProps());
       expect(qb.getQueryFilter()).toEqual('contains(#email, :email_1_1)');
+    });
+
+    it('should allow range operators on string attributes', () => {
+      const filter: Filter<{ updatedAt: string; createdAt?: string }> = {
+        updatedAt: { between: ['2026-01-01T00:00:00.000Z', '2026-01-02T00:00:00.000Z'] },
+        createdAt: { greaterOrEqualThan: '2026-01-01T00:00:00.000Z' },
+      };
+
+      class QueryBuilder extends QueryBuilderBase<any> {
+        public getQueryFilter() {
+          return this.getFilterExpression(filter);
+        }
+      }
+
+      const qb = new QueryBuilder(getQueryBuilderProps());
+      expect(qb.getQueryFilter()).toEqual(
+        '#updatedAt BETWEEN :updatedAt_1_0_0 and :updatedAt_1_0_1 and #createdAt >= :createdAt_1_1'
+      );
     });
 
     it('should omit a nested filter group when all of its attributes are undefined', () => {
