@@ -61,11 +61,11 @@ catalogs:
       specifier: ^4.1.0
       version: 4.1.0
     cdktn:
-      specifier: ^0.24.0
-      version: 0.24.0
+      specifier: ^0.25.0
+      version: 0.25.0
     cdktn-cli:
-      specifier: ^0.24.0
-      version: 0.24.0
+      specifier: ^0.25.0
+      version: 0.25.0
     constructs:
       specifier: ^10.8.0
       version: 10.8.1
@@ -127,13 +127,13 @@ importers:
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   apps/example:
     dependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@lafken/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -169,7 +169,7 @@ importers:
         version: link:../../packages/state-machine
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -185,13 +185,13 @@ importers:
         version: 8.10.163
       cdktn-cli:
         specifier: 'catalog:'
-        version: 0.24.0(cdktn@0.24.0(constructs@10.8.1))(jsii-pacmak@1.128.0(jsii-rosetta@5.9.64))(jsii@5.9.53)
+        version: 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(cdktn@0.25.0(constructs@10.8.1))(jsii-pacmak@1.140.0(jsii-rosetta@6.0.22))(jsii@6.0.20)
       unplugin-swc:
         specifier: 'catalog:'
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@22.20.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@22.20.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/api:
     dependencies:
@@ -207,10 +207,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -225,7 +225,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -237,7 +237,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/auth:
     dependencies:
@@ -250,10 +250,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -268,7 +268,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -280,7 +280,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/bucket:
     dependencies:
@@ -296,10 +296,10 @@ importers:
         version: 3.1136.0
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -314,7 +314,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -326,7 +326,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/common:
     dependencies:
@@ -339,7 +339,7 @@ importers:
     devDependencies:
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@swc/core':
         specifier: 'catalog:'
         version: 1.16.2(@swc/helpers@0.5.23)
@@ -357,7 +357,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/dynamo:
     dependencies:
@@ -376,10 +376,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -397,7 +397,7 @@ importers:
         version: 4.1.0
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -409,7 +409,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/event:
     dependencies:
@@ -422,10 +422,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -440,7 +440,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -452,7 +452,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/main:
     dependencies:
@@ -465,10 +465,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -477,7 +477,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -486,7 +486,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/pubsub:
     dependencies:
@@ -505,10 +505,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -529,7 +529,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -541,7 +541,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/queue:
     dependencies:
@@ -557,10 +557,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -578,7 +578,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -590,7 +590,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/resolver:
     dependencies:
@@ -603,10 +603,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -615,7 +615,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -624,7 +624,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/schedule:
     dependencies:
@@ -637,10 +637,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -655,7 +655,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -667,7 +667,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/standalone:
     dependencies:
@@ -680,10 +680,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -698,7 +698,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -710,7 +710,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   packages/state-machine:
     dependencies:
@@ -723,10 +723,10 @@ importers:
     devDependencies:
       '@cdktn/provider-aws':
         specifier: 'catalog:'
-        version: 25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)
       '@cdktn/vitest':
         specifier: 'catalog:'
-        version: 0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)
+        version: 0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)
       '@lafken/common':
         specifier: workspace:*
         version: link:../common
@@ -741,7 +741,7 @@ importers:
         version: 5.0.1(vitest@5.0.1)
       cdktn:
         specifier: 'catalog:'
-        version: 0.24.0(constructs@10.8.1)
+        version: 0.25.0(constructs@10.8.1)
       constructs:
         specifier: 'catalog:'
         version: 10.8.1
@@ -753,7 +753,7 @@ importers:
         version: 1.6.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(rolldown@1.2.9)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
 packages:
 
@@ -884,10 +884,6 @@ packages:
     resolution: {integrity: sha512-puq+Gf35oI24FeN11LkoUQFqv9uwNeWpxXZi/Ji3rRIoKAzKnxRaZ+Gkj0vKS9ZCiTESfng1N9LyOyXvo+m+Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/types@7.29.7':
-    resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
-    engines: {node: '>=6.9.0'}
-
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
@@ -953,17 +949,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cdktn/commons@0.24.0':
-    resolution: {integrity: sha512-jRNfkgTwv6HyW+2TnHK6mwIUF6xFfB+zcYFzqDI8hvfswibYrfVZw0Bdl2iEVbyDcf6oH0qFl/hQu3qAZfK+PQ==}
+  '@cdktn/commons@0.25.0':
+    resolution: {integrity: sha512-p+b9jwJb7TEC32HkOdmmOLio6jHJWW6+rVKW6tVcUhwbglYPDByRlAAvY6VtsmvW92uaK3R/3ONZeEPR6q4eSg==}
 
-  '@cdktn/hcl-tools@0.24.0':
-    resolution: {integrity: sha512-4n6uLQlGoU94LlTtC8QfhL/4MebnEVQWaZcthbthsFHxF8hg6SR8FBDSm5AnVn1Qf5+Ru/NDA59rYyHFTBCc3w==}
+  '@cdktn/hcl-tools@0.25.0':
+    resolution: {integrity: sha512-eaCVcTiQU1P5w/O2ScvfVnhh6e3VUKNLGLeQjgld3MVmaEpnYEWctmnXSJXWTjAqr66F6p+UiIOkbFFB0mS3og==}
 
-  '@cdktn/hcl2cdk@0.24.0':
-    resolution: {integrity: sha512-maE8vLTnfZkD3TeitHB4XO0B/LcxOBnJ/0jA0oYuevuKCTQs4q9jBTmjUENh5DONsRF7gGB3T/OIMMIErydWcA==}
+  '@cdktn/hcl2cdk@0.25.0':
+    resolution: {integrity: sha512-CTJK4GTDTFQz5CijXWtlxU4HaKPYRi8DmW3zP31dWfETPaQ6prXjNOTm7FDi+AWPA5oFnVgE8UOcSkEmygYLsQ==}
 
-  '@cdktn/hcl2json@0.24.0':
-    resolution: {integrity: sha512-ECDHCIhXkg6cBVwm2842II5NYzcqaZyz99hqVFIhBEeWCYG2NmfTaCxbdOXWo7nlWI4Dn+lhekgnksEwolH4Yg==}
+  '@cdktn/hcl2json@0.25.0':
+    resolution: {integrity: sha512-iHAjABuhTqlc4Vvx3Vx5RIvjrRtJuP6/YYCfgvY0iAVpYZm+LPsv/8dmX94/1I5xz6XPgKDLZGhfqZNIkr4Xkg==}
 
   '@cdktn/provider-aws@25.6.0':
     resolution: {integrity: sha512-gFu2rUUerOR4qDsJM/pS5DgQgj+TYknvyLlqCbnet8qmy4mt2eIoD0OR0I/bnSAMBNwMFSIhhY3ffwQGvV8pQg==}
@@ -972,11 +968,11 @@ packages:
       cdktn: ^0.24.0
       constructs: '>=10.6.0 <10.8.0'
 
-  '@cdktn/provider-generator@0.24.0':
-    resolution: {integrity: sha512-QhvqdnoDvUtq0EgHkApZ1qkS3j0wR5FI0utCvvc84wHWdrXlQTYBwq6TKyHPWHCPbghNfcNV3jV6U8eDHmvl2A==}
+  '@cdktn/provider-generator@0.25.0':
+    resolution: {integrity: sha512-vsfQt0WtVota9y4DFMF7F7HrD9n8EvJyjJ1B2480I8b23PJXTldNBvfWoy8tPYKPKxjMdrrNCwCdOufc0dGypQ==}
 
-  '@cdktn/provider-schema@0.24.0':
-    resolution: {integrity: sha512-+2RaArn/4qo04oOTZsbvYN5Kl29yhXqz40oNucPv53DYlPwdYf0vHBGXNsAcm1W30i85YnFWZD/xqv01TQrU/w==}
+  '@cdktn/provider-schema@0.25.0':
+    resolution: {integrity: sha512-yfOr4JMQTM1odDrOs6q/+7MuXCwKSl8VsZ66UX8vAjm/Jg3zyEh99B2If8Ox6Mthu2kEuBfHqlEOJYO6O3jAIQ==}
 
   '@cdktn/vitest@0.1.0':
     resolution: {integrity: sha512-Oce6D6cUSj25dlW5004OlO6R0IigL4yHOutgnEoThafBvuWl4vnKndHPrPNmfMeT6+tsBDarnPbWXFr2YCP6JQ==}
@@ -1223,28 +1219,20 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jsii/check-node@1.128.0':
-    resolution: {integrity: sha512-1XirN1v+gbSHFIGSMmB/jPzTdsKEY8P8JOJOS2Vz5j9+T6ZaPJ2ZcJ4foYsIBblKcDWPzVNVJmGC2+ViEzUIsA==}
-    engines: {node: '>= 14.17.0'}
-
-  '@jsii/check-node@1.139.0':
-    resolution: {integrity: sha512-tLS0H2XPN3hWVO9OtVB2DDllaxz3M6Jz8Zk8ByV1pl2h5b6LayJg8lHYvRMf0b3P/82xqWat7CpfLeqU96OwVw==}
-    engines: {node: '>= 14.17.0'}
-
   '@jsii/check-node@1.140.0':
     resolution: {integrity: sha512-NTiY2Nd9ZtACPZjaU+k9+oiaD191Yw0FoiUR7bB+NoOtB5nMEhrLKn5O/PYmCIZGK0G1JaJs+PmLcyj68J6RKw==}
     engines: {node: '>= 14.17.0'}
 
-  '@jsii/spec@1.128.0':
-    resolution: {integrity: sha512-sv4JP3Ap7Vagh+yoCZ7mkfoKNY3ivV43QQPLzOYaNLgrTW86S+rqfiwTG/ouLn9qSaIC300vDpnT5V9uBGserA==}
-    engines: {node: '>= 14.17.0'}
-
-  '@jsii/spec@1.139.0':
-    resolution: {integrity: sha512-+l1B0h4WAg6KOQ7PGykW/FvxeFmyt74U0/n41cus9Jdjv3VfQJKynsv5r9Ng23B1KwWqJkS5YvJuv2yGYoULdw==}
+  '@jsii/check-node@1.142.0':
+    resolution: {integrity: sha512-viMnVpg4vfa22vYawtQqjkuOsLa5eYRpKfs1aTxBE7/WsXLCfvqCX0XNgi27NmIHUtUzXUpzzS+gmY1731h1tQ==}
     engines: {node: '>= 14.17.0'}
 
   '@jsii/spec@1.140.0':
     resolution: {integrity: sha512-1rGS+iJtejQ3ybSJfV0if9PzZuSQmORbVF3MkqE0csatF//Rj8raCqptZLMX6rkdfZ8C2Jsw5hU4PrmuCzBk6A==}
+    engines: {node: '>= 14.17.0'}
+
+  '@jsii/spec@1.142.0':
+    resolution: {integrity: sha512-6AX6EpAMn7YNWwKr0c19LShxFnSXokhMaOZedkHxAEkoY12Rs1XkZLFgHoag7HdFQ3k8EPsQ4b2iyX24LEXtZg==}
     engines: {node: '>= 14.17.0'}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -1259,28 +1247,56 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@oxc-project/types@0.148.0':
-    resolution: {integrity: sha512-Nm4s/jB+4FpFsPhWGEC4h7rzksesmtnMXomo6rCMcg/b8zLQuOziRgkCS1fxDCXOlJB/6Q8oABOZ/OP6RIPj9A==}
+  '@opentelemetry/api-logs@0.220.0':
+    resolution: {integrity: sha512-CmVa4ImJ+ynfrPMNaAXHET6Bhb44SwzmfyVJFq9ni2jgXJR/l7C6gfVFddNmHP+ZOkP9cf4f9DBe68qVLTHc9w==}
+    engines: {node: '>=8.0.0'}
+
+  '@opentelemetry/api@1.10.0':
+    resolution: {integrity: sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ==}
+    engines: {node: '>=8.0.0'}
+
+  '@opentelemetry/core@2.12.0':
+    resolution: {integrity: sha512-1HsSAuvT4/my0QrXWsyXFdWjKaPeCHsismKZgEEIb8NK13LP6DrMRlsUbvD/0F9mDWK3xDom9AMv3IscxgOnOQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
+  '@opentelemetry/instrumentation@0.220.0':
+    resolution: {integrity: sha512-xQx3E2WxP1mDvKzxLxX+CTCtNLa560YJZ3087qYHerl2YmiKpv7AH+dAy7vmx+eVrZ5BwhfWUAVoKOoxCNHcpw==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/resources@2.12.0':
+    resolution: {integrity: sha512-+rSRoOdln6NhXTVcBdHSlZxJDNzwxadeweK2ltZO3tVtfp6aklABc06xclDk6ovRR+EiGgIcSbh/6NgjFhnb3A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/sdk-trace-base@2.12.0':
+    resolution: {integrity: sha512-JOERgZCxRM06FEJ5kEWxlSRChah6MmXDx3KwCruqEv/iEyLkTokCSemf2y1w8oIHtfrr8EVTpzebq/31vn2Cpg==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/sdk-trace@2.12.0':
+    resolution: {integrity: sha512-ImVuRQ6faOsTi1Wna88s2avgrrf/iDgXPigIeynkUhjstMuoQUDOJXgkez2j1mlU4btjXcXBGa+q7qKFYR3GsA==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/semantic-conventions@1.44.0':
+    resolution: {integrity: sha512-E3JkOlMBi3N8OGGkbl7tFyqk2MAS6/lySRZBK3Mu7AzjF1fT8oIChH9ChE48SUWzDn9Kdwta+G/p5LJ4xW4CLQ==}
+    engines: {node: '>=14'}
 
   '@oxc-project/types@0.150.0':
     resolution: {integrity: sha512-rDS5/31E9HfPl/CIzGrn0DOlvBbXFseQ5URJ9sYMfstbKLD/c6Gm9vmRzRGDdAXyOIL4zmO37lc9RIwYqVruZw==}
-
-  '@rolldown/binding-android-arm-eabi@1.2.7':
-    resolution: {integrity: sha512-EypzgnYCwyVY4NDHKzGmNJT5b+XaQEBniHxsMdeIQLB/tcCzZnhqrzHpZFbX9iaxx+5RiB8caATBtfvZP7zVxQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm]
-    os: [android]
 
   '@rolldown/binding-android-arm-eabi@1.2.9':
     resolution: {integrity: sha512-tNISae1QEf/vkb3xkRcjV5SEdzPE97We5IVaa2Z8jSszQPZ8U60B/YCYpw4QI7VidYsBtKavczXf+DyDs9WGxw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm]
-    os: [android]
-
-  '@rolldown/binding-android-arm64@1.2.7':
-    resolution: {integrity: sha512-l17HE9EweWaqJZhuUuNBN/FzM62xw+DECVnJyvMsxn8vJFAGLy5QfLDoYAcronkAN8VxKZHezDpulHDPx95vFw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
     os: [android]
 
   '@rolldown/binding-android-arm64@1.2.9':
@@ -1289,22 +1305,10 @@ packages:
     cpu: [arm64]
     os: [android]
 
-  '@rolldown/binding-darwin-arm64@1.2.7':
-    resolution: {integrity: sha512-8ED8ELFvHXc6OCETIn4gXObPiaR6bckM/ipXtbzlPVDRMBfEGjCKgO90F9YtfdpDatVx/ZQw7aZ1vUMf/+T3Mw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [darwin]
-
   '@rolldown/binding-darwin-arm64@1.2.9':
     resolution: {integrity: sha512-IwhlH3qK5urrY8hZiEgGkHKEFN901p/p2bjxCxJlr4GyNnF7wYpUvK+Y43uaRYuC4hpfjzbR3SJC3arX1jGvmw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
-    os: [darwin]
-
-  '@rolldown/binding-darwin-x64@1.2.7':
-    resolution: {integrity: sha512-/WPripjtiAIZ2tWY7ddijORT0Ujg87wxWW/qcoFVCKAWVDPhtY0xr7Dj0M3GyNGz60jGwTElhro/mkF9dT7dDQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
     os: [darwin]
 
   '@rolldown/binding-darwin-x64@1.2.9':
@@ -1313,36 +1317,17 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@rolldown/binding-freebsd-x64@1.2.7':
-    resolution: {integrity: sha512-14DI4NcqpvbICxSnGLx3PmtDaWqRP/KGSGb6C+JLLVPeZRl6dKdHba3pGsqT3vpdTqhEYIPG0MMQ8c0xYqoJxA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [freebsd]
-
   '@rolldown/binding-freebsd-x64@1.2.9':
     resolution: {integrity: sha512-kSfvhmgeWyfkbT3p/1s5vSgboogoah2zkm9fX2zjg2hHxSV7T4KhMWRUUaRk4OXNqoD3QAUeRqLcs1aZOK4U1g==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [freebsd]
 
-  '@rolldown/binding-linux-arm-gnueabihf@1.2.7':
-    resolution: {integrity: sha512-bxrWIRvHWQvbJwi+VIie/kDJmQxcNE6xxWwZdqF/ExVAigtHkv54WTLQPb+QsZdnFy18fg7JPfWGL0RH6vwIlQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm]
-    os: [linux]
-
   '@rolldown/binding-linux-arm-gnueabihf@1.2.9':
     resolution: {integrity: sha512-1RVzG17pxqbTfYLC352JlLt6kKLG+6Hr30n8DlIJqsnV5luUDd2Qdx9Ayw1Cabfyb1K9k0jXEZ7evxkRoT+uiw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm]
     os: [linux]
-
-  '@rolldown/binding-linux-arm64-gnu@1.2.7':
-    resolution: {integrity: sha512-toOY2BChBZyuxU7OYX6Tn389di4IzAqPTycVcci0O7FSfBqzRB3RZn+K5Is6ANf4tmgRd/K1yZTsNTXbkXsnLg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
 
   '@rolldown/binding-linux-arm64-gnu@1.2.9':
     resolution: {integrity: sha512-BXqPvZ2drqVD+/Z8UpKwcs4Mp7grM+eGFku4CAEKrEtcbAsUpzREphK1sogCRZGreVPiMkiiBtw0n3TPteuqvw==}
@@ -1351,13 +1336,6 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@rolldown/binding-linux-arm64-musl@1.2.7':
-    resolution: {integrity: sha512-lAIXTH/aiLRLxsTgQvfhjo4K1ydWIp00+V0voOr9beb/9ZmkUFrSIb03dXNFRgMNvkE6oGsF10ioQ6UsI+vS5Q==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
   '@rolldown/binding-linux-arm64-musl@1.2.9':
     resolution: {integrity: sha512-11vWvo8YDwLzukt27J3aYDWU+gg2P7J+ZOmiJ0hkF5BXZDW7pVya7r40MXDy6ya0i9KamoENSVKIugvJNgFXIA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1365,24 +1343,10 @@ packages:
     os: [linux]
     libc: [musl]
 
-  '@rolldown/binding-linux-ppc64-gnu@1.2.7':
-    resolution: {integrity: sha512-kdnwS28Pkenp/mZMRwjXXXwxQ7pIsm+bF919LUK93BOyhcLsrVKdP2p9fxpiPNPAbNuch8ypQt0pm2P2LYCAGg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [ppc64]
-    os: [linux]
-    libc: [glibc]
-
   '@rolldown/binding-linux-ppc64-gnu@1.2.9':
     resolution: {integrity: sha512-a1tijMkdwsIARtc0F39ApURROkf3NwqinI6TOiSSWCTR7dT96dffNvMUtDHnq64wKNTIZOIlzKrFvvFUznJiyw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [ppc64]
-    os: [linux]
-    libc: [glibc]
-
-  '@rolldown/binding-linux-s390x-gnu@1.2.7':
-    resolution: {integrity: sha512-516OdsyLdr5E65paF3yBF55t8mfm9+gmtCsK3xI7XKXIT7EfRlHhxL8K/NR6Hu8BWSgF5+1w74lTL0+nxcc8Qw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
@@ -1393,26 +1357,12 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@rolldown/binding-linux-x64-gnu@1.2.7':
-    resolution: {integrity: sha512-r8/z8n7GFaYRln3xmP1Cxy0HH/HLM0uBUPkEuSVEfKGDA89M0FsZRZJRSwe/tJjRx+fpH/gjorfhB8tmEbSFLA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
   '@rolldown/binding-linux-x64-gnu@1.2.9':
     resolution: {integrity: sha512-9s0AZ8BFK5/n7B/TBoa2yJE3gI3KURrbXcPBlsAsvjU4VeJKgE90y1YtNxyEUIcHPQkg6/yfF3qihUrcM/Kf0Q==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
-
-  '@rolldown/binding-linux-x64-musl@1.2.7':
-    resolution: {integrity: sha512-pAsE8iiDxUg1xBqdhrTfg45AVDVpirjz00sblEYClGNNcMnDb+e8beQgqIAw6LvauX/APvgxUnwrgun/YYGBhw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
 
   '@rolldown/binding-linux-x64-musl@1.2.9':
     resolution: {integrity: sha512-P7VWAmV+WdJluH7ovnRGoiv2i8To7GAZ+kGzfGup635cyL7SyYl3lSUaA3Gp5THf0n/Co5EyEqb2zbqq+nMOHQ==}
@@ -1421,34 +1371,16 @@ packages:
     os: [linux]
     libc: [musl]
 
-  '@rolldown/binding-openharmony-arm64@1.2.7':
-    resolution: {integrity: sha512-lTcIYmmnQQA8Or/2DatS6oSqcdLHvendjS+zLu+FwgToynWMRSmQdpM65fTANJgIS4mjbMOo5KT2lnT9SAb96w==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [openharmony]
-
   '@rolldown/binding-openharmony-arm64@1.2.9':
     resolution: {integrity: sha512-1qixtsE4BK8h+yS3BfmZ09UhA7O/N4IACva6YBr7EBvCJraByTuRcgOTaiA62Tm0vey3UcKXLOaoGHtYmNGEVg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [openharmony]
 
-  '@rolldown/binding-win32-arm64-msvc@1.2.7':
-    resolution: {integrity: sha512-e3Gu3WxbNk/UqQhxqU7YIYO+9ZBvWNz3U+h/qRFosscMFzdRPbXYSaSWgSnklv2fz1TgzBTcti2z35c/7irsHw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [win32]
-
   '@rolldown/binding-win32-arm64-msvc@1.2.9':
     resolution: {integrity: sha512-ok8IQjcEPs1AKZfuEUznVBrJw+gK4soq+bx8b1X2XoMqVClarc1q5JDmVtWXY1xfr6ZuHTAsPXHTgTrqKTZeww==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
-    os: [win32]
-
-  '@rolldown/binding-win32-x64-msvc@1.2.7':
-    resolution: {integrity: sha512-W/jg5qoRSqjsEv0+dZi4e687mcHqmVuU0P4fK6qS/xjetW2Gmc1W8j//z5nAeNcC8Ttm0hV46IjcYeuVwYhuiw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
     os: [win32]
 
   '@rolldown/binding-win32-x64-msvc@1.2.9':
@@ -1469,29 +1401,50 @@ packages:
       rollup:
         optional: true
 
-  '@sentry-internal/tracing@7.120.4':
-    resolution: {integrity: sha512-Fz5+4XCg3akeoFK+K7g+d7HqGMjmnLoY2eJlpONJmaeT9pXY7yfUyXKZMmMajdE2LxxKJgQ2YKvSCaGVamTjHw==}
-    engines: {node: '>=8'}
+  '@sentry/conventions@0.16.0':
+    resolution: {integrity: sha512-fO9PLmHdVURcSPUpWCItWAtgKiMwGdJHbovoSEyLplX5sxs2ugvI4CBPTrkkgqhObnZOD0CnWBKDzSVQYBKEyQ==}
+    engines: {node: '>=14'}
 
-  '@sentry/core@7.120.4':
-    resolution: {integrity: sha512-TXu3Q5kKiq8db9OXGkWyXUbIxMMuttB5vJ031yolOl5T/B69JRyAoKuojLBjRv1XX583gS1rSSoX8YXX7ATFGA==}
-    engines: {node: '>=8'}
+  '@sentry/core@10.73.0':
+    resolution: {integrity: sha512-FLO1UgH19RyasVpofu612WCOgb2nEH0dZy+R72d7p65XU9i0wxlMKm3+sgfwKmiSJp1Qhilaaxs4Jg6BbiM5HA==}
+    engines: {node: '>=18'}
 
-  '@sentry/integrations@7.120.4':
-    resolution: {integrity: sha512-kkBTLk053XlhDCg7OkBQTIMF4puqFibeRO3E3YiVc4PGLnocXMaVpOSCkMqAc1k1kZ09UgGi8DxfQhnFEjUkpA==}
-    engines: {node: '>=8'}
+  '@sentry/node-core@10.73.0':
+    resolution: {integrity: sha512-GHAGUmZPmm6FKfxfv2maVVJ/A99YAmd7oFOuKMDmITI6O/Msl6JB3vPTEpopVAHLW0LYJQBOjddL9C7o+Jt44g==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+      '@opentelemetry/core': ^1.30.1 || ^2.1.0
+      '@opentelemetry/exporter-trace-otlp-http': '>=0.57.0 <1'
+      '@opentelemetry/instrumentation': '>=0.57.1 <1'
+      '@opentelemetry/sdk-trace-base': ^1.30.1 || ^2.1.0
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      '@opentelemetry/core':
+        optional: true
+      '@opentelemetry/exporter-trace-otlp-http':
+        optional: true
+      '@opentelemetry/instrumentation':
+        optional: true
+      '@opentelemetry/sdk-trace-base':
+        optional: true
 
-  '@sentry/node@7.120.4':
-    resolution: {integrity: sha512-qq3wZAXXj2SRWhqErnGCSJKUhPSlZ+RGnCZjhfjHpP49KNpcd9YdPTIUsFMgeyjdh6Ew6aVCv23g1hTP0CHpYw==}
-    engines: {node: '>=8'}
+  '@sentry/node@10.73.0':
+    resolution: {integrity: sha512-jiMJ6GgXDw6UMGzJY+o0c8OoeA9OfHqZ/xEpHfDqy75hn+9CEkRkbNGCIdMvsc7wW/Se1Os394hHfTpU+YEskg==}
+    engines: {node: '>=18'}
 
-  '@sentry/types@7.120.4':
-    resolution: {integrity: sha512-cUq2hSSe6/qrU6oZsEP4InMI5VVdD86aypE+ENrQ6eZEVLTCYm1w6XhW1NvIu3UuWh7gZec4a9J7AFpYxki88Q==}
-    engines: {node: '>=8'}
+  '@sentry/opentelemetry@10.73.0':
+    resolution: {integrity: sha512-fQouPQKsH0CQrw6oAn1k0Z2I+tgyochCovifr5qNS69i0OzjknLa03WJyiZ/IuzXc4AVa5jAKfOeE9slABz8Qw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+      '@opentelemetry/core': ^1.30.1 || ^2.1.0
+      '@opentelemetry/sdk-trace-base': ^1.30.1 || ^2.1.0
 
-  '@sentry/utils@7.120.4':
-    resolution: {integrity: sha512-zCKpyDIWKHwtervNK2ZlaK8mMV7gVUijAgFeJStH+CU/imcdquizV3pFLlSQYRswG+Lbyd6CT/LGRh3IbtkCFw==}
-    engines: {node: '>=8'}
+  '@sentry/server-utils@10.73.0':
+    resolution: {integrity: sha512-QskripdKFbM/+gipC6mpa2crLwL7+VbkX84IpHg2z9UlYQ1kNKd3aMT+Qk9NLRSw/zu1rSIAvlbWfx4D3rgNAA==}
+    engines: {node: '>=18'}
 
   '@simple-libs/child-process-utils@2.0.0':
     resolution: {integrity: sha512-dvNoRKLijXnD0XoJAz94pbNuB5GQgDr55UhpSPhffDkTT0Cmcqh9jSCOtwfT2d4H6MI9E7c4SgtMuJXZ6F3c6A==}
@@ -1516,6 +1469,9 @@ packages:
   '@smithy/core@3.33.3':
     resolution: {integrity: sha512-CsOeKq/9kA3y6VJHt+/+VTCtBaxJ4OTFpgrjIUhPpDIKxBci1k2bJaQASF2h/ELWrulGp+t97DZ0mevfAD8idg==}
     engines: {node: '>=18.0.0'}
+    deprecated: |-
+      Deprecated due to a bug in custom logger data redaction. Upgrade to the latest version. If you used a custom logger with this
+        version, review your logs and rotate any credentials or other secrets. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -1929,19 +1885,19 @@ packages:
     resolution: {integrity: sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==}
     engines: {node: '>= 0.8.0'}
 
-  cdktn-cli@0.24.0:
-    resolution: {integrity: sha512-lex2mTo3+/zhcTJzyaoOW/0DOst4BSYeEchgJEE6R+RfOSTVvhqlRJ+VmvAdepjlRaoIlqAEW9xatE8RWHzAFw==}
-    engines: {node: '>=22.19.0'}
+  cdktn-cli@0.25.0:
+    resolution: {integrity: sha512-e3tKJlL+/3fAFoFwuSrhJVc5IMeMGwUFY1i8pBE81RXujQ9Q8KN1IrFL/9jNCCTLMY5xSpcYZhRBHKOobe9lvg==}
+    engines: {node: '>=22.23.4'}
     hasBin: true
     peerDependencies:
-      cdktn: 0.24.0
-      jsii: ~5.9.0
-      jsii-pacmak: 1.128.0
+      cdktn: 0.25.0
+      jsii: ~6.0.0
+      jsii-pacmak: 1.140.0
 
-  cdktn@0.24.0:
-    resolution: {integrity: sha512-Ok7kYlM2BWyXebnQi4Se9JPsjsRZKoVtkyshkVEkhHY/fGWonMvdWvivXmdB6caBGcQ8cwioQOZXKkps+dCnZg==}
+  cdktn@0.25.0:
+    resolution: {integrity: sha512-I5JyJIHakL7ZIuo3RpCojFG3ClWoeQihlaSfUHfdppYNlZASSkZbT9TdtrtG7XxlNQcMg+a2nOuaS5XJrk50qQ==}
     peerDependencies:
-      constructs: '>=10.6.0 <10.8.0'
+      constructs: ^10.6.0
     bundledDependencies:
       - fflate
       - safe-stable-stringify
@@ -1961,6 +1917,9 @@ packages:
   ci-info@4.4.0:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
+
+  cjs-module-lexer@2.3.0:
+    resolution: {integrity: sha512-lmNyBzi6iYiqyrExTctfmjd8tInx+dHu9PBomTfH5RXS53c27JMFJgzNv5TyAnm3PgGf+MLy0+Ws41/HlVxdKQ==}
 
   cli-cursor@3.1.0:
     resolution: {integrity: sha512-I/zHAwsKf9FqGoXM4WWRACob9+SNukZTd94DWF57E4toouRulbCxcUh6RKUEOQlYTHJnzkPMySvPNaaSLNfLZw==}
@@ -1990,12 +1949,12 @@ packages:
     resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
     engines: {node: '>=0.8'}
 
-  codemaker@1.128.0:
-    resolution: {integrity: sha512-QqIZBuVAE5wap5DJrIgk0v4pl2VRB5Bl3YWwPDloerM621fpgmzIm2lbw5hM+saV0zg+K+r4cCjWBVDIvRLExA==}
+  codemaker@1.140.0:
+    resolution: {integrity: sha512-/EPlxI+2i9ji7aZac2kLEUyjzfgHWBl8hDZ98T6BnED9mTLRInCNToA0vqgZPcTotiP6g6YNeZo7cBAc90Ok9A==}
     engines: {node: '>= 14.17.0'}
 
-  codemaker@1.139.0:
-    resolution: {integrity: sha512-v93CwWcepdmHDENEJuPepaOzo2J8SZ5HKNVgH/+6vPrvLOoDDfVXEkBMr6KUu4trHN7QvZjFwxJBpjCYCBG9+g==}
+  codemaker@1.142.0:
+    resolution: {integrity: sha512-mip7+WZ1bqt0SA6k1u0vjp7PzsifHRLmrwWqnz+ZHCFMDT8+ctbdMOUkjMtF2G4RASEExJrrjfM8cC7cl2bd6Q==}
     engines: {node: '>= 14.17.0'}
 
   color-convert@2.0.1:
@@ -2008,9 +1967,6 @@ packages:
   commonmark@0.31.2:
     resolution: {integrity: sha512-2fRLTyb9r/2835k5cwcAwOj0DEc44FARnMp5veGsJ+mEAZdi52sNopLu07ZyElQUz058H43whzlERDIaaSw4rg==}
     hasBin: true
-
-  constructs@10.6.0:
-    resolution: {integrity: sha512-TxHOnBO5zMo/G76ykzGF/wMpEHu257TbWiIxP9K0Yv/+t70UzgBQiTqjkAsWOPC6jW91DzJI0+ehQV6xDRNBuQ==}
 
   constructs@10.8.1:
     resolution: {integrity: sha512-98yGXYyhePqPYh3cYu8nzBERmAhC0DONe3UD03okK0nehZ7hYP4wgZuf02a04+uOWxnTJ5Rpp5m0GRNpwyLGGA==}
@@ -2136,6 +2092,9 @@ packages:
   es-module-lexer@2.3.2:
     resolution: {integrity: sha512-poHGpORABojJJucnV9KbOavETW8lBVnphkW77ER5/BQ5Fz7oXSoCNek7IH3vR5nRjdsEz926ibFYX8KtLQmdyw==}
 
+  es-module-lexer@3.0.4:
+    resolution: {integrity: sha512-BldNY5mwkVu+cQ5Ymn3e6hB9Sx8XHx4ZevWbiUyZbfKxJxYO27Hf0wfzkxIaD5CAJMaGl3YspKELj0ff/7nCMA==}
+
   es-object-atoms@1.1.2:
     resolution: {integrity: sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==}
     engines: {node: '>= 0.4'}
@@ -2210,10 +2169,6 @@ packages:
   fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
-
-  fs-extra@11.3.6:
-    resolution: {integrity: sha512-w8ZNZr2mKIc7qeNaQ9AVPT1+iFaI+Avd4xudVOvdDJ8VytREi1Ft5Ih7hd9jjehod8vAM5GMsfQ/TpPf4EyoEA==}
-    engines: {node: '>=14.14'}
 
   fs-extra@11.4.0:
     resolution: {integrity: sha512-EQsFzMUJkCKGr1ePqlYADkIUmHW1s3ZXr5Yqy6wbGrfUCphpl2maM/kyOIRA2HpP3AaFQTZXD4ldjek+nccddA==}
@@ -2309,12 +2264,13 @@ packages:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
 
-  immediate@3.0.6:
-    resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
-
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
     engines: {node: '>=6'}
+
+  import-in-the-middle@3.5.3:
+    resolution: {integrity: sha512-usm/IiY63VtOyx/dm7uEoZV+EsanCDmwRUroQZIkFLGu1NVXZ8mZqIOhaN4QIJ7EsbMTuQbJXwCySCx+ozMA8g==}
+    engines: {node: '>=18'}
 
   ini@6.0.0:
     resolution: {integrity: sha512-IBTdIkzZNOpqm7q3dRqJvMaldXjDHWkEDfrwGEQTs5eaQMWV+djAhR+wahyNNMAa+qpbDUhBMVt4ZKNwpPm7xQ==}
@@ -2436,8 +2392,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsii-pacmak@1.128.0:
-    resolution: {integrity: sha512-XUmN7VnsUoYTtCOTUi87A1eyfHtgvq/bQJLnKTVZkGPKyKi+PIRayVpu6DlnjvpaKAY8emnvgx9qVYU1F9yoAw==}
+  jsii-pacmak@1.140.0:
+    resolution: {integrity: sha512-BHv63POC099uGm08UM7L5UZUanN3rfESzWv54xpwhamiIJ+zlw0+6Sj790LP2skRkezTdTj8Qj6mhU5Kxfko7g==}
     engines: {node: '>= 14.17.0'}
     hasBin: true
     peerDependencies:
@@ -2448,13 +2404,13 @@ packages:
     engines: {node: '>= 14.17.0'}
     hasBin: true
 
-  jsii-rosetta@5.9.64:
-    resolution: {integrity: sha512-24eTwyTX0Ak2u9XSI2C3N+QaA5KsizNE0llVKObKZT0NEAE7wbHjGBuT2y1RjGfIsaSrpWGx5VzW0Fmaut7FiA==}
+  jsii-rosetta@6.0.22:
+    resolution: {integrity: sha512-f8Nv3odcoH6tmdlbDoqDzLLbwYIhv3v3cjtBlxodgRr2v7qEwHJbL9gl9HDjayR0bUKUmQWbI5hSPAMTcsKG2A==}
     engines: {node: '>= 20.16.0'}
     hasBin: true
 
-  jsii@5.9.53:
-    resolution: {integrity: sha512-IqNfn1EWYOL/nkgYv3meNgRz/5yCbjNJgp1qFxkAEvIUPMlgKjCINXjAv21n3pXREVT1VAsMldG0MrtKaCywgw==}
+  jsii@6.0.20:
+    resolution: {integrity: sha512-E+EadEU/WIlqat3gTi+Oj1mptH68+O8KWQGAOrufCXkxqL528KbS59y233nuSZqW5RPpbDPCdKuVZ2CxxxCJSQ==}
     engines: {node: '>= 20.16.0'}
     hasBin: true
 
@@ -2472,9 +2428,6 @@ packages:
 
   just-extend@6.2.0:
     resolution: {integrity: sha512-cYofQu2Xpom82S6qD778jBDpwvvy39s1l/hrYij2u9AMdQcGRpaBu6kY4mVhuno5kJVi1DAz4aiphA2WI1/OAw==}
-
-  lie@3.1.1:
-    resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==}
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -2562,9 +2515,6 @@ packages:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  localforage@1.10.0:
-    resolution: {integrity: sha512-14/H1aX7hzBBmmh7sGPd+AOMkkIrHM3Z1PAyGgZigA1H1p5O5ANnMyWzvpAETtG68/dC4pC0ncy3+PPGzXZHPg==}
-
   log4js@6.9.1:
     resolution: {integrity: sha512-1somDdy9sChrr9/f4UlzhdaGfDR2c/SaD2a4T7qEkG4jTS57/B3qmnjLYePwQ8cqWnUHZI0iAKxMBpCZICiZ2g==}
     engines: {node: '>=8.0'}
@@ -2611,6 +2561,9 @@ packages:
 
   mnemonist@0.38.3:
     resolution: {integrity: sha512-2K9QYubXx/NAjv4VLq1d1Ly8pWNC5L3BrixtdkyTegXWJIqY+zLNDhhX/A+ZwWt70tB1S8H4BE8FLYEFyNoOBw==}
+
+  module-details-from-path@1.0.4:
+    resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -2723,6 +2676,10 @@ packages:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
 
+  require-in-the-middle@8.0.1:
+    resolution: {integrity: sha512-QT7FVMXfWOYFbeRBF6nu+I6tr2Tf3u0q8RIEjNob/heKY/nh7drD/k7eeMFmSQgnTtCzLDcCu/XEnpW2wk4xCQ==}
+    engines: {node: '>=9.3.0 || >=8.10.0 <9.0.0'}
+
   reserved-words@0.1.2:
     resolution: {integrity: sha512-0S5SrIUJ9LfpbVl4Yzij6VipUdafHrOTzvmfazSw/jeZrZtQK303OPZW+obtkaw7jQlTQppy0UvZWm9872PbRw==}
 
@@ -2744,11 +2701,6 @@ packages:
 
   rfdc@1.4.1:
     resolution: {integrity: sha512-q1b3N5QkRUWUl7iyylaaj3kOpIT0N2i9MqIEQXP73GVsN9cw3fdx8X63cEmWhJGi2PPCF23Ijp7ktmd39rawIA==}
-
-  rolldown@1.2.7:
-    resolution: {integrity: sha512-g0EtLvBjTUB7jhyV0S/TCup3v/XSVl45vUIGbOGU4QPiyjTenCe4mKuFvW9fEgYmS2Fo42AUssRmNuMziXdrig==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    hasBin: true
 
   rolldown@1.2.9:
     resolution: {integrity: sha512-hx/Pv0N1haXRb11qkfnK5MXB/iqr7i0yjWQqmO9uHqZpBgQSqzc8UsSnEpalsh+j1I8qQ2CkXAkJC8Br3dKSlg==}
@@ -2844,11 +2796,11 @@ packages:
     resolution: {integrity: sha512-eLoXW/DHyl62zxY4SCaIgnRhuMr6ri4juEYARS8E6sCEqzKpOiE521Ucofdx+KnDZl5xmvGYaaKCk5FEOxJCoQ==}
     engines: {node: '>= 0.4'}
 
-  stream-chain@2.2.5:
-    resolution: {integrity: sha512-1TJmBx6aSWqZ4tx7aTpBDXK0/e2hhcNSTV8+CbFJtDjbb+I1mZ8lHit0Grw9GRT+6JbIrrDd8esncgBi8aBXGA==}
+  stream-chain@4.4.1:
+    resolution: {integrity: sha512-4MWXw+Si0RW3HAYQN3MdxpgTJA6Te9StiLtdkZO248DLPsRipqBbuiQSkyYLpCDEuvqGfqb2B5dEGxiEfHYkNQ==}
 
-  stream-json@1.9.1:
-    resolution: {integrity: sha512-uWkjJ+2Nt/LO9Z/JyKZbMusL8Dkh97uUBTv3AJQ74y07lVahLY4eEFsPsE97pxYBwr8nnjMAIch5eqI0gPShyw==}
+  stream-json@3.8.0:
+    resolution: {integrity: sha512-xD0bPEoPgaaEpEu2HSq1spYAs5LSJrLAlo44SHycE+aI8W0IrU2cklY7fiQKhRTVbuvxNUij06vIiz1NBT+AZA==}
 
   streamroller@3.1.5:
     resolution: {integrity: sha512-KFxaM7XT+irxvdqSP1LGLgNWbYN7ay5owZ3r/8t77p+EtSUAfUgtl7be3xtqtOmGUl9K9YPO2ca8133RlTjvKw==}
@@ -2925,8 +2877,8 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3403,11 +3355,6 @@ snapshots:
       '@babel/parser': 7.29.8
       '@babel/types': 7.29.8
 
-  '@babel/types@7.29.7':
-    dependencies:
-      '@babel/helper-string-parser': 7.29.7
-      '@babel/helper-validator-identifier': 7.29.7
-
   '@babel/types@7.29.8':
     dependencies:
       '@babel/helper-string-parser': 7.29.7
@@ -3450,99 +3397,102 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.13':
     optional: true
 
-  '@cdktn/commons@0.24.0(constructs@10.6.0)':
+  '@cdktn/commons@0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)':
     dependencies:
-      '@sentry/node': 7.120.4
-      cdktn: 0.24.0(constructs@10.6.0)
+      '@sentry/node': 10.73.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))
+      cdktn: 0.25.0(constructs@10.8.1)
       ci-info: 4.4.0
-      codemaker: 1.128.0
+      codemaker: 1.140.0
       cross-spawn: 7.0.6
       follow-redirects: 1.16.0
-      fs-extra: 11.3.6
+      fs-extra: 11.4.0
       log4js: 6.9.1
       semver: 7.8.5
       strip-ansi: 6.0.1
       validator: 13.15.35
     transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
       - constructs
       - debug
       - supports-color
 
-  '@cdktn/hcl-tools@0.24.0':
+  '@cdktn/hcl-tools@0.25.0':
     dependencies:
       fs-extra: 11.4.0
 
-  '@cdktn/hcl2cdk@0.24.0(constructs@10.6.0)':
+  '@cdktn/hcl2cdk@0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)':
     dependencies:
       '@babel/generator': 7.29.7
       '@babel/template': 7.29.7
-      '@babel/types': 7.29.7
-      '@cdktn/commons': 0.24.0(constructs@10.6.0)
-      '@cdktn/hcl2json': 0.24.0
-      '@cdktn/provider-generator': 0.24.0(jsii-rosetta@5.9.64)
-      '@cdktn/provider-schema': 0.24.0(constructs@10.6.0)
+      '@babel/types': 7.29.8
+      '@cdktn/commons': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
+      '@cdktn/hcl2json': 0.25.0
+      '@cdktn/provider-generator': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(jsii-rosetta@6.0.22)
+      '@cdktn/provider-schema': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
       camelcase: 6.3.0
-      cdktn: 0.24.0(constructs@10.6.0)
-      codemaker: 1.128.0
+      cdktn: 0.25.0(constructs@10.8.1)
+      codemaker: 1.140.0
       deep-equal: 2.2.3
       glob: 13.0.6
       graphology: 0.26.0(graphology-types@0.24.7)
       graphology-types: 0.24.7
-      jsii-rosetta: 5.9.64
+      jsii-rosetta: 6.0.22
       prettier: 2.8.8
       reserved-words: 0.1.2
       zod: 4.4.3
     transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
       - constructs
       - debug
       - supports-color
 
-  '@cdktn/hcl2json@0.24.0':
+  '@cdktn/hcl2json@0.25.0':
     dependencies:
-      fs-extra: 11.3.6
+      fs-extra: 11.4.0
 
-  '@cdktn/provider-aws@25.6.0(cdktn@0.24.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@cdktn/provider-aws@25.6.0(cdktn@0.25.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      cdktn: 0.24.0(constructs@10.8.1)
+      cdktn: 0.25.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@cdktn/provider-generator@0.24.0(jsii-rosetta@5.9.64)':
+  '@cdktn/provider-generator@0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(jsii-rosetta@6.0.22)':
     dependencies:
-      '@cdktn/commons': 0.24.0(constructs@10.6.0)
-      '@cdktn/provider-schema': 0.24.0(constructs@10.6.0)
-      cdktn: 0.24.0(constructs@10.6.0)
-      codemaker: 1.128.0
-      constructs: 10.6.0
-      fs-extra: 11.3.6
+      '@cdktn/commons': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
+      '@cdktn/provider-schema': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
+      cdktn: 0.25.0(constructs@10.8.1)
+      codemaker: 1.140.0
+      constructs: 10.8.1
+      fs-extra: 11.4.0
       glob: 13.0.6
-      jsii: 5.9.53
-      jsii-pacmak: 1.128.0(jsii-rosetta@5.9.64)
+      jsii: 6.0.20
+      jsii-pacmak: 1.140.0(jsii-rosetta@6.0.22)
     transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
       - debug
       - jsii-rosetta
       - supports-color
 
-  '@cdktn/provider-schema@0.24.0(constructs@10.6.0)':
+  '@cdktn/provider-schema@0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)':
     dependencies:
-      '@cdktn/commons': 0.24.0(constructs@10.6.0)
-      '@cdktn/hcl2json': 0.24.0
+      '@cdktn/commons': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
+      '@cdktn/hcl2json': 0.25.0
       deepmerge: 4.3.1
-      fs-extra: 11.3.6
+      fs-extra: 11.4.0
       semver: 7.8.5
     transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
       - constructs
       - debug
       - supports-color
 
-  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.6.0))(vitest@5.0.1)':
+  '@cdktn/vitest@0.1.0(cdktn@0.25.0(constructs@10.8.1))(vitest@5.0.1)':
     dependencies:
-      cdktn: 0.24.0(constructs@10.6.0)
-      vitest: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
-
-  '@cdktn/vitest@0.1.0(cdktn@0.24.0(constructs@10.8.1))(vitest@5.0.1)':
-    dependencies:
-      cdktn: 0.24.0(constructs@10.8.1)
-      vitest: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+      cdktn: 0.25.0(constructs@10.8.1)
+      vitest: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   '@colors/colors@1.5.0':
     optional: true
@@ -3810,26 +3760,19 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@jsii/check-node@1.128.0':
-    dependencies:
-      chalk: 4.1.2
-      semver: 7.8.5
-
-  '@jsii/check-node@1.139.0':
-    dependencies:
-      chalk: 4.1.2
-      semver: 7.8.5
-
   '@jsii/check-node@1.140.0':
     dependencies:
       chalk: 4.1.2
       semver: 7.8.5
 
-  '@jsii/spec@1.128.0': {}
-
-  '@jsii/spec@1.139.0': {}
+  '@jsii/check-node@1.142.0':
+    dependencies:
+      chalk: 4.1.2
+      semver: 7.8.5
 
   '@jsii/spec@1.140.0': {}
+
+  '@jsii/spec@1.142.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -3843,95 +3786,91 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
 
-  '@oxc-project/types@0.148.0': {}
+  '@opentelemetry/api-logs@0.220.0':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+
+  '@opentelemetry/api@1.10.0': {}
+
+  '@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/semantic-conventions': 1.44.0
+
+  '@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/api-logs': 0.220.0
+      import-in-the-middle: 3.5.3
+      require-in-the-middle: 8.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@opentelemetry/resources@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.44.0
+
+  '@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.44.0
+
+  '@opentelemetry/sdk-trace@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.44.0
+
+  '@opentelemetry/semantic-conventions@1.44.0': {}
 
   '@oxc-project/types@0.150.0': {}
 
-  '@rolldown/binding-android-arm-eabi@1.2.7':
-    optional: true
-
   '@rolldown/binding-android-arm-eabi@1.2.9':
-    optional: true
-
-  '@rolldown/binding-android-arm64@1.2.7':
     optional: true
 
   '@rolldown/binding-android-arm64@1.2.9':
     optional: true
 
-  '@rolldown/binding-darwin-arm64@1.2.7':
-    optional: true
-
   '@rolldown/binding-darwin-arm64@1.2.9':
-    optional: true
-
-  '@rolldown/binding-darwin-x64@1.2.7':
     optional: true
 
   '@rolldown/binding-darwin-x64@1.2.9':
     optional: true
 
-  '@rolldown/binding-freebsd-x64@1.2.7':
-    optional: true
-
   '@rolldown/binding-freebsd-x64@1.2.9':
-    optional: true
-
-  '@rolldown/binding-linux-arm-gnueabihf@1.2.7':
     optional: true
 
   '@rolldown/binding-linux-arm-gnueabihf@1.2.9':
     optional: true
 
-  '@rolldown/binding-linux-arm64-gnu@1.2.7':
-    optional: true
-
   '@rolldown/binding-linux-arm64-gnu@1.2.9':
-    optional: true
-
-  '@rolldown/binding-linux-arm64-musl@1.2.7':
     optional: true
 
   '@rolldown/binding-linux-arm64-musl@1.2.9':
     optional: true
 
-  '@rolldown/binding-linux-ppc64-gnu@1.2.7':
-    optional: true
-
   '@rolldown/binding-linux-ppc64-gnu@1.2.9':
-    optional: true
-
-  '@rolldown/binding-linux-s390x-gnu@1.2.7':
     optional: true
 
   '@rolldown/binding-linux-s390x-gnu@1.2.9':
     optional: true
 
-  '@rolldown/binding-linux-x64-gnu@1.2.7':
-    optional: true
-
   '@rolldown/binding-linux-x64-gnu@1.2.9':
-    optional: true
-
-  '@rolldown/binding-linux-x64-musl@1.2.7':
     optional: true
 
   '@rolldown/binding-linux-x64-musl@1.2.9':
     optional: true
 
-  '@rolldown/binding-openharmony-arm64@1.2.7':
-    optional: true
-
   '@rolldown/binding-openharmony-arm64@1.2.9':
     optional: true
 
-  '@rolldown/binding-win32-arm64-msvc@1.2.7':
-    optional: true
-
   '@rolldown/binding-win32-arm64-msvc@1.2.9':
-    optional: true
-
-  '@rolldown/binding-win32-x64-msvc@1.2.7':
     optional: true
 
   '@rolldown/binding-win32-x64-msvc@1.2.9':
@@ -3945,37 +3884,52 @@ snapshots:
       estree-walker: 2.0.2
       picomatch: 4.0.7
 
-  '@sentry-internal/tracing@7.120.4':
-    dependencies:
-      '@sentry/core': 7.120.4
-      '@sentry/types': 7.120.4
-      '@sentry/utils': 7.120.4
+  '@sentry/conventions@0.16.0': {}
 
-  '@sentry/core@7.120.4':
+  '@sentry/core@10.73.0':
     dependencies:
-      '@sentry/types': 7.120.4
-      '@sentry/utils': 7.120.4
+      '@sentry/conventions': 0.16.0
 
-  '@sentry/integrations@7.120.4':
+  '@sentry/node-core@10.73.0(@opentelemetry/api@1.10.0)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))':
     dependencies:
-      '@sentry/core': 7.120.4
-      '@sentry/types': 7.120.4
-      '@sentry/utils': 7.120.4
-      localforage: 1.10.0
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
+      '@sentry/opentelemetry': 10.73.0(@opentelemetry/api@1.10.0)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))
+      import-in-the-middle: 3.5.3
+    optionalDependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
 
-  '@sentry/node@7.120.4':
+  '@sentry/node@10.73.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))':
     dependencies:
-      '@sentry-internal/tracing': 7.120.4
-      '@sentry/core': 7.120.4
-      '@sentry/integrations': 7.120.4
-      '@sentry/types': 7.120.4
-      '@sentry/utils': 7.120.4
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
+      '@sentry/node-core': 10.73.0(@opentelemetry/api@1.10.0)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))
+      '@sentry/opentelemetry': 10.73.0(@opentelemetry/api@1.10.0)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))
+      '@sentry/server-utils': 10.73.0
+      import-in-the-middle: 3.5.3
+    transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
+      - supports-color
 
-  '@sentry/types@7.120.4': {}
-
-  '@sentry/utils@7.120.4':
+  '@sentry/opentelemetry@10.73.0(@opentelemetry/api@1.10.0)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))':
     dependencies:
-      '@sentry/types': 7.120.4
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
+
+  '@sentry/server-utils@10.73.0':
+    dependencies:
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
 
   '@simple-libs/child-process-utils@2.0.0':
     dependencies:
@@ -4211,7 +4165,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
+      vitest: 5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
 
   '@vitest/istanbul-lib-coverage@1.0.1': {}
 
@@ -4324,33 +4278,31 @@ snapshots:
 
   case@1.6.3: {}
 
-  cdktn-cli@0.24.0(cdktn@0.24.0(constructs@10.8.1))(jsii-pacmak@1.128.0(jsii-rosetta@5.9.64))(jsii@5.9.53):
+  cdktn-cli@0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(cdktn@0.25.0(constructs@10.8.1))(jsii-pacmak@1.140.0(jsii-rosetta@6.0.22))(jsii@6.0.20):
     dependencies:
-      '@cdktn/hcl-tools': 0.24.0
-      '@cdktn/hcl2cdk': 0.24.0(constructs@10.6.0)
-      '@cdktn/hcl2json': 0.24.0
+      '@cdktn/hcl-tools': 0.25.0
+      '@cdktn/hcl2cdk': 0.25.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0))(constructs@10.8.1)
+      '@cdktn/hcl2json': 0.25.0
       '@inquirer/prompts': 7.10.1(@types/node@22.20.1)
       '@types/node': 22.20.1
       ansi-escapes: 4.3.2
-      cdktn: 0.24.0(constructs@10.8.1)
+      cdktn: 0.25.0(constructs@10.8.1)
       cli-cursor: 3.1.0
       cli-spinners: 2.9.2
       cli-table3: 0.6.5
-      constructs: 10.6.0
+      constructs: 10.8.1
       is-ci: 4.1.0
-      jsii: 5.9.53
-      jsii-pacmak: 1.128.0(jsii-rosetta@5.9.64)
+      jsii: 6.0.20
+      jsii-pacmak: 1.140.0(jsii-rosetta@6.0.22)
       punycode: 2.3.1
       yargs: 17.7.3
     transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
       - debug
       - supports-color
 
-  cdktn@0.24.0(constructs@10.6.0):
-    dependencies:
-      constructs: 10.6.0
-
-  cdktn@0.24.0(constructs@10.8.1):
+  cdktn@0.25.0(constructs@10.8.1):
     dependencies:
       constructs: 10.8.1
 
@@ -4364,6 +4316,8 @@ snapshots:
   chardet@2.2.0: {}
 
   ci-info@4.4.0: {}
+
+  cjs-module-lexer@2.3.0: {}
 
   cli-cursor@3.1.0:
     dependencies:
@@ -4393,13 +4347,13 @@ snapshots:
 
   clone@2.1.2: {}
 
-  codemaker@1.128.0:
+  codemaker@1.140.0:
     dependencies:
       camelcase: 6.3.0
       decamelize: 5.0.1
       fs-extra: 10.1.0
 
-  codemaker@1.139.0:
+  codemaker@1.142.0:
     dependencies:
       camelcase: 6.3.0
       decamelize: 5.0.1
@@ -4416,8 +4370,6 @@ snapshots:
       entities: 3.0.1
       mdurl: 1.0.1
       minimist: 1.2.8
-
-  constructs@10.6.0: {}
 
   constructs@10.8.1: {}
 
@@ -4545,6 +4497,8 @@ snapshots:
 
   es-module-lexer@2.3.2: {}
 
+  es-module-lexer@3.0.4: {}
+
   es-object-atoms@1.1.2:
     dependencies:
       es-errors: 1.3.0
@@ -4598,12 +4552,6 @@ snapshots:
       is-callable: 1.2.7
 
   fs-extra@10.1.0:
-    dependencies:
-      graceful-fs: 4.2.11
-      jsonfile: 6.2.1
-      universalify: 2.0.1
-
-  fs-extra@11.3.6:
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.2.1
@@ -4699,12 +4647,16 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  immediate@3.0.6: {}
-
   import-fresh@3.3.1:
     dependencies:
       parent-module: 1.0.1
       resolve-from: 4.0.0
+
+  import-in-the-middle@3.5.3:
+    dependencies:
+      cjs-module-lexer: 2.3.0
+      es-module-lexer: 3.0.4
+      module-details-from-path: 1.0.4
 
   ini@6.0.0: {}
 
@@ -4813,17 +4765,17 @@ snapshots:
 
   jsesc@3.1.0: {}
 
-  jsii-pacmak@1.128.0(jsii-rosetta@5.9.64):
+  jsii-pacmak@1.140.0(jsii-rosetta@6.0.22):
     dependencies:
-      '@jsii/check-node': 1.128.0
-      '@jsii/spec': 1.128.0
+      '@jsii/check-node': 1.140.0
+      '@jsii/spec': 1.140.0
       clone: 2.1.2
-      codemaker: 1.139.0
+      codemaker: 1.142.0
       commonmark: 0.31.2
       escape-string-regexp: 4.0.0
       fs-extra: 10.1.0
       jsii-reflect: 1.140.0
-      jsii-rosetta: 5.9.64
+      jsii-rosetta: 6.0.22
       semver: 7.8.5
       spdx-license-list: 6.12.0
       xmlbuilder: 15.1.1
@@ -4838,28 +4790,28 @@ snapshots:
       oo-ascii-tree: 1.140.0
       yargs: 17.7.3
 
-  jsii-rosetta@5.9.64:
+  jsii-rosetta@6.0.22:
     dependencies:
-      '@jsii/check-node': 1.140.0
-      '@jsii/spec': 1.140.0
+      '@jsii/check-node': 1.142.0
+      '@jsii/spec': 1.142.0
       '@xmldom/xmldom': 0.9.12
       chalk: 4.1.2
       commonmark: 0.31.2
       fast-glob: 3.3.3
-      jsii: 5.9.53
+      jsii: 6.0.20
       semver: 7.8.5
       semver-intersect: 1.5.0
-      stream-json: 1.9.1
-      typescript: 5.9.3
+      stream-json: 3.8.0
+      typescript: 6.0.3
       workerpool: 6.5.1
       yargs: 17.7.3
     transitivePeerDependencies:
       - supports-color
 
-  jsii@5.9.53:
+  jsii@6.0.20:
     dependencies:
-      '@jsii/check-node': 1.139.0
-      '@jsii/spec': 1.139.0
+      '@jsii/check-node': 1.142.0
+      '@jsii/spec': 1.142.0
       case: 1.6.3
       chalk: 4.1.2
       fast-deep-equal: 3.1.3
@@ -4868,7 +4820,7 @@ snapshots:
       semver-intersect: 1.5.0
       sort-json: 2.0.1
       spdx-license-list: 6.12.0
-      typescript: 5.9.3
+      typescript: 6.0.3
       yargs: 17.7.3
     transitivePeerDependencies:
       - supports-color
@@ -4888,10 +4840,6 @@ snapshots:
       graceful-fs: 4.2.11
 
   just-extend@6.2.0: {}
-
-  lie@3.1.1:
-    dependencies:
-      immediate: 3.0.6
 
   lightningcss-android-arm64@1.33.0:
     optional: true
@@ -4954,10 +4902,6 @@ snapshots:
 
   load-tsconfig@0.2.5: {}
 
-  localforage@1.10.0:
-    dependencies:
-      lie: 3.1.1
-
   log4js@6.9.1:
     dependencies:
       date-format: 4.0.14
@@ -5004,6 +4948,8 @@ snapshots:
   mnemonist@0.38.3:
     dependencies:
       obliterator: 1.6.1
+
+  module-details-from-path@1.0.4: {}
 
   ms@2.1.3: {}
 
@@ -5101,6 +5047,13 @@ snapshots:
 
   require-from-string@2.0.2: {}
 
+  require-in-the-middle@8.0.1:
+    dependencies:
+      debug: 4.4.3
+      module-details-from-path: 1.0.4
+    transitivePeerDependencies:
+      - supports-color
+
   reserved-words@0.1.2: {}
 
   resolve-from@4.0.0: {}
@@ -5115,27 +5068,6 @@ snapshots:
   reusify@1.1.0: {}
 
   rfdc@1.4.1: {}
-
-  rolldown@1.2.7:
-    dependencies:
-      '@oxc-project/types': 0.148.0
-      '@rolldown/pluginutils': 1.0.1
-    optionalDependencies:
-      '@rolldown/binding-android-arm-eabi': 1.2.7
-      '@rolldown/binding-android-arm64': 1.2.7
-      '@rolldown/binding-darwin-arm64': 1.2.7
-      '@rolldown/binding-darwin-x64': 1.2.7
-      '@rolldown/binding-freebsd-x64': 1.2.7
-      '@rolldown/binding-linux-arm-gnueabihf': 1.2.7
-      '@rolldown/binding-linux-arm64-gnu': 1.2.7
-      '@rolldown/binding-linux-arm64-musl': 1.2.7
-      '@rolldown/binding-linux-ppc64-gnu': 1.2.7
-      '@rolldown/binding-linux-s390x-gnu': 1.2.7
-      '@rolldown/binding-linux-x64-gnu': 1.2.7
-      '@rolldown/binding-linux-x64-musl': 1.2.7
-      '@rolldown/binding-openharmony-arm64': 1.2.7
-      '@rolldown/binding-win32-arm64-msvc': 1.2.7
-      '@rolldown/binding-win32-x64-msvc': 1.2.7
 
   rolldown@1.2.9:
     dependencies:
@@ -5262,11 +5194,11 @@ snapshots:
       es-errors: 1.3.0
       internal-slot: 1.1.0
 
-  stream-chain@2.2.5: {}
+  stream-chain@4.4.1: {}
 
-  stream-json@1.9.1:
+  stream-json@3.8.0:
     dependencies:
-      stream-chain: 2.2.5
+      stream-chain: 4.4.1
 
   streamroller@3.1.5:
     dependencies:
@@ -5341,7 +5273,7 @@ snapshots:
 
   type-fest@0.21.3: {}
 
-  typescript@5.9.3: {}
+  typescript@6.0.3: {}
 
   typescript@7.0.2:
     optionalDependencies:
@@ -5433,7 +5365,7 @@ snapshots:
       lightningcss: 1.33.0
       picomatch: 4.0.7
       postcss: 8.5.28
-      rolldown: 1.2.7
+      rolldown: 1.2.9
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 22.20.1
@@ -5446,7 +5378,7 @@ snapshots:
       lightningcss: 1.33.0
       picomatch: 4.0.7
       postcss: 8.5.28
-      rolldown: 1.2.7
+      rolldown: 1.2.9
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 26.6.1
@@ -5454,7 +5386,7 @@ snapshots:
       jiti: 2.6.1
       yaml: 2.9.0
 
-  vitest@5.0.1(@types/node@22.20.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0)):
+  vitest@5.0.1(@opentelemetry/api@1.10.0)(@types/node@22.20.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.1(vite@8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0))
@@ -5471,12 +5403,13 @@ snapshots:
       vite: 8.2.2(@types/node@22.20.1)(jiti@2.6.1)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
+      '@opentelemetry/api': 1.10.0
       '@types/node': 22.20.1
       '@vitest/coverage-v8': 5.0.1(vitest@5.0.1)
     transitivePeerDependencies:
       - msw
 
-  vitest@5.0.1(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0)):
+  vitest@5.0.1(@opentelemetry/api@1.10.0)(@types/node@26.6.1)(@vitest/coverage-v8@5.0.1)(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.1(vite@8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0))
@@ -5493,6 +5426,7 @@ snapshots:
       vite: 8.2.2(@types/node@26.6.1)(jiti@2.6.1)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
+      '@opentelemetry/api': 1.10.0
       '@types/node': 26.6.1
       '@vitest/coverage-v8': 5.0.1(vitest@5.0.1)
     transitivePeerDependencies:
